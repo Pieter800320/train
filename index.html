@@ -345,33 +345,82 @@ var CATALOGUE=[
 
 var SKILLS=[
   {id:'hinge',name:'Hip hinge',ico:'H',lvls:[
-    {n:'Wall hip hinge',d:'Stand 30cm from wall. Push hips back until they touch. Spine neutral throughout.',t:'10 reps without spinal flexion'},
-    {n:'Dowel rod hinge',d:'Three contact points: back of head, thoracic spine, sacrum. Hinge while maintaining all three.',t:'10 reps maintaining all 3 contact points'},
-    {n:'Bodyweight RDL',d:'Own the pattern unloaded. Arms crossed on chest. Hip hinge only — no squatting.',t:'10 reps with perfect spine position'},
-    {n:'Dumbbell RDL',d:'Add light load. Pattern must remain identical to the bodyweight version.',t:'4x8 at working weight with clean form'},
-    {n:'Single-leg RDL',d:'Unilateral challenge. Hip stability and hinge combined. Start bodyweight.',t:'2x8 each side without balance loss'}
+    {n:'Wall hip hinge',d:'Stand 30cm from wall. Push hips back until they touch. Spine neutral throughout. This is pure pattern drilling — no load, no ego.',t:'10 reps touching the wall each time without any rounding at the lower back'},
+    {n:'Dowel rod hinge',d:'Hold a dowel along your spine with three contact points: back of head, between the shoulder blades, and sacrum. Hinge while keeping all three touching.',t:'10 reps maintaining all 3 contact points throughout the movement'},
+    {n:'Bodyweight RDL',d:'Pattern unloaded. Arms crossed on chest. Push hips back — the torso follows. Feel the hamstring stretch. Return by driving the hips forward.',t:'10 consecutive reps with a clear hamstring stretch at the bottom and no change in spine position'},
+    {n:'Dumbbell RDL',d:'Add light load. Dumbbells hang close to the legs throughout. The pattern must be identical to the bodyweight version — if it changes, the weight is too heavy.',t:'4x8 at a working weight with no change in spine position compared to the bodyweight version'},
+    {n:'Single-leg RDL',d:'Unilateral challenge. One hand holds a light dumbbell. Free leg travels back as the torso descends. Hips stay level — do not let the free hip drop.',t:'2x8 each side without losing balance or lateral hip shift'}
   ]},
   {id:'push',name:'Push-up',ico:'P',lvls:[
-    {n:'Wall push-up',d:'Upright angle. Build the pattern and scapular control with minimal load.',t:'3x12 with plank position maintained'},
-    {n:'Incline push-up',d:'Bench or box. Increasing load, same pattern demands.',t:'3x12 with chest touching the surface'},
-    {n:'Eccentric push-up',d:'From knees: lower in 5 seconds. Reset at top. Only the lowering phase counts.',t:'3x8 controlled 5-second eccentrics'},
-    {n:'Knee push-up',d:'Full range from knees. Both up and down phases.',t:'3x12 with full range and rigid body'},
-    {n:'Full push-up',d:'Full plank on toes. Rigid from head to heels. Full range.',t:'3x10 perfect form for 2 consecutive sessions'},
-    {n:'Weighted push-up',d:'Plate on back or weighted vest. Progressive loading from here.',t:'Progressive load increase over time'}
+    {n:'Wall push-up',d:'Stand arms-length from the wall. The whole body moves as one rigid unit — no hinging at the hips. Build the pattern and scapular awareness before adding load.',t:'3x12 with the whole body moving as one unit and full range of motion'},
+    {n:'Incline push-up',d:'Hands on a bench or box. The lower the surface, the harder the exercise. Same rigid body demand — no piking or sagging.',t:'3x12 with chest touching the surface and full lockout at the top'},
+    {n:'Eccentric push-up',d:'From knees, lower your chest to the floor in exactly 5 seconds. Reset position at the top each rep. Only the lowering phase — that is where the strength is built.',t:'3x8 with a consistent 5-second descent and control all the way to the floor'},
+    {n:'Knee push-up',d:'Full range from knees. Both the push and the lower. Body rigid from knees to shoulders. No sagging hips.',t:'3x12 with full range and rigid body position for 2 consecutive sessions'},
+    {n:'Full push-up',d:'Full plank on toes. Rigid from head to heels. Elbows at 45 degrees. Chest to the floor, full lockout at the top.',t:'3x10 with perfect form — no sagging, no piking, full range — for 2 consecutive sessions'},
+    {n:'Weighted push-up',d:'Plate on the upper back or a weighted vest. All the same standards apply. This is where progressive loading begins.',t:'Add load gradually — same form standards as the full push-up, no exceptions'}
   ]},
   {id:'pull',name:'Pull-up',ico:'U',lvls:[
-    {n:'Dead hang',d:'Hang from the bar. Practise shoulder packing — retract and depress.',t:'3x20 seconds without losing shoulder position'},
-    {n:'Scapular pull-up',d:'Retract and depress only — no elbow bend at all. Pure shoulder blade control.',t:'3x10 controlled'},
-    {n:'Band-assisted pull-up',d:'Light band. Full range of motion. Control in both directions.',t:'3x8 with 3-second controlled descent'},
-    {n:'Negative pull-up',d:'Jump to the top position. Lower in exactly 5 seconds.',t:'3x6 consistent 5-second eccentrics'},
-    {n:'Full pull-up',d:'Dead hang to chin over bar. No kipping. Earn every rep.',t:'1 clean rep, then build to 3x5'},
-    {n:'Weighted pull-up',d:'Belt or dumbbell. The long game.',t:'Progressive load over months'}
+    {n:'Dead hang',d:'Hang from the bar with a full overhead grip. Practise shoulder packing: pull the shoulder blades down and back slightly. This is active — you are holding a position, not just dangling.',t:'3 sets of 20 seconds with shoulder blades actively packed'},
+    {n:'Scapular pull-up',d:'From a dead hang, retract and depress the shoulder blades only — no elbow bend at all. The body rises a few centimetres. Pure shoulder blade control.',t:'3x10 with clear controlled retraction and depression, zero elbow bend'},
+    {n:'Band-assisted pull-up',d:'Light band looped over the bar. Full range of motion — dead hang to chin over bar. The band assists most at the bottom where you are weakest.',t:'3x8 with a controlled 3-second descent on every rep'},
+    {n:'Negative pull-up',d:'Jump or step to the top position — chin over bar. Lower yourself in exactly 5 seconds. Fight gravity the whole way down.',t:'3x6 with a consistent 5-second eccentric and control all the way to a dead hang'},
+    {n:'Full pull-up',d:'Dead hang to chin over bar. No kipping, no momentum, no shortened range. Earn every single rep.',t:'1 clean full-range rep, then build to 3x5 over the following weeks'},
+    {n:'Weighted pull-up',d:'Belt with plates or a dumbbell between the feet. All the same standards. Add load slowly.',t:'Progressive load over months — form and range of motion always come before weight'}
   ]},
   {id:'squat',name:'Squat',ico:'S',lvls:[
-    {n:'Box squat',d:'Sit to box. Removes depth anxiety. Learn the sitting-back pattern.',t:'3x12 with upright torso and controlled descent'},
-    {n:'Goblet squat',d:'Counter-balance teaches upright torso. Elbows push knees out at bottom.',t:'4x10 with full available depth'},
-    {n:'DB front squat',d:'Dumbbells on shoulders. Increased core demand. Same pattern.',t:'4x8 with neutral spine and full depth'},
-    {n:'Barbell back squat',d:'Full loading potential. Requires solid thoracic mobility.',t:'Progressive loading over months'}
+    {n:'Box squat',d:'Stand in front of a box or bench. Sit back and down to touch the box lightly — do not crash onto it. Stand back up by driving through the whole foot.',t:'3x12 with an upright torso, controlled descent, and light touch on the box'},
+    {n:'Goblet squat',d:'Hold a dumbbell or kettlebell at your chest. The counter-balance naturally teaches an upright torso. Elbows push the knees outward at the bottom.',t:'4x10 with full available depth, knees tracking over toes, and chest tall throughout'},
+    {n:'DB front squat',d:'Dumbbells resting on the shoulders, elbows high. Increased core and upper back demand. Same squat pattern.',t:'4x8 with neutral spine, full depth, and elbows staying high throughout'},
+    {n:'Barbell back squat',d:'Full loading potential. Requires solid thoracic mobility and hip flexibility. Do not rush to this — the goblet squat builds more for longer than most people expect.',t:'Progressive loading over months — depth and position always before adding weight'}
+  ]},
+  {id:'brace',name:'Bracing',ico:'Br',lvls:[
+    {n:'Diaphragmatic breathing',d:'Lie on your back, one hand on the chest, one on the belly. Breathe so only the belly hand rises. Inhale through the nose, exhale slowly through the mouth. This is the foundation of every brace.',t:'5 minutes of breathing with zero chest movement — only the belly rises and falls'},
+    {n:'Brace against a hand',d:'Standing. Take a big breath into your belly, then brace your core as if someone is about to punch you. Press your own hand into your abdomen — it should feel hard and resist the pressure.',t:'Hold a firm brace for 10 seconds, 5 times, while maintaining controlled breathing'},
+    {n:'Brace during dead bug',d:'Lying on your back. Press your lower back into the floor — this is the brace. Now move your arms and legs while keeping that pressure constant. The moment the back lifts, the brace is gone.',t:'2x5 each side with the lower back in constant contact with the floor throughout'},
+    {n:'Brace during a plank',d:'Plank position. Fill the belly, brace hard, breathe in short controlled breaths without losing the brace. The brace must be maintained for the full duration, not just at the start.',t:'3x30 seconds with a firm brace maintained throughout — no sagging or piking'},
+    {n:'Brace under load',d:'Apply the brace before every loaded rep. The sequence is always: breathe — brace — lift. Do not move first and brace second. This protects the spine on every exercise for the rest of your training life.',t:'Every loaded set begins with a deliberate breath and brace before the first rep — no exceptions'}
+  ]},
+  {id:'row',name:'The row',ico:'Ro',lvls:[
+    {n:'Scapular awareness',d:'Stand with arms hanging. Practice retracting the shoulder blades — pulling them toward each other — then depressing them — pulling them away from the ears. This movement starts every row. Most people have never isolated it.',t:'10 controlled retractions and 10 depressions, slow and deliberate, with clear movement each time'},
+    {n:'Band row',d:'Sit on the floor, band around the feet. Row both hands to your lower ribs — not your chest. Lead with the elbows, not the hands. Pause at full contraction. Control the return.',t:'3x15 with a 1-second pause at full contraction and no torso rocking to generate momentum'},
+    {n:'TRX or ring row',d:'Body at an angle under a bar or rings. Pull your chest to the bar, elbows traveling back and down. The more horizontal your body, the harder the exercise.',t:'3x10 with chest touching the bar, a 1-second hold, and a 3-second controlled descent'},
+    {n:'Dumbbell row',d:'One hand on a bench for support. Row the dumbbell to the hip — not the shoulder. Elbow drives back and down. Pause at the top. Neutral spine throughout — no torso rotation.',t:'3x12 each side with no torso rotation and a clear pause at the top of every rep'},
+    {n:'Chest-supported row',d:'Chest on an incline bench. Both arms row simultaneously. The bench removes momentum completely. This isolates the pulling muscles and teaches the full contraction.',t:'3x12 with both elbows reaching full extension at the bottom and full retraction at the top'}
+  ]},
+  {id:'lunge',name:'Split stance and lunge',ico:'Lu',lvls:[
+    {n:'Split stance hold',d:'Step one foot forward, one foot back. Stand still. Find your balance and stack your hips under your shoulders. This is the position — learn it before you move in it.',t:'3x20 seconds each side with a stable upright torso and hips level throughout'},
+    {n:'Reverse lunge',d:'Step one foot back and lower the back knee toward the floor. Return to standing. The reverse lunge is more controlled than a forward lunge because you step into the position rather than falling into it.',t:'3x10 each side with the front shin staying vertical and the torso upright throughout'},
+    {n:'Split squat',d:'Both feet stay still — front foot forward, back foot behind. Drop the back knee straight down toward the floor. Work the range first, then add load.',t:'3x10 each side with full range of motion and the torso tall throughout'},
+    {n:'DB split squat',d:'Add dumbbells. The weight increases the demand on the quad and the stability. If the torso starts to lean forward, the weight is too heavy.',t:'4x8 each side with full depth and an upright torso throughout'},
+    {n:'Bulgarian split squat',d:'Back foot elevated on a bench. The front leg now works almost alone. One of the most effective lower body exercises that exists. Earn it with the previous steps first.',t:'3x8 each side with control, full depth, and no forward lean of the torso'}
+  ]},
+  {id:'carry',name:'Carry',ico:'Cy',lvls:[
+    {n:'Bilateral farmer carry',d:'Pick up two equal weights — one in each hand. Stand tall. Walk. Do not lean forward, do not shorten your stride, do not let the weights pull your shoulders down.',t:'3x20 metres with shoulders level, upright posture, and normal walking gait throughout'},
+    {n:'Suitcase carry',d:'One weight in one hand only. The challenge is not leaning away from the load. Someone watching from behind should see both shoulders at exactly the same height. That is the whole exercise.',t:'3x20 metres each side without any lateral lean — if you are leaning, reduce the weight'},
+    {n:'Front rack carry',d:'Weight held at shoulder height, elbow up. The demand shifts to the upper back and core. The weight will want to pull the elbow down and the torso forward. Resist both.',t:'3x20 metres with elbow high and torso upright throughout'},
+    {n:'Overhead carry',d:'Weight pressed and locked out overhead. Maximum stability demand. The shoulder must be packed and the core braced for the entire walk. Start very light — the overhead position exposes every weakness.',t:'3x15 metres with the weight locked out overhead, shoulder packed, and ribs down — not flared'}
+  ]},
+  {id:'plank',name:'Plank and core stiffness',ico:'Pl',lvls:[
+    {n:'Dead bug',d:'Lying on your back. Lower back pressed to the floor — hold it there. Extend the opposite arm and leg slowly — 3 seconds — while keeping the back flat. This trains the deep core to resist extension.',t:'2x5 each side with the lower back in constant contact with the floor on every single rep'},
+    {n:'Forearm plank',d:'Forearms on the floor, elbows under shoulders. Body forms a straight line from head to heels. Brace hard. Breathe without losing position. No sagging hips, no raised hips.',t:'3x30 seconds with a genuine straight line and a firm brace maintained throughout'},
+    {n:'Side plank',d:'Side-lying, one forearm on the floor. Lift the hips to form a straight line from head to feet. This trains anti-lateral flexion — resisting the sideways collapse that happens in real life and sport.',t:'3x20 seconds each side with a straight body line and hips not sagging toward the floor'},
+    {n:'Pallof press',d:'Cable or band at chest height. Stand side-on to the anchor. Press straight out and return. The load tries to rotate you — your job is to resist completely. This is the most important anti-rotation exercise in the gym.',t:'3x10 each side with zero rotation at the torso throughout — hips and shoulders stay square'},
+    {n:'Ab wheel rollout',d:'Kneel behind the ab wheel. Roll forward slowly, keeping the lower back flat — not arched. Roll back. The range of motion is only as large as your ability to keep the spine neutral.',t:'3x8 rollouts with no arch in the lower back — reduce the range before you lose the position'}
+  ]}
+,
+  {id:'bench',name:'Bench press',ico:'Bp',lvls:[
+    {n:'Floor press (dumbbell)',d:'Lie on the floor, dumbbells in hand. The floor limits the range of motion naturally — your upper arms rest on it at the bottom. This removes shoulder stress and teaches the pressing path before full range is demanded.',t:'3x12 with controlled descent to the floor, a 1-second pause, and full lockout at the top'},
+    {n:'DB bench press',d:'Move to a bench. Now the full range is available — lower the dumbbells until you feel a chest stretch, then press back up. Elbows at 45 degrees, not flared wide. This is the safest and most effective way to learn bench pressing mechanics.',t:'4x10 with full range of motion, elbows at 45 degrees, and no bouncing off the chest'},
+    {n:'Barbell bench press — technique',d:'Learn the setup before you load it. Five contact points: head, upper back, glutes on the bench, and both feet flat on the floor. Grip slightly wider than shoulder width. Lower the bar to the lower chest — not the upper chest. Elbows at 45 degrees.',t:'3x10 with an empty or very light bar focusing entirely on the setup and bar path — no ego'},
+    {n:'Barbell bench press — working weight',d:'The setup is now automatic. Unrack with straight arms, lower under control to the lower chest, press back to full lockout. The bar path is a slight arc — not straight up and down. Brace before every rep.',t:'4x8 at a moderate working weight with consistent bar path, controlled descent, and full lockout'},
+    {n:'Barbell bench press — progressive load',d:'Add weight systematically — 2.5 kg per side when all reps are clean. Never sacrifice the 5 contact points or the elbow position for more weight. A spotter or safety bars are non-negotiable at heavy loads.',t:'Progressive load increase over months — if any of the 5 contact points break down, the weight is too heavy'}
+  ]},
+  {id:'kbswing',name:'Kettlebell swing',ico:'Kb',lvls:[
+    {n:'Hip hinge prerequisite',d:'The kettlebell swing is a loaded, explosive hip hinge. Before touching a kettlebell for swings, you must own the hinge pattern. Go to the Hip hinge skill and work through it first. Come back when the wall hip hinge and bodyweight RDL are clean.',t:'Wall hip hinge and bodyweight RDL completed cleanly — this is a hard gate, not a suggestion'},
+    {n:'KB deadlift',d:'Stand over the kettlebell with it between your feet. Hinge back, grip the handle, brace hard, then drive the hips forward to stand. Lower it back down with the same hinge. This is the swing without the swing — you are loading the pattern.',t:'3x10 with a clean hinge on every rep, full hip extension at the top, and no rounding of the lower back'},
+    {n:'KB swing — pendulum drill',d:'Hike the kettlebell back between your legs like a centre snap in American football. Let it swing forward to about hip height only — no higher. The power comes entirely from the hip drive, not the arms. The arms are just ropes.',t:'3x10 with the power visibly coming from the hip snap — the arms stay relaxed, the hips do the work'},
+    {n:'Russian kettlebell swing',d:'Full swing to shoulder height. Hike back, explosive hip drive, the bell floats to shoulder height as the hips reach full extension. At the top: hips extended, glutes squeezed, core braced. At the bottom: hinge, load the hamstrings, repeat.',t:'3x15 with full hip extension at the top, the bell floating — not being muscled up — and a clean hinge at the bottom'},
+    {n:'American kettlebell swing',d:'The bell travels all the way overhead — full lockout with the bell above the head. This demands more shoulder mobility and core stiffness than the Russian swing. Only progress here when the Russian swing is completely automatic.',t:'3x12 with full overhead lockout, ribs down at the top, and the same clean hinge mechanics at the bottom'}
   ]}
 ];
 
@@ -606,19 +655,15 @@ function skillsV(){
     var open=S.skOpen===sk.id;
     var inner='';
     if(open){
-      var pct=Math.round(lv/sk.lvls.length*100);
-      inner='<div style="margin-top:14px"><div class="pb" style="margin-bottom:16px"><div class="pf" style="width:'+pct+'%"></div></div>';
+      inner='<div style="margin-top:12px">';
       for(var l=0;l<sk.lvls.length;l++){
         var lvi=sk.lvls[l];
-        var done=l+1<lv,cur=l+1===lv;
-        var bc=cur?'var(--str-bg)':'var(--bg3)';
-        var bdr=cur?'1.5px solid var(--acc)':'1px solid transparent';
-        var nc=done?'var(--ok)':cur?'var(--acc)':'var(--dim)';
-        var badge=done?'<span style="font-size:11px;color:var(--ok)">&#10003;</span>':cur?'<span style="font-size:11px;color:var(--acc)">current</span>':'';
-        inner+='<div style="padding:12px;border-radius:10px;background:'+bc+';border:'+bdr+';margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:'+nc+'">Level '+(l+1)+': '+lvi.n+'</span>'+badge+'</div><p style="font-size:13px;color:var(--mu);margin-bottom:5px">'+lvi.d+'</p><p style="font-size:12px;color:var(--dim);font-style:italic">Test: '+lvi.t+'</p></div>';
+        inner+='<div style="padding:11px 12px;border-radius:10px;background:var(--bg3);margin-bottom:7px;display:flex;gap:11px;align-items:flex-start">';
+        inner+='<div style="width:24px;height:24px;border-radius:6px;background:var(--str-bg);border:.5px solid var(--str-brd);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--acc);flex-shrink:0">'+(l+1)+'</div>';
+        inner+='<div style="flex:1"><p style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px">'+lvi.n+'</p>';
+        inner+='<p style="font-size:13px;color:var(--mu);line-height:1.5;margin-bottom:4px">'+lvi.d+'</p>';
+        inner+='<p style="font-size:11px;color:var(--acc);font-style:italic">Ready when: '+lvi.t+'</p></div></div>';
       }
-      if(lv<sk.lvls.length)inner+='<button class="btn btno" style="margin-top:6px" data-advsk="'+sk.id+'">Mark level '+lv+' complete</button>';
-      else inner+='<p style="text-align:center;color:var(--ok);font-size:14px;padding:10px">Skill mastered &#10003;</p>';
       inner+='</div>';
     }
     var rot=open?'180':'0';
@@ -658,13 +703,7 @@ document.addEventListener('click',function(e){
     if(t.dataset&&t.dataset.switchday!==undefined){S.day=parseInt(t.dataset.switchday);sv();draw();return;}
     if(t.dataset&&t.dataset.togglesk){S.skOpen=S.skOpen===t.dataset.togglesk?null:t.dataset.togglesk;draw();return;}
     if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
-    if(t.dataset&&t.dataset.advsk){
-      var id=t.dataset.advsk;var sk=null;
-      for(var i=0;i<SKILLS.length;i++)if(SKILLS[i].id===id)sk=SKILLS[i];
-      var cur=parseInt(localStorage.getItem('sk_'+id)||'1');
-      if(sk&&cur<sk.lvls.length){localStorage.setItem('sk_'+id,cur+1);draw();}
-      return;
-    }
+    
     if(t.id&&t.id.indexOf('t-')===0){go(t.id.slice(2));return;}
     t=t.parentElement;
   }
@@ -749,22 +788,15 @@ function programsV(){
     var open=S.skOpen===sk.id;
     var inner='';
     if(open){
-      var pct=Math.round(lv/sk.lvls.length*100);
-      inner='<div style="margin-top:14px"><div class="pb" style="margin-bottom:16px"><div class="pf" style="width:'+pct+'%"></div></div>';
+      inner='<div style="margin-top:12px">';
       for(var l=0;l<sk.lvls.length;l++){
         var lvi=sk.lvls[l];
-        var done=l+1<lv,cur=l+1===lv;
-        var bc=cur?'var(--str-bg)':'var(--bg3)';
-        var bdr=cur?'1.5px solid var(--acc)':'1px solid transparent';
-        var nc=done?'var(--ok)':cur?'var(--acc)':'var(--dim)';
-        var badge=done?'<span style="font-size:11px;color:var(--ok)">&#10003;</span>':cur?'<span style="font-size:11px;color:var(--acc)">current</span>':'';
-        inner+='<div style="padding:12px;border-radius:10px;background:'+bc+';border:'+bdr+';margin-bottom:8px">';
-        inner+='<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:'+nc+'">Level '+(l+1)+': '+lvi.n+'</span>'+badge+'</div>';
-        inner+='<p style="font-size:13px;color:var(--mu);margin-bottom:5px">'+lvi.d+'</p>';
-        inner+='<p style="font-size:12px;color:var(--dim);font-style:italic">Test: '+lvi.t+'</p></div>';
+        inner+='<div style="padding:11px 12px;border-radius:10px;background:var(--bg3);margin-bottom:7px;display:flex;gap:11px;align-items:flex-start">';
+        inner+='<div style="width:24px;height:24px;border-radius:6px;background:var(--str-bg);border:.5px solid var(--str-brd);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--acc);flex-shrink:0">'+(l+1)+'</div>';
+        inner+='<div style="flex:1"><p style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px">'+lvi.n+'</p>';
+        inner+='<p style="font-size:13px;color:var(--mu);line-height:1.5;margin-bottom:4px">'+lvi.d+'</p>';
+        inner+='<p style="font-size:11px;color:var(--acc);font-style:italic">Ready when: '+lvi.t+'</p></div></div>';
       }
-      if(lv<sk.lvls.length)inner+='<button class="btn btno" style="margin-top:6px" data-advsk="'+sk.id+'">Mark level '+lv+' complete</button>';
-      else inner+='<p style="text-align:center;color:var(--ok);font-size:14px;padding:10px">Skill mastered &#10003;</p>';
       inner+='</div>';
     }
     var rot=open?'180':'0';
