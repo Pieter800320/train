@@ -216,6 +216,103 @@ var TPL={
     ]}
   ]
 };
+};
+
+var TPL_HYP={
+  name:'Hypertrophy',
+  days:[
+    {label:'Session A',focus:'Push — Chest, Shoulders, Triceps',mins:50,exercises:[
+      {id:'h_pullpart',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rotator cuff',
+       cues:['Arms stay straight — this is not a row','Pull to chest height, thumbs rotating outward','Control the return — do not let the band snap back'],
+       subs:'Face pull with band'},
+      {id:'h_scappush',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior, scapular stabilisers',
+       cues:['Plank position — only the shoulder blades move','Protract and retract slowly and controlled','Very small movement — arms stay straight throughout'],
+       subs:'Wall scapular push-up'},
+      {id:'h_dbbench',ph:'strength',name:'DB bench press',vol:'4 x 10',rest:120,sets:4,reps:10,kg:16,muscles:'Chest, anterior deltoid, triceps',
+       cues:['Lower dumbbells to chest level — elbows at 45 degrees, not flared wide','Press up and slightly inward — feel the chest squeeze at the top','Control the descent: 2 seconds down, drive up'],
+       subs:'Push-up progression, cable chest press, chest press machine',prog:'Add 2 kg per hand when all 4 sets are clean at the top of the range'},
+      {id:'h_landmine',ph:'strength',name:'Landmine press',vol:'3 x 10 each',rest:90,sets:3,reps:10,kg:10,muscles:'Anterior deltoid, upper chest, triceps, serratus',
+       cues:['Half-kneeling — brace the core hard before pressing','Press at 45 degrees. The arc of the bar is the point — shoulder-friendly by design','Do not lean back as the weight increases — stay tall'],
+       subs:'Seated DB overhead press, Arnold press',prog:'Add 2.5 kg when 3x10 is clean each side'},
+      {id:'h_incline',ph:'accessory',name:'Incline DB fly',vol:'3 x 12',rest:60,sets:3,reps:12,kg:8,muscles:'Chest — stretch emphasis, upper fibres',
+       cues:['Slight bend in the elbows throughout — do not straighten them fully','Lower until you feel a deep chest stretch — do not force beyond comfort','Squeeze the chest to bring the dumbbells back up. Think: hugging a tree.'],
+       subs:'Cable fly (low-to-high), pec deck machine',prog:'Add 2 kg when 3x12 is clean. This is a stretch exercise — form over load always.'},
+      {id:'h_lateral',ph:'accessory',name:'Lateral raise',vol:'3 x 15',rest:60,sets:3,reps:15,kg:6,muscles:'Medial deltoid, supraspinatus',
+       cues:['Lead with your elbows, not your hands — pour a jug of water at the top','Slight forward lean (10 degrees) puts more load on the medial delt','Stop at shoulder height — going higher loads the traps, not the delt'],
+       subs:'Cable lateral raise, machine lateral raise',prog:'Add 1 kg when 3x15 is easy. This muscle responds well to high reps — do not rush the weight.'},
+      {id:'h_tricp',ph:'accessory',name:'Tricep rope pushdown',vol:'3 x 15',rest:60,sets:3,reps:15,kg:15,muscles:'Triceps — all three heads',
+       cues:['Elbows pinned to your sides — they stay there throughout the whole movement','Spread the rope apart at the bottom — this increases the contraction','Full extension at the bottom, controlled return to start'],
+       subs:'DB overhead tricep extension, close-grip push-up',prog:'Add 2.5 kg when 3x15 is clean'},
+      {id:'h_doorway',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',
+       cues:['Forearm on frame, elbow at 90 degrees — step gently forward','Feel the stretch across the chest — not in the shoulder joint','Hold — do not bounce'],
+       subs:'Foam roller thoracic extension'},
+      {id:'h_tric_str',ph:'cooldown',name:'Overhead tricep stretch',vol:'2 x 30s each',rest:0,muscles:'Triceps, shoulder',
+       cues:['Raise one arm, bend at the elbow, hand reaches down the spine','Use the other hand to gently pull the elbow inward','Hold — breathe into the stretch'],
+       subs:'Cross-body shoulder stretch'}
+    ]},
+    {label:'Session B',focus:'Pull — Back, Biceps, Rear Delt',mins:48,exercises:[
+      {id:'h_deadhang',ph:'primer',name:'Dead hang',vol:'2 x 20s',rest:0,muscles:'Shoulder decompression, grip, lats',
+       cues:['Hang from the bar with full shoulder elevation — let the weight pull you long','Practise packing the shoulders: retract and depress briefly','This is active rest for the spine — let it decompress'],
+       subs:'Passive hang (hands only, no shoulder engagement)'},
+      {id:'h_facepull',ph:'primer',name:'Band face pull',vol:'2 x 15',rest:0,muscles:'Rear deltoid, external rotators',
+       cues:['Pull to forehead height — not chin height','Thumbs finishing behind ears at end range','Elbows stay high throughout'],
+       subs:'Band pull-apart'},
+      {id:'h_pulldown',ph:'strength',name:'Lat pulldown or pull-up',vol:'4 x 10',rest:120,sets:4,reps:10,kg:35,muscles:'Lats, biceps, rear deltoid',
+       cues:['Pull to upper chest — not below the chin','Elbows travel down and back toward your hip pockets','Depress the shoulder blades before you pull — do not shrug into it'],
+       subs:'L1: Band-assisted  L2: Machine  L3: Negative  L4: Full pull-up',prog:'Advance pull-up level when 3x8 is clean. For pulldown: add 5 kg when 4x10 is easy.'},
+      {id:'h_csrow',ph:'strength',name:'Chest-supported DB row',vol:'3 x 12',rest:90,sets:3,reps:12,kg:14,muscles:'Mid-back, rhomboids, lower traps',
+       cues:['Chest on the incline pad — this removes the temptation to use momentum','Row both elbows back and upward — squeeze the shoulder blades together','Pause 1 second at the top. Control the descent.'],
+       subs:'Bent-over DB row, cable row, machine row',prog:'Add 2 kg when 3x12 is clean with full contraction'},
+      {id:'h_cablerow',ph:'accessory',name:'Seated cable row',vol:'3 x 12',rest:60,sets:3,reps:12,kg:35,muscles:'Mid-back thickness, biceps',
+       cues:['Sit tall — do not round the lower back as you reach forward','Row to the lower abdomen — not the chest','Pause at full contraction, then lean forward slightly on the return for a full stretch'],
+       subs:'DB row, resistance band row',prog:'Add 5 kg when 3x12 is clean'},
+      {id:'h_dbcurl',ph:'accessory',name:'DB curl',vol:'3 x 12',rest:60,sets:3,reps:12,kg:10,muscles:'Biceps, brachialis',
+       cues:['Elbows stay by your sides — do not swing them forward','Supinate (rotate) the wrist as you curl — pinky side up at the top','Control the descent — the lowering builds the muscle too'],
+       subs:'Cable curl, EZ bar curl, hammer curl',prog:'Add 2 kg when 3x12 is clean without any elbow swing'},
+      {id:'h_reardelt',ph:'accessory',name:'Rear delt fly',vol:'3 x 15',rest:60,sets:3,reps:15,kg:6,muscles:'Rear deltoid, rhomboids',
+       cues:['Bend forward at the hips — flat back','Lead with your elbows out to the side — not your hands upward','Very light weight. If you are swinging to get it up, the weight is too heavy.'],
+       subs:'Face pull, cable rear delt fly, reverse pec deck',prog:'Add 1 kg when 3x15 is clean. High reps, strict form — always.'},
+      {id:'h_childpose',ph:'cooldown',name:"Child's pose and lat reach",vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',
+       cues:['Walk hands forward for more lat stretch','Let chest sink toward the floor','Breathe into the upper back'],
+       subs:'Thread the needle'},
+      {id:'h_bicstr',ph:'cooldown',name:'Bicep doorway stretch',vol:'2 x 30s each',rest:0,muscles:'Biceps, anterior shoulder',
+       cues:['Arm straight, palm on wall at shoulder height — step forward to stretch','Feel the stretch along the front of the upper arm and shoulder','Hold — do not rotate the torso away'],
+       subs:'Cross-body shoulder stretch'}
+    ]},
+    {label:'Session C',focus:'Legs — Quads, Hamstrings, Glutes',mins:52,exercises:[
+      {id:'h_hip9090',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators, hip flexors',
+       cues:['Both hips grounded — do not tilt to one side','Breathe slowly into the restriction, do not force range','Hold the position, do not bounce'],
+       subs:'Pigeon pose, seated figure-four'},
+      {id:'h_gbridge',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes, hamstrings — activation',
+       cues:['Drive through heels — not toes','Squeeze the glutes hard at the top — this is not just a hip lift','Do not hyperextend the lower back at the top'],
+       subs:'Single-leg glute bridge'},
+      {id:'h_goblet',ph:'primer',name:'Goblet squat (light, pattern)',vol:'2 x 10',rest:0,muscles:'Quads, core — movement prep',
+       cues:['Elbows inside knees at the bottom — use them to push knees out','Sit between your heels, chest tall','This is movement preparation — use a light weight'],
+       subs:'Bodyweight squat'},
+      {id:'h_squat',ph:'strength',name:'Goblet or DB front squat',vol:'4 x 10',rest:120,sets:4,reps:10,kg:16,muscles:'Quads, glutes, core',
+       cues:['Brace core before descent — treat it like a punch is coming','Full depth — quads parallel to the floor or below if mobility allows','Drive through the whole foot on the way up — do not rise onto your toes'],
+       subs:'Leg press, box squat',prog:'Add 2.5 kg when 4x10 is clean. Progress to DB front squat when goblet hold limits load.'},
+      {id:'h_rdl',ph:'strength',name:'Romanian deadlift',vol:'4 x 10',rest:120,sets:4,reps:10,kg:22,muscles:'Hamstrings, glutes, erectors',
+       cues:['Push hips back first — the torso follows, not the other way around','Keep the bar or dumbbells close to the legs throughout','Feel a strong hamstring stretch at the bottom — that is the stimulus'],
+       subs:'Single-leg RDL, cable pull-through',prog:'Add 2.5 kg when 4x10 is clean'},
+      {id:'h_bss',ph:'accessory',name:'DB Bulgarian split squat',vol:'3 x 10 each',rest:90,sets:3,reps:10,kg:8,muscles:'Quads, glutes — unilateral',
+       cues:['Back foot elevated on bench — front foot far enough forward that the shin stays vertical','Drop the back knee toward the floor — slow and controlled','Torso upright throughout — do not lean forward under fatigue'],
+       subs:'DB split squat, reverse lunge, step-up',prog:'Add 2 kg per hand when 3x10 is clean each side'},
+      {id:'h_hipthrust',ph:'accessory',name:'Hip thrust',vol:'3 x 12',rest:60,sets:3,reps:12,kg:20,muscles:'Glutes — peak contraction',
+       cues:['Upper back on the bench, feet flat on the floor — hip width apart','Drive through the heels and squeeze the glutes hard at the top','Full hip extension at the top — body forms a straight line from knees to shoulders'],
+       subs:'Glute bridge (floor), cable pull-through',prog:'Add 5 kg when 3x12 is clean. This is a glute-isolation movement — feel the squeeze.'},
+      {id:'h_calfrise',ph:'accessory',name:'Standing calf raise',vol:'3 x 15',rest:60,sets:3,reps:15,kg:0,muscles:'Gastrocnemius, soleus',
+       cues:['Full range — lower the heel below the step for a stretch at the bottom','Pause 1 second at the top — squeeze the calf','Move slowly — calves respond poorly to bouncing'],
+       subs:'Seated calf raise, leg press calf raise',prog:'Add weight (hold dumbbell) when 3x15 bodyweight is easy'},
+      {id:'h_pigeon',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',
+       cues:['Front shin toward parallel with the mat as mobility allows','Hips square to the floor','Breathe into the restriction'],
+       subs:'Figure-four stretch, hip 90/90'},
+      {id:'h_ham',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings, calf',
+       cues:['Hinge at the hip to reach — do not round the lower back','Flex the foot to include the calf in the stretch','Hold static — do not bounce'],
+       subs:'Standing hamstring stretch with band'}
+    ]}
+  ]
+};
 
 var SKILLS=[
   {id:'hinge',name:'Hip hinge',ico:'H',lvls:[
@@ -284,7 +381,8 @@ var OBQ=[
 ];
 
 // STATE
-var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{}},wx:null,hist:[],skOpen:null,theme:'dark'};
+var ACTIVE_TPL=TPL;
+var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{}},wx:null,hist:[],skOpen:null,theme:'dark',tplKey:'balanced'};
 
 function ld(){
   try{
@@ -337,7 +435,11 @@ function obV(){
     var rows='';
     var keys={goal:'Goal',exp:'Experience',days:'Days/week',injury:'Injuries',sport:'Sport'};
     for(var k in S.ob.ans){rows+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:.5px solid var(--brd)"><span class="mu">'+keys[k]+'</span><span style="font-size:14px;color:var(--tx)">'+S.ob.ans[k]+'</span></div>';}
-    return '<div class="pad"><span class="lbl">Almost done</span><p class="h1" style="margin:8px 0">Your program is ready.</p><p class="mu" style="margin-bottom:24px">Based on your answers we have assigned Balanced Strength 3x per week — a full-body approach that builds strength, corrects imbalances, and teaches you to move well.</p><div class="card" style="margin-bottom:10px"><span class="lbl">Your program</span><p class="h2" style="margin:6px 0 3px">Balanced Strength</p><p class="mu">3 sessions per week · Full body · ~45 min</p></div><div class="card" style="margin-bottom:28px"><span class="lbl">Your profile</span>'+rows+'</div><button class="btn btnp" onclick="obDone()">Start training</button></div>';
+    var isHyp=S.tplKey==='hyp';
+var pName=isHyp?'Hypertrophy':'Balanced Strength';
+var pDesc=isHyp?'3 sessions per week · Push / Pull / Legs · ~50 min':'3 sessions per week · Full body · ~45 min';
+var pIntro=isHyp?'Based on your answers we have assigned Hypertrophy — a Push / Pull / Legs split focused on building muscle with progressive overload.':'Based on your answers we have assigned Balanced Strength — a full-body approach that builds strength, corrects imbalances, and teaches you to move well.';
+return '<div class="pad"><span class="lbl">Almost done</span>'+'<p class="h1" style="margin:8px 0">Your program is ready.</p>'+'<p class="mu" style="margin-bottom:24px">'+pIntro+'</p>'+'<div class="card" style="margin-bottom:10px"><span class="lbl">Your program</span>'+'<p class="h2" style="margin:6px 0 3px">'+pName+'</p>'+'<p class="mu">'+pDesc+'</p></div>'<div class="card" style="margin-bottom:28px"><span class="lbl">Your profile</span>'+rows+'</div><button class="btn btnp" onclick="obDone()">Start training</button></div>';
   }
   var q=OBQ[step];
   var pct=Math.round(step/OBQ.length*100);
@@ -353,26 +455,32 @@ function obV(){
 }
 function obNext(){S.ob.step++;draw();}
 function obBack(){S.ob.step=Math.max(0,S.ob.step-1);draw();}
-function obDone(){S.view='app';S.tab='home';sv();draw();}
+function obDone(){
+  var g=S.ob.ans.goal||'balanced';
+  var sp=S.ob.ans.sport||'none';
+  if(g==='muscle'){S.tplKey='hyp';ACTIVE_TPL=TPL_HYP;}
+  else{S.tplKey='balanced';ACTIVE_TPL=TPL;}
+  S.day=0;S.view='app';S.tab='home';sv();draw();
+}
 
 // HOME
 function homeV(){
   var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var d=new Date();
-  var sess=TPL.days[S.day];
+  var sess=ACTIVE_TPL.days[S.day];
   var notices='';
   for(var i=0;i<INFO.length;i++){
     var n=INFO[i];
     var isN=n.type==='notice';
     notices+='<div class="card '+(isN?'cacc':'cblu')+'" style="margin-bottom:8px"><span class="lbl" style="color:'+(isN?'var(--acc)':'var(--acc2)')+'">'+(isN?'Coach notice':'Training tip')+'</span><p style="font-size:14px;font-weight:500;margin:5px 0 4px;color:'+(isN?'var(--acc-tx)':'var(--acc2-tx)')+'">'+n.title+'</p><p style="font-size:13px;line-height:1.5;color:'+(isN?'var(--acc-sub)':'var(--acc2-sub)')+'">'+n.body+'</p></div>';
   }
-  return '<div class="pad"><span class="lbl">'+dn[d.getDay()]+' · '+d.getDate()+' '+mn[d.getMonth()]+'</span><p class="h1" style="margin:6px 0 24px">Good to see you.</p><div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;cursor:pointer" onclick="go(\'today\')"><div><span class="lbl" style="color:var(--acc)">Today\'s session</span><p style="font-size:16px;font-weight:500;margin:5px 0 4px;color:var(--tx)">'+TPL.name+'</p><p class="mu">'+sess.label+' · '+sess.focus+' · ~'+sess.mins+' min</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div><span class="lbl" style="display:block;margin-bottom:12px">From your coach</span>'+notices+'</div>';
+  return '<div class="pad"><span class="lbl">'+dn[d.getDay()]+' · '+d.getDate()+' '+mn[d.getMonth()]+'</span><p class="h1" style="margin:6px 0 24px">Good to see you.</p><div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;cursor:pointer" onclick="go(\'today\')"><div><span class="lbl" style="color:var(--acc)">Today\'s session</span><p style="font-size:16px;font-weight:500;margin:5px 0 4px;color:var(--tx)">'+ACTIVE_TPL.name+'</p><p class="mu">'+sess.label+' · '+sess.focus+' · ~'+sess.mins+' min</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div><span class="lbl" style="display:block;margin-bottom:12px">From your coach</span>'+notices+'</div>';
 }
 
 // TODAY
 function todayV(){
-  var sess=TPL.days[S.day];
+  var sess=ACTIVE_TPL.days[S.day];
     var rows='';
   for(var i=0;i<sess.exercises.length;i++){
     var ex=sess.exercises[i];
@@ -383,14 +491,14 @@ function todayV(){
     rows+='<div class="exrow'+(str?' exstr':'')+'" data-xd="'+i+'"><div class="dot" style="background:'+PH[ex.ph].dot+'"></div><div style="flex:1;min-width:0"><span class="lbl" style="color:'+(str?'var(--acc)':'var(--mu)')+'">'+PH[ex.ph].label+'</span><p style="font-size:14px;font-weight:'+(str?'500':'400')+';color:'+(str?'var(--tx)':'var(--mu)')+';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p></div><span style="font-size:12px;color:'+(str?'var(--acc)':'var(--mu)')+';white-space:nowrap;margin-left:8px">'+ex.vol+'</span></div>'+detail;
   }
   var daybts='';
-  for(var i=0;i<TPL.days.length;i++){var on=i===S.day;daybts+='<button data-switchday="'+i+'" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'var(--str-bg)':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer;font-weight:'+(on?'500':'400')+'">'+TPL.days[i].label+'</button>';}
-  return '<div class="pad"><span class="lbl">'+TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
+  for(var i=0;i<ACTIVE_TPL.days.length;i++){var on=i===S.day;daybts+='<button data-switchday="'+i+'" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'var(--str-bg)':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer;font-weight:'+(on?'500':'400')+'">'+ACTIVE_TPL.days[i].label+'</button>';}
+  return '<div class="pad"><span class="lbl">'+ACTIVE_TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
 }
 
 // WORKOUT PLAYER
 function wxStart(){
   var exs=[];
-  var sess=TPL.days[S.day];
+  var sess=ACTIVE_TPL.days[S.day];
   for(var i=0;i<sess.exercises.length;i++){if(sess.exercises[i].sets)exs.push(sess.exercises[i]);}
   var weights={};
   for(var i=0;i<exs.length;i++)weights[exs[i].id]=exs[i].kg||0;
@@ -456,7 +564,7 @@ function wxLog(){
 function wxSkip(){S.wx.rest=false;sv();draw();}
 function wxConfirmEnd(){if(confirm('End this session?'))wxEnd();}
 function wxEnd(){
-  if(S.wx&&S.wx.logs.length>0){S.hist.push({date:new Date().toISOString(),label:S.wx.label,logs:S.wx.logs});S.day=(S.day+1)%TPL.days.length;}
+  if(S.wx&&S.wx.logs.length>0){S.hist.push({date:new Date().toISOString(),label:S.wx.label,logs:S.wx.logs});S.day=(S.day+1)%ACTIVE_TPL.days.length;}
   clearInterval(_t);S.wx=null;S.tab='home';sv();draw();
 }
 
@@ -509,7 +617,7 @@ function progV(){
   }
   var empty='<div class="card" style="text-align:center;padding:36px 20px"><p style="font-size:32px;margin-bottom:12px">&#8594;</p><p class="h2" style="margin-bottom:8px">No sessions yet</p><p class="mu">Complete your first session to see strength progress here.</p></div>';
   var reset=sessions>0?'<div style="margin-top:16px"><button class="btng" style="width:100%;padding:12px;font-size:13px;border:.5px solid var(--brd);border-radius:12px" onclick="if(confirm(\'Reset all progress?\')){S.hist=[];sv();draw();}">Reset progress data</button></div>':'';
-  return '<div class="pad"><span class="lbl">Your progress</span><p class="h1" style="margin:6px 0 22px">'+TPL.name+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px"><div class="card" style="text-align:center"><span class="lbl">Sessions</span><p style="font-size:32px;font-weight:500;color:var(--tx);margin:8px 0 4px">'+sessions+'</p><p style="font-size:12px;color:var(--acc)">total logged</p></div><div class="card" style="text-align:center"><span class="lbl">Next up</span><p style="font-size:16px;font-weight:500;color:var(--tx);margin:8px 0 4px">'+TPL.days[S.day].label+'</p><p class="mu" style="font-size:12px">'+TPL.days[S.day].focus+'</p></div></div>'+(sessions===0?empty:'<span class="lbl" style="display:block;margin-bottom:12px">Strength progress</span>'+liftHtml)+reset+'</div>';
+  return '<div class="pad"><span class="lbl">Your progress</span><p class="h1" style="margin:6px 0 22px">'+ACTIVE_TPL.name+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px"><div class="card" style="text-align:center"><span class="lbl">Sessions</span><p style="font-size:32px;font-weight:500;color:var(--tx);margin:8px 0 4px">'+sessions+'</p><p style="font-size:12px;color:var(--acc)">total logged</p></div><div class="card" style="text-align:center"><span class="lbl">Next up</span><p style="font-size:16px;font-weight:500;color:var(--tx);margin:8px 0 4px">'+ACTIVE_TPL.days[S.day].label+'</p><p class="mu" style="font-size:12px">'+ACTIVE_TPL.days[S.day].focus+'</p></div></div>'+(sessions===0?empty:'<span class="lbl" style="display:block;margin-bottom:12px">Strength progress</span>'+liftHtml)+reset+'</div>';
 }
 
 // EVENT DELEGATION
@@ -550,7 +658,7 @@ function makeIcon(){
 }
 
 // INIT
-ld();makeIcon();draw();fetchInfo();
+ld();if(S.tplKey==='hyp')ACTIVE_TPL=TPL_HYP;else ACTIVE_TPL=TPL;makeIcon();draw();fetchInfo();
 setInterval(function(){
   var n=new Date();var el=document.getElementById('clk');
   if(el)el.textContent=n.getHours()+':'+('0'+n.getMinutes()).slice(-2);
