@@ -68,11 +68,29 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 <script>
 // DATA -----------------------------------------------------------------------
 
-const INFO=[
+// ---- INFO BOARD URL: paste your Apps Script URL below ----
+var INFO_URL='https://script.google.com/macros/s/AKfycbwJM5zc5XzBjPFrC9pQqI1o6KH2QomR0BhBa9479osorQKe5j3X3QmUFucdpHgB8MY/exec';
+// -----------------------------------------------------------
+
+var INFO=[
   {type:'notice',title:'Welcome to Train!',body:'Your personal coaching app. Tap Today to see your first session.'},
   {type:'tip',title:'The hip hinge: think, not lift',body:'Push your hips back toward a wall behind you. The weight follows naturally.'},
   {type:'notice',title:'Questions about your program?',body:'Message your coach directly — they are here to help.'}
 ];
+
+function fetchInfo(){
+  if(!INFO_URL||INFO_URL==='https://script.google.com/macros/s/AKfycbwJM5zc5XzBjPFrC9pQqI1o6KH2QomR0BhBa9479osorQKe5j3X3QmUFucdpHgB8MY/exec')return;
+  fetch(INFO_URL)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(Array.isArray(data)&&data.length>0){
+        INFO=data;
+        // Refresh home if currently showing
+        if(S.view==='app'&&S.tab==='home'&&!S.wx)draw();
+      }
+    })
+    .catch(function(e){console.log('Info board offline, using defaults');});
+}
 
 const PH={
   primer:{label:'Primer',cls:'pgr',dot:'#444'},
@@ -536,6 +554,7 @@ function makeIcon(){
 ld();
 makeIcon();
 draw();
+fetchInfo();
 setInterval(function(){
   var n=new Date();
   var el=document.getElementById('clk');
