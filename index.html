@@ -13,24 +13,24 @@
 /* OCEAN DARK (default) */
 :root{
   --bg:#0f1923;--bg2:#162535;--bg3:#1e3a4a;
-  --acc:#38BDF8;--acc2:#818cf8;
+  --acc:#38BDF8;--acc2:#0ea5e9;
   --tx:#e0f2fe;--mu:#4a7a99;--dim:#2d5a70;--brd:#1e3a4a;
-  --ok:#34d399;--warn:#fbbf24;
-  --acc-bg:#0d2030;--acc2-bg:#0d1228;
-  --acc-tx:#bae6fd;--acc2-tx:#c7d2fe;
-  --acc-sub:#2d6a8a;--acc2-sub:#4338ca;
+  --ok:#22d3ee;--warn:#fbbf24;
+  --acc-bg:#0d2030;--acc2-bg:#071e2e;
+  --acc-tx:#bae6fd;--acc2-tx:#bae6fd;
+  --acc-sub:#2d6a8a;--acc2-sub:#0369a1;
   --str-bg:#0d2030;--str-brd:#1e4a66;
   --nb-bg:#1e3a4a;
 }
 /* OCEAN LIGHT */
 .light{
   --bg:#f0f7ff;--bg2:#ffffff;--bg3:#e6f1fb;
-  --acc:#0369a1;--acc2:#4f46e5;
+  --acc:#0369a1;--acc2:#0284c7;
   --tx:#042c53;--mu:#4a7a99;--dim:#93c5fd;--brd:#bfdbfe;
-  --ok:#059669;--warn:#d97706;
-  --acc-bg:#f0f9ff;--acc2-bg:#eef2ff;
-  --acc-tx:#0c4a6e;--acc2-tx:#3730a3;
-  --acc-sub:#0369a1;--acc2-sub:#4f46e5;
+  --ok:#0891b2;--warn:#d97706;
+  --acc-bg:#f0f9ff;--acc2-bg:#e0f2fe;
+  --acc-tx:#0c4a6e;--acc2-tx:#0c4a6e;
+  --acc-sub:#0369a1;--acc2-sub:#0284c7;
   --str-bg:#e0f2fe;--str-brd:#7dd3fc;
   --nb-bg:#e6f1fb;
 }
@@ -55,8 +55,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 .pgr{background:var(--bg3);color:var(--mu)}
 .pac{background:var(--str-bg);color:var(--acc);border:.5px solid var(--str-brd)}
 .pbl{background:var(--acc2-bg);color:var(--acc2)}
-.pok{background:#0a2a1a;color:var(--ok)}
-.light .pok{background:#d1fae5;color:#065f46}
+.pok{background:#071e28;color:var(--ok)}
+.light .pok{background:#cffafe;color:#0e7490}
 #tb{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg2);border-top:.5px solid var(--brd);display:grid;grid-template-columns:repeat(4,1fr);padding:10px 0 24px;z-index:100;transition:background .2s}
 .ti{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--dim);padding:4px}
 .ti.on{color:var(--acc)}
@@ -118,10 +118,10 @@ function fetchInfo(){
 }
 
 var PH={
-  primer:{label:'Primer',cls:'pgr',dot:'var(--dim)'},
+  primer:{label:'Preparation',cls:'pgr',dot:'var(--dim)'},
   strength:{label:'Strength',cls:'pac',dot:'var(--acc)'},
-  accessory:{label:'Accessory',cls:'pbl',dot:'var(--acc2)'},
-  cooldown:{label:'Cooldown',cls:'pok',dot:'var(--ok)'}
+  accessory:{label:'Support',cls:'pbl',dot:'var(--acc2)'},
+  cooldown:{label:'Recovery',cls:'pok',dot:'var(--ok)'}
 };
 
 var TPL={
@@ -295,7 +295,7 @@ function ld(){
 function sv(){try{localStorage.setItem('train_v3',JSON.stringify(S));}catch(e){}}
 
 function applyTheme(){
-  document.body.classList.toggle('light',S.theme==='light');
+  document.documentElement.classList.toggle('light',S.theme==='light');
   var btn=document.getElementById('tmb');
   if(btn)btn.innerHTML=S.theme==='light'?'&#9728;':'&#9790;';
 }
