@@ -89,7 +89,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
   <nav id="tb" style="display:none">
     <div class="ti" id="t-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Home</span></div>
     <div class="ti" id="t-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Today</span></div>
-    <div class="ti" id="t-skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Skills</span></div>
+    <div class="ti" id="t-programs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Programs</span></div>
     <div class="ti" id="t-progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Progress</span></div>
   </nav>
 </div>
@@ -313,6 +313,36 @@ var TPL_HYP={
   ]
 };
 
+var CATALOGUE=[
+  {key:'balanced',tpl:'TPL',name:'Balanced Strength',tag:'Full body',
+   who:'Build strength, fix imbalances, and learn to move well. The best starting point for most people.',
+   sessions:'3 days/week',mins:'~45 min',icon:'B',available:true},
+  {key:'hyp',tpl:'TPL_HYP',name:'Hypertrophy',tag:'Push / Pull / Legs',
+   who:'Build muscle and size with a classic Push/Pull/Legs split and progressive overload.',
+   sessions:'3 days/week',mins:'~50 min',icon:'H',available:true},
+  {key:'fatloss',tpl:null,name:'Fat Loss',tag:'Full body + conditioning',
+   who:'Lose fat and improve fitness with strength training and metabolic conditioning.',
+   sessions:'3 days/week',mins:'~40 min',icon:'F',available:false},
+  {key:'soccer',tpl:null,name:'Soccer Support',tag:'Athletic',
+   who:'Injury prevention and explosiveness for football players. Hamstrings, deceleration, and lateral power.',
+   sessions:'2-3 days/week',mins:'~40 min',icon:'S',available:false},
+  {key:'run',tpl:null,name:'Runner Support',tag:'Athletic',
+   who:'Tendon health, calf strength, and hip stability to make you a more resilient runner.',
+   sessions:'2 days/week',mins:'~35 min',icon:'R',available:false},
+  {key:'climb',tpl:null,name:'Rock Climbing',tag:'Athletic',
+   who:'Antagonist balance, shoulder health, and core tension for climbers.',
+   sessions:'2-3 days/week',mins:'~40 min',icon:'C',available:false},
+  {key:'shoulder',tpl:null,name:'Shoulder Support',tag:'Rehab',
+   who:'Rotator cuff strength, scapular control, and gradual return to pressing movements.',
+   sessions:'3 days/week',mins:'~30 min',icon:'Sh',available:false},
+  {key:'knee',tpl:null,name:'Knee Support',tag:'Rehab',
+   who:'VMO activation, hip strengthening, and tendon load management for knee health.',
+   sessions:'3 days/week',mins:'~30 min',icon:'K',available:false},
+  {key:'back',tpl:null,name:'Back Health',tag:'Rehab',
+   who:'Spine-sparing movement, bracing technique, and gradual loading for a resilient lower back.',
+   sessions:'3 days/week',mins:'~35 min',icon:'Bk',available:false}
+];
+
 var SKILLS=[
   {id:'hinge',name:'Hip hinge',ico:'H',lvls:[
     {n:'Wall hip hinge',d:'Stand 30cm from wall. Push hips back until they touch. Spine neutral throughout.',t:'10 reps without spinal flexion'},
@@ -418,11 +448,11 @@ function draw(){
     tickR();
   } else {
     tb.style.display='grid';
-    ['home','today','skills','progress'].forEach(function(t){
+    ['home','today','programs','progress'].forEach(function(t){
       var el=document.getElementById('t-'+t);
       if(el)el.className='ti'+(t===S.tab?' on':'');
     });
-    var views={home:homeV,today:todayV,skills:skillsV,progress:progV};
+    var views={home:homeV,today:todayV,programs:programsV,progress:progV};
     sc.innerHTML=views[S.tab]?views[S.tab]():'';
   }
 }
@@ -627,6 +657,7 @@ document.addEventListener('click',function(e){
     if(t.dataset&&t.dataset.xd!==undefined){var el=document.getElementById('xd'+t.dataset.xd);if(el)el.style.display=el.style.display==='none'?'block':'none';return;}
     if(t.dataset&&t.dataset.switchday!==undefined){S.day=parseInt(t.dataset.switchday);sv();draw();return;}
     if(t.dataset&&t.dataset.togglesk){S.skOpen=S.skOpen===t.dataset.togglesk?null:t.dataset.togglesk;draw();return;}
+    if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
     if(t.dataset&&t.dataset.advsk){
       var id=t.dataset.advsk;var sk=null;
       for(var i=0;i<SKILLS.length;i++)if(SKILLS[i].id===id)sk=SKILLS[i];
@@ -654,6 +685,98 @@ function makeIcon(){
     var lnk=document.createElement('link');lnk.rel='apple-touch-icon';lnk.href=c.toDataURL();
     document.head.appendChild(lnk);
   }catch(e){}
+}
+
+
+function switchProgram(key){
+  var entry=null;
+  for(var i=0;i<CATALOGUE.length;i++)if(CATALOGUE[i].key===key)entry=CATALOGUE[i];
+  if(!entry||!entry.available)return;
+  var tplMap={balanced:typeof TPL!=='undefined'?TPL:null,hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:null};
+  var newTpl=tplMap[key];
+  if(!newTpl)return;
+  if(S.tplKey===key){go('today');return;}
+  if(!confirm('Switch to '+entry.name+'? Your session history is kept.'))return;
+  S.tplKey=key;
+  ACTIVE_TPL=newTpl;
+  S.day=0;
+  sv();go('today');
+}
+
+
+function programsV(){
+  var html='<div class="pad"><span class="lbl">Training programs</span>';
+  html+='<p class="h1" style="margin:6px 0 8px">Choose your program</p>';
+  html+='<p class="mu" style="margin-bottom:24px">Switch at any time. Your session history is always kept.</p>';
+  html+='<div class="card" style="margin-bottom:24px;background:var(--str-bg);border-color:var(--str-brd)">';
+  html+='<span class="lbl" style="color:var(--acc)">Current program</span>';
+  html+='<p style="font-size:18px;font-weight:500;color:var(--tx);margin:6px 0 4px">'+ACTIVE_TPL.name+'</p>';
+  var curEntry=null;
+  for(var i=0;i<CATALOGUE.length;i++)if(CATALOGUE[i].key===S.tplKey)curEntry=CATALOGUE[i];
+  if(curEntry){
+    html+='<p class="mu">'+curEntry.sessions+' · '+curEntry.mins+'</p>';
+    html+='<p style="font-size:13px;color:var(--mu);margin-top:6px">'+curEntry.who+'</p>';
+  }
+  html+='</div>';
+  html+='<span class="lbl" style="display:block;margin-bottom:14px">All programs</span>';
+  for(var i=0;i<CATALOGUE.length;i++){
+    var c=CATALOGUE[i];
+    var isCur=c.key===S.tplKey;
+    if(isCur)continue;
+    var bg=c.available?'var(--bg2)':'var(--bg2)';
+    var opacity=c.available?'1':'0.5';
+    html+='<div style="background:'+bg+';border-radius:14px;padding:15px 16px;margin-bottom:10px;border:.5px solid var(--brd);opacity:'+opacity+'">';
+    html+='<div style="display:flex;align-items:flex-start;gap:12px">';
+    html+='<div style="width:42px;height:42px;border-radius:11px;background:var(--str-bg);border:.5px solid var(--str-brd);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--acc);flex-shrink:0">'+c.icon+'</div>';
+    html+='<div style="flex:1;min-width:0">';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">';
+    html+='<p style="font-size:15px;font-weight:500;color:var(--tx)">'+c.name+'</p>';
+    html+='<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bg3);color:var(--mu)">'+c.tag+'</span>';
+    html+='</div>';
+    html+='<p style="font-size:13px;color:var(--mu);line-height:1.5;margin-bottom:10px">'+c.who+'</p>';
+    html+='<p style="font-size:11px;color:var(--dim);margin-bottom:10px">'+c.sessions+' · '+c.mins+'</p>';
+    if(c.available){
+      html+='<button class="btn btnp" style="padding:11px 16px;font-size:13px" data-switchprog="'+c.key+'">Switch to this program</button>';
+    } else {
+      html+='<p style="font-size:12px;color:var(--dim);font-style:italic">Coming soon</p>';
+    }
+    html+='</div></div></div>';
+  }
+  html+='<div style="margin-top:20px"><span class="lbl" style="display:block;margin-bottom:14px">Movement skills</span>';
+  for(var s=0;s<SKILLS.length;s++){
+    var sk=SKILLS[s];
+    var lv=parseInt(localStorage.getItem('sk_'+sk.id)||'1');
+    var open=S.skOpen===sk.id;
+    var inner='';
+    if(open){
+      var pct=Math.round(lv/sk.lvls.length*100);
+      inner='<div style="margin-top:14px"><div class="pb" style="margin-bottom:16px"><div class="pf" style="width:'+pct+'%"></div></div>';
+      for(var l=0;l<sk.lvls.length;l++){
+        var lvi=sk.lvls[l];
+        var done=l+1<lv,cur=l+1===lv;
+        var bc=cur?'var(--str-bg)':'var(--bg3)';
+        var bdr=cur?'1.5px solid var(--acc)':'1px solid transparent';
+        var nc=done?'var(--ok)':cur?'var(--acc)':'var(--dim)';
+        var badge=done?'<span style="font-size:11px;color:var(--ok)">&#10003;</span>':cur?'<span style="font-size:11px;color:var(--acc)">current</span>':'';
+        inner+='<div style="padding:12px;border-radius:10px;background:'+bc+';border:'+bdr+';margin-bottom:8px">';
+        inner+='<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:'+nc+'">Level '+(l+1)+': '+lvi.n+'</span>'+badge+'</div>';
+        inner+='<p style="font-size:13px;color:var(--mu);margin-bottom:5px">'+lvi.d+'</p>';
+        inner+='<p style="font-size:12px;color:var(--dim);font-style:italic">Test: '+lvi.t+'</p></div>';
+      }
+      if(lv<sk.lvls.length)inner+='<button class="btn btno" style="margin-top:6px" data-advsk="'+sk.id+'">Mark level '+lv+' complete</button>';
+      else inner+='<p style="text-align:center;color:var(--ok);font-size:14px;padding:10px">Skill mastered &#10003;</p>';
+      inner+='</div>';
+    }
+    var rot=open?'180':'0';
+    html+='<div class="card" style="margin-bottom:10px"><div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" data-togglesk="'+sk.id+'">';
+    html+='<div style="display:flex;align-items:center;gap:12px">';
+    html+='<div style="width:38px;height:38px;border-radius:10px;background:var(--str-bg);border:.5px solid var(--str-brd);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--acc)">'+sk.ico+'</div>';
+    html+='<div><p style="font-size:14px;font-weight:500;color:var(--tx)">'+sk.name+'</p><p class="mu">Level '+lv+' of '+sk.lvls.length+'</p></div></div>';
+    html+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dim)" stroke-width="2" style="transform:rotate('+rot+'deg);transition:transform .2s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>';
+    html+='</div>'+inner+'</div>';
+  }
+  html+='</div></div>';
+  return html;
 }
 
 // INIT
