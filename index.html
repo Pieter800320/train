@@ -216,7 +216,6 @@ var TPL={
     ]}
   ]
 };
-};
 
 var TPL_HYP={
   name:'Hypertrophy',
@@ -439,7 +438,7 @@ function obV(){
 var pName=isHyp?'Hypertrophy':'Balanced Strength';
 var pDesc=isHyp?'3 sessions per week · Push / Pull / Legs · ~50 min':'3 sessions per week · Full body · ~45 min';
 var pIntro=isHyp?'Based on your answers we have assigned Hypertrophy — a Push / Pull / Legs split focused on building muscle with progressive overload.':'Based on your answers we have assigned Balanced Strength — a full-body approach that builds strength, corrects imbalances, and teaches you to move well.';
-return '<div class="pad"><span class="lbl">Almost done</span>'+'<p class="h1" style="margin:8px 0">Your program is ready.</p>'+'<p class="mu" style="margin-bottom:24px">'+pIntro+'</p>'+'<div class="card" style="margin-bottom:10px"><span class="lbl">Your program</span>'+'<p class="h2" style="margin:6px 0 3px">'+pName+'</p>'+'<p class="mu">'+pDesc+'</p></div>'<div class="card" style="margin-bottom:28px"><span class="lbl">Your profile</span>'+rows+'</div><button class="btn btnp" onclick="obDone()">Start training</button></div>';
+return '<div class="pad"><span class="lbl">Almost done</span>'+'<p class="h1" style="margin:8px 0">Your program is ready.</p>'+'<p class="mu" style="margin-bottom:24px">'+pIntro+'</p>'+'<div class="card" style="margin-bottom:10px"><span class="lbl">Your program</span>'+'<p class="h2" style="margin:6px 0 3px">'+pName+'</p>'+'<p class="mu">'+pDesc+'</p></div>'+'<div class="card" style="margin-bottom:28px"><span class="lbl">Your profile</span>'+rows+'</div><button class="btn btnp" onclick="obDone()">Start training</button></div>';
   }
   var q=OBQ[step];
   var pct=Math.round(step/OBQ.length*100);
