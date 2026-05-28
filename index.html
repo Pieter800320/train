@@ -79,7 +79,7 @@ var INFO=[
 ];
 
 function fetchInfo(){
-  if(!INFO_URL||INFO_URL==='https://script.google.com/macros/s/AKfycbwJM5zc5XzBjPFrC9pQqI1o6KH2QomR0BhBa9479osorQKe5j3X3QmUFucdpHgB8MY/exec')return;
+  if(!INFO_URL||INFO_URL==='YOUR_SCRIPT_URL_HERE')return;
   fetch(INFO_URL)
     .then(function(r){return r.json();})
     .then(function(data){
