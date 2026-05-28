@@ -320,12 +320,12 @@ var CATALOGUE=[
   {key:'hyp',tpl:'TPL_HYP',name:'Hypertrophy',tag:'Push / Pull / Legs',
    who:'Build muscle and size with a classic Push/Pull/Legs split and progressive overload.',
    sessions:'3 days/week',mins:'~50 min',icon:'H',available:true},
-  {key:'fatloss',tpl:null,name:'Fat Loss',tag:'Full body + conditioning',
+  {key:'fatloss',tpl:'TPL_FAT',name:'Fat Loss',tag:'Full body + conditioning',
    who:'Lose fat and improve fitness with strength training and metabolic conditioning.',
    sessions:'3 days/week',mins:'~40 min',icon:'F',available:false},
-  {key:'soccer',tpl:null,name:'Soccer Support',tag:'Athletic',
+  {key:'soccer',tpl:'TPL_SOCCER',name:'Soccer Support',tag:'Athletic',
    who:'Injury prevention and explosiveness for football players. Hamstrings, deceleration, and lateral power.',
-   sessions:'2-3 days/week',mins:'~40 min',icon:'S',available:false},
+   sessions:'3 days/week',mins:'~45 min',icon:'S',available:true},
   {key:'run',tpl:null,name:'Runner Support',tag:'Athletic',
    who:'Tendon health, calf strength, and hip stability to make you a more resilient runner.',
    sessions:'2 days/week',mins:'~35 min',icon:'R',available:false},
@@ -342,6 +342,192 @@ var CATALOGUE=[
    who:'Spine-sparing movement, bracing technique, and gradual loading for a resilient lower back.',
    sessions:'3 days/week',mins:'~35 min',icon:'Bk',available:false}
 ];
+
+var TPL_FAT={
+  name:'Fat Loss',
+  days:[
+    {label:'Session A',focus:'Full body — strength + conditioning',mins:45,exercises:[
+      {id:'fl_deadbug',ph:'primer',name:'Dead bug',vol:'2 x 6 each side',rest:0,muscles:'Deep core, hip flexors',
+       cues:['Lower back pressed to the floor — this is the entire point','Move slowly: 3 seconds down, 3 seconds return','Exhale as you lower the arm and leg'],
+       subs:'Bent-knee dead bug'},
+      {id:'fl_gbridge',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes, hamstrings — activation',
+       cues:['Drive through heels — not toes','Squeeze the glutes hard at the top','Do not hyperextend the lower back'],
+       subs:'Single-leg glute bridge'},
+      {id:'fl_goblet',ph:'strength',name:'Goblet squat',vol:'4 x 12',rest:75,sets:4,reps:12,kg:12,muscles:'Quads, glutes, core',
+       cues:['Brace core before descent','Knees track in line with toes','Full depth if available'],
+       subs:'Box squat, leg press',prog:'Add 2.5 kg when 4x12 is clean'},
+      {id:'fl_pushup',ph:'strength',name:'Push-up (your level)',vol:'3 x 12',rest:60,sets:3,reps:12,kg:0,muscles:'Chest, deltoid, triceps',
+       cues:['Rigid plank — hips in line with shoulders and ankles','Elbows at 45 degrees throughout','Chest to surface, full lockout at top'],
+       subs:'L1: Wall  L2: Incline  L3: Knee  L4: Full',prog:'Advance one level when 3x12 is clean for 2 sessions'},
+      {id:'fl_dbrow',ph:'strength',name:'DB row',vol:'3 x 12 each',rest:60,sets:3,reps:12,kg:12,muscles:'Lats, rhomboids, biceps',
+       cues:['Pull elbow to the hip — not the shoulder','Pause and squeeze at the top','Neutral spine — no torso rotation'],
+       subs:'Cable row, TRX row',prog:'Add 2 kg when 3x12 is comfortable each side'},
+      {id:'fl_rdl',ph:'accessory',name:'Romanian deadlift',vol:'3 x 12',rest:75,sets:3,reps:12,kg:18,muscles:'Hamstrings, glutes, erectors',
+       cues:['Push hips back first — the torso follows','Keep the weights close to the legs','Feel the hamstring stretch at the bottom'],
+       subs:'Single-leg RDL, cable pull-through',prog:'Add 2.5 kg when 3x12 is clean'},
+      {id:'fl_carry',ph:'accessory',name:'Farmer carry',vol:'3 x 25m',rest:60,sets:3,reps:0,kg:16,muscles:'Grip, core, traps, conditioning',
+       cues:['Stand tall — do not let the weight pull your shoulders down','Normal walking gait throughout','Breathe steadily — this is conditioning work'],
+       subs:'Suitcase carry (unilateral), dumbbell march on spot',prog:'Increase weight when 25m feels easy with perfect posture'},
+      {id:'fl_thoracic',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine, obliques',
+       cues:['Side-lying, knees at 90 degrees. Top arm sweeps across the floor.','Follow your hand with your eyes','Keep knees together throughout'],
+       subs:'Thread the needle'},
+      {id:'fl_hipflex',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors, quads',
+       cues:['Back knee down — neutral pelvis','Gently push hips forward into the stretch','Raise same-side arm for a greater reach'],
+       subs:'Standing quad stretch'}
+    ]},
+    {label:'Session B',focus:'Upper body + core circuit',mins:42,exercises:[
+      {id:'fl_pullpart',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rotator cuff',
+       cues:['Arms stay straight — this is not a row','Pull to chest height, thumbs rotating outward','Control the return'],
+       subs:'Face pull with band'},
+      {id:'fl_scap',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior',
+       cues:['Plank position — only the shoulder blades move','Protract and retract slowly and controlled','Very small movement'],
+       subs:'Wall scapular push-up'},
+      {id:'fl_landmine',ph:'strength',name:'Landmine press',vol:'3 x 10 each',rest:75,sets:3,reps:10,kg:10,muscles:'Deltoid, triceps, serratus, core',
+       cues:['Half-kneeling — brace the core hard before pressing','Press at 45 degrees — shoulder-friendly angle','Stay tall — do not lean back'],
+       subs:'Seated DB press, pike push-up',prog:'Add 2.5 kg when 3x10 is clean each side'},
+      {id:'fl_pulldown',ph:'strength',name:'Lat pulldown or pull-up',vol:'3 x 10',rest:75,sets:3,reps:10,kg:28,muscles:'Lats, biceps, rear deltoid',
+       cues:['Pull to upper chest — not below the chin','Elbows travel down toward hip pockets','Depress shoulder blades before pulling'],
+       subs:'L1: Band-assisted  L2: Machine  L3: Negative  L4: Full pull-up',prog:'Add 5 kg when 3x10 is easy, or advance pull-up level'},
+      {id:'fl_pallof',ph:'accessory',name:'Pallof press',vol:'2 x 12 each',rest:45,sets:2,reps:12,kg:0,muscles:'Obliques, deep core',
+       cues:['Press straight out — resist rotation completely','Hold 1 second at full extension','Feet shoulder-width, perpendicular to cable'],
+       subs:'Half-kneeling Pallof press, band version',prog:'Step further from anchor or increase resistance'},
+      {id:'fl_sidepl',ph:'accessory',name:'Side plank',vol:'2 x 25s each',rest:45,sets:2,reps:0,kg:0,muscles:'Obliques, hip abductors, core',
+       cues:['One forearm on the floor — body in a straight line from head to feet','Do not let the hips sag toward the floor','Breathe steadily throughout'],
+       subs:'Kneeling side plank (easier), side plank with reach (harder)',prog:'Increase hold time to 40 seconds, then add a hip dip'},
+      {id:'fl_stepsup',ph:'accessory',name:'Step-up',vol:'3 x 10 each',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, glutes, balance',
+       cues:['Drive through the heel of the elevated foot — not the toes','Stand fully upright at the top — do not cut it short','Control the descent — do not drop down'],
+       subs:'Reverse lunge, split squat',prog:'Add dumbbells when 3x10 bodyweight is clean and controlled'},
+      {id:'fl_childpose',ph:'cooldown',name:"Child's pose and lat reach",vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',
+       cues:['Walk hands forward for more lat stretch','Let chest sink toward the floor','Breathe into the upper back'],
+       subs:'Thread the needle'},
+      {id:'fl_ham',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings, calf',
+       cues:['Hinge at the hip to reach — do not round the lower back','Flex the foot to include the calf','Hold static — do not bounce'],
+       subs:'Standing hamstring stretch'}
+    ]},
+    {label:'Session C',focus:'Lower body + loaded conditioning',mins:45,exercises:[
+      {id:'fl_wgs',ph:'primer',name:"World's greatest stretch",vol:'2 x 3 each',rest:0,muscles:'Full body mobility',
+       cues:['Lunge position — drop into it slowly','Front hand on floor beside front foot, rotate thoracic spine upward','Hold 2 seconds at each end range'],
+       subs:'Hip flexor stretch plus thoracic rotation separately'},
+      {id:'fl_wallhinge',ph:'primer',name:'Wall hip hinge',vol:'2 x 10',rest:0,muscles:'Hamstrings, glutes — pattern drill',
+       cues:['Stand 30cm from wall — push hips back until they touch','Neutral spine throughout','Pattern drill only — no load'],
+       subs:'Dowel rod hinge'},
+      {id:'fl_splitsq',ph:'strength',name:'DB split squat',vol:'4 x 10 each',rest:75,sets:4,reps:10,kg:8,muscles:'Quads, glutes, hip flexors',
+       cues:['Weight 70% on front foot — this is a quad exercise','Drop back knee toward the floor','Torso tall — do not lean forward'],
+       subs:'Assisted split squat, reverse lunge',prog:'Add 2 kg per hand when 4x10 is clean each side'},
+      {id:'fl_dbrdl',ph:'strength',name:'Dumbbell RDL',vol:'4 x 12',rest:75,sets:4,reps:12,kg:18,muscles:'Hamstrings, glutes, erectors',
+       cues:['Lead with the hips going back — not the torso going down','Keep dumbbells close to your legs','Strong hamstring stretch at the bottom'],
+       subs:'Kettlebell deadlift, cable pull-through',prog:'Add 2.5 kg when 4x12 is clean'},
+      {id:'fl_hipthrust',ph:'accessory',name:'Hip thrust',vol:'3 x 15',rest:60,sets:3,reps:15,kg:16,muscles:'Glutes — peak contraction',
+       cues:['Upper back on the bench, feet flat and hip-width','Drive through heels and squeeze hard at the top','Full hip extension — straight line from knees to shoulders'],
+       subs:'Glute bridge on floor',prog:'Add 5 kg when 3x15 is clean'},
+      {id:'fl_lunge',ph:'accessory',name:'Reverse lunge',vol:'3 x 10 each',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, glutes, balance',
+       cues:['Step back and lower the back knee toward the floor','Front shin stays vertical — do not let the knee drift forward','Return to standing by driving through the front heel'],
+       subs:'Split squat, step-up',prog:'Add light dumbbells when 3x10 bodyweight is completely controlled'},
+      {id:'fl_suitcase',ph:'accessory',name:'Suitcase carry',vol:'3 x 20m each',rest:60,sets:3,reps:0,kg:14,muscles:'Obliques, grip, conditioning',
+       cues:['Stand tall — do not lean away from the weight','Shoulders level — both at the same height','Normal walking gait throughout'],
+       subs:'Farmer carry bilateral',prog:'Increase weight when 20m is completed without any lateral lean'},
+      {id:'fl_pigeon',ph:'cooldown',name:'Pigeon pose',vol:'2 x 40s each',rest:0,muscles:'Glutes, hip rotators',
+       cues:['Front shin toward parallel with the mat as mobility allows','Hips square to the floor','Breathe into the restriction'],
+       subs:'Figure-four stretch, hip 90/90'},
+      {id:'fl_hip9090',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 40s each',rest:0,muscles:'Hip rotators, hip flexors',
+       cues:['Both hips grounded — do not tilt to one side','Breathe slowly into the restriction','Hold the position, do not bounce'],
+       subs:'Pigeon pose, seated figure-four'}
+    ]}
+  ]
+};
+
+var TPL_SOCCER={
+  name:'Soccer Support',
+  days:[
+    {label:'Session A',focus:'Posterior chain + deceleration',mins:45,exercises:[
+      {id:'sc_hip9090',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators, hip flexors',
+       cues:['Both hips grounded — do not tilt to one side','Breathe slowly into the restriction','Hold the position, do not bounce'],
+       subs:'Pigeon pose, figure-four'},
+      {id:'sc_copen',ph:'primer',name:'Copenhagen adductor hold',vol:'2 x 20s each',rest:0,muscles:'Adductors — activation',
+       cues:['Side-lying, top leg on a bench at knee height. Lift the hips — support on that knee.','Body in a straight line — do not let the hips sag','This is the most evidence-backed groin injury prevention exercise in football'],
+       subs:'Side-lying adductor squeeze with ball'},
+      {id:'sc_nordic',ph:'strength',name:'Nordic hamstring curl',vol:'4 x 5',rest:120,sets:4,reps:5,kg:0,muscles:'Hamstrings — eccentric strength',
+       cues:['Kneel with feet anchored. Lower your body toward the floor as slowly as possible — resist with the hamstrings.','Use your hands to catch yourself at the bottom and push back up','The lowering phase is the exercise. Slow is hard. That is the point.'],
+       subs:'Single-leg RDL, prone hamstring curl with slow eccentric',prog:'Add 1 rep per set when you can control the full descent. This progresses slowly — that is normal.'},
+      {id:'sc_splitsq',ph:'strength',name:'DB split squat',vol:'3 x 8 each',rest:90,sets:3,reps:8,kg:10,muscles:'Quads, glutes, hip stabilisers',
+       cues:['Weight 70% on front foot','Drop the back knee toward the floor — slow and controlled','Torso upright throughout'],
+       subs:'Reverse lunge, step-up',prog:'Add 2 kg per hand when 3x8 is clean each side'},
+      {id:'sc_sldl',ph:'accessory',name:'Single-leg RDL',vol:'3 x 8 each',rest:75,sets:3,reps:8,kg:10,muscles:'Hamstrings, glutes, hip stability',
+       cues:['Hinge at the hip — free leg travels back as torso descends','Hips stay level throughout','Light dumbbell in the opposite hand'],
+       subs:'Split-stance RDL',prog:'Add 2 kg when 3x8 is clean without any hip drop'},
+      {id:'sc_latband',ph:'accessory',name:'Lateral band walk',vol:'3 x 15 each direction',rest:60,sets:3,reps:15,kg:0,muscles:'Glute med, hip abductors',
+       cues:['Band around ankles or just above the knees. Quarter squat position.','Step sideways — keep tension in the band throughout','Do not let the feet come together'],
+       subs:'Side-lying hip abduction, clamshell',prog:'Move the band lower (ankles) or use a heavier band'},
+      {id:'sc_carry',ph:'accessory',name:'Farmer carry',vol:'3 x 20m',rest:60,sets:3,reps:0,kg:18,muscles:'Grip, core, gait integration',
+       cues:['Stand tall — shoulders level and down','Normal walking gait — do not shuffle','Breathe steadily throughout'],
+       subs:'Suitcase carry',prog:'Increase weight when 20m is easy with perfect posture'},
+      {id:'sc_pigeon',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',
+       cues:['Front shin toward parallel with the mat','Hips square to the floor','Breathe into the restriction'],
+       subs:'Figure-four, hip 90/90'},
+      {id:'sc_hamstr',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings, calf',
+       cues:['Hinge at the hip to reach — do not round the lower back','Flex the foot to include the calf','Hold static — do not bounce'],
+       subs:'Standing hamstring stretch'}
+    ]},
+    {label:'Session B',focus:'Trunk stability + upper body balance',mins:40,exercises:[
+      {id:'sc_deadbug',ph:'primer',name:'Dead bug',vol:'2 x 6 each',rest:0,muscles:'Deep core — activation',
+       cues:['Lower back pressed to the floor throughout','Move slowly: 3 seconds down, 3 seconds return','Exhale as you lower the arm and leg'],
+       subs:'Bent-knee dead bug'},
+      {id:'sc_facepull',ph:'primer',name:'Band face pull',vol:'2 x 15',rest:0,muscles:'Rear deltoid, external rotators',
+       cues:['Pull to forehead height — not chin height','Thumbs finishing behind ears at end range','Elbows stay high throughout'],
+       subs:'Band pull-apart'},
+      {id:'sc_pallof',ph:'strength',name:'Pallof press',vol:'3 x 10 each',rest:60,sets:3,reps:10,kg:0,muscles:'Obliques, core — anti-rotation',
+       cues:['Press straight out — resist rotation completely','Hold 1 second at full extension','Hips and shoulders stay square throughout'],
+       subs:'Half-kneeling Pallof press, band version',prog:'Step further from anchor or increase resistance'},
+      {id:'sc_row',ph:'strength',name:'DB row',vol:'3 x 10 each',rest:75,sets:3,reps:10,kg:14,muscles:'Lats, rhomboids — postural balance',
+       cues:['Pull elbow to the hip — not the shoulder','Pause at the top — squeeze','Neutral spine throughout'],
+       subs:'Cable row, TRX row',prog:'Add 2 kg when 3x10 is clean'},
+      {id:'sc_landmine',ph:'accessory',name:'Landmine rotation',vol:'3 x 8 each',rest:60,sets:3,reps:8,kg:8,muscles:'Obliques, rotational power',
+       cues:['Hold the end of the barbell in both hands. Rotate from hip height on one side to hip height on the other.','Power comes from the hips — the arms follow','Keep a slight bend in the elbows throughout'],
+       subs:'Cable woodchop, med ball rotational throw',prog:'Add weight when 3x8 is fluid and powerful each side'},
+      {id:'sc_sidepl',ph:'accessory',name:'Side plank',vol:'3 x 25s each',rest:45,sets:3,reps:0,kg:0,muscles:'Obliques, hip abductors',
+       cues:['One forearm on the floor — body in a straight line','Do not let the hips sag','Breathe steadily throughout'],
+       subs:'Kneeling side plank',prog:'Increase hold time to 40 seconds, then add hip dips'},
+      {id:'sc_pushup',ph:'accessory',name:'Push-up (your level)',vol:'3 x 10',rest:60,sets:3,reps:10,kg:0,muscles:'Chest, triceps, serratus',
+       cues:['Rigid plank throughout','Elbows at 45 degrees','Full range every rep'],
+       subs:'L1: Wall  L2: Incline  L3: Knee  L4: Full',prog:'Advance level when 3x10 is perfect for 2 sessions'},
+      {id:'sc_thoracic',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',
+       cues:['Side-lying, knees at 90 degrees. Top arm sweeps across the floor.','Follow your hand with your eyes','Keep knees together throughout'],
+       subs:'Thread the needle'},
+      {id:'sc_doorway',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',
+       cues:['Forearm on frame, elbow at 90 degrees','Step gently forward into the stretch','Hold — do not bounce'],
+       subs:'Foam roller thoracic extension'}
+    ]},
+    {label:'Session C',focus:'Explosive lower body + prehab',mins:42,exercises:[
+      {id:'sc_wallhinge',ph:'primer',name:'Wall hip hinge',vol:'2 x 10',rest:0,muscles:'Hamstrings, glutes — pattern',
+       cues:['Stand 30cm from wall — push hips back until they touch','Neutral spine throughout','Pattern drill — no load'],
+       subs:'Dowel rod hinge'},
+      {id:'sc_pogohop',ph:'primer',name:'Pogo hops',vol:'2 x 20 reps',rest:0,muscles:'Calves, Achilles — tendon prep',
+       cues:['Small, fast hops on both feet — the goal is minimal ground contact time','Land softly on the balls of the feet — not flat-footed','This is tendon conditioning, not jumping for height'],
+       subs:'Slow calf raises (if too intense)'},
+      {id:'sc_hipthrust',ph:'strength',name:'Hip thrust',vol:'4 x 10',rest:90,sets:4,reps:10,kg:22,muscles:'Glutes — peak contraction and power',
+       cues:['Upper back on the bench, feet flat and hip-width','Drive through heels and squeeze hard at the top','Full hip extension at the top — this is the position that matters in sprinting'],
+       subs:'Glute bridge on floor',prog:'Add 5 kg when 4x10 is clean'},
+      {id:'sc_stepsup',ph:'strength',name:'Step-up (explosive)',vol:'3 x 8 each',rest:75,sets:3,reps:8,kg:0,muscles:'Quads, glutes — single-leg power',
+       cues:['Drive through the heel of the elevated foot explosively','Drive the opposite knee upward at the top — like a sprint stride','Control the descent — do not drop down'],
+       subs:'Split squat jump (advanced), reverse lunge',prog:'Add light dumbbells when 3x8 bodyweight is powerful and controlled'},
+      {id:'sc_copenstr',ph:'accessory',name:'Copenhagen adductor exercise',vol:'3 x 8 each',rest:60,sets:3,reps:8,kg:0,muscles:'Adductors — strength and injury prevention',
+       cues:['Side-lying, top leg on a bench at knee height. Lower and raise the hips.','Full range — hip drops toward the floor, then drives back up','This is not easy. Start with the shorter lever (foot on bench) if needed.'],
+       subs:'Side-lying adductor raise, adductor machine',prog:'Progress to the longer lever (ankle on bench) when 3x8 is controlled'},
+      {id:'sc_calfrise',ph:'accessory',name:'Single-leg calf raise',vol:'3 x 12 each',rest:60,sets:3,reps:12,kg:0,muscles:'Gastrocnemius, Achilles tendon',
+       cues:['Full range — lower the heel below the step for maximum stretch','Slow: 3 seconds up, 3 seconds down — this is tendon work, not muscle work','Hold at the top for 1 second'],
+       subs:'Bilateral calf raise',prog:'Add load (hold a dumbbell) when 3x12 single-leg is controlled through full range'},
+      {id:'sc_latbnd2',ph:'accessory',name:'Lateral band walk',vol:'2 x 15 each direction',rest:45,sets:2,reps:15,kg:0,muscles:'Glute med, hip abductors',
+       cues:['Band around ankles or above knees. Quarter squat position.','Keep tension in the band throughout — do not let feet come together','Controlled steps — not a shuffle'],
+       subs:'Clamshell, side-lying hip abduction',prog:'Move band lower or use heavier band'},
+      {id:'sc_hip9090b',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators, hip flexors',
+       cues:['Both hips grounded — do not tilt to one side','Breathe slowly into the restriction','Hold the position, do not bounce'],
+       subs:'Pigeon pose'},
+      {id:'sc_copestr',ph:'cooldown',name:'Adductor stretch',vol:'2 x 40s each',rest:0,muscles:'Adductors, inner thigh',
+       cues:['Seated, soles of feet together — let the knees fall outward','Lean gently forward from the hips to increase the stretch','Hold — do not push the knees down with your hands'],
+       subs:'Standing adductor stretch, side lunge hold'}
+    ]}
+  ]
+};
 
 var SKILLS=[
   {id:'hinge',name:'Hip hinge',ico:'H',lvls:[
@@ -530,6 +716,8 @@ function obDone(){
   var g=S.ob.ans.goal||'balanced';
   var sp=S.ob.ans.sport||'none';
   if(g==='muscle'){S.tplKey='hyp';ACTIVE_TPL=TPL_HYP;}
+  else if(g==='fat_loss'){S.tplKey='fatloss';ACTIVE_TPL=TPL_FAT;}
+  else if(sp==='soccer'){S.tplKey='soccer';ACTIVE_TPL=TPL_SOCCER;}
   else{S.tplKey='balanced';ACTIVE_TPL=TPL;}
   S.day=0;S.view='app';S.tab='home';sv();draw();
 }
@@ -724,7 +912,7 @@ function switchProgram(key){
   var entry=null;
   for(var i=0;i<CATALOGUE.length;i++)if(CATALOGUE[i].key===key)entry=CATALOGUE[i];
   if(!entry||!entry.available)return;
-  var tplMap={balanced:typeof TPL!=='undefined'?TPL:null,hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:null};
+  var tplMap={balanced:typeof TPL!=='undefined'?TPL:null,hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:null,fatloss:typeof TPL_FAT!=='undefined'?TPL_FAT:null,soccer:typeof TPL_SOCCER!=='undefined'?TPL_SOCCER:null};
   var newTpl=tplMap[key];
   if(!newTpl)return;
   if(S.tplKey===key){go('today');return;}
@@ -749,6 +937,7 @@ function programsV(){
     html+='<p class="mu">'+curEntry.sessions+' · '+curEntry.mins+'</p>';
     html+='<p style="font-size:13px;color:var(--mu);margin-top:6px">'+curEntry.who+'</p>';
   }
+  html+='<button class="btn btno" style="padding:11px;font-size:13px;margin-top:12px" onclick="resetOnboarding()">Retake questionnaire</button>';
   html+='</div>';
   html+='<span class="lbl" style="display:block;margin-bottom:14px">All programs</span>';
   for(var i=0;i<CATALOGUE.length;i++){
@@ -804,8 +993,16 @@ function programsV(){
   return html;
 }
 
+
+function resetOnboarding(){
+  if(!confirm('Retake the questionnaire? Your session history and skill progress are kept.'))return;
+  S.ob={step:0,ans:{}};
+  S.view='ob';
+  sv();draw();
+}
+
 // INIT
-ld();if(S.tplKey==='hyp')ACTIVE_TPL=TPL_HYP;else ACTIVE_TPL=TPL;makeIcon();draw();fetchInfo();
+ld();if(S.tplKey==='hyp')ACTIVE_TPL=TPL_HYP;else if(S.tplKey==='fatloss')ACTIVE_TPL=TPL_FAT;else if(S.tplKey==='soccer')ACTIVE_TPL=TPL_SOCCER;else ACTIVE_TPL=TPL;makeIcon();draw();fetchInfo();
 setInterval(function(){
   var n=new Date();var el=document.getElementById('clk');
   if(el)el.textContent=n.getHours()+':'+('0'+n.getMinutes()).slice(-2);
