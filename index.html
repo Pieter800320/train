@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111111">
+<title>Train</title>
+<style>
+:root{--bg:#111;--bg2:#1a1a1a;--bg3:#222;--acc:#E07B3A;--acc2:#3A82E0;--tx:#f0f0f0;--muted:#888;--dim:#444;--border:#2a2a2a;--ok:#4aaa60;--rad:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;font-size:16px}
+#app{max-width:430px;margin:0 auto;min-height:100vh}
+.screen{padding-bottom:80px}
+.pad{padding:20px 16px}
+.label{font-size:10px;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;font-weight:500}
+.muted{font-size:13px;color:var(--muted);line-height:1.6}
+.h1{font-size:22px;font-weight:500;color:var(--tx);line-height:1.3}
+.h2{font-size:18px;font-weight:500;color:var(--tx)}
+.card{background:var(--bg2);border-radius:var(--rad);padding:16px;border:.5px solid var(--border)}
+.card-acc{border-left:3px solid var(--acc);border-radius:0 12px 12px 0;background:#160e00}
+.card-blue{border-left:3px solid var(--acc2);border-radius:0 12px 12px 0;background:#001422}
+.btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:15px;font-weight:500;cursor:pointer}
+.btn-p{background:var(--acc);color:#fff}
+.btn-o{background:transparent;border:1px solid var(--acc);color:var(--acc)}
+.btn-g{background:transparent;border:none;color:var(--muted);cursor:pointer}
+.pill{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500}
+.p-gray{background:var(--bg3);color:var(--muted)}
+.p-acc{background:#2a1400;color:var(--acc)}
+.p-blue{background:#001422;color:var(--acc2)}
+.p-ok{background:#0a1e0a;color:var(--ok)}
+#tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#161616;border-top:.5px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);padding:10px 0 20px;z-index:100}
+.ti{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--dim);padding:4px}
+.ti.on{color:var(--acc)}
+.ti svg{width:22px;height:22px}
+.ti span{font-size:10px;font-weight:500}
+.ex-row{background:var(--bg2);border-radius:12px;padding:13px 14px;margin-bottom:7px;display:flex;align-items:center;gap:12px;border:.5px solid var(--border);cursor:pointer}
+.ex-str{background:#1c1000;border-color:#3a1e00}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pbar{background:var(--bg3);border-radius:4px;height:5px;overflow:hidden}
+.pfill{background:var(--acc);height:100%;border-radius:4px;transition:width .3s}
+.ob-opt{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:15px 18px;margin-bottom:9px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:border-color .15s,background .15s}
+.ob-opt.sel{border-color:var(--acc);background:#1e1000}
+.ob-icon{width:36px;height:36px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.setpip{width:24px;height:4px;border-radius:2px;background:var(--bg3)}
+.setpip.done{background:var(--acc)}
+.num-btn{background:var(--bg3);border:none;color:var(--tx);width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cue{font-size:13px;color:var(--muted);padding:6px 10px;border-left:2px solid var(--border);margin:4px 0;line-height:1.5}
+.sep{height:.5px;background:var(--border);margin:12px 0}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sbar" style="background:var(--bg);padding:12px 20px 6px;display:flex;justify-content:space-between;align-items:center">
+    <span id="clk" style="font-size:11px;color:var(--muted);font-weight:500">9:41</span>
+    <span style="font-size:12px;color:var(--muted);font-weight:500">Train</span>
+    <span style="font-size:11px;color:var(--muted)">&#9679;&#9679;&#9679;</span>
+  </div>
+  <div id="scr"></div>
+  <nav id="tabbar" style="display:none">
+    <div class="ti" data-t="home" onclick="go('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="ti" data-t="today" onclick="go('today')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>Today</span>
+    </div>
+    <div class="ti" data-t="skills" onclick="go('skills')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <span>Skills</span>
+    </div>
+    <div class="ti" data-t="progress" onclick="go('progress')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Progress</span>
+    </div>
+  </nav>
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+
+const INFO=[
+  {type:'notice',title:'Welcome to Train!',body:'Your personal coaching app. Tap Today to see your first session.',date:''},
+  {type:'tip',title:'The hip hinge: think, not lift',body:'Push your hips back toward a wall behind you. The weight follows — you don\'t pull it up.',date:''},
+  {type:'notice',title:'Questions about your program?',body:'Message your coach directly — they\'re here to help.',date:''}
+];
+
+const PH={
+  primer:{label:'Primer',cls:'p-gray',dot:'#444'},
+  strength:{label:'Strength',cls:'p-acc',dot:'#E07B3A'},
+  accessory:{label:'Accessory',cls:'p-blue',dot:'#3A82E0'},
+  cooldown:{label:'Cooldown',cls:'p-ok',dot:'#4aaa60'}
+};
+
+const T={
+  name:'Balanced Strength',
+  days:[
+    {label:'Session A',focus:'Hinge + Push + Pull',mins:45,exercises:[
+      {id:'hip9090',ph:'primer',name:'Hip 90/90 stretch',vol:'2 × 45s each',rest:0,muscles:'Hip rotators, hip flexors',
+       cues:['Both hips grounded — do not tilt to one side','Breathe slowly into the restriction — do not force range','Hold the position, do not bounce'],
+       subs:'Pigeon pose, seated figure-four'},
+      {id:'wallhinge',ph:'primer',name:'Wall hip hinge',vol:'2 × 10',rest:0,muscles:'Hamstrings, glutes, erectors',
+       cues:['Stand 30cm from wall — push hips back until they touch it','Neutral spine throughout — no rounding','This teaches the motor pattern before any load is added'],
+       subs:'Dowel rod hinge (3 contact points)'},
+      {id:'pullpart',ph:'primer',name:'Band pull-apart',vol:'2 × 15',rest:0,muscles:'Rear deltoid, rotator cuff',
+       cues:['Arms stay straight — this is not a row','Pull to chest height, thumbs rotating outward','Control the return — do not let band snap back'],
+       subs:'Face pull with band'},
+      {id:'dbrdl',ph:'strength',name:'Dumbbell RDL',vol:'4 × 8',rest:120,sets:4,reps:8,kg:20,muscles:'Hamstrings, glutes, erectors',
+       cues:['Lead with the hips going back — not the torso going down','Keep dumbbells close to your legs throughout','Stop at a strong hamstring stretch — do not force extra range'],
+       subs:'Kettlebell deadlift, cable pull-through',prog:'Add 2.5 kg when all 4 sets are clean'},
+      {id:'pushupA',ph:'strength',name:'Push-up (your level)',vol:'3 × 10',rest:90,sets:3,reps:10,kg:0,muscles:'Chest, deltoid, triceps',
+       cues:['Rigid plank — hips in line with shoulders and ankles','Elbows track at 45° — not flared, not tucked','Chest to surface, full lockout at top'],
+       subs:'L1: Wall | L2: Incline | L3: Knee | L4: Full',prog:'Advance one level when 3×10 is perfect for 2 sessions'},
+      {id:'dbrow',ph:'accessory',name:'Dumbbell row',vol:'3 × 12',rest:90,sets:3,reps:12,kg:12,muscles:'Lats, rhomboids, biceps',
+       cues:['Pull elbow to your hip — not your shoulder','Pause and squeeze at the top, then control the descent','Neutral spine — no torso rotation to get the weight up'],
+       subs:'TRX row, cable row',prog:'Add 2 kg when 3×12 is comfortable'},
+      {id:'slrdl',ph:'accessory',name:'Single-leg RDL (bodyweight)',vol:'2 × 8 each',rest:60,sets:2,reps:8,kg:0,muscles:'Hamstrings, glutes, hip stabilisers',
+       cues:['Hinge at the hip — free leg travels back as torso descends','Slight bend in the standing knee — do not lock it','Keep hips level throughout — do not let the free hip drop'],
+       subs:'Split-stance RDL',prog:'Add a light dumbbell in the opposite hand when balance is solid'},
+      {id:'childpose',ph:'cooldown',name:"Child's pose + lat reach",vol:'2 × 40s',rest:0,muscles:'Lats, thoracic spine',
+       cues:['Walk hands further forward to increase lat stretch','Let chest sink toward the floor','Breathe into the upper back — release on exhale'],
+       subs:'Thread the needle'},
+      {id:'hipflex',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 × 30s each',rest:0,muscles:'Hip flexors, quads',
+       cues:['Back knee down — neutral pelvis, do not arch lower back','Gently push hips forward to feel the stretch','Raise same-side arm overhead for a greater reach'],
+       subs:'Standing quad stretch, couch stretch'}
+    ]},
+    {label:'Session B',focus:'Squat + Vertical Push + Pull',mins:48,exercises:[
+      {id:'gobletprimer',ph:'primer',name:'Goblet squat (light, pattern)',vol:'2 × 10',rest:0,muscles:'Quads, glutes, core',
+       cues:['Elbows inside knees at the bottom — use them to push knees out','Sit between your heels — not onto them','Chest tall throughout — do not collapse forward'],
+       subs:'Bodyweight squat, box squat'},
+      {id:'deadbug',ph:'primer',name:'Dead bug',vol:'2 × 5 each side',rest:0,muscles:'Deep core, hip flexors',
+       cues:['Lower back pressed to the floor throughout — this is the entire point','Move slowly: 3 seconds down, 3 seconds back','Exhale as you lower the arm and leg'],
+       subs:'Bent-knee dead bug'},
+      {id:'facepull',ph:'primer',name:'Band face pull',vol:'2 × 15',rest:0,muscles:'Rear deltoid, external rotators',
+       cues:['Pull to forehead height — not chin height','Thumbs finishing behind ears at end range','Elbows stay high throughout'],
+       subs:'Band pull-apart, cable face pull'},
+      {id:'goblet',ph:'strength',name:'Goblet squat',vol:'4 × 10',rest:120,sets:4,reps:10,kg:12,muscles:'Quads, glutes, core',
+       cues:['Brace core before descent — treat it like a punch is coming','Knees track in line with toes — do not let them cave inward','Full depth if available — if not, go as deep as form allows'],
+       subs:'Box squat, leg press',prog:'Add 2.5 kg when 4×10 is clean. Progress to DB front squat when goblet hold limits load.'},
+      {id:'landmine',ph:'strength',name:'Landmine press',vol:'3 × 10 each',rest:90,sets:3,reps:10,kg:10,muscles:'Deltoid, triceps, serratus, core',
+       cues:['Half-kneeling position — brace the core hard before pressing','Press at 45° — not straight up, not straight forward','Do not lean back under load — stay tall'],
+       subs:'Seated DB overhead press, pike push-up',prog:'Add 2.5 kg when 3×10 is clean on each side'},
+      {id:'pulldown',ph:'accessory',name:'Lat pulldown / pull-up',vol:'3 × 10',rest:90,sets:3,reps:10,kg:30,muscles:'Lats, biceps, rear deltoid',
+       cues:['Pull to upper chest — not below the chin','Elbows travel down toward your hip pockets','Depress the shoulder blades before you pull — do not shrug'],
+       subs:'L1: Band-assisted | L2: Machine | L3: Negative | L4: Full pull-up',prog:'Advance pull-up level when 3×8 is clean. For pulldown: add 5 kg when 3×10 is easy.'},
+      {id:'pallof',ph:'accessory',name:'Pallof press',vol:'2 × 10 each',rest:45,sets:2,reps:10,kg:0,muscles:'Obliques, deep core',
+       cues:['Press straight out — resist the pull toward the cable','Hold 1 second extended — feel the obliques working','Feet shoulder-width, stance perpendicular to the cable'],
+       subs:'Half-kneeling Pallof press, landmine anti-rotation',prog:'Step further from the anchor or increase cable weight'},
+      {id:'doorway',ph:'cooldown',name:'Doorway chest stretch',vol:'2 × 30s each',rest:0,muscles:'Chest, anterior deltoid',
+       cues:['Forearm on frame, elbow at 90° — step gently forward','Feel the stretch across the chest — not in the shoulder joint','Hold — do not bounce'],
+       subs:'Foam roller thoracic extension'},
+      {id:'thoracic',ph:'cooldown',name:'Thoracic rotation',vol:'2 × 5 each',rest:0,muscles:'Thoracic spine, obliques',
+       cues:['Side-lying, knees stacked at 90°. Top arm sweeps across the floor','Follow the hand with your eyes — gaze drives the rotation','Keep knees together throughout'],
+       subs:'Thread the needle, seated thoracic rotation'}
+    ]},
+    {label:'Session C',focus:'Unilateral + Carry',mins:42,exercises:[
+      {id:'wgs',ph:'primer',name:"World's greatest stretch",vol:'2 × 3 each',rest:0,muscles:'Full body — hip flexors, thoracic, glutes',
+       cues:['Lunge position — drop into it slowly','Front hand on floor beside front foot. Rotate thoracic spine upward.','Hold 2 seconds at each end range'],
+       subs:'Hip flexor stretch + thoracic rotation (separate)'},
+      {id:'gbridge',ph:'primer',name:'Glute bridge',vol:'2 × 15',rest:0,muscles:'Glutes, hamstrings',
+       cues:['Drive through your heels — not your toes','Squeeze the glutes hard at the top. This is not just a hip lift.','Do not hyperextend the lower back at the top'],
+       subs:'Single-leg glute bridge'},
+      {id:'scappushup',ph:'primer',name:'Scapular push-up',vol:'2 × 10',rest:0,muscles:'Serratus anterior, scapular stabilisers',
+       cues:['Plank position — only the shoulder blades move. Arms stay straight.','Protract (spread) and retract (pinch) slowly and controlled','Very small movement — if a large movement is happening, something is wrong'],
+       subs:'Wall scapular push-up'},
+      {id:'splitsquat',ph:'strength',name:'DB split squat',vol:'4 × 8 each',rest:90,sets:4,reps:8,kg:8,muscles:'Quads, glutes, hip flexors',
+       cues:['Weight 70% on front foot — this is a quad exercise','Drop the back knee toward the floor — do not drive forward over the front toes','Torso tall throughout — do not lean forward under fatigue'],
+       subs:'Assisted split squat, step-up, reverse lunge',prog:'Add 2 kg per hand when 4×8 is clean on each side'},
+      {id:'sarow',ph:'strength',name:'Single-arm DB row',vol:'3 × 10 each',rest:60,sets:3,reps:10,kg:14,muscles:'Lats, rhomboids, biceps',
+       cues:['Neutral spine — do not rotate the torso to get the weight up','Pull the elbow to your hip — think elbow, not hand','Pause at the top. Control the descent.'],
+       subs:'Cable single-arm row, TRX row',prog:'Add 2 kg when 3×10 is clean without any torso rotation'},
+      {id:'pushupC',ph:'accessory',name:'Push-up (your level)',vol:'3 × 8',rest:60,sets:3,reps:8,kg:0,muscles:'Chest, triceps, serratus, core',
+       cues:['Rigid plank throughout — same as Session A','Lower slowly: 2 seconds down, explosive up','Step back one level if the plank position breaks'],
+       subs:'Same level system as Session A',prog:'Tracks the same level as Session A'},
+      {id:'carry',ph:'accessory',name:'Suitcase carry',vol:'3 × 20m each',rest:60,sets:3,reps:0,kg:16,muscles:'Obliques, grip, glutes',
+       cues:['Stand tall — do not lean away from the weight. This is the whole challenge.','Shoulders level — imagine someone watching from behind','Normal walking gait — do not shuffle or shorten the stride'],
+       subs:'Farmer carry (bilateral), KB front rack carry',prog:'Increase weight when 20m is completed without any lateral lean'},
+      {id:'pigeon',ph:'cooldown',name:'Pigeon pose',vol:'2 × 40s each',rest:0,muscles:'Glutes, hip rotators',
+       cues:['Front shin as close to parallel with the mat as available mobility allows','Hips square to the floor — do not tilt sideways','Breathe into the restriction — each exhale releases a little more'],
+       subs:'Figure-four stretch, hip 90/90'},
+      {id:'hamstring',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 × 30s each',rest:0,muscles:'Hamstrings, calf',
+       cues:['Hinge at the hip to reach forward — do not round your lower back','Flex the foot to include the calf in the stretch','Hold static — do not bounce'],
+       subs:'Standing hamstring stretch, supine with band'}
+    ]}
+  ]
+};
+
+const SKILLS=[
+  {id:'hinge',name:'Hip hinge',icon:'H',levels:[
+    {n:'Wall hip hinge',d:'Stand 30cm from wall. Push hips back until they touch. Spine neutral throughout.',t:'10 reps without any spinal flexion'},
+    {n:'Dowel rod hinge',d:'Three contact points: back of head, thoracic spine, sacrum. Hinge while keeping all three.',t:'10 reps maintaining all 3 contact points'},
+    {n:'Bodyweight RDL',d:'Own the pattern unloaded. Arms crossed on chest. Hip hinge only — no squatting.',t:'10 reps with perfect spine position'},
+    {n:'Dumbbell RDL',d:'Add light load. The pattern must remain identical to the bodyweight version.',t:'4×8 at working weight with clean form'},
+    {n:'Single-leg RDL',d:'Unilateral challenge. Hip stability and hinge combined. Start with bodyweight.',t:'2×8 each side without balance loss'}
+  ]},
+  {id:'push',name:'Push-up',icon:'P',levels:[
+    {n:'Wall push-up',d:'Upright angle. Build the movement pattern and scapular control with no load.',t:'3×12 with plank body position maintained'},
+    {n:'Incline push-up',d:'Bench or box. Increasing load challenge, same pattern demands.',t:'3×12 with chest touching the surface'},
+    {n:'Eccentric push-up',d:'From knees: lower in 5 seconds. Reset position at top. Only the lowering phase.',t:'3×8 controlled 5-second eccentrics'},
+    {n:'Knee push-up',d:'Full range from knees. Both concentric and eccentric phases.',t:'3×12 with full range and rigid body position'},
+    {n:'Full push-up',d:'Full plank on toes. Rigid from head to heels. Full range of motion.',t:'3×10 with perfect form for 2 consecutive sessions'},
+    {n:'Weighted push-up',d:'Plate on back or weighted vest. Progressive loading from here.',t:'Progressive load increase over time'}
+  ]},
+  {id:'pull',name:'Pull-up',icon:'U',levels:[
+    {n:'Dead hang',d:'Hang from the bar. Practise shoulder packing — retract and depress at the bottom.',t:'3×20 seconds without losing shoulder position'},
+    {n:'Scapular pull-up',d:'Retract and depress only — no elbow bend. Very small movement. Pure shoulder blade control.',t:'3×10 controlled'},
+    {n:'Band-assisted pull-up',d:'Light band. Full range of motion. Aim for control in both directions.',t:'3×8 with a controlled 3-second descent'},
+    {n:'Negative pull-up',d:'Jump to the top position. Lower yourself in exactly 5 seconds.',t:'3×6 with consistent 5-second eccentrics'},
+    {n:'Full pull-up',d:'Dead hang to chin over the bar. No kipping. Earn every rep.',t:'1 clean rep, then build to 3×5 over weeks'},
+    {n:'Weighted pull-up',d:'Belt or dumbbell between your feet. The long game.',t:'Progressive load over months'}
+  ]},
+  {id:'squat',name:'Squat',icon:'S',levels:[
+    {n:'Box squat',d:'Sit to box. Removes depth anxiety. Learn the sitting-back pattern without fear.',t:'3×12 with upright torso and controlled descent'},
+    {n:'Goblet squat',d:'Counter-balance teaches upright torso naturally. Use elbows to push knees out at bottom.',t:'4×10 with full available depth'},
+    {n:'DB front squat',d:'Dumbbells on shoulders. Increased core demand. Same pattern.',t:'4×8 with neutral spine and full depth'},
+    {n:'Barbell back squat',d:'Full loading potential. Requires solid thoracic mobility and hip flexibility.',t:'Progressive loading over months'}
+  ]}
+];
+
+const OBQ=[
+  {q:'What is your main goal?',sub:'We\'ll build your program around this.',key:'goal',opts:[
+    {v:'balanced',l:'Build strength and balance',i:'⚖'},
+    {v:'muscle',l:'Build muscle and size',i:'M'},
+    {v:'fat_loss',l:'Lose fat and get fitter',i:'F'},
+    {v:'athletic',l:'Support my sport',i:'A'},
+    {v:'general',l:'General health and fitness',i:'G'}
+  ]},
+  {q:'How often do you currently train?',sub:'Be honest — this helps us start at the right level.',key:'exp',opts:[
+    {v:'new',l:'Just getting started',i:'N'},
+    {v:'occ',l:'Occasionally — not consistent',i:'~'},
+    {v:'reg',l:'Regularly — 2+ times per week',i:'✓'}
+  ]},
+  {q:'How many days per week can you train?',sub:'Be realistic — consistency beats ambition.',key:'days',opts:[
+    {v:2,l:'2 days per week',i:'2'},
+    {v:3,l:'3 days per week',i:'3'},
+    {v:4,l:'4 days per week',i:'4'},
+    {v:5,l:'5 days per week',i:'5'}
+  ]},
+  {q:'Any injuries or pain affecting your training?',sub:'Your program will be adjusted accordingly.',key:'injury',opts:[
+    {v:'none',l:'None — I\'m good to go',i:'✓'},
+    {v:'back',l:'Lower back sensitivity',i:'B'},
+    {v:'knee',l:'Knee discomfort',i:'K'},
+    {v:'shoulder',l:'Shoulder issues',i:'S'}
+  ]},
+  {q:'Do you play a sport outside the gym?',sub:'We can tailor your program to support it.',key:'sport',opts:[
+    {v:'none',l:'No sport — gym only',i:'—'},
+    {v:'run',l:'Running or cycling',i:'R'},
+    {v:'soccer',l:'Football / soccer',i:'F'},
+    {v:'court',l:'Volleyball or basketball',i:'V'},
+    {v:'other',l:'Other sport',i:'★'}
+  ]}
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+
+let S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{}},wx:null,hist:[],skillsOpen:null};
+
+function ld(){try{const d=localStorage.getItem('train');if(d)Object.assign(S,JSON.parse(d));}catch(e){}}
+function sv(){try{localStorage.setItem('train',JSON.stringify(S));}catch(e){}}
+
+// ── ROUTER ───────────────────────────────────────────────────────────────────
+
+function go(tab){S.tab=tab;sv();draw();}
+
+function draw(){
+  const sc=document.getElementById('scr');
+  const tb=document.getElementById('tabbar');
+  if(S.view==='ob'){tb.style.display='none';sc.innerHTML=obView();return;}
+  if(S.wx&&S.wx.on){tb.style.display='none';sc.innerHTML=wxView();tickRest();return;}
+  tb.style.display='grid';
+  document.querySelectorAll('.ti').forEach(t=>t.classList.toggle('on',t.dataset.t===S.tab));
+  sc.innerHTML={home:homeView,today:todayView,skills:skillsView,progress:progressView}[S.tab]();
+}
+
+// ── ONBOARDING ───────────────────────────────────────────────────────────────
+
+function obView(){
+  const step=S.ob.step;
+  if(step>=OBQ.length){
+    return`<div class="pad screen">
+      <div style="margin-bottom:8px"><span class="label">Almost done</span></div>
+      <p class="h1" style="margin-bottom:8px">Your program is ready.</p>
+      <p class="muted" style="margin-bottom:28px">Based on your answers we've assigned Balanced Strength 3×/week — a full-body approach that builds strength, corrects imbalances, and teaches you to move well.</p>
+      <div class="card" style="margin-bottom:10px">
+        <span class="label">Your program</span>
+        <p class="h2" style="margin:6px 0 3px">Balanced Strength</p>
+        <p class="muted">3 sessions per week · Full body · ~45 min</p>
+      </div>
+      <div class="card" style="margin-bottom:28px">
+        <span class="label">Your profile</span>
+        ${Object.entries(S.ob.ans).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--border)"><span class="muted">${k}</span><span style="font-size:14px">${v}</span></div>`).join('')}
+      </div>
+      <button class="btn btn-p" onclick="obDone()">Start training →</button>
+    </div>`;
+  }
+  const q=OBQ[step];
+  const pct=(step/OBQ.length*100).toFixed(0);
+  return`<div class="pad screen">
+    <div class="pbar" style="margin-bottom:20px"><div class="pfill" style="width:${pct}%"></div></div>
+    <span class="label">Question ${step+1} of ${OBQ.length}</span>
+    <p style="font-size:20px;font-weight:500;color:var(--tx);margin:8px 0 6px;line-height:1.3">${q.q}</p>
+    <p class="muted" style="margin-bottom:22px">${q.sub}</p>
+    ${q.opts.map(o=>`<div class="ob-opt ${S.ob.ans[q.key]===o.v?'sel':''}" onclick="obSel('${q.key}',${JSON.stringify(o.v)})">
+      <div class="ob-icon">${o.i}</div>
+      <span style="font-size:15px">${o.l}</span>
+    </div>`).join('')}
+    ${S.ob.ans[q.key]!==undefined?`<button class="btn btn-p" style="margin-top:18px" onclick="obNext()">Continue →</button>`:''}
+    ${step>0?`<button class="btn btn-g" style="width:100%;padding:12px;margin-top:6px;font-size:14px" onclick="obBack()">← Back</button>`:''}
+  </div>`;
+}
+function obSel(k,v){S.ob.ans[k]=v;draw();}
+function obNext(){S.ob.step++;draw();}
+function obBack(){S.ob.step=Math.max(0,S.ob.step-1);draw();}
+function obDone(){S.view='app';S.tab='home';sv();draw();}
+
+// ── HOME ─────────────────────────────────────────────────────────────────────
+
+function homeView(){
+  const d=new Date();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const sess=T.days[S.day];
+  return`<div class="pad screen">
+    <span class="label">${days[d.getDay()]} · ${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}</span>
+    <p class="h1" style="margin:6px 0 24px">Good to see you.</p>
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;cursor:pointer" onclick="go('today')">
+      <div>
+        <span class="label" style="color:var(--acc)">Today's session</span>
+        <p style="font-size:16px;font-weight:500;margin:5px 0 4px">${T.name}</p>
+        <p class="muted">${sess.label} · ${sess.focus} · ~${sess.mins} min</p>
+      </div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </div>
+    <span class="label" style="display:block;margin-bottom:12px">From your coach</span>
+    ${INFO.map(n=>`<div class="card ${n.type==='notice'?'card-acc':'card-blue'}" style="margin-bottom:8px">
+      <span class="label" style="color:${n.type==='notice'?'var(--acc)':'var(--acc2)'}">${n.type==='notice'?'Coach notice':'Training tip'}</span>
+      <p style="font-size:14px;font-weight:500;margin:5px 0 4px;color:${n.type==='notice'?'#ddc89a':'#b8d4f0'}">${n.title}</p>
+      <p style="font-size:13px;line-height:1.5;color:${n.type==='notice'?'#8a6430':'#336699'}">${n.body}</p>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── TODAY ────────────────────────────────────────────────────────────────────
+
+function todayView(){
+  const sess=T.days[S.day];
+  const phases=[...new Set(sess.exercises.map(e=>e.ph))];
+  return`<div class="pad screen">
+    <span class="label">${T.name} · ${sess.label}</span>
+    <p class="h1" style="margin:6px 0 4px">${sess.focus}</p>
+    <p class="muted" style="margin-bottom:14px">${sess.exercises.length} exercises · ~${sess.mins} min</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">
+      ${phases.map(p=>`<span class="pill ${PH[p].cls}">${PH[p].label}</span>`).join('')}
+    </div>
+    ${sess.exercises.map((ex,i)=>{
+      const str=ex.ph==='strength';
+      return`<div class="ex-row ${str?'ex-str':''}" onclick="toggleEx(${i})">
+        <div class="dot" style="background:${PH[ex.ph].dot}"></div>
+        <div style="flex:1;min-width:0">
+          <span class="label" style="color:${str?'var(--acc)':'var(--muted)'}">${PH[ex.ph].label}</span>
+          <p style="font-size:14px;font-weight:${str?'500':'400'};color:${str?'var(--tx)':'#c0c0c0'};margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ex.name}</p>
+        </div>
+        <span style="font-size:12px;color:${str?'var(--acc)':'var(--muted)'};white-space:nowrap;margin-left:8px">${ex.vol}</span>
+      </div>
+      <div id="xd${i}" style="display:none;background:var(--bg2);border-radius:0 0 12px 12px;padding:12px 14px 14px;margin-top:-7px;margin-bottom:7px;border:.5px solid var(--border);border-top:none">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:8px"><strong style="color:var(--tx)">Muscles:</strong> ${ex.muscles}</p>
+        ${ex.cues.map(c=>`<div class="cue">${c}</div>`).join('')}
+        <p style="font-size:12px;color:var(--dim);margin-top:8px;font-style:italic">Substitutes: ${ex.subs}</p>
+        ${ex.prog?`<p style="font-size:12px;color:var(--acc);margin-top:6px">Progression: ${ex.prog}</p>`:''}
+      </div>`;
+    }).join('')}
+    <div style="margin-top:8px">
+      <button class="btn btn-p" onclick="wxStart()">Start session →</button>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        ${T.days.map((d,i)=>`<button onclick="switchDay(${i})" style="flex:1;padding:10px;border-radius:10px;border:1px solid ${i===S.day?'var(--acc)':'var(--border)'};background:${i===S.day?'#1e1000':'transparent'};color:${i===S.day?'var(--acc)':'var(--muted)'};font-size:12px;cursor:pointer">${d.label}</button>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+function toggleEx(i){const el=document.getElementById('xd'+i);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function switchDay(i){S.day=i;sv();draw();}
+
+// ── WORKOUT PLAYER ───────────────────────────────────────────────────────────
+
+function wxStart(){
+  const exs=T.days[S.day].exercises.filter(e=>e.sets);
+  const weights={};
+  exs.forEach(e=>{weights[e.id]=e.kg||0;});
+  S.wx={on:true,label:T.days[S.day].label,exs,idx:0,set:1,logs:[],rest:false,restLeft:0,restTotal:0,weights};
+  sv();draw();
+}
+
+let _tick=null;
+function tickRest(){
+  clearInterval(_tick);
+  if(!S.wx||!S.wx.rest)return;
+  _tick=setInterval(()=>{
+    if(!S.wx||!S.wx.rest){clearInterval(_tick);return;}
+    S.wx.restLeft=Math.max(0,S.wx.restLeft-1);
+    const te=document.getElementById('rt');
+    if(te)te.textContent=fmtT(S.wx.restLeft);
+    const re=document.getElementById('rr');
+    if(re){const pct=S.wx.restLeft/S.wx.restTotal;re.style.strokeDashoffset=440-(440*(1-pct));}
+    if(S.wx.restLeft<=0){S.wx.rest=false;sv();clearInterval(_tick);draw();}
+  },1000);
+}
+
+function fmtT(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+
+function wxView(){
+  const w=S.wx;
+  const ex=w.exs[w.idx];
+  if(!ex){
+    clearInterval(_tick);
+    return`<div class="pad screen" style="padding-top:80px;text-align:center">
+      <p style="font-size:52px;margin-bottom:16px">✓</p>
+      <p class="h1" style="margin-bottom:8px">Session complete!</p>
+      <p class="muted" style="margin-bottom:8px">${w.label} · ${w.logs.length} sets logged</p>
+      <p class="muted" style="margin-bottom:48px">Great work. Rest, recover, come back stronger.</p>
+      <button class="btn btn-p" onclick="wxEnd()">Back to home</button>
+    </div>`;
+  }
+  if(w.rest){
+    return`<div class="pad screen" style="padding-top:32px;text-align:center">
+      <span class="label">Resting</span>
+      <p style="font-size:16px;font-weight:500;margin:8px 0 32px">Next: ${ex.name} — set ${w.set} of ${ex.sets}</p>
+      <div style="position:relative;width:160px;height:160px;margin:0 auto 32px">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--bg3)" stroke-width="8"/>
+          <circle id="rr" cx="80" cy="80" r="70" fill="none" stroke="var(--acc)" stroke-width="8" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="0" transform="rotate(-90 80 80)" style="transition:stroke-dashoffset 1s linear"/>
+        </svg>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">
+          <p id="rt" style="font-size:32px;font-weight:500;color:var(--acc);font-variant-numeric:tabular-nums">${fmtT(w.restLeft)}</p>
+        </div>
+      </div>
+      <button class="btn btn-o" onclick="wxSkipRest()">Skip rest →</button>
+    </div>`;
+  }
+  const bw=!ex.kg&&ex.id!=='carry';
+  const cueIdx=Math.min(w.set-1,ex.cues.length-1);
+  return`<div>
+    <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--border)">
+      <button class="btn-g" style="font-size:14px;padding:4px" onclick="wxConfirmEnd()">✕ End</button>
+      <p style="font-size:12px;color:var(--muted)">${w.label} · ${w.idx+1}/${w.exs.length}</p>
+      <div style="width:48px"></div>
+    </div>
+    <div class="pad screen" style="padding-top:18px">
+      <span class="label" style="color:${PH[ex.ph].dot}">Set ${w.set} of ${ex.sets}</span>
+      <div style="display:flex;gap:5px;margin:7px 0 16px">
+        ${Array.from({length:ex.sets},(_,i)=>`<div class="setpip ${i<w.set?'done':''}"></div>`).join('')}
+      </div>
+      <p class="h1" style="margin-bottom:4px">${ex.name}</p>
+      <p class="muted" style="margin-bottom:22px">${ex.muscles}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+        <div class="card" style="text-align:center">
+          <span class="label">Target</span>
+          <p style="font-size:28px;font-weight:500;margin-top:6px">${ex.reps||'—'} <span style="font-size:13px;color:var(--muted)">${ex.reps?'reps':''}</span></p>
+        </div>
+        ${bw?`<div class="card" style="text-align:center"><span class="label">Type</span><p style="font-size:15px;font-weight:500;color:var(--acc);margin-top:8px">Bodyweight</p></div>`
+        :`<div class="card" style="text-align:center;background:#1c1000;border-color:#3a1e00">
+          <span class="label" style="color:var(--acc)">Weight (kg)</span>
+          <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px">
+            <button class="num-btn" onclick="adjW(-2.5)">−</button>
+            <span id="wd" style="font-size:24px;font-weight:500;color:var(--acc);min-width:52px;text-align:center">${w.weights[ex.id]}</span>
+            <button class="num-btn" onclick="adjW(2.5)">+</button>
+          </div>
+        </div>`}
+      </div>
+      <div class="card" style="margin-bottom:18px">
+        <span class="label">Form cue</span>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:6px;font-style:italic">"${ex.cues[cueIdx]}"</p>
+      </div>
+      <button class="btn btn-p" onclick="wxLog()">Log set &amp; rest →</button>
+      ${w.idx<w.exs.length-1?`<p style="text-align:center;margin-top:10px;font-size:12px;color:var(--dim)">Next: ${w.exs[w.idx+1].name}</p>`:''}
+    </div>
+  </div>`;
+}
+
+function adjW(d){
+  const ex=S.wx.exs[S.wx.idx];
+  S.wx.weights[ex.id]=Math.round((S.wx.weights[ex.id]+d)*10)/10;
+  const el=document.getElementById('wd');
+  if(el)el.textContent=S.wx.weights[ex.id];
+}
+
+function wxLog(){
+  const w=S.wx;const ex=w.exs[w.idx];
+  w.logs.push({name:ex.name,set:w.set,reps:ex.reps,kg:w.weights[ex.id],ts:Date.now()});
+  if(w.set<ex.sets){
+    w.set++;
+    if(ex.rest>0){w.rest=true;w.restLeft=ex.rest;w.restTotal=ex.rest;}
+  }else{
+    w.idx++;w.set=1;
+    if(w.idx<w.exs.length){
+      const nx=w.exs[w.idx];
+      if(nx.rest>0){w.rest=true;w.restLeft=nx.rest;w.restTotal=nx.rest;}
+    }
+  }
+  sv();draw();
+}
+
+function wxSkipRest(){S.wx.rest=false;sv();draw();}
+
+function wxConfirmEnd(){
+  if(confirm('End this session?'))wxEnd();
+}
+
+function wxEnd(){
+  if(S.wx&&S.wx.logs.length>0){
+    S.hist.push({date:new Date().toISOString(),label:S.wx.label,logs:S.wx.logs});
+    S.day=(S.day+1)%T.days.length;
+  }
+  clearInterval(_tick);S.wx=null;S.tab='home';sv();draw();
+}
+
+// ── SKILLS ───────────────────────────────────────────────────────────────────
+
+function skillsView(){
+  return`<div class="pad screen">
+    <span class="label">Movement skills</span>
+    <p class="h1" style="margin:6px 0 8px">Master the foundations</p>
+    <p class="muted" style="margin-bottom:24px">These patterns underpin every exercise in your program. Work through each level at your own pace.</p>
+    ${SKILLS.map(sk=>{
+      const lv=parseInt(localStorage.getItem('sk_'+sk.id)||'1');
+      const open=S.skillsOpen===sk.id;
+      return`<div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleSk('${sk.id}')">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:var(--acc)">${sk.icon}</div>
+            <div>
+              <p style="font-size:15px;font-weight:500">${sk.name}</p>
+              <p class="muted">Level ${lv} of ${sk.levels.length}</p>
+            </div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dim)" stroke-width="2" style="transform:rotate(${open?180:0}deg);transition:transform .2s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        ${open?`<div style="margin-top:14px">
+          <div class="pbar" style="margin-bottom:16px"><div class="pfill" style="width:${(lv/sk.levels.length*100).toFixed(0)}%"></div></div>
+          ${sk.levels.map((l,i)=>{
+            const done=i+1<lv,cur=i+1===lv;
+            return`<div style="padding:12px;border-radius:10px;background:${cur?'#1c1000':done?'var(--bg3)':'var(--bg3)'};border:1px solid ${cur?'var(--acc)':'transparent'};margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                <span style="font-size:13px;font-weight:500;color:${done?'var(--ok)':cur?'var(--acc)':'var(--dim)'}">Level ${i+1}: ${l.n}</span>
+                ${done?'<span style="font-size:11px;color:var(--ok)">✓</span>':cur?'<span style="font-size:11px;color:var(--acc)">current</span>':''}
+              </div>
+              <p style="font-size:13px;color:var(--muted);margin-bottom:5px">${l.d}</p>
+              <p style="font-size:12px;color:var(--dim);font-style:italic">Test: ${l.t}</p>
+            </div>`;
+          }).join('')}
+          ${lv<sk.levels.length?`<button class="btn btn-o" style="margin-top:6px" onclick="advSk('${sk.id}')">Mark level ${lv} complete →</button>`:`<p style="text-align:center;color:var(--ok);font-size:14px;padding:10px">Skill mastered ✓</p>`}
+        </div>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+function toggleSk(id){S.skillsOpen=S.skillsOpen===id?null:id;draw();}
+function advSk(id){
+  const sk=SKILLS.find(s=>s.id===id);
+  const cur=parseInt(localStorage.getItem('sk_'+id)||'1');
+  if(cur<sk.levels.length){localStorage.setItem('sk_'+id,cur+1);draw();}
+}
+
+// ── PROGRESS ─────────────────────────────────────────────────────────────────
+
+function progressView(){
+  const sessions=S.hist.length;
+  const lifts={};
+  S.hist.forEach(h=>h.logs.forEach(l=>{
+    if(!lifts[l.name])lifts[l.name]=[];
+    if(l.kg>0)lifts[l.name].push(l.kg);
+  }));
+  return`<div class="pad screen">
+    <span class="label">Your progress</span>
+    <p class="h1" style="margin:6px 0 22px">${T.name}</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px">
+      <div class="card" style="text-align:center">
+        <span class="label">Sessions</span>
+        <p style="font-size:32px;font-weight:500;margin:8px 0 4px">${sessions}</p>
+        <p style="font-size:12px;color:var(--acc)">total logged</p>
+      </div>
+      <div class="card" style="text-align:center">
+        <span class="label">Next up</span>
+        <p style="font-size:16px;font-weight:500;margin:8px 0 4px">${T.days[S.day].label}</p>
+        <p class="muted" style="font-size:12px">${T.days[S.day].focus}</p>
+      </div>
+    </div>
+    ${sessions===0?`<div class="card" style="text-align:center;padding:36px 20px">
+      <p style="font-size:32px;margin-bottom:12px">→</p>
+      <p class="h2" style="margin-bottom:8px">No sessions yet</p>
+      <p class="muted">Complete your first session to see your strength progress here.</p>
+    </div>`:
+    `<span class="label" style="display:block;margin-bottom:12px">Strength progress</span>
+    ${Object.entries(lifts).filter(([,v])=>v.length>0).slice(0,6).map(([name,vals])=>{
+      const first=vals[0],last=vals[vals.length-1],delta=last-first;
+      const pct=Math.min(100,(last/80)*100).toFixed(0);
+      return`<div class="card" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <p style="font-size:14px;font-weight:500">${name}</p>
+          ${delta!==0?`<span style="font-size:12px;color:var(--ok)">+${delta} kg</span>`:'<span style="font-size:12px;color:var(--muted)">tracking</span>'}
+        </div>
+        <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px">
+          <span style="font-size:11px;color:var(--muted)">${first} kg</span>
+          <span style="font-size:11px;color:var(--acc)">${last} kg</span>
+        </div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:16px">
+      <button class="btn-g" style="width:100%;padding:12px;font-size:13px;border:.5px solid var(--border);border-radius:12px" onclick="if(confirm('Reset all progress data?')){S.hist=[];sv();draw();}">Reset progress data</button>
+    </div>`}
+  </div>`;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+
+ld();draw();
+setInterval(()=>{
+  const n=new Date(),t=document.getElementById('clk');
+  if(t)t.textContent=n.getHours()+':'+String(n.getMinutes()).padStart(2,'0');
+},15000);
+</script>
+</body>
+</html>
