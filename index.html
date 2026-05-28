@@ -120,8 +120,8 @@ function fetchInfo(){
 var PH={
   primer:{label:'Preparation',cls:'pgr',dot:'var(--dim)'},
   strength:{label:'Strength',cls:'pac',dot:'var(--acc)'},
-  accessory:{label:'Support',cls:'pbl',dot:'var(--acc2)'},
-  cooldown:{label:'Recovery',cls:'pok',dot:'var(--ok)'}
+  accessory:{label:'Support',cls:'pbl',dot:'var(--dim)'},
+  cooldown:{label:'Recovery',cls:'pok',dot:'var(--dim)'}
 };
 
 var TPL={
@@ -373,9 +373,7 @@ function homeV(){
 // TODAY
 function todayV(){
   var sess=TPL.days[S.day];
-  var seen={};var pills='';
-  for(var i=0;i<sess.exercises.length;i++){var p=sess.exercises[i].ph;if(!seen[p]){seen[p]=1;pills+='<span class="pill '+PH[p].cls+'">'+PH[p].label+'</span>';}}
-  var rows='';
+    var rows='';
   for(var i=0;i<sess.exercises.length;i++){
     var ex=sess.exercises[i];
     var str=ex.ph==='strength';
@@ -386,7 +384,7 @@ function todayV(){
   }
   var daybts='';
   for(var i=0;i<TPL.days.length;i++){var on=i===S.day;daybts+='<button data-switchday="'+i+'" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'var(--str-bg)':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer;font-weight:'+(on?'500':'400')+'">'+TPL.days[i].label+'</button>';}
-  return '<div class="pad"><span class="lbl">'+TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">'+pills+'</div>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
+  return '<div class="pad"><span class="lbl">'+TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
 }
 
 // WORKOUT PLAYER
