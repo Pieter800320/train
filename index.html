@@ -62,8 +62,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
     <div class="ti" id="t-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Home</span></div>
     <div class="ti" id="t-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Today</span></div>
     <div class="ti" id="t-programs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Programs</span></div>
+    <div class="ti" id="t-build"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Build</span></div>
     <div class="ti" id="t-timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 15"/><path d="M9 2h6"/><path d="M12 2v3"/></svg><span>Timer</span></div>
-    <div class="ti" id="t-progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Progress</span></div>
   </nav>
 </div>
 <script>
@@ -502,6 +502,10 @@ function draw(){
   applyTheme();
   var tb=document.getElementById('tb');
   if(!sc)return;
+  if(S.view==='progress'){
+    tb.style.display='none';
+    sc.innerHTML='<div class="pad"><button class="btng" style="width:auto;padding:4px 0;font-size:13px;margin-bottom:16px;text-align:left" onclick="S.view=\'app\';sv();draw();">&#8592; Back</button>'+progV()+'</div>';return;
+  }
   if(S.view==='custom'){
     tb.style.display='none';
     sc.innerHTML=customV();return;
@@ -515,11 +519,11 @@ function draw(){
     tickR();
   } else {
     tb.style.display='grid';
-    ['home','today','programs','timer','progress'].forEach(function(t){
+    ['home','today','programs','build','timer'].forEach(function(t){
       var el=document.getElementById('t-'+t);
       if(el)el.className='ti'+(t===S.tab?' on':'');
     });
-    var views={home:homeV,today:todayV,programs:programsV,timer:timerV,progress:progV};
+    var views={home:homeV,today:todayV,programs:programsV,build:buildV,timer:timerV};
     sc.innerHTML=views[S.tab]?views[S.tab]():'';
   }
 }
@@ -846,10 +850,7 @@ document.addEventListener('click',function(e){
 function programsV(){
   var html='<div class="pad"><span class="lbl">Training programs</span>';
   html+='<p class="h1" style="margin:6px 0 8px">Your programmes</p>';
-  html+='<div style="background:var(--bg3);border-radius:12px;padding:12px 14px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px">';
-  html+='<p class="mu" style="font-size:13px;line-height:1.4">Not sure which fits you?</p>';
-  html+='<button class="btn btnp" style="width:auto;padding:9px 14px;font-size:12px;white-space:nowrap;flex-shrink:0" onclick="resetOnboarding()">Get recommendation</button>';
-  html+='</div>';
+  
   html+='<div class="card" style="margin-bottom:24px;background:var(--str-bg);border-color:var(--str-brd)">';
   html+='<span class="lbl" style="color:var(--acc)">Current program</span>';
   html+='<p style="font-size:18px;font-weight:500;color:var(--tx);margin:6px 0 4px">'+ACTIVE_TPL.name+'</p>';
@@ -910,13 +911,16 @@ function resetOnboarding(){
 // CUSTOM PROGRAM BUILDER
 // ═══════════════════════════════════════════════════════════════
 
+function buildV(){return customV();}
+function progressOverlay(){S.view='progress';sv();draw();}
+
 function customV(){
   var ce=S.customEdit;
   // ── Setup screen ───────────────────────────────────────────
   if(!ce.days||ce.days.length===0){
     var dayBtns='';
     for(var d=1;d<=7;d++)dayBtns+='<button data-custdays="'+d+'" style="flex:1;padding:12px 4px;border-radius:12px;border:1.5px solid '+(ce.numDays===d?'var(--acc)':'var(--brd)')+';background:'+(ce.numDays===d?'var(--str-bg)':'transparent')+';color:'+(ce.numDays===d?'var(--acc)':'var(--mu)')+';font-size:15px;font-weight:'+(ce.numDays===d?'600':'400')+';cursor:pointer">'+d+'</button>';
-    return '<div class="pad"><button class="btng" style="width:auto;padding:4px 0;font-size:13px;margin-bottom:16px;text-align:left" onclick="go(\'programs\')">&#8592; Programs</button>'
+    return '<div class="pad">'
       +'<span class="lbl">Custom program</span>'
       +'<p class="h1" style="margin:6px 0 6px">Build your program</p>'
       +'<p class="mu" style="margin-bottom:24px">It will load into Today just like any other program.</p>'
@@ -988,7 +992,7 @@ function customV(){
 
   var canSave=ce.days.length>0&&ce.days.every(function(d){return d.exercises.length>0;});
   return '<div class="pad">'
-    +'<button class="btng" style="width:auto;padding:4px 0;font-size:13px;margin-bottom:16px;text-align:left" onclick="go(\'programs\')">&#8592; Programs</button>'
+    +''
     +'<span class="lbl">Custom program</span>'
     +'<p class="h1" style="margin:6px 0 4px">'+ce.name+'</p>'
     +'<p class="mu" style="margin-bottom:20px">Add exercises to each day, then save.</p>'
@@ -1009,7 +1013,7 @@ function custStart(){
   }
   S.customEdit.days=days;
   S.customEdit.activeDay=null;
-  S.view='custom';sv();draw();
+  sv();draw();
 }
 function custDayLabel(i,v){S.customEdit.days[i].label=v;}
 function custDayFocus(i,v){S.customEdit.days[i].focus=v;}
@@ -1114,6 +1118,7 @@ function timerStart(){
   var T=S.timer;
   T.running=true;
   T.setup=false;
+  sv();draw();
   if(T.mode==='amrap'||T.mode==='fortime'){
     if(T.mode==='amrap'){T.remaining=T.totalSecs;T.elapsed=0;}
     else{T.elapsed=0;T.remaining=0;}
