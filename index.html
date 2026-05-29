@@ -548,7 +548,7 @@ function draw(){
       if(el)el.className='ti'+(t===S.tab?' on':'');
     });
     var views={home:homeV,today:todayV,programs:programsV,build:buildV,timer:timerV};
-    sc.innerHTML=views[S.tab]?views[S.tab]():'';
+    try{sc.innerHTML=views[S.tab]?views[S.tab]():'';}catch(err){sc.innerHTML='<div class="pad"><p class="h2" style="color:var(--warn)">Something went wrong</p><p class="mu" style="margin-top:8px">'+err.message+'</p><button class="btn btno" style="margin-top:16px" onclick="go(\'home\')">Back to Home</button></div>';}
   }
 }
 
@@ -678,6 +678,8 @@ function homeV(){
 // TODAY ----------------------------------------------------------------------
 
 function todayV(){
+  if(!ACTIVE_TPL||!ACTIVE_TPL.days){return '<div class="pad"><p class="mu">No program loaded. <button class="btn btno" style="margin-top:12px" onclick="go(\'programs\')">Choose a program</button></p></div>';}
+  if(S.day>=ACTIVE_TPL.days.length)S.day=0;
   var sess=ACTIVE_TPL.days[S.day];
   var rows='';
   for(var i=0;i<sess.exercises.length;i++){
@@ -855,7 +857,15 @@ document.addEventListener('click',function(e){
       return;
     }
     // Tab bar
-    if(t.dataset&&t.dataset.custdays){S.customEdit.numDays=parseInt(t.dataset.custdays);sv();draw();return;}
+    if(t.dataset&&t.dataset.custdays){var ne=document.getElementById('cpname');if(ne&&ne.value.trim())S.customEdit.name=ne.value.trim();S.customEdit.numDays=parseInt(t.dataset.custdays);sv();draw();return;}
+    if(t.dataset&&t.dataset.delex){var parts=t.dataset.delex.split('-');custDelEx(parseInt(parts[0]),parseInt(parts[1]));return;}
+    if(t.dataset&&t.dataset.delcp){
+      var cpkey=t.dataset.delcp,cpname=t.dataset.delname||'this program';
+      if(!confirm('Delete '+cpname+'?'))return;
+      for(var dci=0;dci<S.customPrograms.length;dci++)if(S.customPrograms[dci].key===cpkey){S.customPrograms.splice(dci,1);break;}
+      if(S.tplKey===cpkey){S.tplKey='balanced';ACTIVE_TPL=TPL;}
+      sv();draw();return;
+    }
     if(t.dataset&&t.dataset.tset){S.timer.totalSecs=parseInt(t.dataset.tset);sv();draw();return;}
     if(t.dataset&&t.dataset.timermode){S.timer.mode=t.dataset.timermode;S.timer.setup=true;S.timer.running=false;clearInterval(_timerInterval);sv();draw();return;}
     if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
@@ -890,15 +900,11 @@ function programsV(){
       html+='<div style="display:flex;align-items:center;gap:10px">';
       html+='<div style="width:38px;height:38px;border-radius:10px;background:var(--str-bg);border:.5px solid var(--str-brd);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--acc);flex-shrink:0">My</div>';
       html+='<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:500;color:var(--tx);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+cp.name+'</p>';
-      html+='<p class="mu" style="font-size:12px">'+cp.tpl.days.length+' day'+( cp.tpl.days.length>1?'s':'')+' · saved '+cp.date+'</p></div>';
+      html+='<p class="mu" style="font-size:12px">'+cp.tpl.days.length+' session'+(cp.tpl.days.length>1?'s':'')+' per week · saved '+cp.date+'</p></div>';
       if(!isCurCP)html+='<button class="btn btnp" style="width:auto;padding:9px 14px;font-size:12px;flex-shrink:0" data-switchprog="'+cp.key+'">Load</button>';
       else html+='<span style="font-size:11px;background:var(--acc);color:#fff;padding:3px 9px;border-radius:10px;font-weight:500;flex-shrink:0">Active</span>';
       html+='</div>';
-      html+='<button onclick="if(confirm(\'Delete '+cp.name+'?\')){'
-        +'S.customPrograms.splice('+ci+',1);'
-        +'if(S.tplKey===\''+cp.key+'\'){S.tplKey=\'balanced\';ACTIVE_TPL=TPL;}'
-        +'sv();draw();}" '
-        +'style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:6px 0;margin-top:4px">Delete program</button>';
+      html+='<button data-delcp="'+cp.key+'" data-delname="'+cp.name+'" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:6px 0;margin-top:4px">Delete program</button>';
       html+='</div>';
     }
     html+='<div style="height:16px"></div>';
@@ -969,62 +975,76 @@ function progressOverlay(){S.view='progress';sv();draw();}
 function customV(){
   if(!S.customEdit)S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
   var ce=S.customEdit;
-  // ── Setup screen ───────────────────────────────────────────
+
+  // ── Setup screen ────────────────────────────────────────────
   if(!ce.days||ce.days.length===0){
     var dayBtns='';
-    for(var d=1;d<=7;d++)dayBtns+='<button data-custdays="'+d+'" style="flex:1;padding:12px 4px;border-radius:12px;border:1.5px solid '+(ce.numDays===d?'var(--acc)':'var(--brd)')+';background:'+(ce.numDays===d?'var(--str-bg)':'transparent')+';color:'+(ce.numDays===d?'var(--acc)':'var(--mu)')+';font-size:15px;font-weight:'+(ce.numDays===d?'600':'400')+';cursor:pointer">'+d+'</button>';
+    for(var d=1;d<=7;d++){
+      var on=(ce.numDays===d);
+      dayBtns+='<button data-custdays="'+d+'" style="flex:1;padding:12px 4px;border-radius:12px;'
+        +'border:1.5px solid '+(on?'var(--acc)':'var(--brd)')+';'
+        +'background:'+(on?'var(--str-bg)':'transparent')+';'
+        +'color:'+(on?'var(--acc)':'var(--mu)')+';'
+        +'font-size:15px;font-weight:'+(on?'600':'400')+';cursor:pointer">'+d+'</button>';
+    }
     return '<div class="pad">'
-      +'<span class="lbl">Custom program</span>'
-      +'<p class="h1" style="margin:6px 0 6px">Build your program</p>'
-      +'<p class="mu" style="margin-bottom:24px">It will load into Today just like any other program.</p>'
-      +'<p class="lbl" style="display:block;margin-bottom:8px">Program name</p>'
-      +'<input id="cpname" type="text" value="'+ce.name+'" placeholder="My Program" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--brd);background:var(--bg2);color:var(--tx);font-size:15px;margin-bottom:24px">'
-      +'<p class="lbl" style="display:block;margin-bottom:8px">Number of training days</p>'
+      +'<span class="lbl">Build</span>'
+      +'<p class="h1" style="margin:6px 0 20px">Create your program</p>'
+      +'<p class="lbl" style="display:block;margin-bottom:6px">Program name</p>'
+      +'<input id="cpname" type="text" value="'+ce.name+'" placeholder="e.g. Push / Pull / Legs" '
+      +'style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--brd);background:var(--bg2);color:var(--tx);font-size:15px;margin-bottom:20px">'
+      +'<p class="lbl" style="display:block;margin-bottom:8px">Number of training days per week</p>'
       +'<div style="display:flex;gap:7px;margin-bottom:28px">'+dayBtns+'</div>'
-      +'<button class="btn btnp" onclick="custStart()">Set up days</button>'
+      +'<button class="btn btnp" onclick="custStart()">Set up days &rarr;</button>'
       +'</div>';
   }
 
-  // ── Day editing screen ─────────────────────────────────────
+  // ── Day editor ───────────────────────────────────────────────
   var rows='';
   for(var i=0;i<ce.days.length;i++){
     var day=ce.days[i];
     var exRows='';
     for(var j=0;j<day.exercises.length;j++){
       var ex=day.exercises[j];
-      var ph=PH[ex.ph]||PH.strength;
+      var ph2=PH[ex.ph]||PH.strength;
       exRows+='<div style="background:var(--bg3);border-radius:10px;padding:11px 13px;margin-bottom:6px;display:flex;align-items:center;gap:10px">'
-        +'<div class="dot" style="background:'+ph.dot+';flex-shrink:0"></div>'
-        +'<div style="flex:1;min-width:0"><span class="lbl" style="color:var(--mu)">'+ph.label+'</span>'
-        +'<p style="font-size:14px;font-weight:500;color:var(--tx);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p>'
-        +'<p class="mu" style="font-size:12px">'+ex.vol+(ex.kg?' · '+ex.kg+'kg':'')+(ex.rest?' · '+ex.rest+'s rest':'')+'</p></div>'
-        +'<button onclick="custDelEx('+i+','+j+')" style="background:transparent;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:4px 8px;flex-shrink:0">&#10005;</button>'
+        +'<div class="dot" style="background:'+ph2.dot+';flex-shrink:0"></div>'
+        +'<div style="flex:1;min-width:0">'
+        +'<p style="font-size:14px;font-weight:500;color:var(--tx);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p>'
+        +'<p class="mu" style="font-size:12px">'+ex.vol+(ex.kg?' \xb7 '+ex.kg+'kg':'')+(ex.rest?' \xb7 '+ex.rest+'s rest':'')+'</p>'
+        +'</div>'
+        +'<button data-delex="'+i+'-'+j+'" style="background:transparent;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:4px 8px;flex-shrink:0">&#10005;</button>'
         +'</div>';
     }
     var isActive=(ce.activeDay===i);
     var addForm='';
     if(isActive){
-      var nx=ce.newEx;
+      var nx=ce.newEx||{ph:'strength',sets:3,reps:'10',kg:0,rest:90,muscles:'',cues:['','',''],subs:'',prog:''};
       var phOpts=['primer','strength','accessory','cooldown'].map(function(p){
         return '<option value="'+p+'"'+(nx.ph===p?' selected':'')+'>'+PH[p].label+'</option>';
       }).join('');
+      var inp='style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"';
       addForm='<div style="background:var(--bg2);border:1.5px solid var(--acc);border-radius:14px;padding:16px;margin-top:10px">'
         +'<p class="lbl" style="margin-bottom:12px;color:var(--acc)">Add exercise</p>'
-        +'<input id="exname" type="text" placeholder="Exercise name *" value="'+(nx.name||'')+'" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
-        +'<select id="exph" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'+phOpts+'</select>'
+        +'<input id="exname" type="text" placeholder="Exercise name *" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+        +'<select id="exph" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'+phOpts+'</select>'
         +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
-        +'<div><p class="lbl" style="margin-bottom:4px">Sets</p><input id="exsets" type="number" min="1" max="10" value="'+(nx.sets||3)+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
-        +'<div><p class="lbl" style="margin-bottom:4px">Reps</p><input id="exreps" type="text" value="'+(nx.reps||'10')+'" placeholder="10 or 8-12" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
-        +'<div><p class="lbl" style="margin-bottom:4px">kg</p><input id="exkg" type="number" min="0" value="'+(nx.kg||0)+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'<div><p class="lbl" style="margin-bottom:4px">Sets</p><input id="exsets" type="number" min="1" max="10" value="'+(nx.sets||3)+'" '+inp+'></div>'
+        +'<div><p class="lbl" style="margin-bottom:4px">Reps</p><input id="exreps" type="text" value="'+(nx.reps||'10')+'" placeholder="10" '+inp+'></div>'
+        +'<div><p class="lbl" style="margin-bottom:4px">kg</p><input id="exkg" type="number" min="0" value="'+(nx.kg||0)+'" '+inp+'></div>'
         +'</div>'
-        +'<div style="margin-bottom:8px"><p class="lbl" style="margin-bottom:4px">Rest between sets (seconds)</p><input id="exrest" type="number" min="0" max="600" step="15" value="'+(nx.rest||90)+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
-        +'<div style="margin-bottom:8px"><p class="lbl" style="margin-bottom:4px">Muscles worked</p><input id="exmuscles" type="text" placeholder="e.g. Quads, glutes, core" value="'+(nx.muscles||'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
-        +'<p class="lbl" style="margin-bottom:4px">Form cues (optional, up to 3)</p>'
-        +'<input id="excue0" type="text" placeholder="Cue 1" value="'+(nx.cues&&nx.cues[0]?nx.cues[0]:'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:6px">'
-        +'<input id="excue1" type="text" placeholder="Cue 2" value="'+(nx.cues&&nx.cues[1]?nx.cues[1]:'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:6px">'
-        +'<input id="excue2" type="text" placeholder="Cue 3" value="'+(nx.cues&&nx.cues[2]?nx.cues[2]:'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
-        +'<div style="margin-bottom:8px"><p class="lbl" style="margin-bottom:4px">Substitutes</p><input id="exsubs" type="text" placeholder="e.g. Goblet squat, leg press" value="'+(nx.subs||'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
-        +'<div style="margin-bottom:14px"><p class="lbl" style="margin-bottom:4px">Progression note</p><input id="exprog" type="text" placeholder="e.g. Add 2.5kg when all sets are clean" value="'+(nx.prog||'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'<p class="lbl" style="margin-bottom:4px">Rest between sets (seconds)</p>'
+        +'<input id="exrest" type="number" min="0" max="600" step="15" value="'+(nx.rest||90)+'" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+        +'<p class="lbl" style="margin-bottom:4px">Muscles worked</p>'
+        +'<input id="exmuscles" type="text" placeholder="e.g. Quads, glutes" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+        +'<p class="lbl" style="margin-bottom:4px">Form cues (optional)</p>'
+        +'<input id="excue0" type="text" placeholder="Cue 1" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:6px">'
+        +'<input id="excue1" type="text" placeholder="Cue 2" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:6px">'
+        +'<input id="excue2" type="text" placeholder="Cue 3" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+        +'<p class="lbl" style="margin-bottom:4px">Substitutes</p>'
+        +'<input id="exsubs" type="text" placeholder="e.g. Goblet squat, leg press" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+        +'<p class="lbl" style="margin-bottom:4px">Progression note</p>'
+        +'<input id="exprog" type="text" placeholder="e.g. Add 2.5kg when all sets are clean" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:14px">'
         +'<div style="display:flex;gap:8px">'
         +'<button class="btn btnp" style="flex:1" onclick="custAddEx('+i+')">Add exercise</button>'
         +'<button class="btn btno" style="flex:1" onclick="custCancelEx()">Cancel</button>'
@@ -1032,10 +1052,12 @@ function customV(){
     }
     rows+='<div class="card" style="margin-bottom:14px">'
       +'<div style="margin-bottom:10px">'
-      +'<p class="lbl" style="margin-bottom:4px">Day '+(i+1)+' — name</p>'
-      +'<input id="dlabel'+i+'" type="text" value="'+day.label+'" placeholder="Session A" onchange="custDayLabel('+i+',this.value)" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+      +'<p class="lbl" style="margin-bottom:4px">Day '+(i+1)+' — label</p>'
+      +'<input id="dlabel'+i+'" type="text" value="'+day.label+'" placeholder="Session A" '
+      +'style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
       +'<p class="lbl" style="margin-bottom:4px">Focus / heading</p>'
-      +'<input id="dfocus'+i+'" type="text" value="'+day.focus+'" placeholder="e.g. Push — Chest, Shoulders, Triceps" onchange="custDayFocus('+i+',this.value)" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px">'
+      +'<input id="dfocus'+i+'" type="text" value="'+day.focus+'" placeholder="e.g. Push — Chest, Shoulders" '
+      +'style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px">'
       +'</div>'
       +exRows
       +(!isActive?'<button class="btn btno" style="padding:11px;font-size:13px;margin-top:8px" onclick="custOpenEx('+i+')">+ Add exercise</button>':'')
@@ -1045,38 +1067,54 @@ function customV(){
 
   var canSave=ce.days.length>0&&ce.days.every(function(d){return d.exercises.length>0;});
   return '<div class="pad">'
-    +''
-    +'<span class="lbl">Custom program</span>'
-    +'<p class="h1" style="margin:6px 0 4px">'+ce.name+'</p>'
-    +'<p class="mu" style="margin-bottom:20px">Add exercises to each day, then save.</p>'
+    +'<span class="lbl">Build</span>'
+    +'<p class="lbl" style="display:block;margin:8px 0 4px">Program name</p>'
+    +'<input id="cpname-edit" type="text" value="'+ce.name+'" placeholder="My Program" '
+    +'style="width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--brd);background:var(--bg2);color:var(--tx);font-size:15px;font-weight:500;margin-bottom:18px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
+    +'<span class="lbl">Days</span>'
+    +'<button onclick="S.customEdit.days=[];sv();draw();" style="font-size:12px;color:var(--mu);background:transparent;border:none;cursor:pointer;padding:4px 8px">\u21a9 Start over</button>'
+    +'</div>'
     +rows
     +(canSave?'<button class="btn btnp" onclick="custSave()" style="margin-top:8px">Save and start this program</button>':'<p class="mu" style="text-align:center;margin-top:8px;font-size:13px">Add at least one exercise to each day to save.</p>')
     +'</div>';
 }
 
 // ── Custom builder helpers ─────────────────────────────────────
+
 function custStart(){
   var nameEl=document.getElementById('cpname');
   var nm=nameEl?nameEl.value.trim():'My Program';
   S.customEdit.name=nm||'My Program';
   var days=[];
+  var labels=['Session A','Session B','Session C','Session D','Session E','Session F','Session G'];
   for(var i=0;i<S.customEdit.numDays;i++){
-    var labels=['Session A','Session B','Session C','Session D','Session E','Session F','Session G'];
     days.push({label:labels[i]||('Day '+(i+1)),focus:'',exercises:[]});
   }
   S.customEdit.days=days;
   S.customEdit.activeDay=null;
   sv();draw();
 }
+
 function custDayLabel(i,v){S.customEdit.days[i].label=v;}
 function custDayFocus(i,v){S.customEdit.days[i].focus=v;}
+
 function custOpenEx(i){
+  // Capture current day label/focus from DOM before redraw
+  var lEl=document.getElementById('dlabel'+i);
+  var fEl=document.getElementById('dfocus'+i);
+  if(lEl&&lEl.value)S.customEdit.days[i].label=lEl.value;
+  if(fEl&&fEl.value)S.customEdit.days[i].focus=fEl.value;
   S.customEdit.activeDay=i;
-  S.customEdit.newEx={name:'',ph:'strength',sets:3,reps:'10',kg:0,rest:90,muscles:'',cues:['','',''],subs:'',prog:''};
+  S.customEdit.newEx={ph:'strength',sets:3,reps:'10',kg:0,rest:90};
   sv();draw();
 }
 function custCancelEx(){S.customEdit.activeDay=null;sv();draw();}
-function custDelEx(d,e){S.customEdit.days[d].exercises.splice(e,1);sv();draw();}
+
+function custDelEx(d,e){
+  S.customEdit.days[d].exercises.splice(e,1);sv();draw();
+}
+
 function custAddEx(dayIdx){
   var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
   var name=g('exname').trim();
@@ -1087,9 +1125,9 @@ function custAddEx(dayIdx){
   var kg=parseFloat(g('exkg'))||0;
   var rest=parseInt(g('exrest'))||0;
   var cues=[g('excue0').trim(),g('excue1').trim(),g('excue2').trim()].filter(function(c){return c.length>0;});
-  if(cues.length===0)cues=['Focus on form and controlled movement'];
+  if(cues.length===0)cues=['Focus on form and controlled movement throughout'];
   var ex={
-    id:'custom_'+dayIdx+'_'+Date.now(),
+    id:'cx_'+dayIdx+'_'+Date.now(),
     ph:g('exph')||'strength',
     name:name,
     vol:sets+' x '+reps,
@@ -1097,63 +1135,63 @@ function custAddEx(dayIdx){
     sets:sets,
     reps:repsNum,
     kg:kg,
-    muscles:g('exmuscles').trim()||'—',
+    muscles:g('exmuscles').trim()||'',
     cues:cues,
     subs:g('exsubs').trim()||'—',
     prog:g('exprog').trim()||''
   };
-  // Update day labels from inputs in case onchange didn't fire
+  // Capture label/focus from DOM
   var lEl=document.getElementById('dlabel'+dayIdx);
   var fEl=document.getElementById('dfocus'+dayIdx);
-  if(lEl)S.customEdit.days[dayIdx].label=lEl.value||S.customEdit.days[dayIdx].label;
-  if(fEl)S.customEdit.days[dayIdx].focus=fEl.value||S.customEdit.days[dayIdx].focus;
+  if(lEl&&lEl.value)S.customEdit.days[dayIdx].label=lEl.value;
+  if(fEl&&fEl.value)S.customEdit.days[dayIdx].focus=fEl.value;
   S.customEdit.days[dayIdx].exercises.push(ex);
   S.customEdit.activeDay=null;
   S.customEdit.newEx=null;
   sv();draw();
 }
+
 function custSave(){
   var ce=S.customEdit;
-  // Capture any unsaved day label/focus edits from DOM
+  // Capture name from whichever input is visible
+  var nameEl=document.getElementById('cpname-edit')||document.getElementById('cpname');
+  if(nameEl&&nameEl.value.trim())ce.name=nameEl.value.trim();
+  // Capture day labels and focuses from DOM
   for(var i=0;i<ce.days.length;i++){
     var lEl=document.getElementById('dlabel'+i);
     var fEl=document.getElementById('dfocus'+i);
-    if(lEl&&lEl.value)ce.days[i].label=lEl.value;
-    if(fEl&&fEl.value)ce.days[i].focus=fEl.value;
+    if(lEl&&lEl.value.trim())ce.days[i].label=lEl.value.trim();
+    if(fEl&&fEl.value.trim())ce.days[i].focus=fEl.value.trim();
   }
   var tpl={
-    name:ce.name,
+    name:ce.name||'My Program',
     days:ce.days.map(function(d,i){
       return {
         label:d.label||('Session '+(i+1)),
-        focus:d.focus||'Custom session',
+        focus:d.focus||'',
         mins:Math.round(d.exercises.length*5+10),
         exercises:d.exercises
       };
     })
   };
-  // Save to customPrograms array (update existing or add new)
   var key=ce.editKey||('custom_'+Date.now());
   var existing=-1;
   for(var ci=0;ci<S.customPrograms.length;ci++)if(S.customPrograms[ci].key===key)existing=ci;
-  var entry={key:key,name:tpl.name,tpl:tpl,date:new Date().toLocaleDateString()};
+  var now=new Date();
+  var dateStr=now.getDate()+'/'+(now.getMonth()+1)+'/'+now.getFullYear();
+  var entry={key:key,name:tpl.name,tpl:tpl,date:dateStr};
   if(existing>=0)S.customPrograms[existing]=entry;
   else S.customPrograms.push(entry);
   S.customTPL=tpl;
   S.tplKey=key;
   ACTIVE_TPL=tpl;
   S.day=0;
-  S.view='app';
-  S.tab='today';
+  // Reset builder for next use
+  S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
+  S.view='app';S.tab='today';
   sv();draw();
 }
 
-
-// ═══════════════════════════════════════════════════════════════
-// TIMER VIEW
-// ═══════════════════════════════════════════════════════════════
-
-var _timerInterval=null;
 
 function beep(freq,dur,vol){
   try{
