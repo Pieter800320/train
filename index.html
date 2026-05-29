@@ -31,7 +31,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 .pac{background:#2a1400;color:var(--acc)}
 .pbl{background:#001422;color:var(--acc2)}
 .pok{background:#0a1e0a;color:var(--ok)}
-#tb{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#161616;border-top:.5px solid var(--brd);display:grid;grid-template-columns:repeat(4,1fr);padding:10px 0 24px;z-index:100}
+#tb{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#161616;border-top:.5px solid var(--brd);display:grid;grid-template-columns:repeat(5,1fr);padding:10px 0 24px;z-index:100}
 .ti{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--dim);padding:4px}
 .ti.on{color:var(--acc)}
 .ti svg{width:22px;height:22px}
@@ -62,6 +62,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
     <div class="ti" id="t-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Home</span></div>
     <div class="ti" id="t-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Today</span></div>
     <div class="ti" id="t-programs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Programs</span></div>
+    <div class="ti" id="t-timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 15"/><path d="M9 2h6"/><path d="M12 2v3"/></svg><span>Timer</span></div>
     <div class="ti" id="t-progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Progress</span></div>
   </nav>
 </div>
@@ -476,7 +477,11 @@ var OBQ=[
 // STATE ----------------------------------------------------------------------
 
 var ACTIVE_TPL=TPL;
-var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],skOpen:null,theme:'dark',tplKey:'balanced'};
+var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],skOpen:null,theme:'dark',tplKey:'balanced',
+  customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},
+  customTPL:null,
+  timer:{mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true}
+};
 
 function applyTheme(){
   document.documentElement.classList.toggle('light',S.theme==='light');
@@ -497,6 +502,10 @@ function draw(){
   applyTheme();
   var tb=document.getElementById('tb');
   if(!sc)return;
+  if(S.view==='custom'){
+    tb.style.display='none';
+    sc.innerHTML=customV();return;
+  }
   if(S.view==='ob'){
     tb.style.display='none';
     sc.innerHTML=obV();
@@ -506,11 +515,11 @@ function draw(){
     tickR();
   } else {
     tb.style.display='grid';
-    ['home','today','programs','progress'].forEach(function(t){
+    ['home','today','programs','timer','progress'].forEach(function(t){
       var el=document.getElementById('t-'+t);
       if(el)el.className='ti'+(t===S.tab?' on':'');
     });
-    var views={home:homeV,today:todayV,programs:programsV,progress:progV};
+    var views={home:homeV,today:todayV,programs:programsV,timer:timerV,progress:progV};
     sc.innerHTML=views[S.tab]?views[S.tab]():'';
   }
 }
@@ -820,6 +829,9 @@ document.addEventListener('click',function(e){
       return;
     }
     // Tab bar
+    if(t.dataset&&t.dataset.custdays){S.customEdit.numDays=parseInt(t.dataset.custdays);sv();draw();return;}
+    if(t.dataset&&t.dataset.tset){S.timer.totalSecs=parseInt(t.dataset.tset);sv();draw();return;}
+    if(t.dataset&&t.dataset.timermode){S.timer.mode=t.dataset.timermode;S.timer.setup=true;S.timer.running=false;clearInterval(_timerInterval);sv();draw();return;}
     if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
     if(t.dataset&&t.dataset.selectprog){obSelectProgram(t.dataset.selectprog);return;}
     if(t.dataset&&t.dataset.action==='goprograms'){S.view='app';S.tab='programs';sv();draw();return;}
@@ -844,6 +856,7 @@ function programsV(){
   var curE=null;for(var ci=0;ci<CATALOGUE.length;ci++)if(CATALOGUE[ci].key===S.tplKey)curE=CATALOGUE[ci];
   if(curE){html+='<p class="mu">'+curE.sessions+' · '+curE.mins+'</p><p style="font-size:13px;color:var(--mu);margin-top:6px">'+curE.who+'</p>';}
   html+='<button class="btn btno" style="padding:11px;font-size:13px;margin-top:12px" onclick="resetOnboarding()">Retake questionnaire</button>';
+  html+='<button class="btn btnp" style="padding:11px;font-size:13px;margin-top:8px" onclick="S.view=\'custom\';S.customEdit={name:\'My Program\',numDays:3,days:[],activeDay:null,newEx:null};sv();draw();">&#43; Create your own program</button>';
   html+='</div>';
   html+='<span class="lbl" style="display:block;margin-bottom:14px">All programs</span>';
   for(var i=0;i<CATALOGUE.length;i++){
@@ -868,6 +881,7 @@ function switchProgram(key){
   if(!entry||!entry.available)return;
   var m={
     balanced:typeof TPL!=='undefined'?TPL:null,
+    custom:S.customTPL||null,
     hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:null,
     strength:typeof TPL_STRENGTH!=='undefined'?TPL_STRENGTH:null,
     athletic:typeof TPL_ATHLETIC!=='undefined'?TPL_ATHLETIC:null,
@@ -891,6 +905,406 @@ function switchProgram(key){
 function resetOnboarding(){
   S.ob={step:0,ans:{},recs:[]};S.view='ob';sv();draw();
 }
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOM PROGRAM BUILDER
+// ═══════════════════════════════════════════════════════════════
+
+function customV(){
+  var ce=S.customEdit;
+  // ── Setup screen ───────────────────────────────────────────
+  if(!ce.days||ce.days.length===0){
+    var dayBtns='';
+    for(var d=1;d<=7;d++)dayBtns+='<button data-custdays="'+d+'" style="flex:1;padding:12px 4px;border-radius:12px;border:1.5px solid '+(ce.numDays===d?'var(--acc)':'var(--brd)')+';background:'+(ce.numDays===d?'var(--str-bg)':'transparent')+';color:'+(ce.numDays===d?'var(--acc)':'var(--mu)')+';font-size:15px;font-weight:'+(ce.numDays===d?'600':'400')+';cursor:pointer">'+d+'</button>';
+    return '<div class="pad"><button class="btng" style="width:auto;padding:4px 0;font-size:13px;margin-bottom:16px;text-align:left" onclick="go(\'programs\')">&#8592; Programs</button>'
+      +'<span class="lbl">Custom program</span>'
+      +'<p class="h1" style="margin:6px 0 6px">Build your program</p>'
+      +'<p class="mu" style="margin-bottom:24px">It will load into Today just like any other program.</p>'
+      +'<p class="lbl" style="display:block;margin-bottom:8px">Program name</p>'
+      +'<input id="cpname" type="text" value="'+ce.name+'" placeholder="My Program" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--brd);background:var(--bg2);color:var(--tx);font-size:15px;margin-bottom:24px">'
+      +'<p class="lbl" style="display:block;margin-bottom:8px">Number of training days</p>'
+      +'<div style="display:flex;gap:7px;margin-bottom:28px">'+dayBtns+'</div>'
+      +'<button class="btn btnp" onclick="custStart()">Set up days</button>'
+      +'</div>';
+  }
+
+  // ── Day editing screen ─────────────────────────────────────
+  var rows='';
+  for(var i=0;i<ce.days.length;i++){
+    var day=ce.days[i];
+    var exRows='';
+    for(var j=0;j<day.exercises.length;j++){
+      var ex=day.exercises[j];
+      var ph=PH[ex.ph]||PH.strength;
+      exRows+='<div style="background:var(--bg3);border-radius:10px;padding:11px 13px;margin-bottom:6px;display:flex;align-items:center;gap:10px">'
+        +'<div class="dot" style="background:'+ph.dot+';flex-shrink:0"></div>'
+        +'<div style="flex:1;min-width:0"><span class="lbl" style="color:var(--mu)">'+ph.label+'</span>'
+        +'<p style="font-size:14px;font-weight:500;color:var(--tx);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p>'
+        +'<p class="mu" style="font-size:12px">'+ex.vol+(ex.kg?' · '+ex.kg+'kg':'')+(ex.rest?' · '+ex.rest+'s rest':'')+'</p></div>'
+        +'<button onclick="custDelEx('+i+','+j+')" style="background:transparent;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:4px 8px;flex-shrink:0">&#10005;</button>'
+        +'</div>';
+    }
+    var isActive=(ce.activeDay===i);
+    var addForm='';
+    if(isActive){
+      var nx=ce.newEx;
+      var phOpts=['primer','strength','accessory','cooldown'].map(function(p){
+        return '<option value="'+p+'"'+(nx.ph===p?' selected':'')+'>'+PH[p].label+'</option>';
+      }).join('');
+      addForm='<div style="background:var(--bg2);border:1.5px solid var(--acc);border-radius:14px;padding:16px;margin-top:10px">'
+        +'<p class="lbl" style="margin-bottom:12px;color:var(--acc)">Add exercise</p>'
+        +'<input id="exname" type="text" placeholder="Exercise name *" value="'+(nx.name||'')+'" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+        +'<select id="exph" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'+phOpts+'</select>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
+        +'<div><p class="lbl" style="margin-bottom:4px">Sets</p><input id="exsets" type="number" min="1" max="10" value="'+(nx.sets||3)+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'<div><p class="lbl" style="margin-bottom:4px">Reps</p><input id="exreps" type="text" value="'+(nx.reps||'10')+'" placeholder="10 or 8-12" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'<div><p class="lbl" style="margin-bottom:4px">kg</p><input id="exkg" type="number" min="0" value="'+(nx.kg||0)+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'</div>'
+        +'<div style="margin-bottom:8px"><p class="lbl" style="margin-bottom:4px">Rest between sets (seconds)</p><input id="exrest" type="number" min="0" max="600" step="15" value="'+(nx.rest||90)+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'<div style="margin-bottom:8px"><p class="lbl" style="margin-bottom:4px">Muscles worked</p><input id="exmuscles" type="text" placeholder="e.g. Quads, glutes, core" value="'+(nx.muscles||'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'<p class="lbl" style="margin-bottom:4px">Form cues (optional, up to 3)</p>'
+        +'<input id="excue0" type="text" placeholder="Cue 1" value="'+(nx.cues&&nx.cues[0]?nx.cues[0]:'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:6px">'
+        +'<input id="excue1" type="text" placeholder="Cue 2" value="'+(nx.cues&&nx.cues[1]?nx.cues[1]:'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:6px">'
+        +'<input id="excue2" type="text" placeholder="Cue 3" value="'+(nx.cues&&nx.cues[2]?nx.cues[2]:'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+        +'<div style="margin-bottom:8px"><p class="lbl" style="margin-bottom:4px">Substitutes</p><input id="exsubs" type="text" placeholder="e.g. Goblet squat, leg press" value="'+(nx.subs||'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'<div style="margin-bottom:14px"><p class="lbl" style="margin-bottom:4px">Progression note</p><input id="exprog" type="text" placeholder="e.g. Add 2.5kg when all sets are clean" value="'+(nx.prog||'')+'" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"></div>'
+        +'<div style="display:flex;gap:8px">'
+        +'<button class="btn btnp" style="flex:1" onclick="custAddEx('+i+')">Add exercise</button>'
+        +'<button class="btn btno" style="flex:1" onclick="custCancelEx()">Cancel</button>'
+        +'</div></div>';
+    }
+    rows+='<div class="card" style="margin-bottom:14px">'
+      +'<div style="margin-bottom:10px">'
+      +'<p class="lbl" style="margin-bottom:4px">Day '+(i+1)+' — name</p>'
+      +'<input id="dlabel'+i+'" type="text" value="'+day.label+'" placeholder="Session A" onchange="custDayLabel('+i+',this.value)" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
+      +'<p class="lbl" style="margin-bottom:4px">Focus / heading</p>'
+      +'<input id="dfocus'+i+'" type="text" value="'+day.focus+'" placeholder="e.g. Push — Chest, Shoulders, Triceps" onchange="custDayFocus('+i+',this.value)" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px">'
+      +'</div>'
+      +exRows
+      +(!isActive?'<button class="btn btno" style="padding:11px;font-size:13px;margin-top:8px" onclick="custOpenEx('+i+')">+ Add exercise</button>':'')
+      +addForm
+      +'</div>';
+  }
+
+  var canSave=ce.days.length>0&&ce.days.every(function(d){return d.exercises.length>0;});
+  return '<div class="pad">'
+    +'<button class="btng" style="width:auto;padding:4px 0;font-size:13px;margin-bottom:16px;text-align:left" onclick="go(\'programs\')">&#8592; Programs</button>'
+    +'<span class="lbl">Custom program</span>'
+    +'<p class="h1" style="margin:6px 0 4px">'+ce.name+'</p>'
+    +'<p class="mu" style="margin-bottom:20px">Add exercises to each day, then save.</p>'
+    +rows
+    +(canSave?'<button class="btn btnp" onclick="custSave()" style="margin-top:8px">Save and start this program</button>':'<p class="mu" style="text-align:center;margin-top:8px;font-size:13px">Add at least one exercise to each day to save.</p>')
+    +'</div>';
+}
+
+// ── Custom builder helpers ─────────────────────────────────────
+function custStart(){
+  var nameEl=document.getElementById('cpname');
+  var nm=nameEl?nameEl.value.trim():'My Program';
+  S.customEdit.name=nm||'My Program';
+  var days=[];
+  for(var i=0;i<S.customEdit.numDays;i++){
+    var labels=['Session A','Session B','Session C','Session D','Session E','Session F','Session G'];
+    days.push({label:labels[i]||('Day '+(i+1)),focus:'',exercises:[]});
+  }
+  S.customEdit.days=days;
+  S.customEdit.activeDay=null;
+  S.view='custom';sv();draw();
+}
+function custDayLabel(i,v){S.customEdit.days[i].label=v;}
+function custDayFocus(i,v){S.customEdit.days[i].focus=v;}
+function custOpenEx(i){
+  S.customEdit.activeDay=i;
+  S.customEdit.newEx={name:'',ph:'strength',sets:3,reps:'10',kg:0,rest:90,muscles:'',cues:['','',''],subs:'',prog:''};
+  sv();draw();
+}
+function custCancelEx(){S.customEdit.activeDay=null;sv();draw();}
+function custDelEx(d,e){S.customEdit.days[d].exercises.splice(e,1);sv();draw();}
+function custAddEx(dayIdx){
+  var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+  var name=g('exname').trim();
+  if(!name){alert('Exercise name is required.');return;}
+  var sets=parseInt(g('exsets'))||3;
+  var reps=g('exreps')||'10';
+  var repsNum=parseInt(reps)||10;
+  var kg=parseFloat(g('exkg'))||0;
+  var rest=parseInt(g('exrest'))||0;
+  var cues=[g('excue0').trim(),g('excue1').trim(),g('excue2').trim()].filter(function(c){return c.length>0;});
+  if(cues.length===0)cues=['Focus on form and controlled movement'];
+  var ex={
+    id:'custom_'+dayIdx+'_'+Date.now(),
+    ph:g('exph')||'strength',
+    name:name,
+    vol:sets+' x '+reps,
+    rest:rest,
+    sets:sets,
+    reps:repsNum,
+    kg:kg,
+    muscles:g('exmuscles').trim()||'—',
+    cues:cues,
+    subs:g('exsubs').trim()||'—',
+    prog:g('exprog').trim()||''
+  };
+  // Update day labels from inputs in case onchange didn't fire
+  var lEl=document.getElementById('dlabel'+dayIdx);
+  var fEl=document.getElementById('dfocus'+dayIdx);
+  if(lEl)S.customEdit.days[dayIdx].label=lEl.value||S.customEdit.days[dayIdx].label;
+  if(fEl)S.customEdit.days[dayIdx].focus=fEl.value||S.customEdit.days[dayIdx].focus;
+  S.customEdit.days[dayIdx].exercises.push(ex);
+  S.customEdit.activeDay=null;
+  S.customEdit.newEx=null;
+  sv();draw();
+}
+function custSave(){
+  var ce=S.customEdit;
+  // Capture any unsaved day label/focus edits from DOM
+  for(var i=0;i<ce.days.length;i++){
+    var lEl=document.getElementById('dlabel'+i);
+    var fEl=document.getElementById('dfocus'+i);
+    if(lEl&&lEl.value)ce.days[i].label=lEl.value;
+    if(fEl&&fEl.value)ce.days[i].focus=fEl.value;
+  }
+  var tpl={
+    name:ce.name,
+    days:ce.days.map(function(d,i){
+      return {
+        label:d.label||('Session '+(i+1)),
+        focus:d.focus||'Custom session',
+        mins:Math.round(d.exercises.length*5+10),
+        exercises:d.exercises
+      };
+    })
+  };
+  S.customTPL=tpl;
+  S.tplKey='custom';
+  ACTIVE_TPL=tpl;
+  S.day=0;
+  S.view='app';
+  S.tab='today';
+  sv();draw();
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// TIMER VIEW
+// ═══════════════════════════════════════════════════════════════
+
+var _timerInterval=null;
+
+function beep(freq,dur,vol){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.frequency.value=freq||880;
+    gain.gain.value=vol||0.3;
+    osc.start();
+    setTimeout(function(){try{osc.stop();ctx.close();}catch(e){}},dur||150);
+  }catch(e){}
+}
+
+function fmtTimer(s){
+  var m=Math.floor(s/60);
+  var sec=s%60;
+  return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
+}
+
+function timerStart(){
+  var T=S.timer;
+  T.running=true;
+  T.setup=false;
+  if(T.mode==='amrap'||T.mode==='fortime'){
+    if(T.mode==='amrap'){T.remaining=T.totalSecs;T.elapsed=0;}
+    else{T.elapsed=0;T.remaining=0;}
+  } else if(T.mode==='emom'){
+    T.emomRound=1;T.remaining=60;T.elapsed=0;
+  } else if(T.mode==='tabata'){
+    T.tabCurrent=1;T.tabPhase='work';T.remaining=T.tabWork;T.elapsed=0;
+  }
+  sv();
+  clearInterval(_timerInterval);
+  _timerInterval=setInterval(function(){
+    if(!S.timer.running){clearInterval(_timerInterval);return;}
+    var T=S.timer;
+    T.elapsed++;
+    if(T.mode==='amrap'){
+      T.remaining=Math.max(0,T.totalSecs-T.elapsed);
+      if(T.remaining<=3&&T.remaining>0)beep(440,100);
+      if(T.remaining===0){T.running=false;beep(880,600);clearInterval(_timerInterval);}
+    } else if(T.mode==='fortime'){
+      T.remaining=T.elapsed;
+    } else if(T.mode==='emom'){
+      T.remaining=60-(T.elapsed%60);
+      if(T.remaining===60){
+        T.emomRound++;
+        beep(660,200);
+        setTimeout(function(){beep(660,200);},250);
+        if(T.emomRound>T.emomMins){T.running=false;beep(880,600);clearInterval(_timerInterval);}
+      }
+    } else if(T.mode==='tabata'){
+      T.remaining--;
+      if(T.remaining===3&&T.tabPhase==='work')beep(440,100);
+      if(T.remaining===0){
+        if(T.tabPhase==='work'){
+          T.tabPhase='rest';T.remaining=T.tabRest;
+          beep(550,300);
+        } else {
+          T.tabCurrent++;
+          if(T.tabCurrent>T.tabRounds){T.running=false;beep(880,600);clearInterval(_timerInterval);}
+          else{T.tabPhase='work';T.remaining=T.tabWork;beep(880,300);setTimeout(function(){beep(880,300);},350);}
+        }
+      }
+    }
+    sv();
+    // Update display without full redraw for performance
+    var disp=document.getElementById('tmr-disp');
+    var sub=document.getElementById('tmr-sub');
+    var bar=document.getElementById('tmr-bar');
+    if(disp){
+      if(T.mode==='amrap')disp.textContent=fmtTimer(T.remaining);
+      else if(T.mode==='fortime')disp.textContent=fmtTimer(T.elapsed);
+      else if(T.mode==='emom')disp.textContent=fmtTimer(T.remaining===60?60:60-(T.elapsed%60));
+      else if(T.mode==='tabata')disp.textContent=fmtTimer(T.remaining);
+    }
+    if(sub){
+      if(T.mode==='emom')sub.textContent='Round '+T.emomRound+' of '+T.emomMins;
+      if(T.mode==='tabata')sub.textContent=(T.tabPhase==='work'?'WORK':'REST')+' — Round '+T.tabCurrent+' of '+T.tabRounds;
+    }
+    if(bar){
+      var pct=0;
+      if(T.mode==='amrap')pct=T.remaining/T.totalSecs*100;
+      else if(T.mode==='emom')pct=(T.remaining/60)*100;
+      else if(T.mode==='tabata')pct=(T.remaining/(T.tabPhase==='work'?T.tabWork:T.tabRest))*100;
+      bar.style.width=pct+'%';
+    }
+  },1000);
+}
+
+function timerStop(){
+  clearInterval(_timerInterval);
+  S.timer.running=false;sv();draw();
+}
+function timerReset(){
+  clearInterval(_timerInterval);
+  var T=S.timer;
+  T.running=false;T.setup=true;T.elapsed=0;
+  T.remaining=T.totalSecs;T.emomRound=0;T.tabCurrent=0;T.tabPhase='work';
+  sv();draw();
+}
+
+function timerV(){
+  var T=S.timer;
+  var modes=[
+    {k:'amrap',l:'AMRAP'},
+    {k:'fortime',l:'For Time'},
+    {k:'emom',l:'EMOM'},
+    {k:'tabata',l:'Tabata'}
+  ];
+  var modeTabs=modes.map(function(m){
+    var on=T.mode===m.k;
+    return '<button data-timermode="'+m.k+'" style="flex:1;padding:9px 4px;border-radius:10px;border:1.5px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'var(--str-bg)':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;font-weight:'+(on?'600':'400')+';cursor:pointer">'+m.l+'</button>';
+  }).join('');
+
+  // ── Setup screens ────────────────────────────────────────────
+  if(T.setup){
+    var settings='';
+    if(T.mode==='amrap'){
+      var presets=[5,10,15,20];
+      var presRows=presets.map(function(p){
+        return '<button data-tset="'+p*60+'" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid '+(T.totalSecs===p*60?'var(--acc)':'var(--brd)')+';background:'+(T.totalSecs===p*60?'var(--str-bg)':'transparent')+';color:'+(T.totalSecs===p*60?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+p+' min</button>';
+      }).join('');
+      settings='<p class="lbl" style="display:block;margin-bottom:8px">Time cap</p>'
+        +'<div style="display:flex;gap:8px;margin-bottom:12px">'+presRows+'</div>'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'
+        +'<p class="mu" style="font-size:13px;white-space:nowrap">Custom (min)</p>'
+        +'<input id="tval" type="number" min="1" max="120" value="'+Math.round(T.totalSecs/60)+'" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:15px">'
+        +'<button onclick="var v=parseInt(document.getElementById(\'tval\').value);if(v>0){S.timer.totalSecs=v*60;sv();draw();}" style="padding:10px 14px;border-radius:10px;border:1.5px solid var(--acc);background:var(--str-bg);color:var(--acc);font-size:13px;cursor:pointer">Set</button>'
+        +'</div>'
+        +'<p class="mu" style="font-size:12px;margin-top:8px">Set a time cap and complete as many rounds as possible.</p>';
+    } else if(T.mode==='fortime'){
+      settings='<p class="mu" style="margin-bottom:8px">Timer counts up. Stop it when you finish.</p>'
+        +'<p class="mu" style="font-size:12px">Optionally set a cap — the timer will stop when reached.</p>'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-top:12px">'
+        +'<p class="mu" style="font-size:13px;white-space:nowrap">Cap (min, 0 = none)</p>'
+        +'<input id="tvalft" type="number" min="0" max="120" value="'+Math.round(T.totalSecs/60)+'" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:15px">'
+        +'<button onclick="var v=parseInt(document.getElementById(\'tvalft\').value)||0;S.timer.totalSecs=v*60;sv();draw();" style="padding:10px 14px;border-radius:10px;border:1.5px solid var(--acc);background:var(--str-bg);color:var(--acc);font-size:13px;cursor:pointer">Set</button>'
+        +'</div>';
+    } else if(T.mode==='emom'){
+      settings='<p class="lbl" style="display:block;margin-bottom:8px">Total minutes</p>'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<button class="nb" onclick="if(S.timer.emomMins>1){S.timer.emomMins--;sv();draw();}">&#8722;</button>'
+        +'<p style="flex:1;text-align:center;font-size:32px;font-weight:500;color:var(--acc)">'+T.emomMins+'</p>'
+        +'<button class="nb" onclick="S.timer.emomMins++;sv();draw();">+</button>'
+        +'</div>'
+        +'<p class="mu" style="font-size:12px">Complete your reps within each 60-second window. The timer beeps at the start of every minute.</p>';
+    } else if(T.mode==='tabata'){
+      settings='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">'
+        +'<div><p class="lbl" style="margin-bottom:6px">Work (sec)</p>'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+        +'<button class="nb" onclick="if(S.timer.tabWork>5){S.timer.tabWork-=5;sv();draw();}">&#8722;</button>'
+        +'<p style="flex:1;text-align:center;font-size:22px;font-weight:500;color:var(--acc)">'+T.tabWork+'</p>'
+        +'<button class="nb" onclick="S.timer.tabWork+=5;sv();draw();">+</button>'
+        +'</div></div>'
+        +'<div><p class="lbl" style="margin-bottom:6px">Rest (sec)</p>'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+        +'<button class="nb" onclick="if(S.timer.tabRest>5){S.timer.tabRest-=5;sv();draw();}">&#8722;</button>'
+        +'<p style="flex:1;text-align:center;font-size:22px;font-weight:500;color:var(--acc)">'+T.tabRest+'</p>'
+        +'<button class="nb" onclick="S.timer.tabRest+=5;sv();draw();">+</button>'
+        +'</div></div>'
+        +'</div>'
+        +'<p class="lbl" style="margin-bottom:6px">Rounds</p>'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+        +'<button class="nb" onclick="if(S.timer.tabRounds>1){S.timer.tabRounds--;sv();draw();}">&#8722;</button>'
+        +'<p style="flex:1;text-align:center;font-size:22px;font-weight:500;color:var(--acc)">'+T.tabRounds+'</p>'
+        +'<button class="nb" onclick="S.timer.tabRounds++;sv();draw();">+</button>'
+        +'</div>'
+        +'<p class="mu" style="font-size:12px">Classic Tabata: 20s work / 10s rest × 8 rounds = 4 minutes.</p>';
+    }
+    return '<div class="pad">'
+      +'<span class="lbl">Timer</span>'
+      +'<p class="h1" style="margin:6px 0 16px">Workout timer</p>'
+      +'<div style="display:flex;gap:7px;margin-bottom:24px">'+modeTabs+'</div>'
+      +'<div class="card" style="margin-bottom:24px">'+settings+'</div>'
+      +'<button class="btn btnp" onclick="timerStart()">Start</button>'
+      +'</div>';
+  }
+
+  // ── Running screen ───────────────────────────────────────────
+  var isTabata=T.mode==='tabata';
+  var isWork=T.tabPhase==='work';
+  var bgCol=isTabata?(isWork?'var(--acc-bg)':'var(--bg3)'):'var(--bg2)';
+  var accentCol=isTabata?(isWork?'var(--acc)':'var(--warn)'):'var(--acc)';
+
+  var disp='';
+  var sub='';
+  var barPct=100;
+  if(T.mode==='amrap'){disp=fmtTimer(T.remaining);sub='AMRAP · '+Math.round(T.totalSecs/60)+' min';barPct=T.remaining/T.totalSecs*100;}
+  else if(T.mode==='fortime'){disp=fmtTimer(T.elapsed);sub='For Time'+(T.totalSecs?(' · cap '+Math.round(T.totalSecs/60)+'min'):'');barPct=100;}
+  else if(T.mode==='emom'){disp=fmtTimer(60-(T.elapsed%60)||60);sub='Round '+T.emomRound+' of '+T.emomMins;barPct=((T.elapsed%60)===0?100:(60-(T.elapsed%60))/60*100);}
+  else if(T.mode==='tabata'){disp=fmtTimer(T.remaining);sub=(isWork?'WORK':'REST')+' — Round '+T.tabCurrent+' of '+T.tabRounds;barPct=T.remaining/(isWork?T.tabWork:T.tabRest)*100;}
+
+  if(!T.running){
+    disp=isTabata?fmtTimer(T.tabWork):(T.mode==='fortime'?'00:00':fmtTimer(T.totalSecs));
+    if(T.mode==='emom')disp='01:00';
+    sub=T.mode==='tabata'?'WORK — Round 1 of '+T.tabRounds:'Ready';
+  }
+
+  return '<div class="pad" style="padding-top:24px">'
+    +'<div style="display:flex;gap:7px;margin-bottom:28px">'+modeTabs+'</div>'
+    +'<div style="background:'+bgCol+';border-radius:20px;padding:32px 20px 28px;text-align:center;margin-bottom:20px;border:.5px solid var(--brd);transition:background .3s">'
+    +(T.mode==='tabata'&&T.running?'<p style="font-size:13px;font-weight:600;letter-spacing:1.5px;color:'+accentCol+';margin-bottom:12px">'+(isWork?'WORK':'REST')+'</p>':'')
+    +'<p id="tmr-disp" style="font-size:72px;font-weight:300;color:'+accentCol+';font-variant-numeric:tabular-nums;line-height:1;margin-bottom:12px">'+disp+'</p>'
+    +'<p id="tmr-sub" class="lbl" style="color:var(--mu)">'+sub+'</p>'
+    +'<div class="pb" style="margin-top:20px;height:6px"><div id="tmr-bar" class="pf" style="width:'+barPct+'%;background:'+accentCol+';transition:width 1s linear"></div></div>'
+    +'</div>'
+    +(T.running
+      ?'<div style="display:flex;gap:10px"><button class="btn btno" style="flex:1" onclick="timerStop()">Stop</button><button class="btn btng" style="flex:1;border:.5px solid var(--brd);border-radius:14px" onclick="timerReset()">Reset</button></div>'
+      :'<div style="display:flex;gap:10px"><button class="btn btnp" style="flex:1" onclick="timerStart()">'+(T.elapsed>0?'Resume':'Start')+'</button><button class="btn btng" style="flex:1;border:.5px solid var(--brd);border-radius:14px" onclick="timerReset()">Reset</button></div>'
+    )
+    +'</div>';
+}
+
 
 function makeIcon(){
   try{
@@ -933,6 +1347,7 @@ if(!S.tplKey)S.tplKey='balanced';
     shoulder:typeof TPL_SHOULDER!=='undefined'?TPL_SHOULDER:TPL,
     knee:typeof TPL_KNEE!=='undefined'?TPL_KNEE:TPL,
     back:typeof TPL_BACK!=='undefined'?TPL_BACK:TPL};
+  _m.custom=S.customTPL||null;
   ACTIVE_TPL=_m[S.tplKey]||TPL;
 })();
 makeIcon();draw();fetchInfo();
