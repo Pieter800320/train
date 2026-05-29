@@ -503,12 +503,12 @@ function draw(){
   var tb=document.getElementById('tb');
   if(!sc)return;
   if(S.view==='progress'){
-    tb.style.display='none';
-    sc.innerHTML='<div class="pad"><button class="btng" style="width:auto;padding:4px 0;font-size:13px;margin-bottom:16px;text-align:left" onclick="S.view=\'app\';sv();draw();">&#8592; Back</button>'+progV()+'</div>';return;
+    tb.style.display='grid';
+    ['home','today','programs','build','timer'].forEach(function(t){var el=document.getElementById('t-'+t);if(el)el.className='ti';});
+    sc.innerHTML='<div class="pad"><button class="btng" style="width:auto;padding:4px 0;font-size:13px;margin-bottom:8px;text-align:left" onclick="S.view=\'app\';sv();draw();">&#8592; Back</button>'+progV()+'</div>';return;
   }
   if(S.view==='custom'){
-    tb.style.display='none';
-    sc.innerHTML=customV();return;
+    S.view='app';S.tab='build';
   }
   if(S.view==='ob'){
     tb.style.display='none';
@@ -915,6 +915,7 @@ function buildV(){return customV();}
 function progressOverlay(){S.view='progress';sv();draw();}
 
 function customV(){
+  if(!S.customEdit)S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
   var ce=S.customEdit;
   // ── Setup screen ───────────────────────────────────────────
   if(!ce.days||ce.days.length===0){
@@ -1199,6 +1200,7 @@ function timerReset(){
 }
 
 function timerV(){
+  if(!S.timer)S.timer={mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true};
   var T=S.timer;
   var modes=[
     {k:'amrap',l:'AMRAP'},
@@ -1337,7 +1339,16 @@ function makeIcon(){
 // INIT -----------------------------------------------------------------------
 
 ld();
+// Migrate state — add any fields missing from older saved versions
 if(!S.tplKey)S.tplKey='balanced';
+if(!S.theme)S.theme='dark';
+if(!S.ob)S.ob={step:0,ans:{},recs:[]};
+if(!S.ob.recs)S.ob.recs=[];
+if(!S.customEdit)S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
+if(!S.customTPL)S.customTPL=null;
+if(!S.timer)S.timer={mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true};
+// Always reset running timer on reload
+S.timer.running=false;
 (function(){
   var _m={balanced:TPL,hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:TPL,
     strength:typeof TPL_STRENGTH!=='undefined'?TPL_STRENGTH:TPL,
