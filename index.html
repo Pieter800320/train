@@ -55,7 +55,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
   <div style="background:var(--bg);padding:12px 20px 6px;display:flex;justify-content:space-between;align-items:center">
     <span id="clk" style="font-size:11px;color:var(--mu);font-weight:500">9:41</span>
     <span style="font-size:12px;color:var(--mu);font-weight:500">Train</span>
-    <span style="font-size:11px;color:var(--mu)">&#9679;&#9679;&#9679;</span>
+    <button onclick="S.view='progress';sv();draw();" style="background:var(--bg3);border:none;color:var(--tx);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;letter-spacing:-2px" aria-label="More">&#8942;</button>
   </div>
   <div id="scr"></div>
   <nav id="tb" style="display:none">
@@ -480,6 +480,7 @@ var ACTIVE_TPL=TPL;
 var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],skOpen:null,theme:'dark',tplKey:'balanced',
   customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},
   customTPL:null,
+  customPrograms:[],
   timer:{mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true}
 };
 
@@ -638,7 +639,7 @@ function homeV(){
   var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var d=new Date();
-  var sess=TPL.days[S.day];
+  var sess=ACTIVE_TPL.days[S.day];
   var notices='';
   for(var i=0;i<INFO.length;i++){
     var n=INFO[i];
@@ -648,15 +649,13 @@ function homeV(){
     var bc=n.type==='notice'?'#8a6430':'#336699';
     notices+='<div class="card '+cls+'" style="margin-bottom:8px"><span class="lbl" style="color:'+lc+'">'+( n.type==='notice'?'Coach notice':'Training tip')+'</span><p style="font-size:14px;font-weight:500;margin:5px 0 4px;color:'+tc+'">'+n.title+'</p><p style="font-size:13px;line-height:1.5;color:'+bc+'">'+n.body+'</p></div>';
   }
-  return '<div class="pad"><span class="lbl">'+dn[d.getDay()]+' · '+d.getDate()+' '+mn[d.getMonth()]+'</span><p class="h1" style="margin:6px 0 24px">Good to see you.</p><div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;cursor:pointer" onclick="go(\'today\')"><div><span class="lbl" style="color:var(--acc)">Today\'s session</span><p style="font-size:16px;font-weight:500;margin:5px 0 4px">'+TPL.name+'</p><p class="mu">'+sess.label+' · '+sess.focus+' · ~'+sess.mins+' min</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div><span class="lbl" style="display:block;margin-bottom:12px">From your coach</span>'+notices+'</div>';
+  return '<div class="pad"><span class="lbl">'+dn[d.getDay()]+' · '+d.getDate()+' '+mn[d.getMonth()]+'</span><p class="h1" style="margin:6px 0 24px">Good to see you.</p><div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;cursor:pointer" onclick="go(\'today\')"><div><span class="lbl" style="color:var(--acc)">Today\'s session</span><p style="font-size:16px;font-weight:500;margin:5px 0 4px">'+ACTIVE_TPL.name+'</p><p class="mu">'+sess.label+' · '+sess.focus+' · ~'+sess.mins+' min</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div><span class="lbl" style="display:block;margin-bottom:12px">From your coach</span>'+notices+'</div>';
 }
 
 // TODAY ----------------------------------------------------------------------
 
 function todayV(){
-  var sess=TPL.days[S.day];
-  var seen={};var pills='';
-  for(var i=0;i<sess.exercises.length;i++){var p=sess.exercises[i].ph;if(!seen[p]){seen[p]=1;pills+='<span class="pill '+PH[p].cls+'">'+PH[p].label+'</span>';}}
+  var sess=ACTIVE_TPL.days[S.day];
   var rows='';
   for(var i=0;i<sess.exercises.length;i++){
     var ex=sess.exercises[i];
@@ -668,8 +667,8 @@ function todayV(){
     rows+='<div class="exrow'+(str?' exstr':'')+'" data-xd="'+i+'"><div class="dot" style="background:'+PH[ex.ph].dot+'"></div><div style="flex:1;min-width:0"><span class="lbl" style="color:'+(str?'var(--acc)':'var(--mu)')+'">'+PH[ex.ph].label+'</span><p style="font-size:14px;font-weight:'+(str?'500':'400')+';color:'+(str?'var(--tx)':'#c0c0c0')+';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p></div><span style="font-size:12px;color:'+(str?'var(--acc)':'var(--mu)')+';white-space:nowrap;margin-left:8px">'+ex.vol+'</span></div>'+detail;
   }
   var daybts='';
-  for(var i=0;i<TPL.days.length;i++){var on=i===S.day;daybts+='<button data-switchday="'+i+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer">'+TPL.days[i].label+'</button>';}
-  return '<div class="pad"><span class="lbl">'+TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">'+pills+'</div>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
+  for(var i=0;i<ACTIVE_TPL.days.length;i++){var on=i===S.day;daybts+='<button data-switchday="'+i+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer">'+TPL.days[i].label+'</button>';}
+  return '<div class="pad"><span class="lbl">'+TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px"></div>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
 }
 
 // WORKOUT PLAYER -------------------------------------------------------------
@@ -857,8 +856,30 @@ function programsV(){
   var curE=null;for(var ci=0;ci<CATALOGUE.length;ci++)if(CATALOGUE[ci].key===S.tplKey)curE=CATALOGUE[ci];
   if(curE){html+='<p class="mu">'+curE.sessions+' · '+curE.mins+'</p><p style="font-size:13px;color:var(--mu);margin-top:6px">'+curE.who+'</p>';}
   html+='<button class="btn btno" style="padding:11px;font-size:13px;margin-top:12px" onclick="resetOnboarding()">Retake questionnaire</button>';
-  html+='<button class="btn btnp" style="padding:11px;font-size:13px;margin-top:8px" onclick="S.view=\'custom\';S.customEdit={name:\'My Program\',numDays:3,days:[],activeDay:null,newEx:null};sv();draw();">&#43; Create your own program</button>';
   html+='</div>';
+  // Custom programs section
+  if(S.customPrograms&&S.customPrograms.length>0){
+    html+='<span class="lbl" style="display:block;margin-bottom:10px">My custom programs</span>';
+    for(var ci=0;ci<S.customPrograms.length;ci++){
+      var cp=S.customPrograms[ci];
+      var isCurCP=cp.key===S.tplKey;
+      html+='<div style="background:'+(isCurCP?'var(--str-bg)':'var(--bg2)')+';border-radius:14px;padding:14px 15px;margin-bottom:9px;border:'+(isCurCP?'1.5px solid var(--acc)':'.5px solid var(--brd)')+'">';
+      html+='<div style="display:flex;align-items:center;gap:10px">';
+      html+='<div style="width:38px;height:38px;border-radius:10px;background:var(--str-bg);border:.5px solid var(--str-brd);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--acc);flex-shrink:0">My</div>';
+      html+='<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:500;color:var(--tx);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+cp.name+'</p>';
+      html+='<p class="mu" style="font-size:12px">'+cp.tpl.days.length+' day'+( cp.tpl.days.length>1?'s':'')+' · saved '+cp.date+'</p></div>';
+      if(!isCurCP)html+='<button class="btn btnp" style="width:auto;padding:9px 14px;font-size:12px;flex-shrink:0" data-switchprog="'+cp.key+'">Load</button>';
+      else html+='<span style="font-size:11px;background:var(--acc);color:#fff;padding:3px 9px;border-radius:10px;font-weight:500;flex-shrink:0">Active</span>';
+      html+='</div>';
+      html+='<button onclick="if(confirm(\'Delete '+cp.name+'?\')){'
+        +'S.customPrograms.splice('+ci+',1);'
+        +'if(S.tplKey===\''+cp.key+'\'){S.tplKey=\'balanced\';ACTIVE_TPL=TPL;}'
+        +'sv();draw();}" '
+        +'style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:6px 0;margin-top:4px">Delete program</button>';
+      html+='</div>';
+    }
+    html+='<div style="height:16px"></div>';
+  }
   html+='<span class="lbl" style="display:block;margin-bottom:14px">All programs</span>';
   for(var i=0;i<CATALOGUE.length;i++){
     var c=CATALOGUE[i];
@@ -878,6 +899,14 @@ function programsV(){
 }
 
 function switchProgram(key){
+  // Check custom programs first
+  if(key.indexOf('custom_')===0){
+    var cp=null;for(var ci=0;ci<S.customPrograms.length;ci++)if(S.customPrograms[ci].key===key)cp=S.customPrograms[ci];
+    if(!cp)return;
+    if(S.tplKey===key){go('today');return;}
+    if(!confirm('Switch to '+cp.name+'? Your session history is kept.'))return;
+    S.tplKey=key;ACTIVE_TPL=cp.tpl;S.day=0;sv();go('today');return;
+  }
   var entry=null;for(var i=0;i<CATALOGUE.length;i++)if(CATALOGUE[i].key===key)entry=CATALOGUE[i];
   if(!entry||!entry.available)return;
   var m={
@@ -1080,8 +1109,15 @@ function custSave(){
       };
     })
   };
+  // Save to customPrograms array (update existing or add new)
+  var key=ce.editKey||('custom_'+Date.now());
+  var existing=-1;
+  for(var ci=0;ci<S.customPrograms.length;ci++)if(S.customPrograms[ci].key===key)existing=ci;
+  var entry={key:key,name:tpl.name,tpl:tpl,date:new Date().toLocaleDateString()};
+  if(existing>=0)S.customPrograms[existing]=entry;
+  else S.customPrograms.push(entry);
   S.customTPL=tpl;
-  S.tplKey='custom';
+  S.tplKey=key;
   ACTIVE_TPL=tpl;
   S.day=0;
   S.view='app';
@@ -1346,6 +1382,7 @@ if(!S.ob)S.ob={step:0,ans:{},recs:[]};
 if(!S.ob.recs)S.ob.recs=[];
 if(!S.customEdit)S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
 if(!S.customTPL)S.customTPL=null;
+if(!S.customPrograms)S.customPrograms=[];
 if(!S.timer)S.timer={mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true};
 // Always reset running timer on reload
 S.timer.running=false;
@@ -1364,6 +1401,12 @@ S.timer.running=false;
     knee:typeof TPL_KNEE!=='undefined'?TPL_KNEE:TPL,
     back:typeof TPL_BACK!=='undefined'?TPL_BACK:TPL};
   _m.custom=S.customTPL||null;
+  // Restore any saved custom program
+  if(S.tplKey&&S.tplKey.indexOf('custom_')===0&&S.customPrograms){
+    for(var ci=0;ci<S.customPrograms.length;ci++){
+      if(S.customPrograms[ci].key===S.tplKey){_m[S.tplKey]=S.customPrograms[ci].tpl;break;}
+    }
+  }
   ACTIVE_TPL=_m[S.tplKey]||TPL;
 })();
 makeIcon();draw();fetchInfo();
