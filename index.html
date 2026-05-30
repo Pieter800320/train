@@ -705,23 +705,69 @@ function wxStart(){
   }
   var weights={};
   for(var i=0;i<exs.length;i++)weights[exs[i].id]=exs[i].kg||0;
-  S.wx={on:true,label:sess.label,exs:exs,idx:0,set:1,logs:[],rest:false,rl:0,rt:0,weights:weights};
+  S.wx={on:true,label:sess.label,exs:exs,idx:0,set:1,logs:[],rest:false,rl:0,rt:0,weights:weights,exTimer:0,exTimerRunning:false};
   sv();draw();
 }
 
 var _t=null;
 function tickR(){
   clearInterval(_t);
-  if(!S.wx||!S.wx.rest)return;
+  if(!S.wx)return;
+  if(!S.wx.rest&&!S.wx.exTimerRunning)return;
   _t=setInterval(function(){
-    if(!S.wx||!S.wx.rest){clearInterval(_t);return;}
-    S.wx.rl=Math.max(0,S.wx.rl-1);
-    var te=document.getElementById('rt');
-    if(te)te.textContent=fmt(S.wx.rl);
-    var re=document.getElementById('rr');
-    if(re)re.style.strokeDashoffset=440-(440*(1-S.wx.rl/S.wx.rt));
-    if(S.wx.rl<=0){S.wx.rest=false;sv();clearInterval(_t);draw();}
+    if(!S.wx){clearInterval(_t);return;}
+    // Rest timer
+    if(S.wx.rest){
+      S.wx.rl=Math.max(0,S.wx.rl-1);
+      var te=document.getElementById('rt');
+      if(te)te.textContent=fmt(S.wx.rl);
+      var re=document.getElementById('rr');
+      if(re)re.style.strokeDashoffset=440-(440*(1-S.wx.rl/S.wx.rt));
+      if(S.wx.rl<=0){S.wx.rest=false;sv();clearInterval(_t);draw();}
+    }
+    // Exercise timer
+    if(S.wx.exTimerRunning){
+      S.wx.exTimer=Math.max(0,S.wx.exTimer-1);
+      var et=document.getElementById('ext');
+      if(et)et.textContent=fmt(S.wx.exTimer);
+      var er=document.getElementById('exr');
+      var ex=S.wx.exs[S.wx.idx];
+      if(er&&ex&&ex.time)er.style.strokeDashoffset=440-(440*(S.wx.exTimer/ex.time));
+      if(S.wx.exTimer<=0){
+        S.wx.exTimerRunning=false;
+        try{beep(880,400);}catch(e){}
+        sv();
+        // Re-render to update button state
+        var sc=document.getElementById('scr');
+        if(sc)sc.innerHTML=wxV();
+        tickR();
+        return;
+      }
+    }
   },1000);
+}
+function wxExTimerStart(){
+  var ex=S.wx.exs[S.wx.idx];
+  if(!ex||!ex.time)return;
+  if(!S.wx.exTimerRunning&&S.wx.exTimer===0)S.wx.exTimer=ex.time;
+  S.wx.exTimerRunning=true;
+  sv();
+  var sc=document.getElementById('scr');if(sc)sc.innerHTML=wxV();
+  tickR();
+}
+function wxExTimerPause(){
+  S.wx.exTimerRunning=false;
+  clearInterval(_t);
+  sv();
+  var sc=document.getElementById('scr');if(sc)sc.innerHTML=wxV();
+}
+function wxExTimerReset(){
+  var ex=S.wx.exs[S.wx.idx];
+  S.wx.exTimerRunning=false;
+  S.wx.exTimer=ex?ex.time:0;
+  clearInterval(_t);
+  sv();
+  var sc=document.getElementById('scr');if(sc)sc.innerHTML=wxV();
 }
 function fmt(s){return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
 
@@ -735,15 +781,12 @@ function wxV(){
   if(w.rest){
     return '<div class="pad" style="padding-top:32px;text-align:center"><span class="lbl">Resting</span><p style="font-size:16px;font-weight:500;margin:8px 0 32px">Next: '+ex.name+' — set '+w.set+' of '+ex.sets+'</p><div style="position:relative;width:160px;height:160px;margin:0 auto 32px"><svg width="160" height="160" viewBox="0 0 160 160"><circle cx="80" cy="80" r="70" fill="none" stroke="var(--bg3)" stroke-width="8"/><circle id="rr" cx="80" cy="80" r="70" fill="none" stroke="var(--acc)" stroke-width="8" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="0" transform="rotate(-90 80 80)" style="transition:stroke-dashoffset 1s linear"/></svg><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><p id="rt" style="font-size:32px;font-weight:500;color:var(--acc);font-variant-numeric:tabular-nums">'+fmt(w.rl)+'</p></div></div><button class="btn btno" onclick="wxSkip()">Skip rest</button></div>';
   }
-  var bw=(ex.kg===0||ex.kg===undefined);
   var exCues2=ex.cues||[];
   var cueIdx=exCues2.length?Math.min(w.set-1,exCues2.length-1):-1;
   var exCatLabel=phLabel(ex.ph||ex.category||'');
   var pips='';
   for(var i=0;i<ex.sets;i++)pips+='<div class="sp'+(i<w.set?' dn':'')+'"></div>';
-  var wgtBlock=bw?
-    '<div class="card" style="text-align:center"><span class="lbl">Type</span><p style="font-size:15px;font-weight:500;color:var(--acc);margin-top:8px">Bodyweight</p></div>':
-    '<div class="card" style="text-align:center;background:#1c1000;border-color:#3a1e00"><span class="lbl" style="color:var(--acc)">Weight (kg)</span><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px"><button class="nb" onclick="adjW(-2.5)">&#8722;</button><span id="wd" style="font-size:24px;font-weight:500;color:var(--acc);min-width:52px;text-align:center">'+w.weights[ex.id]+'</span><button class="nb" onclick="adjW(2.5)">+</button></div></div>';
+  var wgtBlock='<div class="card" style="text-align:center;background:#1c1000;border-color:#3a1e00"><span class="lbl" style="color:var(--acc)">Weight (kg)</span><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px"><button class="nb" onclick="adjW(-2.5)">&#8722;</button><span id="wd" style="font-size:24px;font-weight:500;color:var(--acc);min-width:52px;text-align:center">'+w.weights[ex.id]+'</span><button class="nb" onclick="adjW(2.5)">+</button></div></div>';
   // Info card: notes (custom) > form cue (built-in)
   var infoBlock='';
   if(ex.notes){
@@ -751,10 +794,36 @@ function wxV(){
   } else if(cueIdx>=0){
     infoBlock='<div class="card" style="margin-bottom:18px"><span class="lbl">Form cue</span><p style="font-size:13px;color:var(--mu);line-height:1.6;margin-top:6px;font-style:italic">"'+(exCues2[cueIdx]||'')+'"</p></div>';
   }
-  // Target block: time or reps
+  // Target block: live countdown ring or reps
   var targetBlock='';
   if(ex.time&&ex.time>0){
-    targetBlock='<div class="card" style="text-align:center"><span class="lbl">Time</span><p style="font-size:28px;font-weight:500;color:var(--acc);margin-top:6px">'+fmt(ex.time)+'</p></div>';
+    var tRemain=w.exTimer>0?w.exTimer:ex.time;
+    var tRunning=w.exTimerRunning;
+    var tDone=(w.exTimer===0&&!tRunning&&w.exTimer!==ex.time)||false;
+    // If never started, show full time
+    if(w.exTimer===0&&!tRunning)tRemain=ex.time;
+    var tPct=tRemain/ex.time;
+    var dashOff=440-(440*tPct);
+    var ringCol=tRunning?'var(--acc)':(tRemain<=0?'var(--ok)':'var(--mu)');
+    targetBlock='<div class="card" style="text-align:center;padding:18px 12px">'
+      +'<span class="lbl">Time</span>'
+      +'<div style="position:relative;width:120px;height:120px;margin:10px auto 10px">'
+        +'<svg width="120" height="120" viewBox="0 0 120 120">'
+          +'<circle cx="60" cy="60" r="52" fill="none" stroke="var(--bg3)" stroke-width="7"/>'
+          +'<circle id="exr" cx="60" cy="60" r="52" fill="none" stroke="'+ringCol+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="'+dashOff+'" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1s linear"/>'
+        +'</svg>'
+        +'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">'
+          +'<p id="ext" style="font-size:22px;font-weight:500;color:'+ringCol+';font-variant-numeric:tabular-nums">'+fmt(tRemain)+'</p>'
+        +'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;justify-content:center">'
+        +(tRunning
+          ?'<button onclick="wxExTimerPause()" style="background:var(--bg3);border:none;color:var(--tx);padding:7px 16px;border-radius:10px;font-size:13px;cursor:pointer">Pause</button>'
+          :'<button onclick="wxExTimerStart()" style="background:var(--acc);border:none;color:#fff;padding:7px 16px;border-radius:10px;font-size:13px;cursor:pointer">'+(w.exTimer>0&&w.exTimer<ex.time?'Resume':'Start')+'</button>'
+        )
+        +'<button onclick="wxExTimerReset()" style="background:var(--bg3);border:none;color:var(--mu);padding:7px 12px;border-radius:10px;font-size:13px;cursor:pointer">Reset</button>'
+      +'</div>'
+      +'</div>';
   } else {
     targetBlock='<div class="card" style="text-align:center"><span class="lbl">Target</span><p style="font-size:28px;font-weight:500;margin-top:6px">'+(ex.reps||'&#8212;')+' <span style="font-size:13px;color:var(--mu)">'+(ex.reps?'reps':'')+'</span></p></div>';
   }
@@ -770,9 +839,14 @@ function adjW(d){
 }
 function wxLog(){
   var w=S.wx;var ex=w.exs[w.idx];
+  // Stop exercise timer if running
+  w.exTimerRunning=false;
+  w.exTimer=0;
   w.logs.push({name:ex.name,set:w.set,reps:ex.reps,kg:w.weights[ex.id]});
   if(w.set<ex.sets){
     w.set++;
+    // Reset exercise timer for next set
+    if(ex.time>0)w.exTimer=0;
     if(ex.rest>0){w.rest=true;w.rl=ex.rest;w.rt=ex.rest;}
   } else {
     w.idx++;w.set=1;
