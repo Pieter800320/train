@@ -65,7 +65,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
   <div style="background:var(--bg);padding:12px 20px 6px;display:flex;justify-content:space-between;align-items:center">
     <span id="clk" style="font-size:11px;color:var(--mu);font-weight:500">9:41</span>
     <span style="font-size:12px;color:var(--mu);font-weight:500">Train</span>
-    <button onclick="openProgress()" style="background:var(--bg3);border:none;color:var(--tx);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;letter-spacing:-2px" aria-label="More">&#8942;</button>
+    <button onclick="openProgress()" style="background:var(--bg3);border:none;color:var(--tx);height:28px;padding:0 10px;border-radius:14px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.5px">LOG</button>
   </div>
   <div id="scr"></div>
   <nav id="tb" style="display:none">
@@ -806,10 +806,24 @@ function wxV(){
   var wgtBlock='<div class="card" style="text-align:center;background:#1c1000;border-color:#3a1e00"><span class="lbl" style="color:var(--acc)">Weight (kg)</span><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px"><button class="nb" onclick="adjW(-2.5)">&#8722;</button><span id="wd" style="font-size:24px;font-weight:500;color:var(--acc);min-width:52px;text-align:center">'+w.weights[ex.id]+'</span><button class="nb" onclick="adjW(2.5)">+</button></div></div>';
   // Info card: notes (custom) > form cue (built-in)
   var infoBlock='';
-  if(ex.notes){
-    infoBlock='<div class="card" style="margin-bottom:18px"><span class="lbl">Notes</span><p style="font-size:13px;color:var(--mu);line-height:1.6;margin-top:6px">'+ex.notes+'</p></div>';
+  var isEditingNotes=(S.wx&&S.wx.editingNotes===ex.id);
+  if(isEditingNotes){
+    infoBlock='<div class="card" style="margin-bottom:18px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="lbl">Notes</span><button onclick="wxSaveNote()" style="background:var(--acc);border:none;color:#fff;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer">Save</button></div>'
+      +'<textarea id="notes-edit" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:13px;line-height:1.6;resize:none;min-height:80px" oninput="S.wx.noteDraft=this.value">'+(ex.notes||'')+'</textarea>'
+    +'</div>';
+  } else if(ex.notes){
+    infoBlock='<div class="card" style="margin-bottom:18px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="lbl">Notes</span><button onclick="wxEditNote()" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:2px 6px">Edit</button></div>'
+      +'<p style="font-size:13px;color:var(--mu);line-height:1.6">'+ex.notes+'</p>'
+    +'</div>';
   } else if(cueIdx>=0){
-    infoBlock='<div class="card" style="margin-bottom:18px"><span class="lbl">Form cue</span><p style="font-size:13px;color:var(--mu);line-height:1.6;margin-top:6px;font-style:italic">"'+(exCues2[cueIdx]||'')+'"</p></div>';
+    infoBlock='<div class="card" style="margin-bottom:18px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="lbl">Form cue</span><button onclick="wxEditNote()" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:2px 6px">Add note</button></div>'
+      +'<p style="font-size:13px;color:var(--mu);line-height:1.6;font-style:italic">"'+(exCues2[cueIdx]||'')+'"</p>'
+    +'</div>';
+  } else {
+    infoBlock='<div style="margin-bottom:18px"><button onclick="wxEditNote()" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:4px 0">+ Add note</button></div>';
   }
   // Target block: live countdown ring or reps
   // Target block: live countdown ring or reps stepper
@@ -881,8 +895,10 @@ function wxLog(){
   if(!w.reps)w.reps={};
   if(!w.times)w.times={};
   var eid=ex.id;
-  // Stop exercise timer if running
+  // Stop exercise timer and clear note edit state
   w.exTimerRunning=false;
+  w.editingNotes=null;
+  w.noteDraft='';
   w.exTimer=0;
   w.logs.push({name:ex.name,set:w.set,reps:w.reps[eid],kg:w.weights[eid]});
   if(w.set<ex.sets){
@@ -911,6 +927,51 @@ function wxAddPB(){
   // Flash confirmation
   var btn=document.getElementById('pb-btn');
   if(btn){btn.textContent='✓ Saved!';btn.style.color='var(--ok)';setTimeout(function(){if(btn){btn.textContent='★ Personal best';btn.style.color='var(--mu)';}},1500);}
+}
+function wxEditNote(){
+  var ex=S.wx.exs[S.wx.idx];
+  S.wx.editingNotes=ex.id;
+  S.wx.noteDraft=ex.notes||'';
+  var sc=document.getElementById('scr');if(sc)sc.innerHTML=wxV();
+  // Focus textarea after render
+  setTimeout(function(){var ta=document.getElementById('notes-edit');if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},50);
+}
+function wxSaveNote(){
+  var w=S.wx;
+  var ex=w.exs[w.idx];
+  var newNote=w.noteDraft||'';
+  // Update the live exercise object in S.wx.exs
+  ex.notes=newNote;
+  // Persist back to the program: find the exercise by id in ACTIVE_TPL or customPrograms
+  var updated=false;
+  // Search ACTIVE_TPL days
+  for(var di=0;di<ACTIVE_TPL.days.length&&!updated;di++){
+    for(var ei=0;ei<ACTIVE_TPL.days[di].exercises.length&&!updated;ei++){
+      if(ACTIVE_TPL.days[di].exercises[ei].id===ex.id){
+        ACTIVE_TPL.days[di].exercises[ei].notes=newNote;
+        updated=true;
+      }
+    }
+  }
+  // Also search customPrograms in case ACTIVE_TPL is a custom one
+  if(S.customPrograms){
+    for(var ci=0;ci<S.customPrograms.length&&!updated;ci++){
+      var cp=S.customPrograms[ci];
+      if(!cp.tpl)continue;
+      for(var di=0;di<cp.tpl.days.length&&!updated;di++){
+        for(var ei=0;ei<cp.tpl.days[di].exercises.length&&!updated;ei++){
+          if(cp.tpl.days[di].exercises[ei].id===ex.id){
+            cp.tpl.days[di].exercises[ei].notes=newNote;
+            updated=true;
+          }
+        }
+      }
+    }
+  }
+  w.editingNotes=null;
+  w.noteDraft='';
+  sv();
+  var sc=document.getElementById('scr');if(sc)sc.innerHTML=wxV();
 }
 function wxSkip(){S.wx.rest=false;sv();draw();}
 function wxConfirmEnd(){if(confirm('End this session?'))wxEnd();}
@@ -968,7 +1029,12 @@ function progV(){
       +'<span style="font-size:11px;color:var(--mu)">'+setCount+' sets</span>'
     +'</div>';
   }
-  var loadMore=startIdx>0?'<button onclick="S.histPage=(S.histPage||0)+1;sv();var s=document.getElementById(\'prog-sheet\');if(s){var sc=s.querySelector(\'div:last-child\');if(sc)sc.innerHTML=progV();}" style="width:100%;padding:10px;background:transparent;border:.5px solid var(--brd);border-radius:10px;color:var(--mu);font-size:12px;cursor:pointer;margin-top:10px">Load more</button>':'';
+  var totalPages=Math.ceil(total/PAGE_SIZE);
+  var pageStr=(page+1)+' / '+totalPages;
+  var refreshLog='var s=document.getElementById(\'prog-sheet\');if(s){var sc=s.querySelector(\'div:last-child\');if(sc)sc.innerHTML=progV();}';
+  var prevBtn=page<totalPages-1?'<button onclick="S.histPage=(S.histPage||0)+1;sv();'+refreshLog+'" style="width:40px;height:36px;background:var(--bg3);border:none;color:var(--tx);border-radius:10px;cursor:pointer;font-size:16px">&#8592;</button>':'<button disabled style="width:40px;height:36px;background:transparent;border:none;color:var(--dim);border-radius:10px;font-size:16px">&#8592;</button>';
+  var nextBtn=page>0?'<button onclick="S.histPage=Math.max(0,(S.histPage||0)-1);sv();'+refreshLog+'" style="width:40px;height:36px;background:var(--bg3);border:none;color:var(--tx);border-radius:10px;cursor:pointer;font-size:16px">&#8594;</button>':'<button disabled style="width:40px;height:36px;background:transparent;border:none;color:var(--dim);border-radius:10px;font-size:16px">&#8594;</button>';
+  var loadMore=total>PAGE_SIZE?'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">'+prevBtn+'<span style="font-size:12px;color:var(--mu)">'+pageStr+'</span>'+nextBtn+'</div>':'';
   var histSection=total>0
     ?'<div style="margin-top:4px"><div onclick="var h=document.getElementById(\'hist-body\');h.style.display=h.style.display===\'none\'?\'block\':\'none\'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer"><span class="lbl">History</span><span style="font-size:12px;color:var(--mu)">'+total+' sessions ›</span></div><div id="hist-body" style="display:none">'+histRows+loadMore+'</div></div>'
     :'';
