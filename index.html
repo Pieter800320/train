@@ -808,7 +808,7 @@ function wxV(){
   // Target block: live countdown ring or reps
   // Target block: live countdown ring or reps stepper
   var targetBlock='';
-  if(w.times[ex.id]>0){
+  if(w.times&&w.times[ex.id]>0){
     var tFull=w.times[ex.id];
     var tRemain=(w.exTimer>0)?w.exTimer:tFull;
     var tRunning=w.exTimerRunning;
@@ -838,7 +838,7 @@ function wxV(){
       +'</div>'
       +'</div>';
   } else {
-    var curReps=w.reps[ex.id]!==undefined?w.reps[ex.id]:(ex.reps||0);
+    var curReps=(w.reps&&w.reps[ex.id]!==undefined)?w.reps[ex.id]:(ex.reps||0);
     targetBlock='<div class="card" style="text-align:center"><span class="lbl">Reps</span><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px"><button class="nb" onclick="adjR(-1)">&#8722;</button><span id="rd" style="font-size:28px;font-weight:500;color:var(--tx);min-width:40px;text-align:center">'+(curReps||'&#8212;')+'</span><button class="nb" onclick="adjR(1)">+</button></div></div>';
   }
   var nextLine=w.idx<w.exs.length-1?'<p style="text-align:center;margin-top:10px;font-size:12px;color:var(--dim)">Next: '+w.exs[w.idx+1].name+'</p>':'';
@@ -1148,6 +1148,12 @@ function custSave(){
   var dateStr=d.getDate()+' '+mn[d.getMonth()];
   if(!S.customPrograms)S.customPrograms=[];
 if(!S.pr)S.pr={};
+// Patch stale wx state from pre-PR-system sessions
+if(S.wx){
+  if(!S.wx.reps)S.wx.reps={};
+  if(!S.wx.times)S.wx.times={};
+  if(!S.wx.weights)S.wx.weights={};
+}
   S.customPrograms.push({key:key,name:ce.name,date:dateStr,tpl:tpl});
   S.tplKey=key;
   ACTIVE_TPL=tpl;
