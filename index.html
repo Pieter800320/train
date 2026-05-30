@@ -1421,7 +1421,7 @@ function timerV(){
     return '<div class="pad" style="padding-top:24px">'
       +'<div style="text-align:center;margin-bottom:8px"><span class="lbl">Stopwatch</span></div>'
       +'<div style="text-align:center;margin-bottom:40px"><p id="sw-display" style="font-size:72px;font-weight:300;color:'+(_sw.running?'var(--acc)':'var(--tx)')+';font-variant-numeric:tabular-nums;letter-spacing:-2px">'+fmt(_sw.elapsed)+'</p></div>'
-      +'<div style="display:flex;gap:10px"><button id="sw-btn" class="btn '+(_sw.running?'btno':'btnp')+'" onclick="swToggle()">'+(_sw.running?'Pause':'Start')+'</button><button class="btn btno" onclick="swReset()">Reset</button></div>'
+      +'<div style="display:flex;gap:10px"><button id="sw-btn" class="btn '+(_sw.running?'btno':'btnp')+'" style="flex:1" onclick="swToggle()">'+(_sw.running?'Pause':'Start')+'</button><button class="btn btno" style="flex:1" onclick="swReset()">Reset</button></div>'
       +'<button class="btng" onclick="S.timer.setup=true;sv();draw()">&#8592; Change timer</button>'
     +'</div>';
   }
