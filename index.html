@@ -101,11 +101,30 @@ function fetchInfo(){
 }
 
 var PH={
-  primer:{label:'Preparation',cls:'pgr',dot:'var(--dim)'},
-  strength:{label:'Strength',cls:'pac',dot:'var(--acc)'},
-  accessory:{label:'Support',cls:'pbl',dot:'var(--dim)'},
-  cooldown:{label:'Recovery',cls:'pok',dot:'var(--dim)'}
+  primer:{label:'Warm-up'},
+  strength:{label:'Strength'},
+  accessory:{label:'Accessory'},
+  cooldown:{label:'Cooldown'}
 };
+// Returns display label for any category key (built-in or custom)
+function phLabel(ph){
+  if(!ph)return 'Strength';
+  if(PH[ph])return PH[ph].label;
+  return ph; // custom category — use as-is
+}
+// Generates a vol display string from exercise fields
+function exVolStr(ex){
+  if(!ex)return '';
+  // Built-in exercises already have a vol string and no sets/reps structured fields as numbers
+  if(ex.vol&&typeof ex.sets==='undefined')return ex.vol;
+  var s=ex.sets||1;
+  var parts=[];
+  if(ex.time&&ex.time>0){parts.push(s+' × '+fmt(ex.time));}
+  else if(ex.reps&&ex.reps>0){parts.push(s+' × '+ex.reps);}
+  else{parts.push(s+' set'+(s>1?'s':''));}
+  if(ex.rest&&ex.rest>0)parts.push('rest '+fmt(ex.rest));
+  return parts.join(' · ');
+}
 
 var TPL={
   name:'Balanced Strength',
@@ -648,14 +667,14 @@ function todayV(){
   var rows='';
   for(var i=0;i<sess.exercises.length;i++){
     var ex=sess.exercises[i];
-    var ph=ex.ph&&PH[ex.ph]?ex.ph:'strength';
-    var str=ph==='strength';
-    var phInfo=PH[ph];
+    var catLabel=phLabel(ex.ph||ex.category||'');
+    var isStr=(ex.ph==='strength'||ex.category==='Strength'||ex.category==='Hypertrophy'||ex.category==='Power');
+    var volStr=exVolStr(ex);
     var cues='';
     var exCues=ex.cues||[];
     for(var c=0;c<exCues.length;c++)cues+='<div class="cue">'+exCues[c]+'</div>';
     var detail='<div id="xd'+i+'" style="display:none;background:var(--bg2);border-radius:0 0 12px 12px;padding:12px 14px 14px;margin-top:-7px;margin-bottom:7px;border:.5px solid var(--brd);border-top:none">'+(ex.muscles?'<p style="font-size:12px;color:var(--mu);margin-bottom:8px"><strong style="color:var(--tx)">Muscles:</strong> '+ex.muscles+'</p>':'')+cues+(ex.subs?'<p style="font-size:12px;color:var(--dim);margin-top:8px;font-style:italic">Sub: '+ex.subs+'</p>':'')+(ex.prog?'<p style="font-size:12px;color:var(--acc);margin-top:6px">Progression: '+ex.prog+'</p>':'')+'</div>';
-    rows+='<div class="exrow'+(str?' exstr':'')+'" data-xd="'+i+'"><div class="dot" style="background:'+phInfo.dot+'"></div><div style="flex:1;min-width:0"><span class="lbl" style="color:'+(str?'var(--acc)':'var(--mu)')+'">'+phInfo.label+'</span><p style="font-size:14px;font-weight:'+(str?'500':'400')+';color:'+(str?'var(--tx)':'#c0c0c0')+';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p></div><span style="font-size:12px;color:'+(str?'var(--acc)':'var(--mu)')+';white-space:nowrap;margin-left:8px">'+ex.vol+'</span></div>'+detail;
+    rows+='<div class="exrow'+(isStr?' exstr':'')+'" data-xd="'+i+'"><div style="flex:1;min-width:0"><span class="lbl" style="color:'+(isStr?'var(--acc)':'var(--mu)')+'">'+catLabel+'</span><p style="font-size:14px;font-weight:'+(isStr?'500':'400')+';color:'+(isStr?'var(--tx)':'#c0c0c0')+';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p></div><span style="font-size:12px;color:'+(isStr?'var(--acc)':'var(--mu)')+';white-space:nowrap;margin-left:8px">'+volStr+'</span></div>'+detail;
   }
   var daybts='';
   for(var di=0;di<ACTIVE_TPL.days.length;di++){
@@ -673,10 +692,16 @@ function wxStart(){
   var sess=ACTIVE_TPL.days[S.day];
   for(var i=0;i<sess.exercises.length;i++){
     var e=sess.exercises[i];
-    // Built-in exercises: include only those with sets (skips primer/cooldown).
-    // Custom exercises have no sets field at all — include them and default to 1 set.
-    if(e.sets){exs.push(e);}
-    else if(e.sets===undefined){exs.push(Object.assign({},e,{sets:1,reps:e.reps||0,rest:e.rest||0,kg:e.kg||0}));}
+    // Built-in exercises: include only those with sets>0 (skips primer/cooldown with sets=undefined/0).
+    // Custom exercises always have sets (set in the form), so include them directly.
+    if(e.category){
+      // Custom exercise — always include, ensure defaults
+      exs.push(Object.assign({sets:1,reps:0,rest:0,kg:0,time:0},e));
+    } else if(e.sets){
+      // Built-in exercise with sets defined — include
+      exs.push(e);
+    }
+    // else: built-in primer/cooldown (no sets) — skip
   }
   var weights={};
   for(var i=0;i<exs.length;i++)weights[exs[i].id]=exs[i].kg||0;
@@ -710,18 +735,31 @@ function wxV(){
   if(w.rest){
     return '<div class="pad" style="padding-top:32px;text-align:center"><span class="lbl">Resting</span><p style="font-size:16px;font-weight:500;margin:8px 0 32px">Next: '+ex.name+' — set '+w.set+' of '+ex.sets+'</p><div style="position:relative;width:160px;height:160px;margin:0 auto 32px"><svg width="160" height="160" viewBox="0 0 160 160"><circle cx="80" cy="80" r="70" fill="none" stroke="var(--bg3)" stroke-width="8"/><circle id="rr" cx="80" cy="80" r="70" fill="none" stroke="var(--acc)" stroke-width="8" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="0" transform="rotate(-90 80 80)" style="transition:stroke-dashoffset 1s linear"/></svg><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"><p id="rt" style="font-size:32px;font-weight:500;color:var(--acc);font-variant-numeric:tabular-nums">'+fmt(w.rl)+'</p></div></div><button class="btn btno" onclick="wxSkip()">Skip rest</button></div>';
   }
-  var bw=ex.kg===0;
+  var bw=(ex.kg===0||ex.kg===undefined);
   var exCues2=ex.cues||[];
   var cueIdx=exCues2.length?Math.min(w.set-1,exCues2.length-1):-1;
-  var exPh2=ex.ph&&PH[ex.ph]?ex.ph:'strength';
+  var exCatLabel=phLabel(ex.ph||ex.category||'');
   var pips='';
   for(var i=0;i<ex.sets;i++)pips+='<div class="sp'+(i<w.set?' dn':'')+'"></div>';
   var wgtBlock=bw?
     '<div class="card" style="text-align:center"><span class="lbl">Type</span><p style="font-size:15px;font-weight:500;color:var(--acc);margin-top:8px">Bodyweight</p></div>':
     '<div class="card" style="text-align:center;background:#1c1000;border-color:#3a1e00"><span class="lbl" style="color:var(--acc)">Weight (kg)</span><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px"><button class="nb" onclick="adjW(-2.5)">&#8722;</button><span id="wd" style="font-size:24px;font-weight:500;color:var(--acc);min-width:52px;text-align:center">'+w.weights[ex.id]+'</span><button class="nb" onclick="adjW(2.5)">+</button></div></div>';
-  var cueBlock=cueIdx>=0?'<div class="card" style="margin-bottom:18px"><span class="lbl">Form cue</span><p style="font-size:13px;color:var(--mu);line-height:1.6;margin-top:6px;font-style:italic">"'+(exCues2[cueIdx]||'')+'"</p></div>':'';
+  // Info card: notes (custom) > form cue (built-in)
+  var infoBlock='';
+  if(ex.notes){
+    infoBlock='<div class="card" style="margin-bottom:18px"><span class="lbl">Notes</span><p style="font-size:13px;color:var(--mu);line-height:1.6;margin-top:6px">'+ex.notes+'</p></div>';
+  } else if(cueIdx>=0){
+    infoBlock='<div class="card" style="margin-bottom:18px"><span class="lbl">Form cue</span><p style="font-size:13px;color:var(--mu);line-height:1.6;margin-top:6px;font-style:italic">"'+(exCues2[cueIdx]||'')+'"</p></div>';
+  }
+  // Target block: time or reps
+  var targetBlock='';
+  if(ex.time&&ex.time>0){
+    targetBlock='<div class="card" style="text-align:center"><span class="lbl">Time</span><p style="font-size:28px;font-weight:500;color:var(--acc);margin-top:6px">'+fmt(ex.time)+'</p></div>';
+  } else {
+    targetBlock='<div class="card" style="text-align:center"><span class="lbl">Target</span><p style="font-size:28px;font-weight:500;margin-top:6px">'+(ex.reps||'&#8212;')+' <span style="font-size:13px;color:var(--mu)">'+(ex.reps?'reps':'')+'</span></p></div>';
+  }
   var nextLine=w.idx<w.exs.length-1?'<p style="text-align:center;margin-top:10px;font-size:12px;color:var(--dim)">Next: '+w.exs[w.idx+1].name+'</p>':'';
-  return '<div><div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--brd)"><button class="btng" style="width:auto;padding:4px 8px;font-size:14px" onclick="wxConfirmEnd()">&#10005; End</button><p style="font-size:12px;color:var(--mu)">'+w.label+' &middot; '+(w.idx+1)+'/'+w.exs.length+'</p><div style="width:48px"></div></div><div class="pad" style="padding-top:18px"><span class="lbl" style="color:'+PH[exPh2].dot+'">Set '+w.set+' of '+ex.sets+'</span><div style="display:flex;gap:5px;margin:7px 0 16px">'+pips+'</div><p class="h1" style="margin-bottom:4px">'+ex.name+'</p>'+(ex.muscles?'<p class="mu" style="margin-bottom:22px">'+ex.muscles+'</p>':'<div style="margin-bottom:22px"></div>')+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px"><div class="card" style="text-align:center"><span class="lbl">Target</span><p style="font-size:28px;font-weight:500;margin-top:6px">'+(ex.reps||'&#8212;')+' <span style="font-size:13px;color:var(--mu)">'+(ex.reps?'reps':'')+'</span></p></div>'+wgtBlock+'</div>'+cueBlock+'<button class="btn btnp" onclick="wxLog()">Log set and rest</button>'+nextLine+'</div></div>';
+  return '<div><div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--brd)"><button class="btng" style="width:auto;padding:4px 8px;font-size:14px" onclick="wxConfirmEnd()">&#10005; End</button><p style="font-size:12px;color:var(--mu)">'+w.label+' &middot; '+(w.idx+1)+'/'+w.exs.length+'</p><div style="width:48px"></div></div><div class="pad" style="padding-top:18px"><span class="lbl" style="color:var(--mu)">'+exCatLabel+' · Set '+w.set+' of '+ex.sets+'</span><div style="display:flex;gap:5px;margin:7px 0 16px">'+pips+'</div><p class="h1" style="margin-bottom:4px">'+ex.name+'</p>'+(ex.muscles?'<p class="mu" style="margin-bottom:22px">'+ex.muscles+'</p>':'<div style="margin-bottom:22px"></div>')+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">'+targetBlock+wgtBlock+'</div>'+infoBlock+'<button class="btn btnp" onclick="wxLog()">Log set and rest</button>'+nextLine+'</div></div>';
 }
 
 function adjW(d){
@@ -906,7 +944,7 @@ function buildV(){
       rows+='<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><p style="font-size:14px;font-weight:500">'+day.label+'</p><button onclick="S.customEdit.activeDay='+di+';sv();draw()" style="background:transparent;border:none;color:var(--acc);font-size:13px;cursor:pointer">Edit</button></div>';
       for(var ei=0;ei<day.exercises.length;ei++){
         var ex=day.exercises[ei];
-        rows+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--brd)"><div class="dot" style="background:'+PH[ex.ph].dot+'"></div><div style="flex:1"><p style="font-size:13px;color:var(--tx)">'+ex.name+'</p><p style="font-size:11px;color:var(--mu)">'+ex.vol+'</p></div><button data-delex="'+di+'-'+ei+'" style="background:transparent;border:none;color:var(--mu);font-size:13px;cursor:pointer;width:28px;height:28px">&#10005;</button></div>';
+        rows+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--brd)"><div style="flex:1"><p style="font-size:11px;color:var(--mu);margin-bottom:1px">'+phLabel(ex.ph||ex.category||'')+'</p><p style="font-size:13px;color:var(--tx)">'+ex.name+'</p><p style="font-size:11px;color:var(--mu);margin-top:1px">'+exVolStr(ex)+'</p></div><button data-delex="'+di+'-'+ei+'" style="background:transparent;border:none;color:var(--mu);font-size:13px;cursor:pointer;width:28px;height:28px">&#10005;</button></div>';
       }
       rows+='</div>';
     }
@@ -917,18 +955,41 @@ function buildV(){
   var exRows='';
   for(var ei=0;ei<dayObj.exercises.length;ei++){
     var ex=dayObj.exercises[ei];
-    exRows+='<div class="exrow"><div class="dot" style="background:'+PH[ex.ph].dot+'"></div><div style="flex:1"><span class="lbl">'+PH[ex.ph].label+'</span><p style="font-size:13px;color:var(--tx);margin-top:2px">'+ex.name+'</p></div><span style="font-size:12px;color:var(--mu)">'+ex.vol+'</span></div>';
+    exRows+='<div class="exrow"><div style="flex:1"><span class="lbl">'+phLabel(ex.ph||ex.category||'')+'</span><p style="font-size:13px;color:var(--tx);margin-top:2px">'+ex.name+'</p></div><span style="font-size:12px;color:var(--mu)">'+exVolStr(ex)+'</span></div>';
   }
   if(!ce.newEx){
     return '<div class="pad"><span class="lbl">'+dayObj.label+'</span><p class="h1" style="margin:6px 0 16px">Add exercises</p>'+exRows+'<button class="btn btno" style="margin-top:8px" onclick="custOpenEx()">+ Add exercise</button><button class="btn btnp" style="margin-top:10px" onclick="S.customEdit.activeDay=null;sv();draw()">'+(ce.activeDay<ce.days.length-1?'Next session':'Review program')+'</button></div>';
   }
   // Add exercise form
-  var phOpts='',cats=['primer','strength','accessory','cooldown'];
-  for(var pi=0;pi<cats.length;pi++){
-    var pv=cats[pi];var on2=(ce.newEx.ph===pv);
-    phOpts+='<button onclick="S.customEdit.newEx.ph=\''+pv+'\';sv();draw()" style="flex:1;padding:8px;border-radius:8px;border:1px solid '+(on2?'var(--acc)':'var(--brd)')+';background:'+(on2?'#1e1000':'transparent')+';color:'+(on2?'var(--acc)':'var(--mu)')+';font-size:11px;cursor:pointer">'+PH[pv].label+'</button>';
+  // Category picker
+  var CATS=['Warm-up','Mobility','Activation','Strength','Hypertrophy','Power','Cardio','HIIT','Core','Accessory','Finisher','Cooldown','Stretch','Custom'];
+  var catOpts='';
+  for(var ci2=0;ci2<CATS.length;ci2++){
+    var cv=CATS[ci2];var isCustomCat=(cv==='Custom');
+    var onC=(ce.newEx.category===cv||(isCustomCat&&ce.newEx.customCat));
+    catOpts+='<button onclick="custSetCat(\''+cv+'\');" style="padding:7px 12px;border-radius:20px;border:1px solid '+(onC?'var(--acc)':'var(--brd)')+';background:'+(onC?'#1e1000':'transparent')+';color:'+(onC?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer;white-space:nowrap">'+cv+'</button>';
   }
-  return '<div class="pad"><span class="lbl">'+dayObj.label+' · Add exercise</span><p class="h1" style="margin:6px 0 16px">New exercise</p><div class="card" style="margin-bottom:12px"><span class="lbl">Name</span><input value="'+ce.newEx.name+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.name=this.value;sv()" /></div><div class="card" style="margin-bottom:12px"><span class="lbl">Volume / instructions</span><input value="'+ce.newEx.vol+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" placeholder="e.g. 3 x 10" oninput="S.customEdit.newEx.vol=this.value;sv()" /></div><div class="card" style="margin-bottom:16px"><span class="lbl">Category</span><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+phOpts+'</div></div><button class="btn btnp" onclick="custAddEx()">Add to session</button><button class="btng" onclick="custCancelEx()">Cancel</button></div>';
+  var customCatInput=ce.newEx.customCat!==undefined?'<input value="'+(ce.newEx.customCat||'')+'" placeholder="Type category name..." style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:10px" oninput="S.customEdit.newEx.customCat=this.value;sv()" />':'';
+  // Time dropdown options (0 + 10s increments to 300s)
+  var timeOpts='<option value="0"'+(ce.newEx.time===0?' selected':'')+'>Off</option>';
+  for(var ts=10;ts<=300;ts+=10)timeOpts+='<option value="'+ts+'"'+(ce.newEx.time===ts?' selected':'')+'>'+fmt(ts)+'</option>';
+  // Rest dropdown (0 + 30s increments to 300s)
+  var restOpts='<option value="0"'+(ce.newEx.rest===0?' selected':'')+'>Off</option>';
+  for(var rs=30;rs<=300;rs+=30)restOpts+='<option value="'+rs+'"'+(ce.newEx.rest===rs?' selected':'')+'>'+fmt(rs)+'</option>';
+  var selStyle='width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px;-webkit-appearance:none;appearance:none';
+  return '<div class="pad"><span class="lbl">'+dayObj.label+' · Add exercise</span><p class="h1" style="margin:6px 0 16px">New exercise</p>'
+    +'<div class="card" style="margin-bottom:12px"><span class="lbl">Name</span><input value="'+ce.newEx.name+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.name=this.value;sv()" /></div>'
+    +'<div class="card" style="margin-bottom:12px"><span class="lbl">Category</span><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px">'+catOpts+'</div>'+customCatInput+'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
+      +'<div class="card"><span class="lbl">Sets</span><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><button class="nb" onclick="S.customEdit.newEx.sets=Math.max(1,S.customEdit.newEx.sets-1);sv();draw()">&#8722;</button><span style="font-size:20px;font-weight:500;color:var(--tx);min-width:28px;text-align:center">'+ce.newEx.sets+'</span><button class="nb" onclick="S.customEdit.newEx.sets=Math.min(50,S.customEdit.newEx.sets+1);sv();draw()">+</button></div></div>'
+      +'<div class="card"><span class="lbl">Reps</span><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><button class="nb" onclick="S.customEdit.newEx.reps=Math.max(0,S.customEdit.newEx.reps-1);sv();draw()">&#8722;</button><span style="font-size:20px;font-weight:500;color:var(--tx);min-width:28px;text-align:center">'+(ce.newEx.reps||0)+'</span><button class="nb" onclick="S.customEdit.newEx.reps=Math.min(50,S.customEdit.newEx.reps+1);sv();draw()">+</button></div></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
+      +'<div class="card"><span class="lbl">Time</span><select style="'+selStyle+'" onchange="S.customEdit.newEx.time=parseInt(this.value);sv()">'+timeOpts+'</select></div>'
+      +'<div class="card"><span class="lbl">Rest between sets</span><select style="'+selStyle+'" onchange="S.customEdit.newEx.rest=parseInt(this.value);sv()">'+restOpts+'</select></div>'
+    +'</div>'
+    +'<div class="card" style="margin-bottom:18px"><span class="lbl">Notes</span><input value="'+(ce.newEx.notes||'')+'" placeholder="Optional — shown during the session" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.notes=this.value;sv()" /></div>'
+    +'<button class="btn btnp" onclick="custAddEx()">Add to session</button><button class="btng" onclick="custCancelEx()">Cancel</button></div>';
 }
 
 function custStart(){
@@ -942,12 +1003,23 @@ function custStart(){
   S.customEdit.newEx=null;
   sv();draw();
 }
-function custOpenEx(){S.customEdit.newEx={name:'',vol:'',ph:'strength'};sv();draw();}
+function custOpenEx(){S.customEdit.newEx={name:'',category:'Strength',sets:3,reps:10,time:0,rest:0,notes:''};sv();draw();}
+function custSetCat(cv){
+  if(cv==='Custom'){S.customEdit.newEx.customCat='';S.customEdit.newEx.category='Custom';}
+  else{S.customEdit.newEx.category=cv;delete S.customEdit.newEx.customCat;}
+  sv();draw();
+}
 function custAddEx(){
   var ne=S.customEdit.newEx;
   if(!ne||!ne.name.trim())return;
   ne.id='custom_ex_'+Date.now();
-  if(!ne.vol)ne.vol='';
+  // Resolve category: custom free-type or preset
+  if(ne.customCat!==undefined)ne.category=ne.customCat||'Custom';
+  delete ne.customCat;
+  // ph maps to built-in key for compatibility, falls back to category string
+  ne.ph=ne.category;
+  // vol auto-generated for display
+  ne.vol=exVolStr(ne);
   S.customEdit.days[S.customEdit.activeDay].exercises.push(ne);
   S.customEdit.newEx=null;
   sv();draw();
