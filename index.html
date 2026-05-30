@@ -828,12 +828,12 @@ function wxV(){
     targetBlock='<div class="card" style="text-align:center"><span class="lbl">Target</span><p style="font-size:28px;font-weight:500;margin-top:6px">'+(ex.reps||'&#8212;')+' <span style="font-size:13px;color:var(--mu)">'+(ex.reps?'reps':'')+'</span></p></div>';
   }
   var nextLine=w.idx<w.exs.length-1?'<p style="text-align:center;margin-top:10px;font-size:12px;color:var(--dim)">Next: '+w.exs[w.idx+1].name+'</p>':'';
-  return '<div><div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--brd)"><button class="btng" style="width:auto;padding:4px 8px;font-size:14px" onclick="wxConfirmEnd()">&#10005; End</button><p style="font-size:12px;color:var(--mu)">'+w.label+' &middot; '+(w.idx+1)+'/'+w.exs.length+'</p><div style="width:48px"></div></div><div class="pad" style="padding-top:18px"><span class="lbl" style="color:var(--mu)">'+exCatLabel+' · Set '+w.set+' of '+ex.sets+'</span><div style="display:flex;gap:5px;margin:7px 0 16px">'+pips+'</div><p class="h1" style="margin-bottom:4px">'+ex.name+'</p>'+(ex.muscles?'<p class="mu" style="margin-bottom:22px">'+ex.muscles+'</p>':'<div style="margin-bottom:22px"></div>')+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">'+targetBlock+wgtBlock+'</div>'+infoBlock+'<button class="btn btnp" onclick="wxLog()">Log set and rest</button>'+nextLine+'</div></div>';
+  return '<div><div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--brd)"><button class="btng" style="width:auto;padding:4px 8px;font-size:14px" onclick="wxConfirmEnd()">&#10005; End</button><p style="font-size:12px;color:var(--mu)">'+w.label+' &middot; '+(w.idx+1)+'/'+w.exs.length+'</p><div style="width:48px"></div></div><div class="pad" style="padding-top:18px"><span class="lbl" style="color:var(--mu)">'+exCatLabel+' · Set '+w.set+' of '+ex.sets+'</span><div style="display:flex;gap:5px;margin:7px 0 16px">'+pips+'</div><p class="h1" style="margin-bottom:4px">'+ex.name+'</p>'+(ex.muscles?'<p class="mu" style="margin-bottom:22px">'+ex.muscles+'</p>':'<div style="margin-bottom:22px"></div>')+(ex.time&&ex.time>0?'<div style="margin-bottom:12px">'+targetBlock+'</div><div style="margin-bottom:18px">'+wgtBlock+'</div>':'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">'+targetBlock+wgtBlock+'</div>')+infoBlock+'<button class="btn btnp" onclick="wxLog()">Log set and rest</button>'+nextLine+'</div></div>';
 }
 
 function adjW(d){
   var ex=S.wx.exs[S.wx.idx];
-  S.wx.weights[ex.id]=Math.round((S.wx.weights[ex.id]+d)*10)/10;
+  S.wx.weights[ex.id]=Math.max(0,Math.round((S.wx.weights[ex.id]+d)*10)/10);
   var el=document.getElementById('wd');
   if(el)el.textContent=S.wx.weights[ex.id];
 }
