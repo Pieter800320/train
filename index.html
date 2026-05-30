@@ -535,7 +535,7 @@ function draw(){
         +'<span style="font-size:13px;font-weight:500;color:var(--tx)">Log</span>'
         +'<button onclick="closeProgress()" style="background:var(--bg3);border:none;color:var(--tx);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&#10005;</button>'
         +'</div>'
-        +'<div>'+progV()+'</div>';
+        +'<div class="log-body">'+progV()+'</div>';
       document.getElementById('app').appendChild(sheet);
       requestAnimationFrame(function(){requestAnimationFrame(function(){
         var s=document.getElementById('prog-sheet');if(s)s.classList.add('open');
@@ -671,8 +671,8 @@ function homeV(){
     var bgCls='cacc';
     var bgStyle=isNotice?'':'background:var(--bg2);border-left:3px solid var(--acc);';
     var lc='var(--acc)';
-    var tc='#ddc89a';
-    var bc='#8a6430';
+    var tc='var(--tx)';
+    var bc='var(--mu)';
     var linkHtml=n.link?'<a href="'+n.link+'" target="_blank" style="display:inline-block;margin-top:8px;font-size:12px;color:'+lc+';text-decoration:none;border:.5px solid '+lc+';padding:4px 10px;border-radius:8px">Watch &#8599;</a>':'';
     notices+='<div class="card '+bgCls+'" style="margin-bottom:8px;'+bgStyle+'"><span class="lbl" style="color:'+lc+'">'+(isNotice?'Coach notice':'Training tip')+'</span><p style="font-size:14px;font-weight:500;margin:5px 0 4px;color:'+tc+'">'+n.title+'</p><p style="font-size:13px;line-height:1.5;color:'+bc+'">'+n.body+'</p>'+linkHtml+'</div>';
   }
@@ -1063,7 +1063,7 @@ function progV(){
   }
   var totalPages=Math.ceil(total/PAGE_SIZE);
   var pageStr=(page+1)+' / '+totalPages;
-  var refreshLog='var s=document.getElementById(\'prog-sheet\');if(s){var sc=s.querySelector(\'div:last-child\');if(sc)sc.innerHTML=progV();}';
+  var refreshLog='refreshLogSheet()';
   var prevBtn=page<totalPages-1?'<button onclick="S.histPage=(S.histPage||0)+1;sv();'+refreshLog+'" style="width:40px;height:36px;background:var(--bg3);border:none;color:var(--tx);border-radius:10px;cursor:pointer;font-size:16px">&#8592;</button>':'<button disabled style="width:40px;height:36px;background:transparent;border:none;color:var(--dim);border-radius:10px;font-size:16px">&#8592;</button>';
   var nextBtn=page>0?'<button onclick="S.histPage=Math.max(0,(S.histPage||0)-1);sv();'+refreshLog+'" style="width:40px;height:36px;background:var(--bg3);border:none;color:var(--tx);border-radius:10px;cursor:pointer;font-size:16px">&#8594;</button>':'<button disabled style="width:40px;height:36px;background:transparent;border:none;color:var(--dim);border-radius:10px;font-size:16px">&#8594;</button>';
   var loadMore=total>PAGE_SIZE?'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">'+prevBtn+'<span style="font-size:12px;color:var(--mu)">'+pageStr+'</span>'+nextBtn+'</div>':'';
@@ -1446,12 +1446,23 @@ function timerSetupV(){
   var roundItems=[];for(var ro=1;ro<=30;ro++)roundItems.push({label:ro,val:ro});
 
   var configHtml='';
-  if(T.mode==='countdown'||T.mode==='emom'){
-    var curMins=T.mode==='emom'?(T.emomMins||10):Math.round(T.totalSecs/60)||1;
-    var drumId=T.mode==='emom'?'drum-emom':'drum-cd';
-    var lbl=T.mode==='emom'?'Duration (minutes = rounds)':'Duration';
-    configHtml='<div class="card" style="margin-bottom:16px"><span class="lbl">'+lbl+'</span>'
-      +makeDrum(drumId,minItems,curMins*60)
+  if(T.mode==='countdown'){
+    var cdTotalSecs=T.totalSecs||300;
+    var cdMins=Math.floor(cdTotalSecs/60);
+    var cdSecs=cdTotalSecs%60;
+    // Minutes: 0-90, Seconds: 0,5,10...55
+    var cdMinItems=[];for(var cmi=0;cmi<=90;cmi++)cdMinItems.push({label:cmi+'m',val:cmi});
+    var cdSecItems=[];for(var csi=0;csi<=55;csi+=5)cdSecItems.push({label:csi+'s',val:csi});
+    configHtml='<div class="card" style="margin-bottom:16px"><span class="lbl">Duration</span>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">'
+        +'<div><span class="lbl" style="display:block;margin-bottom:6px">Minutes</span>'+makeDrum('drum-cd-min',cdMinItems,cdMins)+'</div>'
+        +'<div><span class="lbl" style="display:block;margin-bottom:6px">Seconds</span>'+makeDrum('drum-cd-sec',cdSecItems,cdSecs)+'</div>'
+      +'</div>'
+    +'</div>';
+  } else if(T.mode==='emom'){
+    var curMins=T.emomMins||10;
+    configHtml='<div class="card" style="margin-bottom:16px"><span class="lbl">Duration (minutes = rounds)</span>'
+      +makeDrum('drum-emom',minItems,curMins*60)
     +'</div>';
   } else if(T.mode==='tabata'){
     configHtml='<div class="card" style="margin-bottom:16px">'
@@ -1609,7 +1620,12 @@ function initDrumScroll(){
   var T=S.timer;
   // Map drum id -> {get initial index, on change}
   var drums={
-    'drum-cd':   {idx:Math.max(0,(Math.round(T.totalSecs/60)||1)-1),step:60,onChange:function(v){T.totalSecs=v;}},
+    'drum-cd-min':{idx:Math.max(0,Math.floor(T.totalSecs/60)),step:1,onChange:function(v){
+      var secs=T.totalSecs%60;T.totalSecs=Math.max(5,v*60+secs);
+    }},
+    'drum-cd-sec':{idx:Math.max(0,Math.round((T.totalSecs%60)/5)),step:5,onChange:function(v){
+      var mins=Math.floor(T.totalSecs/60);T.totalSecs=Math.max(5,mins*60+v);
+    }},
     'drum-emom': {idx:Math.max(0,(T.emomMins||10)-1),             step:60,onChange:function(v){T.emomMins=Math.round(v/60);}},
     'drum-work': {idx:Math.max(0,Math.round((T.tabWork-5)/5)),     step:5, onChange:function(v){T.tabWork=v;}},
     'drum-rest': {idx:Math.max(0,Math.round((T.tabRest-5)/5)),     step:5, onChange:function(v){T.tabRest=v;}},
@@ -1630,12 +1646,20 @@ function initDrumScroll(){
           var val;
           if(id==='drum-rounds')val=idx+1;
           else if(id==='drum-work'||id==='drum-rest')val=(idx+1)*5;
+          else if(id==='drum-cd-min')val=idx;
+          else if(id==='drum-cd-sec')val=idx*5;
           else val=(idx+1)*60;
           cfg.onChange(val);sv();
         },150);
       });
     })(ids[i],drums[ids[i]]);
   }
+}
+function refreshLogSheet(){
+  var sheet=document.getElementById('prog-sheet');
+  if(!sheet)return;
+  var body=sheet.querySelector('.log-body');
+  if(body)body.innerHTML=progV();
 }
 function closeProgress(){
   var sheet=document.getElementById('prog-sheet');
