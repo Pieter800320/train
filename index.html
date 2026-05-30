@@ -462,7 +462,7 @@ var OBQ=[
 // STATE ----------------------------------------------------------------------
 
 var ACTIVE_TPL=TPL;
-var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],theme:'dark',tplKey:'balanced',
+var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],pr:{},theme:'dark',tplKey:'balanced',
   customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},
   customPrograms:[],
   timer:{mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true}
@@ -703,9 +703,15 @@ function wxStart(){
     }
     // else: built-in primer/cooldown (no sets) — skip
   }
-  var weights={};
-  for(var i=0;i<exs.length;i++)weights[exs[i].id]=exs[i].kg||0;
-  S.wx={on:true,label:sess.label,exs:exs,idx:0,set:1,logs:[],rest:false,rl:0,rt:0,weights:weights,exTimer:0,exTimerRunning:false};
+  var weights={},reps={},times={};
+  for(var i=0;i<exs.length;i++){
+    var eid=exs[i].id;
+    var pr=S.pr[eid]||{};
+    weights[eid]=pr.kg!==undefined?pr.kg:(exs[i].kg||0);
+    reps[eid]=pr.reps!==undefined?pr.reps:(exs[i].reps||0);
+    times[eid]=pr.time!==undefined?pr.time:(exs[i].time||0);
+  }
+  S.wx={on:true,label:sess.label,exs:exs,idx:0,set:1,logs:[],rest:false,rl:0,rt:0,weights:weights,reps:reps,times:times,exTimer:0,exTimerRunning:false};
   sv();draw();
 }
 
@@ -732,7 +738,8 @@ function tickR(){
       if(et)et.textContent=fmt(S.wx.exTimer);
       var er=document.getElementById('exr');
       var ex=S.wx.exs[S.wx.idx];
-      if(er&&ex&&ex.time)er.style.strokeDashoffset=440-(440*(S.wx.exTimer/ex.time));
+      var tFullTick=S.wx.times[ex.id]||ex.time||0;
+      if(er&&ex&&tFullTick)er.style.strokeDashoffset=440-(440*(S.wx.exTimer/tFullTick));
       if(S.wx.exTimer<=0){
         S.wx.exTimerRunning=false;
         try{beep(880,400);}catch(e){}
@@ -748,8 +755,9 @@ function tickR(){
 }
 function wxExTimerStart(){
   var ex=S.wx.exs[S.wx.idx];
-  if(!ex||!ex.time)return;
-  if(!S.wx.exTimerRunning&&S.wx.exTimer===0)S.wx.exTimer=ex.time;
+  var tFull=S.wx.times[ex.id]||ex.time||0;
+  if(!ex||!tFull)return;
+  if(!S.wx.exTimerRunning&&S.wx.exTimer===0)S.wx.exTimer=tFull;
   S.wx.exTimerRunning=true;
   sv();
   var sc=document.getElementById('scr');if(sc)sc.innerHTML=wxV();
@@ -764,7 +772,7 @@ function wxExTimerPause(){
 function wxExTimerReset(){
   var ex=S.wx.exs[S.wx.idx];
   S.wx.exTimerRunning=false;
-  S.wx.exTimer=ex?ex.time:0;
+  S.wx.exTimer=ex?(S.wx.times[ex.id]||ex.time||0):0;
   clearInterval(_t);
   sv();
   var sc=document.getElementById('scr');if(sc)sc.innerHTML=wxV();
@@ -795,37 +803,40 @@ function wxV(){
     infoBlock='<div class="card" style="margin-bottom:18px"><span class="lbl">Form cue</span><p style="font-size:13px;color:var(--mu);line-height:1.6;margin-top:6px;font-style:italic">"'+(exCues2[cueIdx]||'')+'"</p></div>';
   }
   // Target block: live countdown ring or reps
+  // Target block: live countdown ring or reps stepper
   var targetBlock='';
-  if(ex.time&&ex.time>0){
-    var tRemain=w.exTimer>0?w.exTimer:ex.time;
+  if(w.times[ex.id]>0){
+    var tFull=w.times[ex.id];
+    var tRemain=(w.exTimer>0)?w.exTimer:tFull;
     var tRunning=w.exTimerRunning;
-    var tDone=(w.exTimer===0&&!tRunning&&w.exTimer!==ex.time)||false;
-    // If never started, show full time
-    if(w.exTimer===0&&!tRunning)tRemain=ex.time;
-    var tPct=tRemain/ex.time;
+    var tPct=tFull>0?tRemain/tFull:1;
     var dashOff=440-(440*tPct);
     var ringCol=tRunning?'var(--acc)':(tRemain<=0?'var(--ok)':'var(--mu)');
+    var btnHtml=tRunning
+      ?'<button onclick="wxExTimerPause()" style="background:var(--bg3);border:none;color:var(--tx);padding:7px 16px;border-radius:10px;font-size:13px;cursor:pointer">Pause</button>'
+      :'<button onclick="wxExTimerStart()" style="background:var(--acc);border:none;color:#fff;padding:7px 16px;border-radius:10px;font-size:13px;cursor:pointer">'+(w.exTimer>0&&w.exTimer<tFull?'Resume':'Start')+'</button>';
     targetBlock='<div class="card" style="text-align:center;padding:18px 12px">'
       +'<span class="lbl">Time</span>'
-      +'<div style="position:relative;width:120px;height:120px;margin:10px auto 10px">'
-        +'<svg width="120" height="120" viewBox="0 0 120 120">'
-          +'<circle cx="60" cy="60" r="52" fill="none" stroke="var(--bg3)" stroke-width="7"/>'
-          +'<circle id="exr" cx="60" cy="60" r="52" fill="none" stroke="'+ringCol+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="'+dashOff+'" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1s linear"/>'
-        +'</svg>'
-        +'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">'
-          +'<p id="ext" style="font-size:22px;font-weight:500;color:'+ringCol+';font-variant-numeric:tabular-nums">'+fmt(tRemain)+'</p>'
+      +'<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:8px 0 4px">'
+        +'<button onclick="adjT(-10)" style="background:var(--bg3);border:none;color:var(--tx);width:32px;height:32px;border-radius:8px;font-size:15px;cursor:pointer">&#8722;</button>'
+        +'<div style="position:relative;width:110px;height:110px">'
+          +'<svg width="110" height="110" viewBox="0 0 110 110">'
+            +'<circle cx="55" cy="55" r="48" fill="none" stroke="var(--bg3)" stroke-width="7"/>'
+            +'<circle id="exr" cx="55" cy="55" r="48" fill="none" stroke="'+ringCol+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="'+dashOff+'" transform="rotate(-90 55 55)" style="transition:stroke-dashoffset 1s linear"/>'
+          +'</svg>'
+          +'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">'
+            +'<p id="ext" style="font-size:20px;font-weight:500;color:'+ringCol+';font-variant-numeric:tabular-nums">'+fmt(tRemain)+'</p>'
+          +'</div>'
         +'</div>'
+        +'<button onclick="adjT(10)" style="background:var(--bg3);border:none;color:var(--tx);width:32px;height:32px;border-radius:8px;font-size:15px;cursor:pointer">+</button>'
       +'</div>'
-      +'<div style="display:flex;gap:8px;justify-content:center">'
-        +(tRunning
-          ?'<button onclick="wxExTimerPause()" style="background:var(--bg3);border:none;color:var(--tx);padding:7px 16px;border-radius:10px;font-size:13px;cursor:pointer">Pause</button>'
-          :'<button onclick="wxExTimerStart()" style="background:var(--acc);border:none;color:#fff;padding:7px 16px;border-radius:10px;font-size:13px;cursor:pointer">'+(w.exTimer>0&&w.exTimer<ex.time?'Resume':'Start')+'</button>'
-        )
+      +'<div style="display:flex;gap:8px;justify-content:center;margin-top:8px">'+btnHtml
         +'<button onclick="wxExTimerReset()" style="background:var(--bg3);border:none;color:var(--mu);padding:7px 12px;border-radius:10px;font-size:13px;cursor:pointer">Reset</button>'
       +'</div>'
       +'</div>';
   } else {
-    targetBlock='<div class="card" style="text-align:center"><span class="lbl">Target</span><p style="font-size:28px;font-weight:500;margin-top:6px">'+(ex.reps||'&#8212;')+' <span style="font-size:13px;color:var(--mu)">'+(ex.reps?'reps':'')+'</span></p></div>';
+    var curReps=w.reps[ex.id]!==undefined?w.reps[ex.id]:(ex.reps||0);
+    targetBlock='<div class="card" style="text-align:center"><span class="lbl">Reps</span><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px"><button class="nb" onclick="adjR(-1)">&#8722;</button><span id="rd" style="font-size:28px;font-weight:500;color:var(--tx);min-width:40px;text-align:center">'+(curReps||'&#8212;')+'</span><button class="nb" onclick="adjR(1)">+</button></div></div>';
   }
   var nextLine=w.idx<w.exs.length-1?'<p style="text-align:center;margin-top:10px;font-size:12px;color:var(--dim)">Next: '+w.exs[w.idx+1].name+'</p>':'';
   return '<div><div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--brd)"><button class="btng" style="width:auto;padding:4px 8px;font-size:14px" onclick="wxConfirmEnd()">&#10005; End</button><p style="font-size:12px;color:var(--mu)">'+w.label+' &middot; '+(w.idx+1)+'/'+w.exs.length+'</p><div style="width:48px"></div></div><div class="pad" style="padding-top:18px"><span class="lbl" style="color:var(--mu)">'+exCatLabel+' · Set '+w.set+' of '+ex.sets+'</span><div style="display:flex;gap:5px;margin:7px 0 16px">'+pips+'</div><p class="h1" style="margin-bottom:4px">'+ex.name+'</p>'+(ex.muscles?'<p class="mu" style="margin-bottom:22px">'+ex.muscles+'</p>':'<div style="margin-bottom:22px"></div>')+(ex.time&&ex.time>0?'<div style="margin-bottom:12px">'+targetBlock+'</div><div style="margin-bottom:18px">'+wgtBlock+'</div>':'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">'+targetBlock+wgtBlock+'</div>')+infoBlock+'<button class="btn btnp" onclick="wxLog()">Log set and rest</button>'+nextLine+'</div></div>';
@@ -837,16 +848,33 @@ function adjW(d){
   var el=document.getElementById('wd');
   if(el)el.textContent=S.wx.weights[ex.id];
 }
+function adjR(d){
+  var ex=S.wx.exs[S.wx.idx];
+  S.wx.reps[ex.id]=Math.min(50,Math.max(1,S.wx.reps[ex.id]+d));
+  var el=document.getElementById('rd');
+  if(el)el.textContent=S.wx.reps[ex.id];
+}
+function adjT(d){
+  var ex=S.wx.exs[S.wx.idx];
+  S.wx.times[ex.id]=Math.max(10,S.wx.times[ex.id]+d);
+  // Reset the running timer to the new value
+  S.wx.exTimerRunning=false;
+  S.wx.exTimer=S.wx.times[ex.id];
+  clearInterval(_t);
+  var sc=document.getElementById('scr');if(sc)sc.innerHTML=wxV();
+}
 function wxLog(){
   var w=S.wx;var ex=w.exs[w.idx];
+  var eid=ex.id;
+  // Save personal record for this exercise
+  S.pr[eid]={kg:w.weights[eid],reps:w.reps[eid],time:w.times[eid]};
   // Stop exercise timer if running
   w.exTimerRunning=false;
   w.exTimer=0;
-  w.logs.push({name:ex.name,set:w.set,reps:ex.reps,kg:w.weights[ex.id]});
+  w.logs.push({name:ex.name,set:w.set,reps:w.reps[eid],kg:w.weights[eid]});
   if(w.set<ex.sets){
     w.set++;
-    // Reset exercise timer for next set
-    if(ex.time>0)w.exTimer=0;
+    if(ex.time>0||w.times[eid]>0)w.exTimer=0;
     if(ex.rest>0){w.rest=true;w.rl=ex.rest;w.rt=ex.rest;}
   } else {
     w.idx++;w.set=1;
@@ -1110,6 +1138,7 @@ function custSave(){
   var d=new Date();
   var dateStr=d.getDate()+' '+mn[d.getMonth()];
   if(!S.customPrograms)S.customPrograms=[];
+if(!S.pr)S.pr={};
   S.customPrograms.push({key:key,name:ce.name,date:dateStr,tpl:tpl});
   S.tplKey=key;
   ACTIVE_TPL=tpl;
