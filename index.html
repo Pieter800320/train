@@ -1344,7 +1344,7 @@ function swToggle(){
   } else {
     _sw.running=true;
     var el=document.getElementById('sw-display');if(el)el.style.color='var(--acc)';
-    var btn=document.getElementById('sw-btn');if(btn){btn.textContent='Stop';btn.className='btn btno';btn.style.flex='1';}
+    var btn=document.getElementById('sw-btn');if(btn){btn.textContent='Pause';btn.className='btn btno';btn.style.flex='1';}
     _swInterval=setInterval(function(){
       _sw.elapsed++;
       var el=document.getElementById('sw-display');
@@ -1659,7 +1659,11 @@ function refreshLogSheet(){
   var sheet=document.getElementById('prog-sheet');
   if(!sheet)return;
   var body=sheet.querySelector('.log-body');
-  if(body)body.innerHTML=progV();
+  if(body){
+    body.innerHTML=progV();
+    var hb=document.getElementById('hist-body');
+    if(hb)hb.style.display='block';
+  }
 }
 function closeProgress(){
   var sheet=document.getElementById('prog-sheet');
