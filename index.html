@@ -671,7 +671,13 @@ function wxStart(){
   // FIX: use ACTIVE_TPL
   var exs=[];
   var sess=ACTIVE_TPL.days[S.day];
-  for(var i=0;i<sess.exercises.length;i++){if(sess.exercises[i].sets)exs.push(sess.exercises[i]);}
+  for(var i=0;i<sess.exercises.length;i++){
+    var e=sess.exercises[i];
+    // Built-in exercises: include only those with sets (skips primer/cooldown).
+    // Custom exercises have no sets field at all — include them and default to 1 set.
+    if(e.sets){exs.push(e);}
+    else if(e.sets===undefined){exs.push(Object.assign({},e,{sets:1,reps:e.reps||0,rest:e.rest||0,kg:e.kg||0}));}
+  }
   var weights={};
   for(var i=0;i<exs.length;i++)weights[exs[i].id]=exs[i].kg||0;
   S.wx={on:true,label:sess.label,exs:exs,idx:0,set:1,logs:[],rest:false,rl:0,rt:0,weights:weights};
