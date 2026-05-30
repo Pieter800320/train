@@ -395,60 +395,761 @@ var TPL_KNEE={name:'Knee Support',days:[{label:'Session A',focus:'VMO activation
 
 var TPL_BACK={name:'Back Health',days:[{label:'Session A',focus:'Spine sparing + bracing foundations',mins:35,exercises:[{id:'bk_cc',ph:'primer',name:'Cat-cow (controlled)',vol:'2 x 10 slow cycles',rest:0,muscles:'Spinal erectors, multifidus',cues:['On hands and knees. Arch upward (cat), then extend downward (cow). Slow.','Do not force either end range — stay within the pain-free zone','Mobilisation, not a stretch'],subs:'Supine knee rocks'},{id:'bk_bd',ph:'primer',name:'Bird dog',vol:'3 x 6 each',rest:0,muscles:'Erectors, glutes, core — spinal stability',cues:['On hands and knees. Extend the opposite arm and leg slowly — hold 2 seconds.','The lower back must not rotate or sag — keep the pelvis level','Most evidence-based spine stabilisation exercise that exists'],subs:'Bent-knee bird dog',prog:'Add a light resistance band when 3x6 is completely stable'},{id:'bk_db',ph:'strength',name:'Dead bug',vol:'3 x 6 each',rest:60,sets:3,reps:6,kg:0,muscles:'Deep core — anti-extension',cues:['Lower back pressed to the floor throughout','Move slowly','Trains the deep core muscles that directly stabilise the spine'],subs:'Bent-knee dead bug',prog:'Progress to dead bug with arms holding a light weight'},{id:'bk_ms',ph:'strength',name:'Modified side plank',vol:'3 x 20s each',rest:60,sets:3,reps:0,kg:0,muscles:'Quadratus lumborum, obliques',cues:['Knee on the floor (modified). Forearm on the floor. Lift the hips.','Body in a straight line — do not sag','Stuart McGill considers this one of the three essential spine exercises'],subs:'Full side plank when ready',prog:'Progress to full side plank when 3x20s is stable and pain-free'},{id:'bk_gb',ph:'accessory',name:'Glute bridge',vol:'3 x 15',rest:60,sets:3,reps:15,kg:0,muscles:'Glutes, hamstrings — hip extension without spine stress',cues:['Drive through heels — not toes','Squeeze the glutes hard at the top','Do not hyperextend the lower back'],subs:'Single-leg glute bridge',prog:'Add a plate across the hips when bodyweight is easy'},{id:'bk_wh',ph:'accessory',name:'Wall hip hinge',vol:'2 x 10',rest:45,sets:2,reps:10,kg:0,muscles:'Hamstrings, glutes — hinge pattern',cues:['Stand 30cm from wall. Push hips back until they touch.','Neutral spine throughout','Learning this pattern protects the spine on every bending task in daily life'],subs:'Dowel rod hinge'},{id:'bk_wk',ph:'accessory',name:'Walking (deliberate)',vol:'10-15 minutes',rest:0,sets:0,reps:0,kg:0,muscles:'Full body — most evidence-backed back exercise',cues:['Walk tall — do not shuffle. Arm swing is natural and important.','Stuart McGill consistently ranks walking as one of the best interventions for lower back pain','This is prescribed exercise — not casual movement'],subs:'Swimming, cycling'},{id:'bk_cp',ph:'cooldown',name:"Child's pose",vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Sit back toward the heels, arms extended forward','Breathe into the upper back','Do not force the lower back'],subs:'Supine knee hug'},{id:'bk_kh',ph:'cooldown',name:'Supine knee hug',vol:'2 x 30s each',rest:0,muscles:'Lower back, glutes — decompression',cues:['Lie on your back. Hug one or both knees gently to the chest.','Decompresses the lumbar spine after loading','Hold gently — do not pull aggressively'],subs:"Child's pose"}]},{label:'Session B',focus:'Hip strength + upper back endurance',mins:35,exercises:[{id:'bk_bd2',ph:'primer',name:'Bird dog',vol:'3 x 6 each',rest:0,muscles:'Spinal stabilisers',cues:['On hands and knees. Extend opposite arm and leg — hold 2 seconds.','Pelvis stays level throughout','Slow and deliberate'],subs:'Bent-knee bird dog'},{id:'bk_cl',ph:'primer',name:'Clamshell',vol:'2 x 15 each',rest:0,muscles:'Glute med — hip stabiliser',cues:['Side-lying, feet together. Rotate the top knee upward.','Do not let the pelvis roll backward','Glute med weakness is a frequent contributor to back pain'],subs:'Side-lying hip abduction'},{id:'bk_ht',ph:'strength',name:'Hip thrust',vol:'3 x 12',rest:75,sets:3,reps:12,kg:14,muscles:'Glutes — hip extension without axial spine load',cues:['Upper back on bench, feet flat','Drive through heels and squeeze hard at the top','Loads the glutes without compressing the spine'],subs:'Glute bridge on floor',prog:'Add 5 kg when 3x12 is clean and pain-free'},{id:'bk_rw',ph:'strength',name:'Chest-supported DB row',vol:'3 x 10',rest:75,sets:3,reps:10,kg:10,muscles:'Mid-back, rhomboids',cues:['Chest on incline bench — removes the temptation to use the lower back','Row elbows back and upward','Pause and squeeze at the top'],subs:'Band row',prog:'Add 2 kg when 3x10 is clean'},{id:'bk_sp',ph:'accessory',name:'Full side plank (when ready)',vol:'3 x 20s each',rest:60,sets:3,reps:0,kg:0,muscles:'Quadratus lumborum, obliques',cues:['Only progress to this from the modified side plank when pain-free','Body in a straight line from head to feet','Breathe steadily throughout'],subs:'Modified side plank',prog:'Increase to 35 seconds when 3x20s is stable'},{id:'bk_pa',ph:'accessory',name:'Pallof press',vol:'2 x 10 each',rest:45,sets:2,reps:10,kg:0,muscles:'Obliques — anti-rotation',cues:['Press straight out — resist rotation','Hold 1 second at full extension','Hips and shoulders stay square'],subs:'Half-kneeling Pallof press',prog:'Step further or increase resistance'},{id:'bk_ss',ph:'accessory',name:'DB split squat',vol:'3 x 8 each',rest:75,sets:3,reps:8,kg:6,muscles:'Quads, glutes — lower body without heavy axial load',cues:['Weight 70% on front foot','Drop the back knee toward the floor','Torso upright'],subs:'Reverse lunge',prog:'Add 1 kg/hand when 3x8 is pain-free and controlled'},{id:'bk_cc2',ph:'cooldown',name:'Cat-cow (slow)',vol:'2 x 8 slow cycles',rest:0,muscles:'Spinal mobilisation',cues:['Move slowly through the range','Stay within the comfortable zone','Breathe — inhale into the cow, exhale into the cat'],subs:'Supine knee rocks'},{id:'bk_tr',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Thoracic mobility reduces compensatory movement at the lumbar spine'],subs:'Thread the needle'}]},{label:'Session C',focus:'Progressive loading + gait',mins:35,exercises:[{id:'bk_bd3',ph:'primer',name:'Bird dog',vol:'3 x 6 each',rest:0,muscles:'Spinal stabilisers — daily practice',cues:['On hands and knees. Opposite arm and leg — hold 2 seconds.','Pelvis stays level','This becomes easier — that is the point'],subs:'Bent-knee bird dog'},{id:'bk_db2',ph:'primer',name:'Dead bug',vol:'2 x 6 each',rest:0,muscles:'Deep core',cues:['Lower back pressed to the floor','Move slowly','Exhale as you lower'],subs:'Bent-knee dead bug'},{id:'bk_gq',ph:'strength',name:'Goblet squat (to tolerance)',vol:'3 x 10',rest:75,sets:3,reps:10,kg:10,muscles:'Quads, glutes — axial load management',cues:['Only go as deep as is pain-free','Brace the core before every rep','Progress depth before load'],subs:'Box squat, wall sit',prog:'Increase load only when full pain-free depth is available'},{id:'bk_dr',ph:'strength',name:'Romanian deadlift (light)',vol:'3 x 10',rest:75,sets:3,reps:10,kg:14,muscles:'Hamstrings, glutes',cues:['Push hips back first — neutral spine throughout','Never round under load','Start very light and build over weeks'],subs:'Single-leg RDL',prog:'Add 2.5 kg only when 3x10 is completely pain-free with perfect form'},{id:'bk_fc',ph:'accessory',name:'Farmer carry',vol:'3 x 20m',rest:60,sets:3,reps:0,kg:12,muscles:'Core stiffness, gait',cues:['Stand tall — the weight should not change your posture','Teaches the trunk to maintain stiffness under load','Start light — increase gradually as the back tolerates it'],subs:'Suitcase carry',prog:'Increase weight when 20m is easy with no discomfort'},{id:'bk_sg',ph:'accessory',name:'Single-leg glute bridge',vol:'3 x 10 each',rest:60,sets:3,reps:10,kg:0,muscles:'Glutes — progressive hip load',cues:['One foot on the floor, other leg extended','Drive through the heel and squeeze the glute at the top','Do not let the hips drop sideways'],subs:'Bilateral glute bridge',prog:'Add a plate across the hips when single-leg 3x10 is easy'},{id:'bk_wk2',ph:'accessory',name:'Walking (deliberate)',vol:'10-15 minutes',rest:0,sets:0,reps:0,kg:0,muscles:'Full body — therapeutic movement',cues:['Walk tall with a natural arm swing','Most consistently recommended intervention for chronic lower back pain','Frequency matters more than intensity'],subs:'Swimming, cycling'},{id:'bk_kh2',ph:'cooldown',name:'Supine knee hug',vol:'2 x 30s each',rest:0,muscles:'Lower back decompression',cues:['Lie on your back. Hug one knee gently to the chest.','Hold gently — do not pull aggressively','Breathe into the lower back'],subs:"Child's pose"},{id:'bk_sl',ph:'cooldown',name:'Side-lying rest position',vol:'2 minutes',rest:0,muscles:'Spinal decompression',cues:['Lie on your side in the foetal position with a pillow between the knees.','Lowest-load spine position available — allows discs to recover','Simply rest — breathe slowly. This is part of the prescription.'],subs:'Supine with knees bent'}]}]};
 
+// ============================================================
+// MUSCLE BUILDING — BEGINNER 3-DAY
+// ============================================================
+var TPL_HYP_B3={name:'Muscle Building · Beginner · 3 days',days:[
+{label:'Workout 1',focus:'Full body — squat focus',mins:50,exercises:[
+{id:'hb3_p0',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through the heels — not the toes','Squeeze the glutes hard at the top — 1 second hold','Do not hyperextend the lower back at the top'],subs:'Single-leg glute bridge'},
+{id:'hb3_k0',ph:'strength',name:'Barbell Squat',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Quads, glutes, core',cues:['Brace the core before every rep — treat it like a punch is coming','Knees track in line with the toes — they must not cave inward','Full depth where mobility allows; do not cut range to add weight'],subs:'Goblet squat, leg press',prog:'Add 2.5 kg when all sets are clean with full range'},
+{id:'hb3_a0',ph:'accessory',name:'Leg Curl, lying',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Hamstrings',cues:['Curl with intent — do not swing the hips','Pause 1 second at peak contraction','Lower slowly — 3 seconds down'],subs:'Seated leg curl, Nordic curl',prog:'Add 2.5 kg when 3 sets are clean'},
+{id:'hb3_a1',ph:'accessory',name:'DB Bench Press',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Lower to chest level — elbows at 45 degrees, not flared wide','Press up and slightly inward — feel the chest squeeze at the top','Control the descent: 2 seconds down, drive up'],subs:'Push-up progression, cable chest press',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb3_a2',ph:'accessory',name:'Lat Pulldown',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — not below the chin','Elbows travel down toward hip pockets','Depress the shoulder blades before you pull'],subs:'Assisted pull-up, cable row',prog:'Add 5 kg when sets are clean'},
+{id:'hb3_a3',ph:'accessory',name:'DB Shoulder Press',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Deltoid, triceps',cues:['Press straight up — do not flare the elbows excessively wide','Keep the core braced — do not arch the lower back','Full lockout at the top, controlled return'],subs:'Machine shoulder press, Arnold press',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb3_a4',ph:'accessory',name:'Plank with Rotation',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Core, obliques',cues:['Hold a strong plank base — hips level before rotating','Rotate the top arm toward the ceiling, not just the shoulder','Return fully to plank before the next rep'],subs:'Side plank, dead bug'},
+{id:'hb3_cd0',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot to include the calf','Hold static — do not bounce'],subs:'Supine hamstring stretch'},
+{id:'hb3_cd1',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors, quads',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise the same-side arm for a deeper stretch'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 2',focus:'Full body — press focus',mins:50,exercises:[
+{id:'hb3_p1',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rhomboids',cues:['Arms stay straight — this is not a row','Pull to chest height, thumbs rotating outward','Control the return — do not let the band snap back'],subs:'Face pull'},
+{id:'hb3_k1',ph:'strength',name:'BB Bench Press',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Five contact points — head, upper back, glutes on bench, both feet on floor','Lower the bar to the lower chest — elbows at 45 degrees','Brace hard before every rep. Press and slightly arc the bar.'],subs:'DB bench press, push-up',prog:'Add 2.5 kg when all sets are completed cleanly'},
+{id:'hb3_a5',ph:'accessory',name:'Romanian Deadlift',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Hamstrings, glutes',cues:['Push hips back first — the torso follows, not the reverse','Keep the bar or dumbbells close to the legs throughout','Feel a strong hamstring stretch at the bottom — that is the stimulus'],subs:'Single-leg RDL, cable pull-through',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb3_a6',ph:'accessory',name:'Cable Row, neutral grip',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Mid-back, biceps',cues:['Sit tall — do not round the lower back as you reach forward','Row to the lower abdomen — not the chest','Pause at full contraction, lean forward slightly on the return'],subs:'DB row, resistance band row',prog:'Add 5 kg when sets are clean'},
+{id:'hb3_a7',ph:'accessory',name:'Machine Shoulder Press',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Deltoid, triceps',cues:['Adjust the seat so handles are at shoulder height','Press without shrugging the traps — keep them down','Controlled return — do not let the stack drop'],subs:'DB shoulder press, Arnold press',prog:'Add 5 kg when sets are clean'},
+{id:'hb3_a8',ph:'accessory',name:'Leg Extension',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze the quad at the top for 1 second','Lower slowly — 3 seconds down','Adjust the pad so it sits just above the ankle'],subs:'Terminal knee extension (band)',prog:'Add 5 kg when sets are clean'},
+{id:'hb3_a9',ph:'accessory',name:'Ball Crunches',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Rectus abdominis, core',cues:['Lower back presses into the ball — use the curve as a range amplifier','Exhale forcefully as you crunch up','Do not pull the neck — keep hands lightly behind the head'],subs:'Cable crunch, floor crunch'},
+{id:'hb3_cd2',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Forearm on frame, elbow at 90 degrees','Step gently forward into the stretch','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'hb3_cd3',ph:'cooldown',name:'Lat stretch (child\'s pose)',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink toward the floor','Reach hands to one side for a side-specific stretch','Breathe into the upper back'],subs:'Thread the needle'}
+]},
+{label:'Workout 3',focus:'Full body — hinge focus',mins:50,exercises:[
+{id:'hb3_p2',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded — do not tilt to one side','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'},
+{id:'hb3_k2',ph:'strength',name:'Deadlift',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Hamstrings, glutes, erectors, lats',cues:['Set up with the bar over mid-foot, hips hinge back to grip','Brace the core completely before the pull — big breath in','Drive the floor away — do not think "lift", think "push"'],subs:'Romanian deadlift, trap bar deadlift',prog:'Add 5 kg when all sets are completed cleanly'},
+{id:'hb3_a10',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Lats, biceps, rear deltoid',cues:['Pull to upper chest — elbows travel toward hip pockets','Depress the shoulder blades before you pull','Controlled return — do not let the stack pull you forward'],subs:'Pull-up, cable row',prog:'Add 5 kg when sets are clean'},
+{id:'hb3_a11',ph:'accessory',name:'Horizontal Flyes',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Chest — stretch emphasis',cues:['Slight bend in the elbows throughout — do not straighten them fully','Lower until you feel a deep chest stretch — do not force range','Squeeze the chest to bring the weights back up'],subs:'Cable fly, pec deck',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb3_a12',ph:'accessory',name:'Leg Curl, lying',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Hamstrings',cues:['Full range — let the leg fully extend at the bottom','Curl with intent — pause 1 second at the top','Lower slowly — 3 seconds eccentric'],subs:'Seated leg curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb3_a13',ph:'accessory',name:'Machine Shoulder Press',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Deltoid, triceps',cues:['Adjust the seat — handles at shoulder height to start','Press without shrugging','Full extension at the top, controlled return'],subs:'DB shoulder press',prog:'Add 5 kg when sets are clean'},
+{id:'hb3_a14',ph:'accessory',name:'Cable Trunk Rotation',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Obliques, rotational core',cues:['Power comes from the hips — do not just twist the shoulders','Hold 1 second at end range each side','Feet hip-width, stand perpendicular to the cable'],subs:'Landmine rotation, band woodchop',prog:'Increase resistance when sets are fluid and controlled'},
+{id:'hb3_cd4',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel — hips square to the floor','Breathe into the restriction','Hold — do not bounce'],subs:'Figure-four stretch'},
+{id:'hb3_cd5',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across the floor.','Follow your hand with your eyes','Keep the knees together throughout'],subs:'Thread the needle'}
+]}
+]};
+
+// ============================================================
+// MUSCLE BUILDING — BEGINNER 4-DAY
+// ============================================================
+var TPL_HYP_B4={name:'Muscle Building · Beginner · 4 days',days:[
+{label:'Workout 1 — Upper Push',focus:'Chest, shoulders, triceps',mins:50,exercises:[
+{id:'hb4_p0',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior, scapular stabilisers',cues:['Plank position — only the shoulder blades move','Protract and retract slowly','Very small movement — this is activation, not a push-up'],subs:'Wall scapular push-up'},
+{id:'hb4_k0',ph:'strength',name:'BB Bench Press',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Lower the bar to the lower chest — elbows at 45 degrees','Five contact points with the bench throughout','Drive the bar up and slightly back — not straight up'],subs:'DB bench press',prog:'Add 2.5 kg when all sets are clean'},
+{id:'hb4_a0',ph:'accessory',name:'Leg Press',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, glutes',cues:['Feet at shoulder width, toes slightly outward','Full range — knees to 90 degrees minimum','Do not lock the knees aggressively at the top'],subs:'Goblet squat',prog:'Add 10 kg when sets are clean'},
+{id:'hb4_a1',ph:'accessory',name:'Tricep Pushdown',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Triceps — all three heads',cues:['Elbows pinned to sides throughout — they do not move','Full extension at the bottom — spread the rope apart','Control the return — do not let it snap back'],subs:'DB overhead tricep extension, close-grip push-up',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb4_a2',ph:'accessory',name:'DB Lateral Raise',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Medial deltoid',cues:['Lead with your elbows — pour a jug of water at the top','Slight forward lean (10 degrees) targets the medial delt better','Stop at shoulder height — higher loads the traps, not the delt'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'hb4_a3',ph:'accessory',name:'Cable Rope Crunches',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Rectus abdominis',cues:['Kneel facing the cable. Pull the rope to either side of your head.','Crunch down — do not pull with the arms, flex the spine','Exhale forcefully at the bottom of each rep'],subs:'Cable crunch (straight), floor crunch',prog:'Add 5 kg when sets are clean'},
+{id:'hb4_cd0',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'hb4_cd1',ph:'cooldown',name:'Overhead tricep stretch',vol:'2 x 30s each',rest:0,muscles:'Triceps, shoulder',cues:['Raise one arm, bend at the elbow, hand reaches down the spine','Use the other hand to gently pull the elbow inward and down','Hold — breathe into the stretch'],subs:'Cross-body shoulder stretch'}
+]},
+{label:'Workout 2 — Lower Body',focus:'Glutes, hamstrings, quads',mins:50,exercises:[
+{id:'hb4_p1',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through heels — not toes','Squeeze the glutes hard at the top — 1 second hold','Do not hyperextend the lower back'],subs:'Single-leg glute bridge'},
+{id:'hb4_k1',ph:'strength',name:'DB Hip Thrust',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Glutes — peak contraction',cues:['Upper back on bench, feet flat and hip-width apart','Drive through heels and squeeze the glutes hard at the top','Full hip extension — body forms a straight line from knees to shoulders'],subs:'Barbell hip thrust, glute bridge on floor',prog:'Add 5 kg when sets are clean'},
+{id:'hb4_a4',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before you pull','Controlled return — do not let the stack yank you forward'],subs:'Pull-up, cable row',prog:'Add 5 kg when sets are clean'},
+{id:'hb4_a5',ph:'accessory',name:'Leg Curl',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Hamstrings',cues:['Full range at the bottom — let the leg fully extend','Curl with intent — pause 1 second at the top','3 seconds on the way down'],subs:'Nordic curl, seated leg curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb4_a6',ph:'accessory',name:'DB Bicep Curl',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Biceps, brachialis',cues:['Elbows stay by your sides — do not swing them forward','Supinate the wrist as you curl — pinky side up at the top','Control the descent — the lowering builds the muscle too'],subs:'Cable curl, EZ bar curl',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb4_a7',ph:'accessory',name:'Leg Extension',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze the quad at the top','3 seconds down — the eccentric is the stimulus','Adjust the pad so it sits just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'hb4_cd2',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel with the mat','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four, hip 90/90'},
+{id:'hb4_cd3',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}
+]},
+{label:'Workout 3 — Upper Shoulder + Tri',focus:'Shoulders, triceps, core',mins:50,exercises:[
+{id:'hb4_p2',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rhomboids',cues:['Arms straight — not a row','Pull to chest height, thumbs rotating outward','Control the return'],subs:'Face pull'},
+{id:'hb4_k2',ph:'strength',name:'DB Shoulder Press',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Deltoid, triceps',cues:['Press straight up — core braced throughout','Do not arch the lower back as weight gets heavier','Full lockout at the top, controlled return'],subs:'Machine shoulder press, Arnold press',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb4_a8',ph:'accessory',name:'Calf Raise',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range — lower the heel below the step at the bottom','Pause 1 second at the top — squeeze the calf','Move slowly — calves respond poorly to bouncing'],subs:'Seated calf raise',prog:'Add load when bodyweight sets are easy'},
+{id:'hb4_a9',ph:'accessory',name:'High Cable Fly',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Chest — lower fibres',cues:['Cables set high, pull downward and together in an arc','Slight bend in the elbows throughout','Squeeze the chest at the bottom — hold 1 second'],subs:'DB fly on flat bench',prog:'Add 2.5 kg/side when sets are clean'},
+{id:'hb4_a10',ph:'accessory',name:'DB Skull Crusher',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Triceps — long head',cues:['Elbows point toward the ceiling — they must stay there throughout','Lower the dumbbells to the sides of your head, not straight down','Press back up by extending at the elbow — controlled'],subs:'EZ bar skull crusher, tricep pushdown',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb4_a11',ph:'accessory',name:'Cable Trunk Rotation',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Obliques, rotational core',cues:['Power from the hips — do not just spin the shoulders','Hold 1 second at end range each side','Keep the arms fairly straight throughout the movement'],subs:'Landmine rotation',prog:'Increase resistance when sets are fluid'},
+{id:'hb4_cd4',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm for a deeper stretch'],subs:'Standing quad stretch'},
+{id:'hb4_cd5',ph:'cooldown',name:'Child\'s pose',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink toward the floor','Breathe into the upper back','Hold — do not bounce'],subs:'Thread the needle'}
+]},
+{label:'Workout 4 — Lower Pull',focus:'Posterior chain, back, biceps',mins:50,exercises:[
+{id:'hb4_p3',ph:'primer',name:'Wall hip hinge',vol:'2 x 10',rest:0,muscles:'Hamstrings, glutes — hinge prep',cues:['Stand 30 cm from the wall — push hips back until they touch','Neutral spine throughout — no rounding','Pattern drill to groove the hinge before loading'],subs:'Dowel rod hinge'},
+{id:'hb4_k3',ph:'strength',name:'Cable Row, neutral grip',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Mid-back, rhomboids, biceps',cues:['Sit tall — do not round as you reach forward','Row to the lower abdomen, not the chest','Pause at full contraction — squeeze the shoulder blades'],subs:'DB row, machine row',prog:'Add 5 kg when sets are clean'},
+{id:'hb4_a12',ph:'accessory',name:'Romanian Deadlift',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Hamstrings, glutes',cues:['Push hips back first — the torso follows','Keep the bar close to the legs throughout','Feel the hamstring stretch at the bottom — that is the stimulus'],subs:'Single-leg RDL',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb4_a13',ph:'accessory',name:'DB Hip Thrust',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Glutes',cues:['Upper back on bench, feet flat','Squeeze the glutes at the top — not just a hip lift','Full extension — hips level, not tilted'],subs:'Glute bridge on floor',prog:'Add 5 kg when sets are clean'},
+{id:'hb4_a14',ph:'accessory',name:'Band Bicep Curl',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Biceps',cues:['Stand on the band — equal tension both sides','Elbows stay by the sides throughout','Full range — full extension at the bottom, peak contraction at the top'],subs:'DB curl, cable curl'},
+{id:'hb4_a15',ph:'accessory',name:'Seated Calf Raise',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Soleus',cues:['The seated position targets the soleus specifically','Full range — heel drops fully at the bottom','Slow and controlled — hold 1 second at the top'],subs:'Standing calf raise',prog:'Add weight when sets are easy through full range'},
+{id:'hb4_cd6',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded — do not tilt to one side','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'},
+{id:'hb4_cd7',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across the floor.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]}
+]};
+
+// ============================================================
+// MUSCLE BUILDING — BEGINNER 5-DAY
+// ============================================================
+var TPL_HYP_B5={name:'Muscle Building · Beginner · 5 days',days:[
+{label:'Workout 1 — Upper Push/Pull',focus:'Chest, lats, arms',mins:55,exercises:[
+{id:'hb5_p0',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rhomboids',cues:['Arms stay straight — this is not a row','Pull to chest height, thumbs rotating outward','Control the return'],subs:'Face pull'},
+{id:'hb5_k0',ph:'strength',name:'Incline BB Bench Press',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Upper chest, anterior deltoid, triceps',cues:['Incline bench targets the upper chest specifically — sit at 30-45 degrees','Lower the bar to the upper chest, elbows at 45 degrees','Control the descent — 2 seconds down, drive up'],subs:'Incline DB press',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb5_a0',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress the shoulder blades before pulling','Controlled return'],subs:'Pull-up, cable row',prog:'Add 5 kg when sets are clean'},
+{id:'hb5_a1',ph:'accessory',name:'Incline DB Row',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Mid-back, rhomboids',cues:['Chest rests on the incline bench — removes all momentum','Row both elbows back and upward','Pause and squeeze the shoulder blades at the top'],subs:'Chest-supported row, DB row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb5_a2',ph:'accessory',name:'DB Bicep Curl',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Biceps, brachialis',cues:['Elbows stay by the sides — do not swing forward','Supinate the wrist as you curl — pinky side up at the top','Control the descent — 2 seconds down'],subs:'Cable curl, EZ bar curl',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb5_a3',ph:'accessory',name:'Tricep Pushdown',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides — they do not move','Full extension at the bottom — spread the rope apart','Control the return'],subs:'Overhead tricep extension',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb5_a4',ph:'accessory',name:'Cable Rope Crunches',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Rectus abdominis',cues:['Kneel facing the cable — flex the spine, do not just bow','Exhale forcefully at the bottom','Keep the hips stationary throughout'],subs:'Cable crunch, floor crunch',prog:'Add 5 kg when sets are clean'},
+{id:'hb5_cd0',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'hb5_cd1',ph:'cooldown',name:'Lat stretch (child\'s pose)',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward, let the chest sink toward the floor','Breathe into the upper back','Hold steady'],subs:'Thread the needle'}
+]},
+{label:'Workout 2 — Lower Hinge',focus:'Posterior chain, glutes',mins:55,exercises:[
+{id:'hb5_p1',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through heels — not toes','Squeeze hard at the top','Do not hyperextend the lower back'],subs:'Single-leg glute bridge'},
+{id:'hb5_k1',ph:'strength',name:'Romanian Deadlift',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Hamstrings, glutes',cues:['Push hips back first — the torso follows','Keep the bar or dumbbells close to the legs','Feel the hamstring stretch at the bottom — that is the stimulus'],subs:'Single-leg RDL, kettlebell deadlift',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb5_a5',ph:'accessory',name:'Hack Squat',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, glutes',cues:['Feet at shoulder width on the platform — slight toe flare','Full depth — thighs to parallel or below','Control the descent — do not crash down'],subs:'Leg press, goblet squat',prog:'Add 10 kg when sets are clean'},
+{id:'hb5_a6',ph:'accessory',name:'DB Hip Thrust',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Glutes',cues:['Upper back on bench, feet flat and hip-width','Squeeze the glutes at the top — full hip extension','Controlled descent — do not drop the hips'],subs:'Barbell hip thrust',prog:'Add 5 kg when sets are clean'},
+{id:'hb5_a7',ph:'accessory',name:'Leg Extension',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze the quad at the top','3 seconds down — the eccentric matters','Adjust pad so it sits just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'hb5_a8',ph:'accessory',name:'Calf Raise',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range — heel drops below the step','Pause 1 second at the top','Move slowly — calves respond poorly to bouncing'],subs:'Seated calf raise',prog:'Add load when bodyweight is easy'},
+{id:'hb5_cd2',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel with the mat','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four, hip 90/90'},
+{id:'hb5_cd3',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}
+]},
+{label:'Workout 3 — Shoulders + Arms',focus:'Deltoid, biceps, triceps, core',mins:55,exercises:[
+{id:'hb5_p2',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior',cues:['Plank position — only the shoulder blades move','Protract and retract slowly','Very small movement'],subs:'Wall scapular push-up'},
+{id:'hb5_k2',ph:'strength',name:'DB Shoulder Press',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Deltoid, triceps',cues:['Press straight up — core braced throughout','Do not arch the lower back as the weight increases','Full lockout at the top, controlled return'],subs:'Machine shoulder press',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb5_a9',ph:'accessory',name:'DB Lateral Raise',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug of water at the top','Slight forward lean targets the medial delt better','Stop at shoulder height'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'hb5_a10',ph:'accessory',name:'Band Bicep Curl',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Biceps',cues:['Stand on the band — equal tension both sides','Elbows stay by the sides','Full range — full extension at the bottom'],subs:'DB curl, cable curl'},
+{id:'hb5_a11',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Triceps — long head',cues:['One cable set high on each side — create a cross pattern in front','Elbows at sides, extend both arms downward simultaneously','Pause at full extension, controlled return'],subs:'Tricep pushdown, overhead extension',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb5_a12',ph:'accessory',name:'Cable Trunk Rotation',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Obliques, core',cues:['Power from the hips — not just shoulder rotation','Hold 1 second at end range each side','Feet hip-width, perpendicular to the cable'],subs:'Landmine rotation',prog:'Increase resistance when sets are fluid'},
+{id:'hb5_a13',ph:'accessory',name:'Reverse Crunches',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Rectus abdominis — lower emphasis',cues:['Lie on your back. Pull the knees toward the chest using the lower abs.','The pelvis tilts — that is the contraction','Lower slowly — do not drop the legs'],subs:'Hanging knee raise, dragon flag',prog:'Progress to straight-leg reverse crunch'},
+{id:'hb5_cd4',ph:'cooldown',name:'Cross-body shoulder stretch',vol:'2 x 30s each',rest:0,muscles:'Posterior deltoid, rotator cuff',cues:['Bring one arm across the chest','Use the other hand to gently deepen the stretch','Hold — do not bounce'],subs:'Sleeper stretch'},
+{id:'hb5_cd5',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm for a deeper stretch'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 4 — Upper Back Focus',focus:'Lats, rhomboids, rear delt, biceps',mins:55,exercises:[
+{id:'hb5_p3',ph:'primer',name:'Dead hang',vol:'2 x 20s',rest:0,muscles:'Shoulder decompression, grip, lats',cues:['Hang from the bar with full shoulder elevation','Let the weight pull you long — passive decompression','Practise briefly packing the shoulders: retract and depress'],subs:'Passive hang'},
+{id:'hb5_k3',ph:'strength',name:'Cable Row, neutral grip',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Mid-back, rhomboids, biceps',cues:['Sit tall — do not round as you reach forward','Row to the lower abdomen — not the chest','Pause and squeeze at full contraction'],subs:'DB row, machine row',prog:'Add 5 kg when sets are clean'},
+{id:'hb5_a14',ph:'accessory',name:'Lat Pulldown',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before pulling','Controlled return'],subs:'Pull-up, assisted pull-up',prog:'Add 5 kg when sets are clean'},
+{id:'hb5_a15',ph:'accessory',name:'DB Bench Press',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Chest, triceps',cues:['Lower dumbbells to chest — elbows at 45 degrees','Press up and slightly inward','2 seconds down, drive up'],subs:'Barbell bench press',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb5_a16',ph:'accessory',name:'One-Arm DB Row',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Lats, rhomboids — unilateral',cues:['Pull elbow to the hip — not the shoulder','Pause and squeeze at the top','Neutral spine — no torso rotation to get the weight up'],subs:'Cable row, TRX row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb5_a17',ph:'accessory',name:'Chest exercise of choice',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Chest',cues:['Choose a chest exercise you enjoy and have good form on','Focus on the stretch and contraction — not just moving weight','Common options: cable fly, dumbbell fly, pec deck, push-up'],subs:'Cable fly, DB fly, pec deck'},
+{id:'hb5_cd6',ph:'cooldown',name:'Child\'s pose and lat reach',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Reach to one side for a specific lat stretch','Breathe into the upper back'],subs:'Thread the needle'},
+{id:'hb5_cd7',ph:'cooldown',name:'Bicep doorway stretch',vol:'2 x 30s each',rest:0,muscles:'Biceps, anterior shoulder',cues:['Arm straight, palm on wall at shoulder height','Step forward to stretch the front of the arm','Hold — do not rotate the torso away'],subs:'Cross-body shoulder stretch'}
+]},
+{label:'Workout 5 — Lower Squat Focus',focus:'Quads, posterior chain, shoulders',mins:55,exercises:[
+{id:'hb5_p4',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded — do not tilt','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'},
+{id:'hb5_k4',ph:'strength',name:'Leg Press',vol:'3 x 8–12',rest:120,sets:3,reps:10,kg:0,muscles:'Quads, glutes',cues:['Feet at shoulder width, toes slightly out','Full range — knees to 90 degrees minimum','Do not lock the knees aggressively at the top'],subs:'Goblet squat, hack squat',prog:'Add 10 kg when sets are clean'},
+{id:'hb5_a18',ph:'accessory',name:'Leg Extension',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Quads',cues:['Extend fully — squeeze at the top','3 seconds down','Adjust pad just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'hb5_a19',ph:'accessory',name:'Leg Curl, lying',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Hamstrings',cues:['Full extension at the bottom first','Curl with intent — pause at the top','3 seconds eccentric'],subs:'Seated leg curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'hb5_a20',ph:'accessory',name:'DB Hip Thrust',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Glutes',cues:['Upper back on bench, feet flat','Squeeze hard at the top — full hip extension','Controlled descent'],subs:'Glute bridge on floor',prog:'Add 5 kg when sets are clean'},
+{id:'hb5_a21',ph:'accessory',name:'Incline DB Row',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Mid-back, rhomboids',cues:['Chest on the incline pad — removes momentum','Row both elbows back and upward','Pause and squeeze at the top'],subs:'Chest-supported row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'hb5_a22',ph:'accessory',name:'DB Lateral Raise',vol:'3 x 8–12',rest:60,sets:3,reps:10,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug of water at the top','Slight forward lean — 10 degrees — targets the medial delt better','Stop at shoulder height'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'hb5_cd8',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'hb5_cd9',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]}
+]};
+
+
+// ============================================================
+// MUSCLE BUILDING — ADVANCED 3-DAY
+// ============================================================
+var TPL_HYP_A3={name:'Muscle Building · Advanced · 3 days',days:[
+{label:'Workout 1 — Upper + Lower A',focus:'Squat, bench, accessories',mins:65,exercises:[
+{id:'ha3_p0',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior',cues:['Plank position — only shoulder blades move','Protract and retract slowly','Small movement — activation only'],subs:'Wall scapular push-up'},
+{id:'ha3_p1',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through heels — not toes','Squeeze hard at the top','Do not hyperextend the lower back'],subs:'Single-leg glute bridge'},
+{id:'ha3_k0',ph:'strength',name:'BB Squat',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Quads, glutes, core',cues:['Brace the core before every rep — create intra-abdominal pressure','Full depth — quads parallel or below; do not cut range to add weight','Drive the knees out over the toes as you ascend'],subs:'Goblet squat, hack squat',prog:'Add 2.5 kg when all 4 sets are clean'},
+{id:'ha3_k1',ph:'strength',name:'DB Bench Press',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Lower dumbbells to chest — elbows at 45 degrees','Press up and slightly inward — feel the chest engage at the top','Control the descent: 2 seconds down, explosive up'],subs:'Barbell bench press',prog:'Add 2 kg/hand when all 4 sets are clean'},
+{id:'ha3_a0',ph:'accessory',name:'Leg Curl, lying',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Hamstrings',cues:['Full extension at the bottom — load the stretch','Curl with intent — pause 1 second at peak','3 seconds eccentric — the lowering is the stimulus'],subs:'Seated leg curl, Nordic curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'ha3_a1',ph:'accessory',name:'Lat Pulldown',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before you pull','Controlled return — do not let the stack snap up'],subs:'Pull-up, cable row',prog:'Add 5 kg when sets are clean'},
+{id:'ha3_a2',ph:'accessory',name:'DB Shoulder Press',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Deltoid, triceps',cues:['Press straight up — do not let the elbows flare excessively','Core braced throughout — no lower back arch','Full lockout at top, controlled return'],subs:'Machine shoulder press',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha3_a3',ph:'accessory',name:'Plank with Rotation',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Core, obliques',cues:['Strong plank base before rotating','Top arm reaches to the ceiling — rotate the thoracic spine','Return fully to plank before the next rep'],subs:'Side plank, dead bug'},
+{id:'ha3_cd0',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'ha3_cd1',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'}
+]},
+{label:'Workout 2 — Upper + Lower B',focus:'Bench, RDL, accessories',mins:65,exercises:[
+{id:'ha3_p2',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded — do not tilt','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'},
+{id:'ha3_p3',ph:'primer',name:'Band face pull',vol:'2 x 15',rest:0,muscles:'Rear deltoid, external rotators',cues:['Pull to forehead height — thumbs finish behind ears','Elbows stay high throughout','Control the return'],subs:'Band pull-apart'},
+{id:'ha3_k2',ph:'strength',name:'BB Bench Press',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Five contact points with the bench throughout','Lower to lower chest — elbows at 45 degrees','Brace hard before every rep. Press and arc slightly.'],subs:'DB bench press',prog:'Add 2.5 kg when all 4 sets are clean'},
+{id:'ha3_k3',ph:'strength',name:'Romanian Deadlift',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Hamstrings, glutes',cues:['Push hips back first — the torso follows','Keep the bar or dumbbells close to the legs throughout','Strong hamstring stretch at the bottom — that is the stimulus'],subs:'Single-leg RDL',prog:'Add 2.5 kg when all 4 sets are clean'},
+{id:'ha3_a4',ph:'accessory',name:'Cable Row',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Mid-back, rhomboids',cues:['Sit tall — do not round as you reach forward','Row to the lower abdomen — not the chest','Pause and squeeze at full contraction'],subs:'DB row, machine row',prog:'Add 5 kg when sets are clean'},
+{id:'ha3_a5',ph:'accessory',name:'Machine Shoulder Press',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Deltoid, triceps',cues:['Adjust seat so handles are at shoulder height','Press without shrugging the traps','Controlled return'],subs:'DB shoulder press',prog:'Add 5 kg when sets are clean'},
+{id:'ha3_a6',ph:'accessory',name:'Leg Extension',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze the quad at the top for 1 second','3 seconds eccentric — slow lowering builds the stimulus','Adjust pad so it sits just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'ha3_a7',ph:'accessory',name:'Ball Crunches',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Rectus abdominis',cues:['Lower back presses into the ball — use the curve to amplify range','Exhale forcefully as you crunch up','Do not pull the neck — hands lightly behind the head'],subs:'Cable crunch, floor crunch'},
+{id:'ha3_cd2',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'},
+{id:'ha3_cd3',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 3 — Upper + Lower C',focus:'Deadlift, shoulder, back',mins:65,exercises:[
+{id:'ha3_p4',ph:'primer',name:'Dead hang',vol:'2 x 20s',rest:0,muscles:'Shoulder decompression, grip',cues:['Full shoulder elevation — let the weight pull you long','Let the spine decompress — this is active rest','Briefly pack the shoulders: retract and depress'],subs:'Passive hang'},
+{id:'ha3_p5',ph:'primer',name:'Wall hip hinge',vol:'2 x 10',rest:0,muscles:'Hamstrings, glutes',cues:['30 cm from wall — push hips back until they touch','Neutral spine throughout — no rounding','Pattern drill before loading'],subs:'Dowel rod hinge'},
+{id:'ha3_k4',ph:'strength',name:'Deadlift (Classic)',vol:'4 x 8–10',rest:150,sets:4,reps:9,kg:0,muscles:'Hamstrings, glutes, erectors, lats',cues:['Bar over mid-foot — hinge back to grip before pulling','Brace completely before the pull — big breath in','Drive the floor away — think push, not pull'],subs:'Romanian deadlift, trap bar deadlift',prog:'Add 5 kg when all 4 sets are clean'},
+{id:'ha3_k5',ph:'strength',name:'Machine Shoulder Press',vol:'4 x 8–10',rest:150,sets:4,reps:9,kg:0,muscles:'Deltoid, triceps',cues:['Adjust seat — handles at shoulder height','Press without shrugging','Full extension, controlled return'],subs:'DB shoulder press',prog:'Add 5 kg when sets are clean'},
+{id:'ha3_a8',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before pulling','Controlled return'],subs:'Pull-up',prog:'Add 5 kg when sets are clean'},
+{id:'ha3_a9',ph:'accessory',name:'Horizontal Flyes',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Chest — stretch emphasis',cues:['Slight elbow bend throughout — do not straighten fully','Lower until deep chest stretch — do not force range','Squeeze the chest to return — think: hugging a tree'],subs:'Cable fly, pec deck',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha3_a10',ph:'accessory',name:'Leg Curl, lying',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Hamstrings',cues:['Full extension first — load the stretch at the bottom','Curl with intent — pause at the top','3 seconds eccentric'],subs:'Seated leg curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'ha3_a11',ph:'accessory',name:'Cable Trunk Rotation',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Obliques, core',cues:['Power from the hips — do not just twist the shoulders','Hold 1 second at end range','Keep arms fairly straight throughout'],subs:'Landmine rotation',prog:'Increase resistance when sets are fluid'},
+{id:'ha3_cd4',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'ha3_cd5',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]}
+]};
+
+// ============================================================
+// MUSCLE BUILDING — ADVANCED 4-DAY  
+// ============================================================
+var TPL_HYP_A4={name:'Muscle Building · Advanced · 4 days',days:[
+{label:'Workout 1 — Push + Legs',focus:'Bench, squat, chest, triceps',mins:65,exercises:[
+{id:'ha4_p0',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior',cues:['Plank — only shoulder blades move','Protract and retract slowly','Very small movement'],subs:'Wall scapular push-up'},
+{id:'ha4_p1',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes',cues:['Drive through heels','Squeeze hard at the top','Do not hyperextend the lower back'],subs:'Single-leg glute bridge'},
+{id:'ha4_k0',ph:'strength',name:'DB Bench Press',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Lower to chest — elbows at 45 degrees','Press up and slightly inward — squeeze at the top','Control the descent: 2 seconds down'],subs:'Barbell bench press',prog:'Add 2 kg/hand when all 4 sets are clean'},
+{id:'ha4_k1',ph:'strength',name:'BB Squat',vol:'5 x 6–8',rest:150,sets:5,reps:7,kg:0,muscles:'Quads, glutes, core',cues:['Brace the core completely — create intra-abdominal pressure','Full depth — quads parallel or below','Drive knees out over toes on the way up'],subs:'Hack squat, leg press',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'ha4_a0',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Triceps — long head',cues:['One cable high on each side — cross them in front','Elbows stay at sides — extension only from the elbow','Pause at full extension, controlled return'],subs:'Tricep pushdown, overhead extension',prog:'Add 2.5 kg/side when sets are clean'},
+{id:'ha4_a1',ph:'accessory',name:'High Cable Fly',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Chest — lower fibres',cues:['Cables set high — pull downward and together in an arc','Slight elbow bend throughout','Squeeze at the bottom — hold 1 second'],subs:'DB fly, pec deck',prog:'Add 2.5 kg/side when sets are clean'},
+{id:'ha4_a2',ph:'accessory',name:'DB Lateral Raise',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug at the top','Slight forward lean targets the medial delt','Stop at shoulder height'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'ha4_a3',ph:'accessory',name:'DB Skull Crusher',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Triceps — long head',cues:['Elbows point toward the ceiling — they must stay there','Lower to the sides of the head, not straight down','Press back up by extending at the elbow — controlled'],subs:'EZ bar skull crusher',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha4_a4',ph:'accessory',name:'Cable Crunches',vol:'5 x 8–10',rest:75,sets:5,reps:9,kg:0,muscles:'Rectus abdominis',cues:['Kneel facing the cable — flex the spine, do not just bow','Exhale forcefully at the bottom','Keep the hips stationary'],subs:'Rope crunch, floor crunch',prog:'Add 5 kg when sets are clean'},
+{id:'ha4_cd0',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'ha4_cd1',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square','Breathe into the restriction'],subs:'Figure-four'}
+]},
+{label:'Workout 2 — Pull + Glutes',focus:'Back, biceps, posterior chain',mins:65,exercises:[
+{id:'ha4_p2',ph:'primer',name:'Dead hang',vol:'2 x 20s',rest:0,muscles:'Shoulder decompression, lats',cues:['Full shoulder elevation — let the weight pull you long','Spine decompresses — this is prescribed active rest','Briefly pack the shoulders: retract and depress'],subs:'Passive hang'},
+{id:'ha4_p3',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'},
+{id:'ha4_k2',ph:'strength',name:'Leg Curl',vol:'5 x 6–8',rest:150,sets:5,reps:7,kg:0,muscles:'Hamstrings',cues:['Full extension first — load the stretch','Curl with intent — pause at the top','3 seconds eccentric — slow lowering is the stimulus'],subs:'Nordic curl, seated leg curl',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'ha4_k3',ph:'strength',name:'BB Hip Thrust',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Glutes — peak contraction',cues:['Upper back on bench, bar across the hip crease (use pad)','Drive through heels — squeeze the glutes hard at the top','Full hip extension — body forms a straight line'],subs:'DB hip thrust, glute bridge',prog:'Add 5 kg when all 4 sets are clean'},
+{id:'ha4_a5',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before pulling','Controlled return'],subs:'Pull-up',prog:'Add 5 kg when sets are clean'},
+{id:'ha4_a6',ph:'accessory',name:'Machine Bicep Curl',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Biceps, brachialis',cues:['Adjust the seat so elbows align with the pivot point','Full range — full extension at the bottom','Controlled descent — do not let the stack drop'],subs:'DB curl, cable curl',prog:'Add 5 kg when sets are clean'},
+{id:'ha4_a7',ph:'accessory',name:'DB Bicep Curl',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Biceps',cues:['Elbows stay by the sides','Supinate the wrist as you curl — pinky side up at top','Control the descent'],subs:'Cable curl, hammer curl',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha4_a8',ph:'accessory',name:'One-Arm DB Row',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Lats, rhomboids',cues:['Pull elbow to the hip — not the shoulder','Pause and squeeze at the top','Neutral spine — no rotation to get the weight up'],subs:'Cable row, TRX row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha4_a9',ph:'accessory',name:'Calf Raise',vol:'5 x 8–10',rest:60,sets:5,reps:9,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range — heel drops below the step','Pause 1 second at the top','Move slowly — calves respond poorly to bouncing'],subs:'Seated calf raise',prog:'Add load when bodyweight sets are easy'},
+{id:'ha4_cd2',ph:'cooldown',name:'Child\'s pose and lat reach',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Reach to one side for a specific lat stretch','Breathe into the upper back'],subs:'Thread the needle'},
+{id:'ha4_cd3',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}
+]},
+{label:'Workout 3 — Shoulder + Arms + Core',focus:'Deltoid, triceps, obliques',mins:60,exercises:[
+{id:'ha4_p4',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rhomboids',cues:['Arms straight — not a row','Pull to chest height, thumbs outward','Control the return'],subs:'Face pull'},
+{id:'ha4_p5',ph:'primer',name:'Cable Trunk Rotation',vol:'2 x 10 each',rest:0,muscles:'Obliques — activation',cues:['Light resistance — groove the pattern','Power from the hips','Hold 1 second at end range each side'],subs:'Band rotation'},
+{id:'ha4_k4',ph:'strength',name:'BB Shoulder Press',vol:'4 x 8–10',rest:120,sets:4,reps:9,kg:0,muscles:'Deltoid, triceps',cues:['Standing — press the bar from clavicle height to lockout overhead','Core braced — do not arch the lower back excessively','The bar travels in a slight arc around the face, not straight up'],subs:'DB shoulder press, seated press',prog:'Add 2.5 kg when all 4 sets are clean'},
+{id:'ha4_k5',ph:'strength',name:'Cable Trunk Rotation',vol:'5 x 6–8',rest:120,sets:5,reps:7,kg:0,muscles:'Obliques, rotational core',cues:['Power comes from the hips — do not just twist the shoulders','Hold 1 second at end range each side','Feet hip-width, perpendicular to the cable'],subs:'Landmine rotation',prog:'Increase resistance when sets are fluid'},
+{id:'ha4_a10',ph:'accessory',name:'Horizontal Cable Fly',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Chest — horizontal emphasis',cues:['Cables at mid-height — pull together in an arc at chest level','Slight elbow bend throughout','Squeeze at the front — hold 1 second'],subs:'DB fly, pec deck',prog:'Add 2.5 kg/side when sets are clean'},
+{id:'ha4_a11',ph:'accessory',name:'DB Skull Crusher',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Triceps — long head',cues:['Elbows point to the ceiling — they must not flare','Lower to the sides of the head','Extend fully at the top'],subs:'EZ bar skull crusher',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha4_a12',ph:'accessory',name:'DB Lateral Raise',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug at the top','Slight forward lean — 10 degrees','Stop at shoulder height'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'ha4_cd4',ph:'cooldown',name:'Cross-body shoulder stretch',vol:'2 x 30s each',rest:0,muscles:'Posterior deltoid',cues:['Bring arm across chest','Use other hand to gently deepen the stretch','Hold — do not bounce'],subs:'Sleeper stretch'},
+{id:'ha4_cd5',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 4 — Pull + Hinge',focus:'Rows, deadlift, biceps',mins:65,exercises:[
+{id:'ha4_p6',ph:'primer',name:'Wall hip hinge',vol:'2 x 10',rest:0,muscles:'Hamstrings, glutes',cues:['30 cm from wall — push hips back until they touch','Neutral spine throughout','Pattern drill before loading'],subs:'Dowel rod hinge'},
+{id:'ha4_p7',ph:'primer',name:'Dead hang',vol:'2 x 20s',rest:0,muscles:'Shoulder decompression, lats',cues:['Full shoulder elevation','Let the weight pull you long','Briefly pack the shoulders: retract and depress'],subs:'Passive hang'},
+{id:'ha4_k6',ph:'strength',name:'Cable Row',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Mid-back, rhomboids, biceps',cues:['Sit tall — do not round as you reach forward','Row to the lower abdomen — not the chest','Pause and squeeze at full contraction'],subs:'DB row, machine row',prog:'Add 5 kg when all 4 sets are clean'},
+{id:'ha4_k7',ph:'strength',name:'Romanian Deadlift',vol:'5 x 6–8',rest:150,sets:5,reps:7,kg:0,muscles:'Hamstrings, glutes',cues:['Push hips back first — the torso follows','Keep bar or dumbbells close to the legs throughout','Strong hamstring stretch at the bottom'],subs:'Single-leg RDL',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'ha4_a13',ph:'accessory',name:'BB Hip Thrust',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Glutes',cues:['Upper back on bench — bar across hip crease with pad','Drive through heels — squeeze hard at the top','Full extension — straight line from knees to shoulders'],subs:'DB hip thrust',prog:'Add 5 kg when sets are clean'},
+{id:'ha4_a14',ph:'accessory',name:'Band Bicep Curl',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Biceps',cues:['Stand on the band — equal tension both sides','Elbows stay by the sides','Full extension at the bottom, peak contraction at the top'],subs:'DB curl, cable curl'},
+{id:'ha4_a15',ph:'accessory',name:'Seated Calf Raise',vol:'5 x 8–10',rest:60,sets:5,reps:9,kg:0,muscles:'Soleus',cues:['Seated position targets the soleus specifically','Full range — heel drops fully at the bottom','Slow and controlled — hold 1 second at the top'],subs:'Standing calf raise',prog:'Add weight when sets are easy through full range'},
+{id:'ha4_cd6',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded — do not tilt','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'},
+{id:'ha4_cd7',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]}
+]};
+
+// ============================================================
+// MUSCLE BUILDING — ADVANCED 5-DAY
+// ============================================================
+var TPL_HYP_A5={name:'Muscle Building · Advanced · 5 days',days:[
+{label:'Workout 1 — Upper Push/Pull',focus:'Chest, lats, arms',mins:65,exercises:[
+{id:'ha5_p0',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rhomboids',cues:['Arms stay straight — not a row','Pull to chest height, thumbs outward','Control the return'],subs:'Face pull'},
+{id:'ha5_k0',ph:'strength',name:'Incline Bench Press',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Upper chest, deltoid, triceps',cues:['30-45 degree incline — this targets the upper chest','Lower to the upper chest — elbows at 45 degrees','Control the descent: 2 seconds down, explosive up'],subs:'Incline DB press',prog:'Add 2.5 kg when all 4 sets are clean'},
+{id:'ha5_a0',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before pulling','Controlled return'],subs:'Pull-up',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_a1',ph:'accessory',name:'Reverse Flyes with DBs',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Rear deltoid, rhomboids',cues:['Bend forward at the hips — flat back','Lead with elbows out to the side — not hands upward','Very light weight — strict form always'],subs:'Face pull, cable rear delt fly',prog:'Add 1 kg/hand when sets are clean'},
+{id:'ha5_a2',ph:'accessory',name:'DB Flyes',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Chest — stretch emphasis',cues:['Slight elbow bend throughout — do not straighten fully','Lower until you feel a deep chest stretch','Squeeze the chest to return — think: hugging a tree'],subs:'Cable fly, pec deck',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha5_a3',ph:'accessory',name:'DB Bicep Curl',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Biceps',cues:['Elbows by the sides — no swinging','Supinate the wrist as you curl','Control the descent'],subs:'Cable curl, hammer curl',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha5_a4',ph:'accessory',name:'Tricep Pushdown',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides — they do not move','Full extension — spread the rope apart','Control the return'],subs:'Overhead tricep extension',prog:'Add 2.5 kg when sets are clean'},
+{id:'ha5_a5',ph:'accessory',name:'Standing Cable Crunches',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Rectus abdominis',cues:['Stand facing away from the cable — flex the spine against resistance','Exhale forcefully at the bottom','Keep the hips still throughout'],subs:'Kneeling cable crunch',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_cd0',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'ha5_cd1',ph:'cooldown',name:'Child\'s pose',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Breathe into the upper back','Hold steady'],subs:'Thread the needle'}
+]},
+{label:'Workout 2 — Lower Hinge',focus:'Posterior chain, glutes, calves',mins:65,exercises:[
+{id:'ha5_p1',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded — do not tilt','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'},
+{id:'ha5_p2',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes',cues:['Drive through heels — not toes','Squeeze hard at the top','Do not hyperextend the lower back'],subs:'Single-leg glute bridge'},
+{id:'ha5_k1',ph:'strength',name:'Romanian Deadlift',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Hamstrings, glutes',cues:['Push hips back first — the torso follows','Keep bar or dumbbells close to the legs','Strong hamstring stretch at the bottom'],subs:'Single-leg RDL, kettlebell deadlift',prog:'Add 2.5 kg when all 4 sets are clean'},
+{id:'ha5_k2',ph:'strength',name:'Hack Squat',vol:'3 x 8–10',rest:120,sets:3,reps:9,kg:0,muscles:'Quads, glutes',cues:['Feet at shoulder width on the platform — slight toe flare','Full depth — thighs to parallel or below','Control the descent — do not crash down'],subs:'Leg press, front squat',prog:'Add 10 kg when sets are clean'},
+{id:'ha5_a6',ph:'accessory',name:'BB Hip Thrust',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Glutes — peak contraction',cues:['Upper back on bench, bar across hip crease with pad','Drive through heels and squeeze hard at the top','Full hip extension — body forms a straight line'],subs:'DB hip thrust',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_a7',ph:'accessory',name:'Leg Curl',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Hamstrings',cues:['Full extension first — load the stretch','Curl with intent — pause 1 second at the top','3 seconds eccentric'],subs:'Nordic curl, seated leg curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'ha5_a8',ph:'accessory',name:'Leg Extension',vol:'3 x 8–10',rest:75,sets:3,reps:9,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze at the top','3 seconds down','Adjust pad just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_a9',ph:'accessory',name:'Calf Raise',vol:'4 x 8–10',rest:60,sets:4,reps:9,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range — heel drops below the step','Pause 1 second at the top','Move slowly'],subs:'Seated calf raise',prog:'Add load when bodyweight sets are easy'},
+{id:'ha5_a10',ph:'accessory',name:'Machine Shoulder Press',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Deltoid, triceps',cues:['Adjust seat — handles at shoulder height','Press without shrugging','Controlled return'],subs:'DB shoulder press',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_cd2',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'ha5_cd3',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}
+]},
+{label:'Workout 3 — Shoulder + Arms',focus:'Deltoid, biceps, triceps, core',mins:60,exercises:[
+{id:'ha5_p3',ph:'primer',name:'Band face pull',vol:'2 x 15',rest:0,muscles:'Rear deltoid, external rotators',cues:['Pull to forehead height — thumbs finish behind ears','Elbows stay high throughout','Control the return'],subs:'Band pull-apart'},
+{id:'ha5_k3',ph:'strength',name:'DB Lateral Raise',vol:'4 x 8–10',rest:120,sets:4,reps:9,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug at the top','Slight forward lean targets the medial delt better','Stop at shoulder height'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'ha5_a11',ph:'accessory',name:'DB Front Raise',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Anterior deltoid',cues:['Raise one arm at a time or both — alternate creates better balance','Stop at shoulder height — do not go above','Control the descent'],subs:'Cable front raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'ha5_a12',ph:'accessory',name:'Band Bicep Curl',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Biceps',cues:['Stand on the band — equal tension both sides','Elbows stay by the sides','Full range throughout'],subs:'DB curl, cable curl'},
+{id:'ha5_a13',ph:'accessory',name:'Reverse Flyes',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Rear deltoid, rhomboids',cues:['Bent over — flat back','Lead with elbows to the side — not hands upward','Light weight — strict form always'],subs:'Face pull, cable rear delt fly',prog:'Add 1 kg/hand when sets are clean'},
+{id:'ha5_a14',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Triceps — long head',cues:['One cable high each side — cross them in front','Elbows at sides — extension only from the elbow','Pause at full extension'],subs:'Tricep pushdown',prog:'Add 2.5 kg/side when sets are clean'},
+{id:'ha5_a15',ph:'accessory',name:'Side Plank with Rotation',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Obliques, rotational core',cues:['Side plank base — body in a straight line','Top arm sweeps under the body then back toward the ceiling','Control throughout — do not rush'],subs:'Side plank, Pallof press'},
+{id:'ha5_a16',ph:'accessory',name:'Stir-the-Pot with Ball',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Core — full anti-rotation',cues:['Forearms on the stability ball — plank position','Stir the ball in circles with the forearms','The core resists rotation — that is the stimulus'],subs:'Plank, ab wheel rollout'},
+{id:'ha5_cd4',ph:'cooldown',name:'Cross-body shoulder stretch',vol:'2 x 30s each',rest:0,muscles:'Posterior deltoid',cues:['Arm across the chest','Use other hand to gently deepen','Hold — do not bounce'],subs:'Sleeper stretch'},
+{id:'ha5_cd5',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 4 — Upper Pull Focus',focus:'Rows, lats, rear delt, chest',mins:65,exercises:[
+{id:'ha5_p4',ph:'primer',name:'Dead hang',vol:'2 x 20s',rest:0,muscles:'Shoulder decompression, grip, lats',cues:['Full shoulder elevation — let the weight pull you long','Spine decompresses — this is active rest','Briefly pack the shoulders: retract and depress'],subs:'Passive hang'},
+{id:'ha5_p5',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid',cues:['Arms straight — not a row','Pull to chest height, thumbs outward','Control the return'],subs:'Face pull'},
+{id:'ha5_k4',ph:'strength',name:'Cable Row',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Mid-back, rhomboids, biceps',cues:['Sit tall — do not round as you reach forward','Row to the lower abdomen — not the chest','Pause and squeeze at full contraction'],subs:'DB row, machine row',prog:'Add 5 kg when all 4 sets are clean'},
+{id:'ha5_k5',ph:'strength',name:'DB Bench Press',vol:'3 x 8–10',rest:120,sets:3,reps:9,kg:0,muscles:'Chest, triceps',cues:['Lower to chest — elbows at 45 degrees','Press up and slightly inward','2 seconds down, drive up'],subs:'Barbell bench press',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha5_a17',ph:'accessory',name:'Lat Pulldown',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before pulling','Controlled return'],subs:'Pull-up, assisted pull-up',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_a18',ph:'accessory',name:'Low Cable Fly',vol:'3 x 8–10',rest:75,sets:3,reps:9,kg:0,muscles:'Chest — upper fibres',cues:['Cables set low — pull upward and together in an arc','Slight elbow bend throughout','Squeeze at the front — hold 1 second'],subs:'DB fly on incline',prog:'Add 2.5 kg/side when sets are clean'},
+{id:'ha5_a19',ph:'accessory',name:'DB Shoulder Shrug',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Trapezius',cues:['Straight arms — shrug the shoulders toward the ears','Pause at the top — do not roll the shoulders forward','Lower slowly — 2 seconds down'],subs:'Barbell shrug, cable shrug',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha5_a20',ph:'accessory',name:'Chest exercise of choice',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Chest',cues:['Choose an exercise that gives you a strong chest feeling','Common options: cable fly, DB fly, pec deck, push-up','Focus on the squeeze and stretch — not just moving weight'],subs:'Cable fly, DB fly, pec deck'},
+{id:'ha5_cd6',ph:'cooldown',name:'Child\'s pose and lat reach',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Reach to one side for a specific lat stretch','Breathe into the upper back'],subs:'Thread the needle'},
+{id:'ha5_cd7',ph:'cooldown',name:'Bicep doorway stretch',vol:'2 x 30s each',rest:0,muscles:'Biceps, anterior shoulder',cues:['Arm straight, palm on wall at shoulder height','Step forward to stretch the front of the arm','Hold — do not rotate the torso away'],subs:'Cross-body shoulder stretch'}
+]},
+{label:'Workout 5 — Lower Squat Focus',focus:'Quads, glutes, legs',mins:65,exercises:[
+{id:'ha5_p6',ph:'primer',name:'Wall hip hinge',vol:'2 x 10',rest:0,muscles:'Hamstrings, glutes',cues:['30 cm from wall — push hips back until they touch','Neutral spine throughout','Pattern drill before loading'],subs:'Dowel rod hinge'},
+{id:'ha5_p7',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes',cues:['Drive through heels — not toes','Squeeze hard at the top','Do not hyperextend'],subs:'Single-leg glute bridge'},
+{id:'ha5_k5b',ph:'strength',name:'BB Squat',vol:'4 x 8–10',rest:150,sets:4,reps:9,kg:0,muscles:'Quads, glutes, core',cues:['Brace the core completely — create intra-abdominal pressure','Full depth — quads parallel or below','Drive knees out over toes on the way up'],subs:'Hack squat, leg press',prog:'Add 2.5 kg when all 4 sets are clean'},
+{id:'ha5_k6',ph:'strength',name:'DB Hip Thrust',vol:'4 x 8–10',rest:120,sets:4,reps:9,kg:0,muscles:'Glutes',cues:['Upper back on bench, feet flat and hip-width','Squeeze the glutes hard at the top','Full extension — straight line from knees to shoulders'],subs:'Barbell hip thrust',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_a21',ph:'accessory',name:'Leg Extension',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Quads',cues:['Extend fully — squeeze at the top for 1 second','3 seconds down — the eccentric is the stimulus','Adjust pad just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_a22',ph:'accessory',name:'Leg Curl, lying',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Hamstrings',cues:['Full extension first — load the stretch','Curl with intent — pause at the top','3 seconds eccentric'],subs:'Seated leg curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'ha5_a23',ph:'accessory',name:'Incline DB Row',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Mid-back, rhomboids',cues:['Chest on the incline pad — removes all momentum','Row both elbows back and upward','Pause and squeeze at the top'],subs:'Chest-supported row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'ha5_a24',ph:'accessory',name:'DB Lateral Raise',vol:'4 x 10–12',rest:60,sets:4,reps:11,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug at the top','Slight forward lean','Stop at shoulder height'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'ha5_a25',ph:'accessory',name:'Cable Crunches',vol:'4 x 8–10',rest:75,sets:4,reps:9,kg:0,muscles:'Rectus abdominis',cues:['Kneel facing the cable — flex the spine, do not just bow','Exhale forcefully at the bottom','Keep the hips stationary'],subs:'Rope crunch, floor crunch',prog:'Add 5 kg when sets are clean'},
+{id:'ha5_cd8',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'ha5_cd9',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}
+]}
+]};
+
+
+// ============================================================
+// STRENGTH — BEGINNER 3-DAY
+// ============================================================
+var TPL_STR_B3={name:'Strength Building · Beginner · 3 days',days:[
+{label:'Workout 1 — Bench Focus',focus:'Bench press 5×5 + upper accessories',mins:55,exercises:[
+{id:'sb3_p0',ph:'primer',name:'Machine Row',vol:'2 x 6–8',rest:0,muscles:'Mid-back, rhomboids',cues:['Light weight — activation only, not training','Pull elbows back and squeeze the shoulder blades','Sets the shoulder girdle before pressing'],subs:'Band row, cable row'},
+{id:'sb3_p1',ph:'primer',name:'Machine Shoulder Press',vol:'2 x 6–8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pressing pattern','Full range — elbows open fully at the bottom','Prepares the shoulder joint before main work'],subs:'Seated DB press (light)'},
+{id:'sb3_k0',ph:'strength',name:'BB Bench Press',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Five contact points: head, upper back, glutes on bench, both feet on floor','Lower to the lower chest — elbows at 45 degrees, not flared','Brace hard before every rep — the bar arcs slightly, not straight up'],subs:'DB bench press',prog:'Add 2.5 kg when all 5 sets are completed with clean form'},
+{id:'sb3_a0',ph:'accessory',name:'BB Bench Press',vol:'4 x 6',rest:120,sets:4,reps:6,kg:0,muscles:'Chest, triceps — volume work',cues:['Reduce load 15–20% from the top sets','Same technique — no shortcuts because the weight is lighter','These sets build the volume that drives long-term strength'],subs:'DB bench press',prog:'Progress this load alongside the main sets'},
+{id:'sb3_a1',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides throughout — this is the whole point','Full extension at the bottom','Control the return — do not let it snap back'],subs:'Close-grip push-up, overhead tricep extension',prog:'Add 2.5 kg when 4x6 is clean'},
+{id:'sb3_cd0',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Forearm on frame, elbow at 90 degrees, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'sb3_cd1',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]},
+{label:'Workout 2 — Squat Focus',focus:'Barbell squat 5×5 + lower accessories',mins:55,exercises:[
+{id:'sb3_p2',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves, Achilles',cues:['Full range — heel drops below the step at the bottom','Prepares the ankle and Achilles before squatting','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sb3_p3',ph:'primer',name:'DB Hip Thrust',vol:'2 x 6–8',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through heels, squeeze hard at the top','Activates the glutes before squatting','Do not hyperextend the lower back'],subs:'Glute bridge'},
+{id:'sb3_k1',ph:'strength',name:'BB Squat',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Quads, glutes, erectors, core',cues:['Brace the core before every rep — create intra-abdominal pressure','Knees track in line with toes throughout','Full depth where mobility allows — do not cut range to add weight'],subs:'Goblet squat, leg press',prog:'Add 2.5 kg when all 5 sets are completed cleanly'},
+{id:'sb3_a2',ph:'accessory',name:'Leg Press',vol:'4 x 6',rest:120,sets:4,reps:6,kg:0,muscles:'Quads, glutes — volume',cues:['Feet at shoulder width, toes slightly out','Full range — knees to 90 degrees minimum','Do not lock the knees aggressively at the top'],subs:'Goblet squat',prog:'Increase load alongside the barbell squat'},
+{id:'sb3_a3',ph:'accessory',name:'Seated Calf Raise',vol:'4 x 6',rest:60,sets:4,reps:6,kg:0,muscles:'Soleus',cues:['Full range — heel drops fully at the bottom','The seated position targets the soleus specifically','Slow and controlled — calves respond poorly to bouncing'],subs:'Standing calf raise',prog:'Add weight when 4x6 is easy through full range'},
+{id:'sb3_cd2',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'sb3_cd3',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 3 — Row Focus',focus:'Barbell row 5×5 + pull accessories',mins:55,exercises:[
+{id:'sb3_p4',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves',cues:['Light and controlled — full range','Prepares the lower body before pulling','Do not rush these'],subs:'Bilateral calf raise'},
+{id:'sb3_p5',ph:'primer',name:'DB Hip Thrust',vol:'2 x 6–8',rest:0,muscles:'Glutes, posterior chain',cues:['Drive through heels, squeeze hard','Warms the posterior chain before the main pull','Controlled throughout'],subs:'Glute bridge'},
+{id:'sb3_k2',ph:'strength',name:'BB Row',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Lats, rhomboids, biceps, erectors',cues:['Hinge at the hips to 45 degrees — maintain this position throughout','Row the bar to the lower abdomen — not the chest','The trunk must stay still — if the body rocks, the weight is too heavy'],subs:'DB row, cable row',prog:'Add 2.5 kg when all 5 sets are completed cleanly'},
+{id:'sb3_a4',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'4 x 6',rest:120,sets:4,reps:6,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress the shoulder blades before you pull','Controlled return'],subs:'Pull-up progression',prog:'Advance to pull-up when 4x6 lat pulldown is easy'},
+{id:'sb3_a5',ph:'accessory',name:'DB Bicep Curl',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Biceps, brachialis',cues:['Elbows stay by your sides — do not swing forward','Supinate the wrist as you curl — pinky side up at top','Control the descent — the lowering builds the muscle too'],subs:'Cable curl, EZ bar curl',prog:'Add 2 kg/hand when 4x6 is clean without elbow swing'},
+{id:'sb3_cd4',ph:'cooldown',name:'Child\'s pose and lat reach',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Reach to one side for a specific lat stretch','Breathe into the upper back'],subs:'Thread the needle'},
+{id:'sb3_cd5',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}
+]}
+]};
+
+// ============================================================
+// STRENGTH — BEGINNER 4-DAY
+// ============================================================
+var TPL_STR_B4={name:'Strength Building · Beginner · 4 days',days:[
+{label:'Workout 1 — Squat Day',focus:'Barbell squat 5×5 + quad/calf volume',mins:55,exercises:[
+{id:'sb4_p0',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves, Achilles',cues:['Full range — activation only','Prepares the ankle before squatting','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sb4_p1',ph:'primer',name:'DB Hip Thrust',vol:'2 x 6–8',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through heels, squeeze at the top','Activates the glutes before squatting','Controlled throughout'],subs:'Glute bridge'},
+{id:'sb4_k0',ph:'strength',name:'BB Squat',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Quads, glutes, core',cues:['Brace the core completely before every rep','Knees track over toes throughout','Full depth — do not cut range to add weight'],subs:'Goblet squat, leg press',prog:'Add 2.5 kg when all 5 sets are completed cleanly'},
+{id:'sb4_a0',ph:'accessory',name:'Leg Press',vol:'3 x 6',rest:120,sets:3,reps:6,kg:0,muscles:'Quads, glutes',cues:['Feet at shoulder width, toes slightly out','Full range — knees to 90 degrees','Do not lock the knees aggressively'],subs:'Goblet squat',prog:'Add 10 kg when sets are clean'},
+{id:'sb4_a1',ph:'accessory',name:'Leg Extension',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze at the top','3 seconds down — the eccentric matters','Adjust pad just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'sb4_a2',ph:'accessory',name:'Seated Calf Raise',vol:'3 x 6',rest:60,sets:3,reps:6,kg:0,muscles:'Soleus',cues:['Seated targets the soleus specifically','Full range — heel drops fully at the bottom','Slow and controlled'],subs:'Standing calf raise',prog:'Add weight when easy through full range'},
+{id:'sb4_cd0',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'sb4_cd1',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 2 — Bench Day',focus:'Barbell bench 5×5 + chest/tri volume',mins:55,exercises:[
+{id:'sb4_p2',ph:'primer',name:'Machine Row',vol:'2 x 6–8',rest:0,muscles:'Mid-back, rhomboids',cues:['Light weight — activation only','Pull elbows back and squeeze shoulder blades','Sets the shoulder girdle before pressing'],subs:'Band row, cable row'},
+{id:'sb4_p3',ph:'primer',name:'Machine Shoulder Press',vol:'2 x 6–8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pressing pattern','Full range — elbows open fully at the bottom','Prepares the shoulder joint'],subs:'Seated DB press (light)'},
+{id:'sb4_k1',ph:'strength',name:'BB Bench Press',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Five contact points with the bench throughout','Lower to the lower chest — elbows at 45 degrees','Brace hard before every rep'],subs:'DB bench press',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sb4_a3',ph:'accessory',name:'BB Bench Press',vol:'3 x 6',rest:120,sets:3,reps:6,kg:0,muscles:'Chest, triceps — volume',cues:['Reduce load 15–20% from the top sets','Same technique — no shortcuts','Volume drives long-term strength'],subs:'DB bench press',prog:'Progress alongside main sets'},
+{id:'sb4_a4',ph:'accessory',name:'Horizontal Flyes',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Chest — stretch emphasis',cues:['Slight elbow bend throughout — do not straighten fully','Lower until a deep chest stretch','Squeeze the chest to return'],subs:'Cable fly, pec deck',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sb4_a5',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides','Full extension at the bottom','Control the return'],subs:'Close-grip push-up',prog:'Add 2.5 kg when sets are clean'},
+{id:'sb4_cd2',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'sb4_cd3',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]},
+{label:'Workout 3 — RDL Day',focus:'Romanian deadlift 5×5 + posterior chain',mins:55,exercises:[
+{id:'sb4_p4',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves',cues:['Full range — activation only','Prepares the lower leg before hinging','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sb4_p5',ph:'primer',name:'Walking Lunge with DBs',vol:'2 x 6–8',rest:0,muscles:'Quads, glutes',cues:['Light load — activation and mobility','Take deliberate steps — control each landing','Upright torso throughout'],subs:'Reverse lunge'},
+{id:'sb4_k2',ph:'strength',name:'Romanian Deadlift',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Hamstrings, glutes, erectors',cues:['Push hips back first — the torso follows','Keep the bar close to the legs throughout','Strong hamstring stretch at the bottom — that is the stimulus'],subs:'Single-leg RDL, kettlebell deadlift',prog:'Add 2.5 kg when all 5 sets are completed cleanly'},
+{id:'sb4_a6',ph:'accessory',name:'Leg Curl, lying',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Hamstrings',cues:['Full extension first — load the stretch','Curl with intent — pause 1 second at the top','3 seconds eccentric'],subs:'Nordic curl, seated leg curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'sb4_a7',ph:'accessory',name:'BB Hip Thrust',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Glutes — peak contraction',cues:['Upper back on bench, bar across hip crease with pad','Drive through heels and squeeze hard at the top','Full hip extension — straight line from knees to shoulders'],subs:'DB hip thrust',prog:'Add 5 kg when sets are clean'},
+{id:'sb4_a8',ph:'accessory',name:'Calf Raise',vol:'3 x 6',rest:60,sets:3,reps:6,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range — heel drops below the step','Pause 1 second at the top','Move slowly'],subs:'Seated calf raise',prog:'Add load when bodyweight sets are easy'},
+{id:'sb4_cd4',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'},
+{id:'sb4_cd5',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded — do not tilt','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'}
+]},
+{label:'Workout 4 — Row Day',focus:'Barbell row 5×5 + back/bicep volume',mins:55,exercises:[
+{id:'sb4_p6',ph:'primer',name:'Band Bicep Curl',vol:'2 x 6–8',rest:0,muscles:'Biceps',cues:['Light resistance — activation only','Groove the pulling motor pattern before rowing','Full range throughout'],subs:'Light DB curl'},
+{id:'sb4_p7',ph:'primer',name:'Lat Pulldown',vol:'2 x 6–8',rest:0,muscles:'Lats, biceps',cues:['Light weight — groove the pulling pattern','Pull to upper chest','Depress shoulder blades before pulling'],subs:'Band pulldown'},
+{id:'sb4_k3',ph:'strength',name:'BB Row',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Lats, rhomboids, biceps, erectors',cues:['Hinge at hips to 45 degrees — maintain throughout the set','Row to the lower abdomen — not the chest','Trunk stays still — if you rock, the weight is too heavy'],subs:'DB row, cable row',prog:'Add 2.5 kg when all 5 sets are completed cleanly'},
+{id:'sb4_a9',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'3 x 6',rest:120,sets:3,reps:6,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before you pull','Controlled return'],subs:'Pull-up progression',prog:'Advance to pull-up when 3x6 lat pulldown is easy'},
+{id:'sb4_a10',ph:'accessory',name:'Incline DB Row',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Mid-back, rhomboids',cues:['Chest on the incline bench — removes all momentum','Row both elbows back and upward','Pause and squeeze at the top'],subs:'Chest-supported row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sb4_a11',ph:'accessory',name:'DB Bicep Curl',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Biceps',cues:['Elbows by the sides — do not swing forward','Supinate the wrist as you curl','Control the descent'],subs:'Cable curl, EZ bar curl',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sb4_cd6',ph:'cooldown',name:'Child\'s pose',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Breathe into the upper back','Hold steady'],subs:'Thread the needle'},
+{id:'sb4_cd7',ph:'cooldown',name:'Bicep doorway stretch',vol:'2 x 30s each',rest:0,muscles:'Biceps, anterior shoulder',cues:['Arm straight, palm on wall at shoulder height','Step forward to stretch the front of the arm','Hold — do not rotate the torso away'],subs:'Cross-body shoulder stretch'}
+]}
+]};
+
+// ============================================================
+// STRENGTH — BEGINNER 5-DAY (same structure as 4-day plus 5th session)
+// ============================================================
+var TPL_STR_B5={name:'Strength Building · Beginner · 5 days',days:[
+{label:'Workout 1 — Squat Day',focus:'Barbell squat 5×5 + quad volume',mins:55,exercises:[
+{id:'sb5_p0',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves',cues:['Full range — activation only','Prepares the ankle before squatting','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sb5_p1',ph:'primer',name:'DB Hip Thrust',vol:'2 x 6–8',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through heels, squeeze at the top','Activates the glutes before squatting','Controlled throughout'],subs:'Glute bridge'},
+{id:'sb5_k0',ph:'strength',name:'BB Squat',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Quads, glutes, core',cues:['Brace completely — create intra-abdominal pressure','Knees track over toes throughout','Full depth — do not cut range to add weight'],subs:'Goblet squat, leg press',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sb5_a0',ph:'accessory',name:'Leg Press',vol:'3 x 6',rest:120,sets:3,reps:6,kg:0,muscles:'Quads, glutes',cues:['Feet at shoulder width, toes slightly out','Full range — knees to 90 degrees','Do not lock the knees aggressively'],subs:'Goblet squat',prog:'Add 10 kg when sets are clean'},
+{id:'sb5_a1',ph:'accessory',name:'Leg Extension',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze at the top','3 seconds down','Adjust pad just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'sb5_a2',ph:'accessory',name:'Seated Calf Raise',vol:'3 x 6',rest:60,sets:3,reps:6,kg:0,muscles:'Soleus',cues:['Seated targets the soleus specifically','Full range — heel drops fully','Slow and controlled'],subs:'Standing calf raise',prog:'Add weight when easy through full range'},
+{id:'sb5_cd0',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'sb5_cd1',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 2 — Bench Day',focus:'Barbell bench 5×5 + chest/tri volume',mins:55,exercises:[
+{id:'sb5_p2',ph:'primer',name:'Machine Row',vol:'2 x 6–8',rest:0,muscles:'Mid-back',cues:['Light weight — activation only','Pull elbows back and squeeze','Sets the shoulder girdle before pressing'],subs:'Band row'},
+{id:'sb5_p3',ph:'primer',name:'Machine Shoulder Press',vol:'2 x 6–8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pattern','Full range at the bottom','Prepares the shoulder'],subs:'Seated DB press (light)'},
+{id:'sb5_k1',ph:'strength',name:'BB Bench Press',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Five contact points throughout','Lower to the lower chest — elbows at 45 degrees','Brace hard before every rep'],subs:'DB bench press',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sb5_a3',ph:'accessory',name:'BB Bench Press',vol:'3 x 6',rest:120,sets:3,reps:6,kg:0,muscles:'Chest, triceps — volume',cues:['Reduce load 15–20%','Same technique — no shortcuts','Volume drives long-term strength'],subs:'DB bench press',prog:'Progress alongside main sets'},
+{id:'sb5_a4',ph:'accessory',name:'Horizontal Flyes',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Chest — stretch emphasis',cues:['Slight elbow bend throughout','Lower until a deep chest stretch','Squeeze to return'],subs:'Cable fly, pec deck',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sb5_a5',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides','Full extension at the bottom','Control the return'],subs:'Close-grip push-up',prog:'Add 2.5 kg when sets are clean'},
+{id:'sb5_cd2',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'sb5_cd3',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]},
+{label:'Workout 3 — RDL Day',focus:'Romanian deadlift 5×5 + posterior chain',mins:55,exercises:[
+{id:'sb5_p4',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves',cues:['Full range — activation only','Prepares the lower leg','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sb5_p5',ph:'primer',name:'Walking Lunge with DBs',vol:'2 x 6–8',rest:0,muscles:'Quads, glutes',cues:['Light load — activation and mobility','Deliberate steps — control each landing','Upright torso throughout'],subs:'Reverse lunge'},
+{id:'sb5_k2',ph:'strength',name:'Romanian Deadlift',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Hamstrings, glutes, erectors',cues:['Push hips back first — the torso follows','Keep the bar close to the legs','Strong hamstring stretch at the bottom'],subs:'Single-leg RDL',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sb5_a6',ph:'accessory',name:'Leg Curl, lying',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Hamstrings',cues:['Full extension first','Curl with intent — pause at the top','3 seconds eccentric'],subs:'Nordic curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'sb5_a7',ph:'accessory',name:'BB Hip Thrust',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Glutes',cues:['Upper back on bench, bar across hip crease with pad','Drive through heels and squeeze hard','Full extension at the top'],subs:'DB hip thrust',prog:'Add 5 kg when sets are clean'},
+{id:'sb5_a8',ph:'accessory',name:'Calf Raise',vol:'3 x 6',rest:60,sets:3,reps:6,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range — heel drops below the step','Pause 1 second at the top','Move slowly'],subs:'Seated calf raise',prog:'Add load when bodyweight is easy'},
+{id:'sb5_cd4',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'},
+{id:'sb5_cd5',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded','Breathe slowly','Hold — do not bounce'],subs:'Pigeon pose'}
+]},
+{label:'Workout 4 — Row Day',focus:'Barbell row 5×5 + back/bicep volume',mins:55,exercises:[
+{id:'sb5_p6',ph:'primer',name:'Band Bicep Curl',vol:'2 x 6–8',rest:0,muscles:'Biceps',cues:['Light resistance — activation only','Full range throughout','Groove the pulling pattern before rowing'],subs:'Light DB curl'},
+{id:'sb5_p7',ph:'primer',name:'Lat Pulldown',vol:'2 x 6–8',rest:0,muscles:'Lats, biceps',cues:['Light weight — groove the pulling pattern','Pull to upper chest','Depress shoulder blades before pulling'],subs:'Band pulldown'},
+{id:'sb5_k3',ph:'strength',name:'BB Row',vol:'5 x 5',rest:180,sets:5,reps:5,kg:0,muscles:'Lats, rhomboids, biceps, erectors',cues:['Hinge at hips to 45 degrees — maintain throughout','Row to the lower abdomen — not the chest','Trunk stays still — if you rock, the weight is too heavy'],subs:'DB row, cable row',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sb5_a9',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'3 x 6',rest:120,sets:3,reps:6,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before pulling','Controlled return'],subs:'Pull-up progression',prog:'Advance to pull-up when easy'},
+{id:'sb5_a10',ph:'accessory',name:'Incline DB Row',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Mid-back, rhomboids',cues:['Chest on the incline bench — removes all momentum','Row both elbows back and upward','Pause and squeeze at the top'],subs:'Chest-supported row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sb5_a11',ph:'accessory',name:'DB Bicep Curl',vol:'3 x 6',rest:90,sets:3,reps:6,kg:0,muscles:'Biceps',cues:['Elbows by the sides','Supinate the wrist as you curl','Control the descent'],subs:'Cable curl',prog:'Add 2 kg/hand when clean'},
+{id:'sb5_cd6',ph:'cooldown',name:'Child\'s pose',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Breathe into the upper back','Hold steady'],subs:'Thread the needle'},
+{id:'sb5_cd7',ph:'cooldown',name:'Bicep doorway stretch',vol:'2 x 30s each',rest:0,muscles:'Biceps, anterior shoulder',cues:['Arm straight, palm on wall','Step forward to stretch the front of the arm','Hold — do not rotate away'],subs:'Cross-body shoulder stretch'}
+]},
+{label:'Workout 5 — Shoulder + Upper Push',focus:'Incline press, shoulder press, accessories',mins:55,exercises:[
+{id:'sb5_p8',ph:'primer',name:'Machine Row',vol:'2 x 6–8',rest:0,muscles:'Mid-back',cues:['Light weight — activation only','Pull elbows back and squeeze','Sets the shoulder girdle before pressing'],subs:'Band row'},
+{id:'sb5_p9',ph:'primer',name:'Machine Shoulder Press',vol:'2 x 6–8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pattern','Full range at the bottom','Prepares the shoulder joint'],subs:'Seated DB press (light)'},
+{id:'sb5_k4',ph:'strength',name:'Incline DB Bench Press',vol:'3 x 6–8',rest:150,sets:3,reps:7,kg:0,muscles:'Upper chest, deltoid, triceps',cues:['30-45 degree incline — upper chest focus','Lower to the upper chest — elbows at 45 degrees','Control the descent: 2 seconds down'],subs:'Incline BB press',prog:'Add 2 kg/hand when all sets are clean'},
+{id:'sb5_a12',ph:'accessory',name:'Machine Shoulder Press',vol:'3 x 6–8',rest:90,sets:3,reps:7,kg:0,muscles:'Deltoid, triceps',cues:['Adjust seat — handles at shoulder height','Press without shrugging','Full extension, controlled return'],subs:'DB shoulder press',prog:'Add 5 kg when sets are clean'},
+{id:'sb5_a13',ph:'accessory',name:'DB Lateral Raise',vol:'3 x 6–8',rest:75,sets:3,reps:7,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug at the top','Slight forward lean — 10 degrees','Stop at shoulder height'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'sb5_a14',ph:'accessory',name:'Tricep Pushdown',vol:'3 x 6–8',rest:75,sets:3,reps:7,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides','Full extension at the bottom','Control the return'],subs:'Overhead tricep extension',prog:'Add 2.5 kg when sets are clean'},
+{id:'sb5_cd8',ph:'cooldown',name:'Cross-body shoulder stretch',vol:'2 x 30s each',rest:0,muscles:'Posterior deltoid',cues:['Arm across the chest','Use other hand to gently deepen','Hold — do not bounce'],subs:'Sleeper stretch'},
+{id:'sb5_cd9',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'}
+]}
+]};
+
+
+// ============================================================
+// STRENGTH — ADVANCED 3/4/5-DAY (reuse existing STR but extended)
+// ============================================================
+var TPL_STR_A3={name:'Strength Building · Advanced · 3 days',days:[
+{label:'Workout 1 — Bench Day',focus:'Bench press 5×5 + heavy accessories',mins:60,exercises:[
+{id:'sa3_p0',ph:'primer',name:'Machine Row',vol:'2 x 6–8',rest:0,muscles:'Mid-back, rhomboids',cues:['Light weight — activation only','Pull elbows back and squeeze the shoulder blades','Sets the shoulder girdle before pressing'],subs:'Band row, cable row'},
+{id:'sa3_p1',ph:'primer',name:'Machine Shoulder Press',vol:'2 x 6–8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pressing pattern','Full range — elbows open fully at the bottom','Prepares the shoulder joint'],subs:'Seated DB press (light)'},
+{id:'sa3_k0',ph:'strength',name:'BB Bench Press',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Five contact points with the bench throughout','Lower to the lower chest — elbows at 45 degrees','Brace hard before every rep — treat every set like a max attempt'],subs:'DB bench press',prog:'Add 2.5 kg when all 5 sets are completed with clean form'},
+{id:'sa3_k1',ph:'strength',name:'BB Bench Press',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Chest, triceps — volume',cues:['Reduce load 15–20% from top sets','Same technique — no shortcuts with lighter weight','These volume sets drive long-term strength adaptations'],subs:'DB bench press',prog:'Progress this load in parallel with the main sets'},
+{id:'sa3_a0',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides throughout','Full extension at the bottom','Control the return'],subs:'Close-grip push-up, overhead extension',prog:'Add 2.5 kg when 4x6 is clean'},
+{id:'sa3_cd0',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'sa3_cd1',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]},
+{label:'Workout 2 — Squat Day',focus:'Barbell squat 5×5 + heavy lower accessories',mins:60,exercises:[
+{id:'sa3_p2',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves, Achilles',cues:['Full range — heel drops below the step','Prepares the ankle and Achilles','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sa3_p3',ph:'primer',name:'DB Hip Thrust',vol:'2 x 6–8',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through heels, squeeze hard at the top','Activates the glutes before squatting','Do not hyperextend the lower back'],subs:'Glute bridge'},
+{id:'sa3_k2',ph:'strength',name:'BB Squat',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Quads, glutes, erectors, core',cues:['Brace completely — create intra-abdominal pressure','Full depth — quads parallel or below','Drive knees out over toes throughout the ascent'],subs:'Goblet squat, leg press',prog:'Add 2.5 kg when all 5 sets are completed cleanly'},
+{id:'sa3_k3',ph:'strength',name:'Leg Press',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Quads, glutes — volume',cues:['Feet at shoulder width, toes slightly out','Full range — knees to 90 degrees minimum','Do not lock the knees aggressively'],subs:'Goblet squat',prog:'Progress alongside the barbell squat'},
+{id:'sa3_a1',ph:'accessory',name:'Seated Calf Raise',vol:'4 x 6',rest:60,sets:4,reps:6,kg:0,muscles:'Soleus',cues:['Full range — heel drops fully','Seated targets the soleus specifically','Slow and controlled'],subs:'Standing calf raise',prog:'Add weight when 4x6 is easy through full range'},
+{id:'sa3_cd2',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'sa3_cd3',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 3 — Row Day',focus:'Barbell row 5×5 + pull accessories',mins:60,exercises:[
+{id:'sa3_p4',ph:'primer',name:'Band Bicep Curl',vol:'2 x 6–8',rest:0,muscles:'Biceps',cues:['Light resistance — activation only','Groove the pulling pattern before rowing','Full range throughout'],subs:'Light DB curl'},
+{id:'sa3_p5',ph:'primer',name:'Lat Pulldown',vol:'2 x 6–8',rest:0,muscles:'Lats, biceps',cues:['Light weight — groove the pattern','Pull to upper chest','Depress shoulder blades before pulling'],subs:'Band pulldown'},
+{id:'sa3_k4',ph:'strength',name:'BB Row',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Lats, rhomboids, biceps, erectors',cues:['Hinge at hips to 45 degrees — maintain this position throughout the set','Row to the lower abdomen — not the chest','Trunk must stay still — rocking means the weight is too heavy'],subs:'DB row, cable row',prog:'Add 2.5 kg when all 5 sets are completed cleanly'},
+{id:'sa3_a2',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'4 x 6',rest:120,sets:4,reps:6,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before you pull','Controlled return'],subs:'Pull-up progression',prog:'Advance to pull-up when lat pulldown is easy'},
+{id:'sa3_a3',ph:'accessory',name:'DB Bicep Curl',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Biceps',cues:['Elbows by the sides — do not swing forward','Supinate the wrist as you curl','Control the descent'],subs:'Cable curl, EZ bar curl',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sa3_cd4',ph:'cooldown',name:'Child\'s pose',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Breathe into the upper back','Hold steady'],subs:'Thread the needle'},
+{id:'sa3_cd5',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}
+]}
+]};
+
+var TPL_STR_A4={name:'Strength Building · Advanced · 4 days',days:[
+{label:'Workout 1 — Squat Day',focus:'Barbell squat + leg volume',mins:60,exercises:[
+{id:'sa4_p0',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves',cues:['Full range — activation only','Prepares the ankle before squatting','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sa4_p1',ph:'primer',name:'DB Hip Thrust',vol:'2 x 6–8',rest:0,muscles:'Glutes',cues:['Drive through heels, squeeze at the top','Activates the glutes before squatting','Controlled throughout'],subs:'Glute bridge'},
+{id:'sa4_k0',ph:'strength',name:'BB Squat',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Quads, glutes, core',cues:['Brace completely — intra-abdominal pressure before every rep','Full depth — do not cut range to add weight','Drive knees out over toes on the way up'],subs:'Hack squat, leg press',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sa4_k1',ph:'strength',name:'Leg Press',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Quads, glutes — volume',cues:['Feet at shoulder width, toes slightly out','Full range — knees to 90 degrees','Do not lock the knees aggressively'],subs:'Goblet squat',prog:'Progress alongside the barbell squat'},
+{id:'sa4_a0',ph:'accessory',name:'Leg Extension',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze at the top','3 seconds down — the eccentric is the stimulus','Adjust pad just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'sa4_a1',ph:'accessory',name:'Seated Calf Raise',vol:'4 x 6',rest:60,sets:4,reps:6,kg:0,muscles:'Soleus',cues:['Seated targets the soleus specifically','Full range — heel drops fully','Slow and controlled'],subs:'Standing calf raise',prog:'Add weight when easy through full range'},
+{id:'sa4_cd0',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square','Breathe into the restriction'],subs:'Figure-four'},
+{id:'sa4_cd1',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 2 — Bench Day',focus:'Barbell bench + upper push volume',mins:60,exercises:[
+{id:'sa4_p2',ph:'primer',name:'Machine Row',vol:'2 x 6–8',rest:0,muscles:'Mid-back',cues:['Light weight — activation only','Pull elbows back and squeeze','Sets the shoulder girdle before pressing'],subs:'Band row'},
+{id:'sa4_p3',ph:'primer',name:'Machine Shoulder Press',vol:'2 x 6–8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pattern','Full range at the bottom','Prepares the shoulder joint'],subs:'Seated DB press (light)'},
+{id:'sa4_k2',ph:'strength',name:'BB Bench Press',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Five contact points throughout','Lower to lower chest — elbows at 45 degrees','Brace hard — treat every set like a max attempt'],subs:'DB bench press',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sa4_k3',ph:'strength',name:'BB Bench Press',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Chest, triceps — volume',cues:['Reduce load 15–20%','Same technique — no shortcuts','Volume drives long-term strength'],subs:'DB bench press',prog:'Progress alongside main sets'},
+{id:'sa4_a2',ph:'accessory',name:'Horizontal Flyes',vol:'4 x 6',rest:75,sets:4,reps:6,kg:0,muscles:'Chest — stretch emphasis',cues:['Slight elbow bend throughout','Lower until deep chest stretch','Squeeze to return'],subs:'Cable fly, pec deck',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sa4_a3',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides','Full extension at the bottom','Control the return'],subs:'Close-grip push-up',prog:'Add 2.5 kg when sets are clean'},
+{id:'sa4_cd2',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame','Step gently forward into the stretch','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'sa4_cd3',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]},
+{label:'Workout 3 — RDL Day',focus:'Romanian deadlift + posterior chain',mins:60,exercises:[
+{id:'sa4_p4',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves',cues:['Full range — activation only','Prepares the lower leg before hinging','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sa4_p5',ph:'primer',name:'Walking Lunge with DBs',vol:'2 x 6–8',rest:0,muscles:'Quads, glutes',cues:['Light load — activation and mobility','Deliberate steps — control each landing','Upright torso throughout'],subs:'Reverse lunge'},
+{id:'sa4_k4',ph:'strength',name:'Romanian Deadlift',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Hamstrings, glutes, erectors',cues:['Push hips back first — the torso follows','Keep the bar close to the legs throughout','Strong hamstring stretch at the bottom'],subs:'Single-leg RDL',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sa4_k5',ph:'strength',name:'BB Hip Thrust',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Glutes — peak contraction',cues:['Upper back on bench, bar across hip crease with pad','Drive through heels and squeeze hard','Full extension at the top'],subs:'DB hip thrust',prog:'Add 5 kg when all 4 sets are clean'},
+{id:'sa4_a4',ph:'accessory',name:'Leg Curl, lying',vol:'4 x 6',rest:75,sets:4,reps:6,kg:0,muscles:'Hamstrings',cues:['Full extension first','Curl with intent — pause at the top','3 seconds eccentric'],subs:'Nordic curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'sa4_a5',ph:'accessory',name:'Calf Raise',vol:'4 x 6',rest:60,sets:4,reps:6,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range — heel drops below the step','Pause 1 second at the top','Move slowly'],subs:'Seated calf raise',prog:'Add load when bodyweight is easy'},
+{id:'sa4_cd4',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'},
+{id:'sa4_cd5',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded','Breathe slowly','Hold — do not bounce'],subs:'Pigeon pose'}
+]},
+{label:'Workout 4 — Row Day',focus:'Barbell row + pull volume',mins:60,exercises:[
+{id:'sa4_p6',ph:'primer',name:'Band Bicep Curl',vol:'2 x 6–8',rest:0,muscles:'Biceps',cues:['Light resistance — activation only','Full range throughout','Groove the pulling pattern'],subs:'Light DB curl'},
+{id:'sa4_p7',ph:'primer',name:'Lat Pulldown',vol:'2 x 6–8',rest:0,muscles:'Lats, biceps',cues:['Light weight — groove the pattern','Pull to upper chest','Depress shoulder blades before pulling'],subs:'Band pulldown'},
+{id:'sa4_k6',ph:'strength',name:'BB Row',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Lats, rhomboids, biceps, erectors',cues:['Hinge at hips to 45 degrees — maintain throughout','Row to the lower abdomen — not the chest','Trunk stays still — if you rock, the weight is too heavy'],subs:'DB row, cable row',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sa4_k7',ph:'strength',name:'Incline DB Row',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Mid-back, rhomboids',cues:['Chest on the incline bench — removes all momentum','Row both elbows back and upward','Pause and squeeze at the top'],subs:'Chest-supported row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sa4_a6',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before pulling','Controlled return'],subs:'Pull-up progression',prog:'Advance to pull-up when easy'},
+{id:'sa4_a7',ph:'accessory',name:'DB Shoulder Press',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Deltoid, triceps',cues:['Press straight up — core braced throughout','Do not arch the lower back','Full lockout, controlled return'],subs:'Machine shoulder press',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sa4_cd6',ph:'cooldown',name:'Child\'s pose',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Breathe into the upper back','Hold steady'],subs:'Thread the needle'},
+{id:'sa4_cd7',ph:'cooldown',name:'Bicep doorway stretch',vol:'2 x 30s each',rest:0,muscles:'Biceps, anterior shoulder',cues:['Arm straight, palm on wall','Step forward to stretch the front of the arm','Hold — do not rotate away'],subs:'Cross-body shoulder stretch'}
+]}
+]};
+
+var TPL_STR_A5={name:'Strength Building · Advanced · 5 days',days:[
+{label:'Workout 1 — Squat Day',focus:'Barbell squat 5×5 + leg accessories',mins:60,exercises:[
+{id:'sa5_p0',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves',cues:['Full range — activation only','Prepares the ankle before squatting','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sa5_p1',ph:'primer',name:'DB Hip Thrust',vol:'2 x 6–8',rest:0,muscles:'Glutes',cues:['Drive through heels, squeeze at the top','Activates the glutes before squatting','Controlled throughout'],subs:'Glute bridge'},
+{id:'sa5_k0',ph:'strength',name:'BB Squat',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Quads, glutes, core',cues:['Brace completely — create intra-abdominal pressure','Full depth — do not cut range to add weight','Drive knees out over toes on the ascent'],subs:'Hack squat, leg press',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sa5_k1',ph:'strength',name:'Leg Press',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Quads, glutes — volume',cues:['Feet at shoulder width, toes slightly out','Full range — knees to 90 degrees','Do not lock the knees aggressively'],subs:'Goblet squat',prog:'Progress alongside the barbell squat'},
+{id:'sa5_a0',ph:'accessory',name:'Leg Extension',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Quads, VMO',cues:['Extend fully — squeeze at the top','3 seconds down','Adjust pad just above the ankle'],subs:'Terminal knee extension',prog:'Add 5 kg when sets are clean'},
+{id:'sa5_a1',ph:'accessory',name:'Seated Calf Raise',vol:'4 x 6',rest:60,sets:4,reps:6,kg:0,muscles:'Soleus',cues:['Seated targets the soleus','Full range — heel drops fully','Slow and controlled'],subs:'Standing calf raise',prog:'Add weight when easy through full range'},
+{id:'sa5_cd0',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square','Breathe into the restriction'],subs:'Figure-four'},
+{id:'sa5_cd1',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 2 — Bench Day',focus:'Barbell bench 5×5 + chest/tri volume',mins:60,exercises:[
+{id:'sa5_p2',ph:'primer',name:'Machine Row',vol:'2 x 6–8',rest:0,muscles:'Mid-back',cues:['Light weight — activation only','Pull elbows back and squeeze','Sets the shoulder girdle before pressing'],subs:'Band row'},
+{id:'sa5_p3',ph:'primer',name:'Machine Shoulder Press',vol:'2 x 6–8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pattern','Full range at the bottom','Prepares the shoulder joint'],subs:'Seated DB press (light)'},
+{id:'sa5_k2',ph:'strength',name:'BB Bench Press',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Chest, anterior deltoid, triceps',cues:['Five contact points throughout','Lower to lower chest — elbows at 45 degrees','Brace hard — treat every set like a max attempt'],subs:'DB bench press',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sa5_k3',ph:'strength',name:'BB Bench Press',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Chest, triceps — volume',cues:['Reduce load 15–20%','Same technique — no shortcuts','Volume drives long-term strength'],subs:'DB bench press',prog:'Progress alongside main sets'},
+{id:'sa5_a2',ph:'accessory',name:'Horizontal Flyes',vol:'3 x 6',rest:75,sets:3,reps:6,kg:0,muscles:'Chest — stretch emphasis',cues:['Slight elbow bend throughout','Lower until deep chest stretch','Squeeze to return'],subs:'Cable fly, pec deck',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sa5_a3',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides','Full extension at the bottom','Control the return'],subs:'Close-grip push-up',prog:'Add 2.5 kg when sets are clean'},
+{id:'sa5_cd2',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'sa5_cd3',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]},
+{label:'Workout 3 — RDL Day',focus:'Romanian deadlift 5×5 + glutes/hamstrings',mins:60,exercises:[
+{id:'sa5_p4',ph:'primer',name:'Calf Raise',vol:'2 x 6–8',rest:0,muscles:'Calves',cues:['Full range — activation only','Prepares the lower leg before hinging','Light and controlled'],subs:'Bilateral calf raise'},
+{id:'sa5_p5',ph:'primer',name:'Walking Lunge with DBs',vol:'2 x 6–8',rest:0,muscles:'Quads, glutes',cues:['Light load — activation and mobility','Deliberate steps — control each landing','Upright torso throughout'],subs:'Reverse lunge'},
+{id:'sa5_k4',ph:'strength',name:'Romanian Deadlift',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Hamstrings, glutes, erectors',cues:['Push hips back first — torso follows','Keep the bar close to the legs throughout','Strong hamstring stretch at the bottom'],subs:'Single-leg RDL',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sa5_k5',ph:'strength',name:'BB Hip Thrust',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Glutes',cues:['Upper back on bench, bar across hip crease with pad','Drive through heels and squeeze hard','Full extension at the top'],subs:'DB hip thrust',prog:'Add 5 kg when all 4 sets are clean'},
+{id:'sa5_a4',ph:'accessory',name:'Leg Curl, lying',vol:'4 x 6',rest:75,sets:4,reps:6,kg:0,muscles:'Hamstrings',cues:['Full extension first','Curl with intent — pause at the top','3 seconds eccentric'],subs:'Nordic curl',prog:'Add 2.5 kg when sets are clean'},
+{id:'sa5_a5',ph:'accessory',name:'Calf Raise',vol:'4 x 6',rest:60,sets:4,reps:6,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range — heel drops below the step','Pause 1 second at the top','Move slowly'],subs:'Seated calf raise',prog:'Add load when bodyweight is easy'},
+{id:'sa5_cd4',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'},
+{id:'sa5_cd5',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded','Breathe slowly','Hold — do not bounce'],subs:'Pigeon pose'}
+]},
+{label:'Workout 4 — Row Day',focus:'Barbell row 5×5 + back/bicep volume',mins:60,exercises:[
+{id:'sa5_p6',ph:'primer',name:'Band Bicep Curl',vol:'2 x 6–8',rest:0,muscles:'Biceps',cues:['Light resistance — activation only','Full range throughout','Groove the pulling pattern'],subs:'Light DB curl'},
+{id:'sa5_p7',ph:'primer',name:'Lat Pulldown',vol:'2 x 6–8',rest:0,muscles:'Lats, biceps',cues:['Light weight — groove the pattern','Pull to upper chest','Depress shoulder blades before pulling'],subs:'Band pulldown'},
+{id:'sa5_k6',ph:'strength',name:'BB Row',vol:'5 x 5',rest:210,sets:5,reps:5,kg:0,muscles:'Lats, rhomboids, biceps, erectors',cues:['Hinge at hips to 45 degrees — maintain throughout','Row to the lower abdomen — not the chest','Trunk stays still — if you rock, the weight is too heavy'],subs:'DB row, cable row',prog:'Add 2.5 kg when all 5 sets are clean'},
+{id:'sa5_k7',ph:'strength',name:'Incline DB Row',vol:'4 x 6',rest:150,sets:4,reps:6,kg:0,muscles:'Mid-back, rhomboids',cues:['Chest on the incline bench — removes all momentum','Row both elbows back and upward','Pause and squeeze at the top'],subs:'Chest-supported row',prog:'Add 2 kg/hand when sets are clean'},
+{id:'sa5_a6',ph:'accessory',name:'Lat Pulldown, neutral grip',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before pulling','Controlled return'],subs:'Pull-up progression',prog:'Advance to pull-up when easy'},
+{id:'sa5_a7',ph:'accessory',name:'DB Bicep Curl',vol:'4 x 6',rest:90,sets:4,reps:6,kg:0,muscles:'Biceps',cues:['Elbows by the sides — do not swing forward','Supinate the wrist as you curl','Control the descent'],subs:'Cable curl',prog:'Add 2 kg/hand when clean'},
+{id:'sa5_cd6',ph:'cooldown',name:'Child\'s pose',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Breathe into the upper back','Hold steady'],subs:'Thread the needle'},
+{id:'sa5_cd7',ph:'cooldown',name:'Bicep doorway stretch',vol:'2 x 30s each',rest:0,muscles:'Biceps, anterior shoulder',cues:['Arm straight, palm on wall','Step forward to stretch the front of the arm','Hold — do not rotate away'],subs:'Cross-body shoulder stretch'}
+]},
+{label:'Workout 5 — Shoulder + Upper Push',focus:'Incline press, shoulder press, upper accessories',mins:60,exercises:[
+{id:'sa5_p8',ph:'primer',name:'Machine Row',vol:'2 x 6–8',rest:0,muscles:'Mid-back',cues:['Light weight — activation only','Pull elbows back and squeeze','Sets the shoulder girdle before pressing'],subs:'Band row'},
+{id:'sa5_p9',ph:'primer',name:'Machine Shoulder Press',vol:'2 x 6–8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pattern','Full range at the bottom','Prepares the shoulder joint'],subs:'Seated DB press (light)'},
+{id:'sa5_k8',ph:'strength',name:'Incline DB Bench Press',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Upper chest, deltoid, triceps',cues:['30-45 degree incline — upper chest focus','Lower to upper chest — elbows at 45 degrees','Control the descent: 2 seconds down'],subs:'Incline BB press',prog:'Add 2 kg/hand when all sets are clean'},
+{id:'sa5_k9',ph:'strength',name:'Machine Shoulder Press',vol:'4 x 6–8',rest:150,sets:4,reps:7,kg:0,muscles:'Deltoid, triceps',cues:['Adjust seat — handles at shoulder height','Press without shrugging','Full extension, controlled return'],subs:'DB shoulder press',prog:'Add 5 kg when all 4 sets are clean'},
+{id:'sa5_a8',ph:'accessory',name:'DB Lateral Raise',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug at the top','Slight forward lean — 10 degrees','Stop at shoulder height'],subs:'Cable lateral raise',prog:'Add 1 kg/hand when sets are clean'},
+{id:'sa5_a9',ph:'accessory',name:'Tricep Pushdown',vol:'4 x 6–8',rest:75,sets:4,reps:7,kg:0,muscles:'Triceps',cues:['Elbows pinned to sides','Full extension at the bottom','Control the return'],subs:'Overhead tricep extension',prog:'Add 2.5 kg when sets are clean'},
+{id:'sa5_cd8',ph:'cooldown',name:'Cross-body shoulder stretch',vol:'2 x 30s each',rest:0,muscles:'Posterior deltoid',cues:['Arm across the chest','Use other hand to gently deepen','Hold — do not bounce'],subs:'Sleeper stretch'},
+{id:'sa5_cd9',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees on the frame, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'}
+]}
+]};
+
+var TPL_END_A5={name:'Muscular Endurance · Advanced · 5 days',days:[
+{label:'Workout 1 — Upper Push/Pull',focus:'DB bench, rows, arms',mins:55,exercises:[
+{id:'ea5_p0',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid',cues:['Arms straight — not a row','Pull to chest height, thumbs outward','Control the return'],subs:'Face pull'},
+{id:'ea5_k0',ph:'strength',name:'DB Bench Press',vol:'3 x 30s',rest:60,sets:3,reps:0,kg:0,muscles:'Chest, triceps',cues:['Choose a load for 30 seconds of continuous reps','Lower to chest — elbows at 45 degrees throughout','Controlled even as fatigue builds'],subs:'Push-up progression',prog:'Increase load when 30s is controlled'},
+{id:'ea5_k1',ph:'strength',name:'One-Arm DB Row',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Lats, rhomboids — unilateral',cues:['Pull elbow to the hip on every rep','Pause and squeeze at the top','Neutral spine — no rotation throughout'],subs:'Cable row',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a0',ph:'accessory',name:'Horizontal Flyes',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Chest — stretch emphasis',cues:['Slight elbow bend throughout','Lower until deep chest stretch each rep','Squeeze to return'],subs:'Cable fly',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a1',ph:'accessory',name:'Lat Pulldown',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before each pull','Controlled return throughout'],subs:'Pull-up',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a2',ph:'accessory',name:'Reverse Flyes Machine',vol:'4 x 30s',rest:45,sets:4,reps:0,kg:0,muscles:'Rear deltoid, rhomboids',cues:['Adjust seat — handles at shoulder height','Pull handles outward in an arc — elbows lead','Pause at full contraction — squeeze shoulder blades'],subs:'DB reverse flyes, face pull',prog:'Add load when 30s is easy'},
+{id:'ea5_a3',ph:'accessory',name:'DB Bicep Curl',vol:'4 x 45–60s',rest:60,sets:4,reps:0,kg:0,muscles:'Biceps',cues:['Elbows by the sides — do not swing throughout','Supinate the wrist as you curl','Control the descent every rep'],subs:'Cable curl, hammer curl',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a4',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'4 x 30s',rest:45,sets:4,reps:0,kg:0,muscles:'Triceps',cues:['Elbows at sides — extension only from the elbow','Full extension at the bottom on each rep','Control the return'],subs:'Tricep pushdown',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a5',ph:'accessory',name:'Cable Rope Crunches',vol:'4 x 45–60s',rest:60,sets:4,reps:0,kg:0,muscles:'Rectus abdominis',cues:['Continuous reps — choose load wisely','Exhale forcefully on each crunch','Keep hips stationary throughout'],subs:'Cable crunch',prog:'Increase load when controlled'},
+{id:'ea5_cd0',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Elbow at 90 degrees, step gently forward','Feel the stretch across the chest','Hold — do not bounce'],subs:'Foam roller thoracic extension'},
+{id:'ea5_cd1',ph:'cooldown',name:'Child\'s pose',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Breathe into the upper back','Hold steady'],subs:'Thread the needle'}
+]},
+{label:'Workout 2 — Lower Hinge',focus:'RDL, leg press, hip thrust, calves',mins:55,exercises:[
+{id:'ea5_p1',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes',cues:['Drive through heels — not toes','Squeeze hard at the top','Do not hyperextend the lower back'],subs:'Single-leg glute bridge'},
+{id:'ea5_k2',ph:'strength',name:'Romanian Deadlift',vol:'3 x 30s',rest:60,sets:3,reps:0,kg:0,muscles:'Hamstrings, glutes',cues:['Push hips back first on every rep','Keep bar close to legs throughout','Strong hamstring stretch at the bottom each rep'],subs:'Single-leg RDL',prog:'Increase load when 30s is controlled'},
+{id:'ea5_k3',ph:'strength',name:'Leg Press',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Quads, glutes',cues:['Full range on every rep — knees to 90 degrees minimum','Feet at shoulder width, toes slightly out','Continuous reps — pace yourself through the time'],subs:'Hack squat, goblet squat',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a6',ph:'accessory',name:'Leg Curl',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Hamstrings',cues:['Full extension first — load the stretch','Curl with intent — continuous reps for 30s','3 seconds down each rep'],subs:'Nordic curl, seated leg curl',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a7',ph:'accessory',name:'Leg Extension',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Quads',cues:['Extend fully — squeeze at the top each rep','3 seconds down — the eccentric is the stimulus','Adjust pad just above the ankle'],subs:'Terminal knee extension',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a8',ph:'accessory',name:'DB Hip Thrust',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Glutes',cues:['Upper back on bench, feet flat','Squeeze hard at top — full extension every rep','Controlled descent each rep'],subs:'Glute bridge on floor',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a9',ph:'accessory',name:'Single-Leg Squat, foot elevated',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Quads, glutes — unilateral',cues:['Rear foot elevated on a bench — front leg does the work','Control the descent — 3 seconds down on each rep','Drive through the heel of the front foot to stand'],subs:'Bulgarian split squat, reverse lunge',prog:'Add weight when time range is consistently controlled'},
+{id:'ea5_a10',ph:'accessory',name:'Calf Raise',vol:'4 x 30–45s',rest:45,sets:4,reps:0,kg:0,muscles:'Gastrocnemius, soleus',cues:['Full range on every rep — heel drops below the step','Pause 1 second at the top each rep','Continuous reps — do not bounce'],subs:'Seated calf raise',prog:'Add load when full time is easy'},
+{id:'ea5_cd2',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'ea5_cd3',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip — do not round the lower back','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}
+]},
+{label:'Workout 3 — Shoulder + Arms',focus:'Shoulder press, lateral raise, curls, triceps, core',mins:55,exercises:[
+{id:'ea5_p2',ph:'primer',name:'Band face pull',vol:'2 x 15',rest:0,muscles:'Rear deltoid, external rotators',cues:['Pull to forehead height — thumbs finish behind ears','Elbows stay high throughout','Control the return'],subs:'Band pull-apart'},
+{id:'ea5_k4',ph:'strength',name:'DB Shoulder Press',vol:'3 x 30s',rest:60,sets:3,reps:0,kg:0,muscles:'Deltoid, triceps',cues:['Choose load for 30 seconds of continuous reps','Press straight up — do not arch the lower back','Full lockout on every rep'],subs:'Machine shoulder press',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a11',ph:'accessory',name:'DB Lateral Raise',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug at the top','Slight forward lean — 10 degrees','Stop at shoulder height every rep'],subs:'Cable lateral raise',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a12',ph:'accessory',name:'Hammer Curl',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Biceps, brachioradialis',cues:['Neutral grip — thumbs up throughout','Elbows by the sides — no swinging','Control the descent every rep'],subs:'Regular curl, cable curl',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a13',ph:'accessory',name:'Cross-Cable Tricep Extension',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Triceps',cues:['Elbows at sides throughout — extension only from the elbow','Full extension at the bottom on each rep','Controlled return'],subs:'Tricep pushdown',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a14',ph:'accessory',name:'Upright Cable Row',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Deltoid, traps',cues:['Pull the cable to the chin — elbows lead above the hands','Keep the bar close to the body throughout','Lower slowly — 2 seconds down each rep'],subs:'DB upright row, band upright row',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a15',ph:'accessory',name:'Reverse Crunches',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Rectus abdominis — lower emphasis',cues:['Pull knees toward chest using the lower abs — continuous reps','The pelvis tilts — that is the contraction','Lower slowly — do not drop the legs between reps'],subs:'Hanging knee raise'},
+{id:'ea5_a16',ph:'accessory',name:'Cable Front Raise',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Anterior deltoid',cues:['Stand facing away from the cable — raise arms to shoulder height','Stop at shoulder height — do not go above','Control the descent on every rep'],subs:'DB front raise',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a17',ph:'accessory',name:'Cable Trunk Rotation',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Obliques, core',cues:['Power from the hips — continuous controlled reps','Hold briefly at end range each side','Feet hip-width, perpendicular to the cable'],subs:'Landmine rotation',prog:'Increase resistance when sets are fluid'},
+{id:'ea5_cd4',ph:'cooldown',name:'Cross-body shoulder stretch',vol:'2 x 30s each',rest:0,muscles:'Posterior deltoid',cues:['Arm across the chest','Use other hand to gently deepen','Hold — do not bounce'],subs:'Sleeper stretch'},
+{id:'ea5_cd5',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]},
+{label:'Workout 4 — Upper Back + Chest',focus:'Row, lat pulldown, bench, chest',mins:55,exercises:[
+{id:'ea5_p3',ph:'primer',name:'Dead hang',vol:'2 x 20s',rest:0,muscles:'Shoulder decompression, lats',cues:['Full shoulder elevation — let the weight pull you long','Spine decompresses — this is active rest','Briefly pack the shoulders: retract and depress'],subs:'Passive hang'},
+{id:'ea5_k5',ph:'strength',name:'BB Row',vol:'3 x 30s',rest:60,sets:3,reps:0,kg:0,muscles:'Lats, rhomboids, biceps',cues:['Hinge at hips to 45 degrees — maintain throughout','Row to the lower abdomen — not the chest','Continuous reps — trunk stays still throughout'],subs:'DB row, cable row',prog:'Increase load when 30s is controlled'},
+{id:'ea5_k6',ph:'strength',name:'DB Bench Press',vol:'3 x 30s',rest:60,sets:3,reps:0,kg:0,muscles:'Chest, triceps',cues:['Lower to chest — elbows at 45 degrees','Press up and slightly inward — continuous reps','Controlled even as fatigue builds'],subs:'Push-up progression',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a18',ph:'accessory',name:'Lat Pulldown (machine)',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Lats, biceps',cues:['Pull to upper chest — elbows toward hip pockets','Depress shoulder blades before each pull','Controlled return — do not let it snap up'],subs:'Pull-up, cable row',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a19',ph:'accessory',name:'Cable Row',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Mid-back, rhomboids',cues:['Sit tall — do not round as you reach forward','Row to the lower abdomen — maintain form throughout','Continuous reps — controlled on each'],subs:'DB row, machine row',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a20',ph:'accessory',name:'High Cable Fly',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Chest — lower fibres',cues:['Cables set high — pull downward and together in an arc','Slight elbow bend throughout','Squeeze at the bottom on each rep'],subs:'DB fly',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a21',ph:'accessory',name:'One-Arm DB Row',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Lats, rhomboids — unilateral',cues:['Pull elbow to the hip — not the shoulder','Pause and squeeze at the top each rep','Neutral spine — no rotation throughout'],subs:'Cable row, TRX row',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a22',ph:'accessory',name:'Chest/Back exercise of choice',vol:'4 x 30–45s',rest:45,sets:4,reps:0,kg:0,muscles:'Chest or back',cues:['Choose an exercise that complements the session','Focus on the stretch and contraction — not just moving weight','Common options: cable fly, pec deck, DB fly, chest-supported row'],subs:'Cable fly, DB fly, pec deck, chest-supported row'},
+{id:'ea5_cd6',ph:'cooldown',name:'Child\'s pose and lat reach',vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward — let the chest sink','Reach to one side for a specific lat stretch','Breathe into the upper back'],subs:'Thread the needle'},
+{id:'ea5_cd7',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'}
+]},
+{label:'Workout 5 — Lower Squat',focus:'Leg press, walking lunge, hip thrust',mins:55,exercises:[
+{id:'ea5_p4',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded — do not tilt','Breathe slowly into the restriction','Hold — do not bounce'],subs:'Pigeon pose'},
+{id:'ea5_k7',ph:'strength',name:'Leg Press',vol:'3 x 30s',rest:60,sets:3,reps:0,kg:0,muscles:'Quads, glutes',cues:['Full range on every rep — knees to 90 degrees minimum','Continuous reps for 30 seconds — choose load wisely','Feet at shoulder width, toes slightly out'],subs:'Goblet squat, hack squat',prog:'Increase load when 30s is controlled'},
+{id:'ea5_k8',ph:'strength',name:'Walking Lunge',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Quads, glutes, hip flexors',cues:['Take deliberate steps — control each landing','Front shin stays vertical — do not let the knee drift forward','Drive through the front heel to return to standing'],subs:'Stationary lunge, reverse lunge',prog:'Add dumbbells when bodyweight is consistently controlled'},
+{id:'ea5_a23',ph:'accessory',name:'Leg Curl',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Hamstrings',cues:['Full extension first — load the stretch','Continuous reps — controlled throughout','3 seconds down each rep'],subs:'Nordic curl, seated leg curl',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a24',ph:'accessory',name:'DB Hip Thrust',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Glutes',cues:['Upper back on bench, feet flat','Squeeze hard at top — full extension on every rep','Controlled descent each rep'],subs:'Glute bridge on floor',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a25',ph:'accessory',name:'Incline DB Row',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Mid-back, rhomboids',cues:['Chest on the incline bench — removes all momentum','Row both elbows back and upward on every rep','Pause and squeeze at the top each rep'],subs:'Chest-supported row',prog:'Increase load when 30s is controlled'},
+{id:'ea5_a26',ph:'accessory',name:'DB Lateral Raise',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Medial deltoid',cues:['Lead with elbows — pour a jug at the top','Slight forward lean — 10 degrees','Stop at shoulder height every rep'],subs:'Cable lateral raise',prog:'Increase load when 60s is controlled'},
+{id:'ea5_a27',ph:'accessory',name:'Ball Crunches',vol:'3 x 30s',rest:45,sets:3,reps:0,kg:0,muscles:'Rectus abdominis',cues:['Lower back presses into the ball','Exhale forcefully on each crunch','Continuous reps for 30 seconds'],subs:'Cable crunch, floor crunch'},
+{id:'ea5_a28',ph:'accessory',name:'Cable Rope Crunches',vol:'3 x 45–60s',rest:60,sets:3,reps:0,kg:0,muscles:'Rectus abdominis',cues:['Kneel facing the cable — flex the spine, do not just bow','Continuous reps for the prescribed time','Exhale forcefully on each crunch'],subs:'Floor crunch, ball crunch',prog:'Increase load when controlled'},
+{id:'ea5_cd8',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},
+{id:'ea5_cd9',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}
+]}
+]};
+
 var CATALOGUE=[
   {key:'balanced',tpl:'TPL',name:'Balanced Strength',tag:'Full body',
-   who:'Build strength, fix imbalances, and learn to move well. The best starting point for most people.',
-   sessions:'3 days/week',mins:'~45 min',icon:'B',available:true},
-  {key:'hyp',tpl:'TPL_HYP',name:'Hypertrophy',tag:'Push / Pull / Legs',
-   who:'Build muscle and size with a classic Push/Pull/Legs split and progressive overload.',
-   sessions:'3 days/week',mins:'~50 min',icon:'H',available:true},
-  {key:'strength',tpl:'TPL_STRENGTH',name:'Strength Building',tag:'Barbell strength',
-   who:'Build maximal strength with the big three: Bench Press, Squat, Barbell Row. Systematic 5x5 progressive overload.',
-   sessions:'3 days/week',mins:'~50 min',icon:'St',available:true},
-  {key:'athletic',tpl:'TPL_ATHLETIC',name:'Athletic Performance',tag:'Power + sport',
-   who:'Develop explosive power, jump mechanics, and athletic movement. Box jumps, KB swings, and plyometrics.',
-   sessions:'3 days/week',mins:'~50 min',icon:'Ap',available:true},
+   who:'Build strength, fix imbalances, and learn to move well. Best starting point for most people.',
+   sessions:'3 days/week',mins:'~45 min',icon:'B',available:true,goal:'balanced',level:'beginner',days:'3'},
+  {key:'hyp_b3',tpl:'TPL_HYP_B3',name:'Muscle Building · Beginner · 3×',tag:'Full body · Beginner · 3×',
+   who:'3-day full-body muscle building for beginners. Full cues and progressive overload.',
+   sessions:'3 days/week',mins:'~50 min',icon:'H',available:true,goal:'muscle',level:'beginner',days:'3'},
+  {key:'hyp_b4',tpl:'TPL_HYP_B4',name:'Muscle Building · Beginner · 4×',tag:'Upper/Lower · Beginner · 4×',
+   who:'4-day upper/lower split for beginner muscle building. Progressive overload with full cues.',
+   sessions:'4 days/week',mins:'~50 min',icon:'H',available:true,goal:'muscle',level:'beginner',days:'4'},
+  {key:'hyp_b5',tpl:'TPL_HYP_B5',name:'Muscle Building · Beginner · 5×',tag:'5-day split · Beginner',
+   who:'5-day beginner muscle building — dedicated sessions for every major muscle group.',
+   sessions:'5 days/week',mins:'~55 min',icon:'H',available:true,goal:'muscle',level:'beginner',days:'5'},
+  {key:'hyp_a3',tpl:'TPL_HYP_A3',name:'Muscle Building · Advanced · 3×',tag:'Full body · Advanced · 3×',
+   who:'3-day advanced muscle building. Higher volume, heavier loads, full progressive structure.',
+   sessions:'3 days/week',mins:'~65 min',icon:'H',available:true,goal:'muscle',level:'advanced',days:'3'},
+  {key:'hyp_a4',tpl:'TPL_HYP_A4',name:'Muscle Building · Advanced · 4×',tag:'Push/Pull · Advanced · 4×',
+   who:'4-day advanced hypertrophy. Dedicated push, pull, and leg sessions with high volume.',
+   sessions:'4 days/week',mins:'~65 min',icon:'H',available:true,goal:'muscle',level:'advanced',days:'4'},
+  {key:'hyp_a5',tpl:'TPL_HYP_A5',name:'Muscle Building · Advanced · 5×',tag:'5-day · Advanced',
+   who:'5-day advanced muscle building. Full specialisation across chest, back, legs, shoulders, arms.',
+   sessions:'5 days/week',mins:'~65 min',icon:'H',available:true,goal:'muscle',level:'advanced',days:'5'},
+  {key:'hyp',tpl:'TPL_HYP',name:'Hypertrophy (classic)',tag:'Push / Pull / Legs · 3×',
+   who:'Classic Push/Pull/Legs split. 3 days, full cues, progressive overload.',
+   sessions:'3 days/week',mins:'~50 min',icon:'H',available:true,goal:'muscle',level:'beginner',days:'3'},
+  {key:'str_b3',tpl:'TPL_STR_B3',name:'Strength · Beginner · 3×',tag:'5×5 Barbell · Beginner · 3×',
+   who:'Classic 5×5 barbell strength for beginners — Bench, Squat, Row with full cues.',
+   sessions:'3 days/week',mins:'~55 min',icon:'St',available:true,goal:'strength',level:'beginner',days:'3'},
+  {key:'str_b4',tpl:'TPL_STR_B4',name:'Strength · Beginner · 4×',tag:'5×5 Barbell · Beginner · 4×',
+   who:'4-day beginner strength — dedicated days for squat, bench, RDL and row.',
+   sessions:'4 days/week',mins:'~55 min',icon:'St',available:true,goal:'strength',level:'beginner',days:'4'},
+  {key:'str_b5',tpl:'TPL_STR_B5',name:'Strength · Beginner · 5×',tag:'5×5 Barbell · Beginner · 5×',
+   who:'5-day beginner strength with an added shoulder day for complete upper body development.',
+   sessions:'5 days/week',mins:'~55 min',icon:'St',available:true,goal:'strength',level:'beginner',days:'5'},
+  {key:'str_a3',tpl:'TPL_STR_A3',name:'Strength · Advanced · 3×',tag:'5×5 Barbell · Advanced · 3×',
+   who:'Advanced 5×5 strength — heavier loads, longer rest, higher intensity.',
+   sessions:'3 days/week',mins:'~60 min',icon:'St',available:true,goal:'strength',level:'advanced',days:'3'},
+  {key:'str_a4',tpl:'TPL_STR_A4',name:'Strength · Advanced · 4×',tag:'5×5 Barbell · Advanced · 4×',
+   who:'4-day advanced strength with dedicated squat, bench, RDL and row days.',
+   sessions:'4 days/week',mins:'~60 min',icon:'St',available:true,goal:'strength',level:'advanced',days:'4'},
+  {key:'str_a5',tpl:'TPL_STR_A5',name:'Strength · Advanced · 5×',tag:'5×5 Barbell · Advanced · 5×',
+   who:'5-day advanced strength — all major barbell lifts plus dedicated shoulder/upper push day.',
+   sessions:'5 days/week',mins:'~60 min',icon:'St',available:true,goal:'strength',level:'advanced',days:'5'},
+  {key:'strength',tpl:'TPL_STRENGTH',name:'Strength (classic)',tag:'Barbell strength · 3×',
+   who:'Build maximal strength with Bench Press, Squat, Barbell Row. Systematic 5×5 progressive overload.',
+   sessions:'3 days/week',mins:'~50 min',icon:'St',available:true,goal:'strength',level:'beginner',days:'3'},
+  {key:'end_b3',tpl:'TPL_END_B3',name:'Endurance · Beginner · 3×',tag:'12–15 reps · 45s rest · 3×',
+   who:'3-day muscular endurance for beginners. Short rest, higher reps, full body circuit pairs.',
+   sessions:'3 days/week',mins:'~45 min',icon:'E',available:true,goal:'endurance',level:'beginner',days:'3'},
+  {key:'end_b4',tpl:'TPL_END_B4',name:'Endurance · Beginner · 4×',tag:'12–15 reps · 45s rest · 4×',
+   who:'4-day beginner endurance — upper/lower split with short rest intervals and full cues.',
+   sessions:'4 days/week',mins:'~45 min',icon:'E',available:true,goal:'endurance',level:'beginner',days:'4'},
+  {key:'end_b5',tpl:'TPL_END_B5',name:'Endurance · Beginner · 5×',tag:'12–15 reps · 45s rest · 5×',
+   who:'5-day beginner muscular endurance — full specialisation with dedicated muscle group sessions.',
+   sessions:'5 days/week',mins:'~45 min',icon:'E',available:true,goal:'endurance',level:'beginner',days:'5'},
+  {key:'end_a3',tpl:'TPL_END_A3',name:'Endurance · Advanced · 3×',tag:'Time-based sets · Advanced · 3×',
+   who:'Advanced endurance — 45s time-based sets, 60s rest, demanding continuous-load format.',
+   sessions:'3 days/week',mins:'~55 min',icon:'E',available:true,goal:'endurance',level:'advanced',days:'3'},
+  {key:'end_a4',tpl:'TPL_END_A4',name:'Endurance · Advanced · 4×',tag:'Time-based sets · Advanced · 4×',
+   who:'4-day advanced endurance — alternating 30s and 45–60s sets for metabolic overload.',
+   sessions:'4 days/week',mins:'~55 min',icon:'E',available:true,goal:'endurance',level:'advanced',days:'4'},
+  {key:'end_a5',tpl:'TPL_END_A5',name:'Endurance · Advanced · 5×',tag:'Time-based sets · Advanced · 5×',
+   who:'5-day advanced muscular endurance — full split with time-based loading throughout.',
+   sessions:'5 days/week',mins:'~55 min',icon:'E',available:true,goal:'endurance',level:'advanced',days:'5'},
   {key:'fatloss',tpl:'TPL_FAT',name:'Fat Loss',tag:'Full body + conditioning',
    who:'Lose fat and improve fitness with strength training and metabolic conditioning.',
-   sessions:'3 days/week',mins:'~40 min',icon:'F',available:true},
+   sessions:'3 days/week',mins:'~40 min',icon:'F',available:true,goal:'fat_loss',level:'beginner',days:'3'},
   {key:'home_bw',tpl:'TPL_HOME_BW',name:'At Home — Bodyweight',tag:'No equipment',
-   who:'A complete strength programme with zero equipment. Push-ups, squats, rows, and carries using your own bodyweight.',
-   sessions:'3 days/week',mins:'~40 min',icon:'BW',available:true},
+   who:'A complete strength programme with zero equipment.',
+   sessions:'3 days/week',mins:'~40 min',icon:'BW',available:true,goal:'balanced',level:'beginner',days:'3'},
   {key:'home_db',tpl:'TPL_HOME_DB',name:'At Home — Dumbbells',tag:'Home gym',
-   who:'A full gym-quality programme with just a pair of dumbbells. Build strength and muscle without a gym membership.',
-   sessions:'3 days/week',mins:'~45 min',icon:'DB',available:true},
+   who:'A full gym-quality programme with just a pair of dumbbells.',
+   sessions:'3 days/week',mins:'~45 min',icon:'DB',available:true,goal:'balanced',level:'beginner',days:'3'},
+  {key:'athletic',tpl:'TPL_ATHLETIC',name:'Athletic Performance',tag:'Power + sport',
+   who:'Develop explosive power, jump mechanics, and athletic movement.',
+   sessions:'3 days/week',mins:'~50 min',icon:'Ap',available:true,goal:'athletic',level:'beginner',days:'3'},
   {key:'soccer',tpl:'TPL_SOCCER',name:'Soccer Support',tag:'Athletic',
-   who:'Injury prevention and explosiveness for football players. Hamstrings, deceleration, and lateral power.',
-   sessions:'3 days/week',mins:'~45 min',icon:'S',available:true},
+   who:'Injury prevention and explosiveness for football players.',
+   sessions:'3 days/week',mins:'~45 min',icon:'S',available:true,goal:'athletic',level:'beginner',days:'3'},
   {key:'run',tpl:'TPL_RUN',name:'Runner Support',tag:'Athletic',
-   who:'Tendon health, calf strength, and hip stability to make you a more resilient runner.',
-   sessions:'3 days/week',mins:'~40 min',icon:'R',available:true},
+   who:'Tendon health, calf strength, and hip stability for resilient running.',
+   sessions:'3 days/week',mins:'~40 min',icon:'R',available:true,goal:'athletic',level:'beginner',days:'3'},
   {key:'climb',tpl:'TPL_CLIMB',name:'Rock Climbing',tag:'Athletic',
    who:'Antagonist balance, shoulder health, and core tension for climbers.',
-   sessions:'3 days/week',mins:'~40 min',icon:'C',available:true},
+   sessions:'3 days/week',mins:'~40 min',icon:'C',available:true,goal:'athletic',level:'beginner',days:'3'},
   {key:'court',tpl:'TPL_COURT',name:'Volleyball and Basketball',tag:'Athletic',
-   who:'Jump mechanics, landing control, and shoulder health for overhead court sports.',
-   sessions:'3 days/week',mins:'~45 min',icon:'V',available:true},
+   who:'Jump mechanics, landing control, and shoulder health for court sports.',
+   sessions:'3 days/week',mins:'~45 min',icon:'V',available:true,goal:'athletic',level:'beginner',days:'3'},
   {key:'shoulder',tpl:'TPL_SHOULDER',name:'Shoulder Support',tag:'Rehab',
-   who:'Rotator cuff strength, scapular control, and gradual return to pressing movements.',
-   sessions:'3 days/week',mins:'~35 min',icon:'Sh',available:true},
+   who:'Rotator cuff strength, scapular control, and gradual return to pressing.',
+   sessions:'3 days/week',mins:'~35 min',icon:'Sh',available:true,goal:'rehab',level:'beginner',days:'3'},
   {key:'knee',tpl:'TPL_KNEE',name:'Knee Support',tag:'Rehab',
-   who:'VMO activation, hip strengthening, and tendon load management for knee health.',
-   sessions:'3 days/week',mins:'~35 min',icon:'K',available:true},
+   who:'VMO activation, hip strengthening, and tendon load management.',
+   sessions:'3 days/week',mins:'~35 min',icon:'K',available:true,goal:'rehab',level:'beginner',days:'3'},
   {key:'back',tpl:'TPL_BACK',name:'Back Health',tag:'Rehab',
-   who:'Spine-sparing movement, bracing technique, and gradual loading for a resilient lower back.',
-   sessions:'3 days/week',mins:'~35 min',icon:'Bk',available:true}
+   who:'Spine-sparing movement, bracing technique, and gradual loading.',
+   sessions:'3 days/week',mins:'~35 min',icon:'Bk',available:true,goal:'rehab',level:'beginner',days:'3'}
 ];
 
 var OBQ=[
   {q:'What is your main goal?',sub:'We will build your program around this.',key:'goal',opts:[
     {v:'balanced',l:'Build strength and balance'},
     {v:'muscle',l:'Build muscle and size'},
+    {v:'strength',l:'Get stronger — barbell focus'},
+    {v:'endurance',l:'Muscular endurance and fitness'},
     {v:'fat_loss',l:'Lose fat and get fitter'},
     {v:'athletic',l:'Support my sport'},
     {v:'general',l:'General health and fitness'}
   ]},
-  {q:'How often do you currently train?',sub:'Be honest — this helps us start at the right level.',key:'exp',opts:[
+  {q:'What is your training experience?',sub:'Be honest — this shapes the program difficulty.',key:'level',opts:[
+    {v:'beginner',l:'Beginner — less than 2 years consistent training'},
+    {v:'advanced',l:'Intermediate or advanced — 2+ years consistent training'}
+  ]},
+  {q:'How often do you currently train?',sub:'This helps us confirm the right starting point.',key:'exp',opts:[
     {v:'new',l:'Just getting started'},
     {v:'occ',l:'Occasionally — not consistent'},
     {v:'reg',l:'Regularly, 2 or more times per week'}
@@ -495,7 +1196,25 @@ function tplMap(){
   var m={
     balanced:TPL,
     hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:TPL,
+    hyp_b3:typeof TPL_HYP_B3!=='undefined'?TPL_HYP_B3:TPL,
+    hyp_b4:typeof TPL_HYP_B4!=='undefined'?TPL_HYP_B4:TPL,
+    hyp_b5:typeof TPL_HYP_B5!=='undefined'?TPL_HYP_B5:TPL,
+    hyp_a3:typeof TPL_HYP_A3!=='undefined'?TPL_HYP_A3:TPL,
+    hyp_a4:typeof TPL_HYP_A4!=='undefined'?TPL_HYP_A4:TPL,
+    hyp_a5:typeof TPL_HYP_A5!=='undefined'?TPL_HYP_A5:TPL,
     strength:typeof TPL_STRENGTH!=='undefined'?TPL_STRENGTH:TPL,
+    str_b3:typeof TPL_STR_B3!=='undefined'?TPL_STR_B3:TPL,
+    str_b4:typeof TPL_STR_B4!=='undefined'?TPL_STR_B4:TPL,
+    str_b5:typeof TPL_STR_B5!=='undefined'?TPL_STR_B5:TPL,
+    str_a3:typeof TPL_STR_A3!=='undefined'?TPL_STR_A3:TPL,
+    str_a4:typeof TPL_STR_A4!=='undefined'?TPL_STR_A4:TPL,
+    str_a5:typeof TPL_STR_A5!=='undefined'?TPL_STR_A5:TPL,
+    end_b3:typeof TPL_END_B3!=='undefined'?TPL_END_B3:TPL,
+    end_b4:typeof TPL_END_B4!=='undefined'?TPL_END_B4:TPL,
+    end_b5:typeof TPL_END_B5!=='undefined'?TPL_END_B5:TPL,
+    end_a3:typeof TPL_END_A3!=='undefined'?TPL_END_A3:TPL,
+    end_a4:typeof TPL_END_A4!=='undefined'?TPL_END_A4:TPL,
+    end_a5:typeof TPL_END_A5!=='undefined'?TPL_END_A5:TPL,
     athletic:typeof TPL_ATHLETIC!=='undefined'?TPL_ATHLETIC:TPL,
     fatloss:typeof TPL_FAT!=='undefined'?TPL_FAT:TPL,
     home_bw:typeof TPL_HOME_BW!=='undefined'?TPL_HOME_BW:TPL,
@@ -506,8 +1225,7 @@ function tplMap(){
     court:typeof TPL_COURT!=='undefined'?TPL_COURT:TPL,
     shoulder:typeof TPL_SHOULDER!=='undefined'?TPL_SHOULDER:TPL,
     knee:typeof TPL_KNEE!=='undefined'?TPL_KNEE:TPL,
-    back:typeof TPL_BACK!=='undefined'?TPL_BACK:TPL
-  };
+    back:typeof TPL_BACK!=='undefined'?TPL_BACK:TPL  };
   // Merge in saved custom programs
   if(S.customPrograms){
     for(var i=0;i<S.customPrograms.length;i++){
@@ -619,14 +1337,41 @@ function obV(){
 
 function getRecommendations(ans){
   var g=ans.goal||'general',sp=ans.sport||'none',inj=ans.injury||'none',exp=ans.exp||'new';
+  var lv=ans.level||'beginner',days=ans.days||'3';
   var sc={};
   CATALOGUE.forEach(function(c){
     if(!c.available)return;
     var s=0;
-    if(g==='muscle'){if(c.key==='hyp')s+=50;else if(c.key==='strength')s+=25;else if(c.key==='balanced')s+=15;}
-    else if(g==='fat_loss'){if(c.key==='fatloss')s+=50;else if(c.key==='balanced')s+=20;}
-    else if(g==='balanced'||g==='general'){if(c.key==='balanced')s+=50;else if(c.key==='fatloss')s+=20;else if(c.key==='strength')s+=15;}
-    else if(g==='athletic'){if(['athletic','soccer','run','court','climb'].indexOf(c.key)>=0)s+=35;else if(c.key==='balanced')s+=10;}
+    if(g==='muscle'){
+      if(c.goal==='muscle'&&c.level===lv&&c.days===days)s+=80;
+      else if(c.goal==='muscle'&&c.level===lv)s+=40;
+      else if(c.goal==='muscle')s+=20;
+      else if(c.key==='strength')s+=10;
+      else if(c.key==='balanced')s+=8;
+    } else if(g==='strength'){
+      if(c.goal==='strength'&&c.level===lv&&c.days===days)s+=80;
+      else if(c.goal==='strength'&&c.level===lv)s+=40;
+      else if(c.goal==='strength')s+=20;
+      else if(c.goal==='muscle')s+=8;
+      else if(c.key==='balanced')s+=8;
+    } else if(g==='endurance'){
+      if(c.goal==='endurance'&&c.level===lv&&c.days===days)s+=80;
+      else if(c.goal==='endurance'&&c.level===lv)s+=40;
+      else if(c.goal==='endurance')s+=20;
+      else if(c.key==='fatloss')s+=15;
+    } else if(g==='fat_loss'){
+      if(c.key==='fatloss')s+=50;
+      else if(c.goal==='endurance')s+=15;
+      else if(c.key==='balanced')s+=15;
+    } else if(g==='balanced'||g==='general'){
+      if(c.key==='balanced')s+=50;
+      else if(c.key==='fatloss')s+=15;
+      else if(c.goal==='strength'&&c.level===lv&&c.days===days)s+=20;
+      else if(c.goal==='muscle'&&c.level===lv&&c.days===days)s+=15;
+    } else if(g==='athletic'){
+      if(['athletic','soccer','run','court','climb'].indexOf(c.key)>=0)s+=35;
+      else if(c.key==='balanced')s+=10;
+    }
     if(sp==='soccer'){if(c.key==='soccer')s+=50;else if(c.key==='athletic')s+=15;}
     else if(sp==='run'){if(c.key==='run')s+=50;else if(c.key==='athletic')s+=15;}
     else if(sp==='court'){if(c.key==='court')s+=50;else if(c.key==='athletic')s+=15;}
@@ -1132,46 +1877,84 @@ document.addEventListener('click',function(e){
 
 function programsV(){
   var html='<div class="pad"><span class="lbl">Training programs</span>';
-  html+='<p class="h1" style="margin:6px 0 8px">Your programmes</p>';
+  html+='<p class="h1" style="margin:6px 0 16px">Your programmes</p>';
+
+  // ── Current program ──────────────────────────────────────────────────────
+  var curE=null;
+  for(var ci=0;ci<CATALOGUE.length;ci++)if(CATALOGUE[ci].key===S.tplKey){curE=CATALOGUE[ci];break;}
   html+='<div class="card" style="margin-bottom:24px;background:var(--str-bg);border-color:var(--str-brd)">';
-  html+='<span class="lbl" style="color:var(--acc)">Current program</span>';
-  html+='<p style="font-size:18px;font-weight:500;color:var(--tx);margin:6px 0 4px">'+ACTIVE_TPL.name+'</p>';
-  var curE=null;for(var ci=0;ci<CATALOGUE.length;ci++)if(CATALOGUE[ci].key===S.tplKey)curE=CATALOGUE[ci];
-  if(curE){html+='<p class="mu">'+curE.sessions+' · '+curE.mins+'</p><p style="font-size:13px;color:var(--mu);margin-top:6px">'+curE.who+'</p>';}
-  html+='<button class="btn btno" style="padding:11px;font-size:13px;margin-top:12px" onclick="resetOnboarding()">Retake questionnaire</button>';
+  html+='<span class="lbl" style="color:var(--acc)">Active program</span>';
+  if(curE){
+    html+='<p style="font-size:18px;font-weight:500;margin:4px 0 2px">'+curE.name+'</p>';
+    html+='<p class="mu" style="margin-bottom:8px">'+curE.sessions+' &nbsp;·&nbsp; '+curE.mins+'</p>';
+    html+='<p style="font-size:13px;color:var(--tx);margin:0">'+curE.who+'</p>';
+  } else {
+    html+='<p style="font-size:16px;margin:4px 0">'+ACTIVE_TPL.name+'</p>';
+  }
   html+='</div>';
+
+  // ── Custom programs ──────────────────────────────────────────────────────
   if(S.customPrograms&&S.customPrograms.length>0){
-    html+='<span class="lbl" style="display:block;margin-bottom:10px">My custom programs</span>';
+    html+='<p class="h2" style="margin-bottom:8px">Custom programs</p>';
     for(var cpi=0;cpi<S.customPrograms.length;cpi++){
       var cp=S.customPrograms[cpi];
       var isCurCP=cp.key===S.tplKey;
-      html+='<div style="background:'+(isCurCP?'var(--str-bg)':'var(--bg2)')+';border-radius:14px;padding:14px 15px;margin-bottom:9px;border:'+(isCurCP?'1.5px solid var(--acc)':'.5px solid var(--brd)')+'">';
-      html+='<div style="display:flex;align-items:center;gap:10px">';
-      html+='<div style="width:38px;height:38px;border-radius:10px;background:var(--str-bg);border:.5px solid var(--str-brd);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--acc);flex-shrink:0">My</div>';
-      html+='<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:500;color:var(--tx);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+cp.name+'</p>';
-      html+='<p class="mu" style="font-size:12px">'+cp.tpl.days.length+' session'+(cp.tpl.days.length>1?'s':'')+' per week · saved '+cp.date+'</p></div>';
-      if(!isCurCP)html+='<button class="btn btnp" style="width:auto;padding:9px 14px;font-size:12px;flex-shrink:0" data-switchprog="'+cp.key+'">Load</button>';
-      else html+='<span style="font-size:11px;background:var(--acc);color:#fff;padding:3px 9px;border-radius:10px;font-weight:500;flex-shrink:0">Active</span>';
-      html+='</div>';
-      html+='<button data-delcp="'+cp.key+'" data-delname="'+cp.name+'" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:6px 0;margin-top:4px">Delete program</button>';
-      html+='</div>';
+      html+='<div class="card" style="margin-bottom:8px'+(isCurCP?';border-color:var(--acc)':'')+'">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      html+='<div><p style="font-weight:500;margin:0 0 2px">'+cp.name+'</p>';
+      html+='<p class="mu" style="font-size:12px;margin:0">'+cp.date+'</p></div>';
+      html+='<div>';
+      if(!isCurCP)html+='<button class="btn" style="margin-right:6px" data-switchprog="'+cp.key+'">Switch</button>';
+      html+='<button class="btn" style="color:var(--warn)" data-delprog="'+cp.key+'">Delete</button>';
+      html+='</div></div></div>';
     }
-    html+='<div style="height:16px"></div>';
+    html+='<div style="margin-bottom:24px"></div>';
   }
-  html+='<span class="lbl" style="display:block;margin-bottom:14px">All programs</span>';
-  for(var i=0;i<CATALOGUE.length;i++){
-    var c=CATALOGUE[i];
-    if(c.key===S.tplKey)continue;
-    html+='<div style="background:var(--bg2);border-radius:14px;padding:15px 16px;margin-bottom:10px;border:.5px solid var(--brd)">';
-    html+='<div style="display:flex;align-items:flex-start;gap:12px">';
-    html+='<div style="width:42px;height:42px;border-radius:11px;background:var(--str-bg);border:.5px solid var(--str-brd);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--acc);flex-shrink:0">'+c.icon+'</div>';
-    html+='<div style="flex:1;min-width:0">';
-    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><p style="font-size:15px;font-weight:500;color:var(--tx)">'+c.name+'</p><span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bg3);color:var(--mu)">'+c.tag+'</span></div>';
-    html+='<p style="font-size:13px;color:var(--mu);line-height:1.5;margin-bottom:8px">'+c.who+'</p>';
-    html+='<p style="font-size:11px;color:var(--dim);margin-bottom:10px">'+c.sessions+' · '+c.mins+'</p>';
-    html+='<button class="btn btnp" style="padding:11px 16px;font-size:13px" data-switchprog="'+c.key+'">Switch to this program</button>';
-    html+='</div></div></div>';
-  }
+
+  // ── Program groups ────────────────────────────────────────────────────────
+  var groups=[
+    {label:'Muscle Building',keys:['hyp_b3','hyp_b4','hyp_b5','hyp_a3','hyp_a4','hyp_a5','hyp'],col:'var(--acc)'},
+    {label:'Strength Building',keys:['str_b3','str_b4','str_b5','str_a3','str_a4','str_a5','strength'],col:'#e07030'},
+    {label:'Muscular Endurance',keys:['end_b3','end_b4','end_b5','end_a3','end_a4','end_a5'],col:'#3ab8e0'},
+    {label:'Fat Loss',keys:['fatloss'],col:'var(--ok)'},
+    {label:'Home Training',keys:['home_bw','home_db'],col:'#9b8de0'},
+    {label:'Athletic & Sport',keys:['athletic','soccer','run','court','climb'],col:'#e0b83a'},
+    {label:'Balanced',keys:['balanced'],col:'#aaa'},
+    {label:'Rehab & Support',keys:['shoulder','knee','back'],col:'#888'}
+  ];
+
+  groups.forEach(function(g){
+    var entries=[];
+    g.keys.forEach(function(k){
+      for(var i=0;i<CATALOGUE.length;i++){
+        if(CATALOGUE[i].key===k){entries.push(CATALOGUE[i]);break;}
+      }
+    });
+    if(!entries.length)return;
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+    html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:'+g.col+';text-transform:uppercase;white-space:nowrap">'+g.label+'</span>';
+    html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+    entries.forEach(function(c){
+      var isCur=c.key===S.tplKey;
+      html+='<div class="card" style="margin-bottom:8px;'+(isCur?'border-color:var(--acc);background:var(--str-bg)':'')+'">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
+      html+='<div style="flex:1;min-width:0;padding-right:10px">';
+      html+='<p style="font-weight:500;margin:0 0 2px;font-size:14px">'+c.name+'</p>';
+      html+='<p class="mu" style="font-size:11px;margin:0 0 3px">'+c.sessions+'&nbsp;·&nbsp;'+c.mins+'</p>';
+      html+='<p style="font-size:12px;color:var(--tx);margin:0;opacity:0.75">'+c.who+'</p>';
+      html+='</div>';
+      html+='<div style="flex-shrink:0;padding-top:2px">';
+      if(isCur){
+        html+='<span style="font-size:11px;color:var(--acc);font-weight:700">✓ Active</span>';
+      } else {
+        html+='<button class="btn btnp" style="font-size:12px;padding:5px 10px" data-switchprog="'+c.key+'">Switch</button>';
+      }
+      html+='</div></div></div>';
+    });
+    html+='<div style="margin-bottom:18px"></div>';
+  });
+
+  html+='<button class="btn btnp" style="width:100%;margin-bottom:24px" onclick="resetOnboarding()">Retake questionnaire</button>';
   html+='</div>';
   return html;
 }
