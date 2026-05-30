@@ -654,7 +654,7 @@ function homeV(){
     notices+='<div class="card '+cls+'" style="margin-bottom:8px"><span class="lbl" style="color:'+lc+'">'+( n.type==='notice'?'Coach notice':'Training tip')+'</span><p style="font-size:14px;font-weight:500;margin:5px 0 4px;color:'+tc+'">'+n.title+'</p><p style="font-size:13px;line-height:1.5;color:'+bc+'">'+n.body+'</p></div>';
   }
   // FIX: use ACTIVE_TPL
-  return '<div class="pad"><span class="lbl">'+dn[d.getDay()]+' · '+d.getDate()+' '+mn[d.getMonth()]+'</span><p class="h1" style="margin:6px 0 24px">Good to see you.</p><div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;cursor:pointer" onclick="go(\'today\')"><div><span class="lbl" style="color:var(--acc)">Today\'s session</span><p style="font-size:16px;font-weight:500;margin:5px 0 4px">'+ACTIVE_TPL.name+'</p><p class="mu">'+sess.label+' · '+sess.focus+' · ~'+sess.mins+' min</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div><span class="lbl" style="display:block;margin-bottom:12px">From your coach</span>'+notices+'</div>';
+  return '<div class="pad"><span class="lbl">'+dn[d.getDay()]+' · '+d.getDate()+' '+mn[d.getMonth()]+'</span><p class="h1" style="margin:6px 0 24px">Good to see you.</p><div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;cursor:pointer" onclick="go(\'today\')"><div><span class="lbl" style="color:var(--acc)">Today\'s session</span><p style="font-size:16px;font-weight:500;margin:5px 0 4px">'+ACTIVE_TPL.name+'</p><p class="mu">'+sess.label+(sess.focus?' · '+sess.focus:'')+(sess.mins?' · ~'+sess.mins+' min':'')+'</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div><span class="lbl" style="display:block;margin-bottom:12px">From your coach</span>'+notices+'</div>';
 }
 
 // TODAY ----------------------------------------------------------------------
@@ -681,7 +681,7 @@ function todayV(){
     var on=di===S.day;
     daybts+='<button data-switchday="'+di+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer">'+ACTIVE_TPL.days[di].label+'</button>';
   }
-  return '<div class="pad"><span class="lbl">'+ACTIVE_TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px"></div>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
+  return '<div class="pad"><span class="lbl">'+ACTIVE_TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+(sess.focus||'')+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises'+(sess.mins?' · ~'+sess.mins+' min':'')+'</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px"></div>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
 }
 
 // WORKOUT PLAYER -------------------------------------------------------------
@@ -781,6 +781,9 @@ function fmt(s){return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
 
 function wxV(){
   var w=S.wx;
+  // Guard: old saved sessions may lack reps/times maps
+  if(!w.reps)w.reps={};
+  if(!w.times)w.times={};
   var ex=w.exs[w.idx];
   if(!ex){
     clearInterval(_t);
@@ -850,12 +853,16 @@ function adjW(d){
 }
 function adjR(d){
   var ex=S.wx.exs[S.wx.idx];
+  if(!S.wx.reps)S.wx.reps={};
+  if(S.wx.reps[ex.id]===undefined)S.wx.reps[ex.id]=ex.reps||0;
   S.wx.reps[ex.id]=Math.min(50,Math.max(1,S.wx.reps[ex.id]+d));
   var el=document.getElementById('rd');
   if(el)el.textContent=S.wx.reps[ex.id];
 }
 function adjT(d){
   var ex=S.wx.exs[S.wx.idx];
+  if(!S.wx.times)S.wx.times={};
+  if(S.wx.times[ex.id]===undefined)S.wx.times[ex.id]=ex.time||0;
   S.wx.times[ex.id]=Math.max(10,S.wx.times[ex.id]+d);
   // Reset the running timer to the new value
   S.wx.exTimerRunning=false;
@@ -865,6 +872,8 @@ function adjT(d){
 }
 function wxLog(){
   var w=S.wx;var ex=w.exs[w.idx];
+  if(!w.reps)w.reps={};
+  if(!w.times)w.times={};
   var eid=ex.id;
   // Save personal record for this exercise
   S.pr[eid]={kg:w.weights[eid],reps:w.reps[eid],time:w.times[eid]};
