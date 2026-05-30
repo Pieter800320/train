@@ -517,7 +517,7 @@ function draw(){
       var sheet=document.createElement('div');
       sheet.id='prog-sheet';
       sheet.innerHTML='<div style="padding:16px 16px 4px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--brd)">'
-        +'<span style="font-size:13px;font-weight:500;color:var(--tx)">Progress</span>'
+        +'<span style="font-size:13px;font-weight:500;color:var(--tx)">Log</span>'
         +'<button onclick="closeProgress()" style="background:var(--bg3);border:none;color:var(--tx);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&#10005;</button>'
         +'</div>'
         +'<div>'+progV()+'</div>';
@@ -712,7 +712,12 @@ function wxStart(){
     times[eid]=pr.time!==undefined?pr.time:(exs[i].time||0);
   }
   S.wx={on:true,label:sess.label,exs:exs,idx:0,set:1,logs:[],rest:false,rl:0,rt:0,weights:weights,reps:reps,times:times,exTimer:0,exTimerRunning:false};
-  sv();draw();
+  sv();
+  try{draw();}catch(err){
+    console.error('wxV crash:',err);
+    var sc=document.getElementById('scr');
+    if(sc)sc.innerHTML='<div class="pad"><p class="h2" style="color:var(--warn)">Session error</p><p class="mu" style="margin-top:8px">'+err.message+'</p><button class="btn btno" style="margin-top:16px" onclick="S.wx=null;sv();go(\'today\')">Back to Today</button></div>';
+  }
 }
 
 var _t=null;
@@ -781,9 +786,10 @@ function fmt(s){return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
 
 function wxV(){
   var w=S.wx;
-  // Guard: old saved sessions may lack reps/times maps
+  // Guard: old saved sessions may lack reps/times/weights maps
   if(!w.reps)w.reps={};
   if(!w.times)w.times={};
+  if(!w.weights)w.weights={};
   var ex=w.exs[w.idx];
   if(!ex){
     clearInterval(_t);
@@ -905,26 +911,84 @@ function wxEnd(){
 // PROGRESS -------------------------------------------------------------------
 
 function progV(){
-  // FIX: use ACTIVE_TPL
   var sessions=S.hist.length;
-  var lifts={};
+  var now=new Date();
+  var weekStart=new Date(now);weekStart.setDate(now.getDate()-now.getDay());weekStart.setHours(0,0,0,0);
+  var thisWeek=0;
+  for(var i=0;i<S.hist.length;i++){if(new Date(S.hist[i].date)>=weekStart)thisWeek++;}
+  // Personal bests
+  var pbKg={},pbReps={};
   for(var i=0;i<S.hist.length;i++){
     for(var j=0;j<S.hist[i].logs.length;j++){
       var l=S.hist[i].logs[j];
-      if(l.kg>0){if(!lifts[l.name])lifts[l.name]=[];lifts[l.name].push(l.kg);}
+      if(l.kg>0){if(pbKg[l.name]===undefined||l.kg>pbKg[l.name])pbKg[l.name]=l.kg;}
+      else if(l.reps>0){if(pbReps[l.name]===undefined||l.reps>pbReps[l.name])pbReps[l.name]=l.reps;}
     }
   }
-  var liftHtml='';
-  var names=Object.keys(lifts).slice(0,6);
-  for(var i=0;i<names.length;i++){
-    var nm=names[i],vals=lifts[nm],first=vals[0],last=vals[vals.length-1],delta=last-first;
-    var pct=Math.min(100,Math.round(last/80*100));
-    liftHtml+='<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><p style="font-size:14px;font-weight:500">'+nm+'</p>'+(delta!==0?'<span style="font-size:12px;color:var(--ok)">+'+delta+' kg</span>':'<span style="font-size:12px;color:var(--mu)">tracking</span>')+'</div><div class="pb"><div class="pf" style="width:'+pct+'%"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px"><span style="font-size:11px;color:var(--mu)">'+first+' kg</span><span style="font-size:11px;color:var(--acc)">'+last+' kg</span></div></div>';
+  var pbNames=Object.keys(pbKg);
+  var pbHtml='';
+  for(var i=0;i<pbNames.length;i++){
+    var nm=pbNames[i],best=pbKg[nm],first=null;
+    outer:for(var hi=0;hi<S.hist.length;hi++)for(var li=0;li<S.hist[hi].logs.length;li++){if(S.hist[hi].logs[li].name===nm&&S.hist[hi].logs[li].kg>0){first=S.hist[hi].logs[li].kg;break outer;}}
+    var gain=best-(first||best);
+    pbHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:.5px solid var(--brd)">'
+      +'<p style="font-size:14px;color:var(--tx)">'+nm+'</p>'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+        +(gain>0?'<span style="font-size:11px;color:var(--ok)">+'+gain+' kg</span>':'')
+        +'<span style="font-size:15px;font-weight:500;color:var(--acc)">'+best+' kg</span>'
+      +'</div></div>';
   }
-  var empty='<div class="card" style="text-align:center;padding:36px 20px"><p style="font-size:32px;margin-bottom:12px">&#8594;</p><p class="h2" style="margin-bottom:8px">No sessions yet</p><p class="mu">Complete your first session to see strength progress here.</p></div>';
-  var reset=sessions>0?'<div style="margin-top:16px"><button class="btng" style="width:100%;padding:12px;font-size:13px;border:.5px solid var(--brd);border-radius:12px" onclick="if(confirm(\'Reset all progress?\')){'+'S.hist=[];sv();draw();}">Reset progress data</button></div>':'';
-  if(S.day>=ACTIVE_TPL.days.length)S.day=0;
-  return '<div class="pad"><span class="lbl">Your progress</span><p class="h1" style="margin:6px 0 22px">'+ACTIVE_TPL.name+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px"><div class="card" style="text-align:center"><span class="lbl">Sessions</span><p style="font-size:32px;font-weight:500;margin:8px 0 4px">'+sessions+'</p><p style="font-size:12px;color:var(--acc)">total logged</p></div><div class="card" style="text-align:center"><span class="lbl">Next up</span><p style="font-size:16px;font-weight:500;margin:8px 0 4px">'+ACTIVE_TPL.days[S.day].label+'</p><p class="mu" style="font-size:12px">'+ACTIVE_TPL.days[S.day].focus+'</p></div></div>'+(sessions===0?empty:'<span class="lbl" style="display:block;margin-bottom:12px">Strength progress</span>'+liftHtml)+reset+'</div>';
+  var bwNames=Object.keys(pbReps);
+  for(var i=0;i<bwNames.length;i++){
+    var nm=bwNames[i];
+    pbHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:.5px solid var(--brd)">'
+      +'<p style="font-size:14px;color:var(--tx)">'+nm+'</p>'
+      +'<span style="font-size:15px;font-weight:500;color:var(--acc)">'+pbReps[nm]+' reps</span>'
+    +'</div>';
+  }
+  // Session history
+  var histHtml='';
+  for(var i=S.hist.length-1;i>=0;i--){
+    var h=S.hist[i];
+    var d=new Date(h.date);
+    var dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var mn2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var dateStr=dn[d.getDay()]+' '+d.getDate()+' '+mn2[d.getMonth()];
+    var timeStr=d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
+    var logRows='';
+    for(var j=0;j<h.logs.length;j++){
+      var l=h.logs[j];
+      var setStr=(l.reps&&l.reps>0?l.reps+' reps':'')+(l.kg&&l.kg>0?(l.reps?' · ':'')+l.kg+' kg':'');
+      if(!setStr)setStr='—';
+      logRows+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--brd)">'
+        +'<span style="font-size:13px;color:var(--tx)">'+l.name+'</span>'
+        +'<span style="font-size:13px;color:var(--mu)">'+setStr+'</span>'
+      +'</div>';
+    }
+    histHtml+='<div style="margin-bottom:8px">'
+      +'<div data-histtoggle="'+i+'" style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:var(--bg2);border-radius:12px;border:.5px solid var(--brd);cursor:pointer">'
+        +'<div><p style="font-size:14px;font-weight:500;color:var(--tx)">'+h.label+'</p><p style="font-size:12px;color:var(--mu);margin-top:2px">'+dateStr+' · '+timeStr+'</p></div>'
+        +'<span style="font-size:12px;color:var(--mu)">'+h.logs.length+' sets &#8250;</span>'
+      +'</div>'
+      +'<div id="hist'+i+'" style="display:none;background:var(--bg2);border:.5px solid var(--brd);border-top:none;border-radius:0 0 12px 12px;padding:4px 14px 10px">'
+        +logRows
+      +'</div>'
+    +'</div>';
+  }
+  var empty='<div class="card" style="text-align:center;padding:36px 20px"><p style="font-size:36px;margin-bottom:12px">&#128200;</p><p class="h2" style="margin-bottom:8px">No sessions yet</p><p class="mu">Complete your first session to start tracking.</p></div>';
+  var reset=sessions>0?'<div style="margin-top:20px"><button class="btng" style="width:100%;padding:12px;font-size:13px;border:.5px solid var(--brd);border-radius:12px" onclick="if(confirm(\'Reset all data? This cannot be undone.\')){S.hist=[];S.pr={};sv();closeProgress();}">Reset all log data</button></div>':'';
+  var pbSection=pbHtml?'<span class="lbl" style="display:block;margin-bottom:4px">Personal bests</span><div class="card" style="margin-bottom:24px">'+pbHtml+'</div>':'';
+  var histSection=sessions>0?'<span class="lbl" style="display:block;margin-bottom:10px">Session history</span>'+histHtml:'';
+  return '<div class="pad">'
+    +'<p class="h1" style="margin:4px 0 20px">Log</p>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px">'
+      +'<div class="card" style="text-align:center;padding:14px 8px"><span class="lbl">Total</span><p style="font-size:28px;font-weight:500;margin:6px 0 2px">'+sessions+'</p><p style="font-size:11px;color:var(--mu)">sessions</p></div>'
+      +'<div class="card" style="text-align:center;padding:14px 8px"><span class="lbl">This week</span><p style="font-size:28px;font-weight:500;margin:6px 0 2px;color:var(--acc)">'+thisWeek+'</p><p style="font-size:11px;color:var(--mu)">sessions</p></div>'
+      +'<div class="card" style="text-align:center;padding:14px 8px"><span class="lbl">PBs tracked</span><p style="font-size:28px;font-weight:500;margin:6px 0 2px">'+pbNames.length+'</p><p style="font-size:11px;color:var(--mu)">exercises</p></div>'
+    +'</div>'
+    +(sessions===0?empty:pbSection+histSection)
+    +reset
+  +'</div>';
 }
 
 // EVENT DELEGATION -----------------------------------------------------------
@@ -937,6 +1001,11 @@ document.addEventListener('click',function(e){
     }
     if(t.dataset&&t.dataset.xd!==undefined){
       var el=document.getElementById('xd'+t.dataset.xd);
+      if(el)el.style.display=el.style.display==='none'?'block':'none';
+      return;
+    }
+    if(t.dataset&&t.dataset.histtoggle!==undefined){
+      var el=document.getElementById('hist'+t.dataset.histtoggle);
       if(el)el.style.display=el.style.display==='none'?'block':'none';
       return;
     }
@@ -1069,7 +1138,8 @@ function buildV(){
     exRows+='<div class="exrow"><div style="flex:1"><span class="lbl">'+phLabel(ex.ph||ex.category||'')+'</span><p style="font-size:13px;color:var(--tx);margin-top:2px">'+ex.name+'</p></div><span style="font-size:12px;color:var(--mu)">'+exVolStr(ex)+'</span></div>';
   }
   if(!ce.newEx){
-    return '<div class="pad"><span class="lbl">'+dayObj.label+'</span><p class="h1" style="margin:6px 0 16px">Add exercises</p>'+exRows+'<button class="btn btno" style="margin-top:8px" onclick="custOpenEx()">+ Add exercise</button><button class="btn btnp" style="margin-top:10px" onclick="S.customEdit.activeDay=null;sv();draw()">'+(ce.activeDay<ce.days.length-1?'Next session':'Review program')+'</button></div>';
+    var labelInput='<div class="card" style="margin-bottom:14px"><span class="lbl">Session name</span><input value="'+dayObj.label+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.customEdit.days[S.customEdit.activeDay].label=this.value;sv()" /></div>';
+  return '<div class="pad"><span class="lbl">'+(ce.activeDay+1)+' of '+ce.days.length+'</span><p class="h1" style="margin:6px 0 14px">'+dayObj.label+'</p>'+labelInput+exRows+'<button class="btn btno" style="margin-top:8px" onclick="custOpenEx()">+ Add exercise</button><button class="btn btnp" style="margin-top:10px" onclick="S.customEdit.activeDay=null;sv();draw()">'+(ce.activeDay<ce.days.length-1?'Next session':'Review program')+'</button></div>';
   }
   // Add exercise form
   // Category picker
