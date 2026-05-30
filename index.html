@@ -1421,7 +1421,7 @@ function timerV(){
     return '<div class="pad" style="padding-top:24px">'
       +'<div style="text-align:center;margin-bottom:8px"><span class="lbl">Stopwatch</span></div>'
       +'<div style="text-align:center;margin-bottom:40px"><p id="sw-display" style="font-size:72px;font-weight:300;color:'+(_sw.running?'var(--acc)':'var(--tx)')+';font-variant-numeric:tabular-nums;letter-spacing:-2px">'+fmt(_sw.elapsed)+'</p></div>'
-      +'<div style="display:flex;gap:10px"><button class="btn '+(_sw.running?'btno':'btnp')+'" onclick="swToggle()">'+(_sw.running?'Stop':'Start')+'</button><button class="btn btno" onclick="swReset()">Reset</button></div>'
+      +'<div style="display:flex;gap:10px"><button id="sw-btn" class="btn '+(_sw.running?'btno':'btnp')+'" onclick="swToggle()">'+(_sw.running?'Pause':'Start')+'</button><button class="btn btno" onclick="swReset()">Reset</button></div>'
       +'<button class="btng" onclick="S.timer.setup=true;sv();draw()">&#8592; Change timer</button>'
     +'</div>';
   }
@@ -1587,6 +1587,10 @@ function timerStart(){
 
 function timerToggle(){
   var T=S.timer;
+  // If timer has finished (remaining<=0), treat as a fresh start instead of resume
+  if(!T.running&&T.remaining<=0){
+    timerStart();return;
+  }
   T.running=!T.running;
   if(T.running){
     clearInterval(_timerInterval);
