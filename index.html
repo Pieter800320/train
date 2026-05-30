@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Train">
+<meta name="apple-mobile-web-app-title" content="Falkenburg">
 <meta name="theme-color" content="#111111">
 <link rel="manifest" href="manifest.json">
-<title>Train</title>
+<title>Falkenburg</title>
 <style>
 :root{--bg:#111;--bg2:#1a1a1a;--bg3:#222;--acc:#E07B3A;--acc2:#3A82E0;--tx:#f0f0f0;--mu:#888;--dim:#444;--brd:#2a2a2a;--ok:#4aaa60;--r:16px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -64,7 +64,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 <div id="app">
   <div style="background:var(--bg);padding:12px 20px 6px;display:flex;justify-content:space-between;align-items:center">
     <span id="clk" style="font-size:11px;color:var(--mu);font-weight:500">9:41</span>
-    <span style="font-size:12px;color:var(--mu);font-weight:500">Train</span>
+    <span style="font-size:13px;font-weight:700;letter-spacing:2.5px;color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;text-transform:uppercase;opacity:.9">Falkenburg</span>
     <button onclick="openProgress()" style="background:var(--bg3);border:none;color:var(--tx);height:28px;padding:0 10px;border-radius:14px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.5px">LOG</button>
   </div>
   <div id="scr"></div>
@@ -82,7 +82,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 var INFO_URL='https://script.google.com/macros/s/AKfycbwJM5zc5XzBjPFrC9pQqI1o6KH2QomR0BhBa9479osorQKe5j3X3QmUFucdpHgB8MY/exec';
 
 var INFO=[
-  {type:'notice',title:'Welcome to Train!',body:'Your personal coaching app. Tap Today to see your first session.'},
+  {type:'notice',title:'Welcome to Falkenburg!',body:'Your personal coaching app. Tap Today to see your first session.'},
   {type:'tip',title:'The hip hinge: think, not lift',body:'Push your hips back toward a wall behind you. The weight follows naturally.'},
   {type:'notice',title:'Questions about your program?',body:'Message your coach directly — they are here to help.'}
 ];
@@ -805,26 +805,35 @@ function wxV(){
   for(var i=0;i<ex.sets;i++)pips+='<div class="sp'+(i<w.set?' dn':'')+'"></div>';
   var wgtBlock='<div class="card" style="text-align:center;background:#1c1000;border-color:#3a1e00"><span class="lbl" style="color:var(--acc)">Weight (kg)</span><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px"><button class="nb" onclick="adjW(-2.5)">&#8722;</button><span id="wd" style="font-size:24px;font-weight:500;color:var(--acc);min-width:52px;text-align:center">'+w.weights[ex.id]+'</span><button class="nb" onclick="adjW(2.5)">+</button></div></div>';
   // Info card: notes (custom) > form cue (built-in)
-  var infoBlock='';
   var isEditingNotes=(S.wx&&S.wx.editingNotes===ex.id);
+  var isCustomEx=!!ex.category;
+  // Form cue block — built-in programs only
+  var cueBlock='';
+  if(!isCustomEx&&cueIdx>=0){
+    cueBlock='<div class="card" style="margin-bottom:10px">'
+      +'<span class="lbl">Form cue</span>'
+      +'<p style="font-size:13px;color:var(--mu);line-height:1.6;margin-top:6px;font-style:italic">"'+(exCues2[cueIdx]||'')+'"</p>'
+    +'</div>';
+  }
+  // Notes block — always visible
+  var notesBlock='';
   if(isEditingNotes){
-    infoBlock='<div class="card" style="margin-bottom:18px">'
+    notesBlock='<div class="card" style="margin-bottom:18px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="lbl">Notes</span><button onclick="wxSaveNote()" style="background:var(--acc);border:none;color:#fff;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer">Save</button></div>'
       +'<textarea id="notes-edit" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:13px;line-height:1.6;resize:none;min-height:80px" oninput="S.wx.noteDraft=this.value">'+(ex.notes||'')+'</textarea>'
     +'</div>';
   } else if(ex.notes){
-    infoBlock='<div class="card" style="margin-bottom:18px">'
+    notesBlock='<div class="card" style="margin-bottom:18px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="lbl">Notes</span><button onclick="wxEditNote()" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:2px 6px">Edit</button></div>'
       +'<p style="font-size:13px;color:var(--mu);line-height:1.6">'+ex.notes+'</p>'
     +'</div>';
-  } else if(cueIdx>=0){
-    infoBlock='<div class="card" style="margin-bottom:18px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="lbl">Form cue</span><button onclick="wxEditNote()" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:2px 6px">Add note</button></div>'
-      +'<p style="font-size:13px;color:var(--mu);line-height:1.6;font-style:italic">"'+(exCues2[cueIdx]||'')+'"</p>'
-    +'</div>';
   } else {
-    infoBlock='<div style="margin-bottom:18px"><button onclick="wxEditNote()" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:4px 0">+ Add note</button></div>';
+    notesBlock='<div class="card" style="margin-bottom:18px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center"><span class="lbl">Notes</span><button onclick="wxEditNote()" style="background:transparent;border:none;color:var(--mu);font-size:12px;cursor:pointer;padding:2px 6px">+ Add</button></div>'
+      +'<p style="font-size:12px;color:var(--dim);margin-top:6px;font-style:italic">No note yet.</p>'
+    +'</div>';
   }
+  var infoBlock=cueBlock+notesBlock;
   // Target block: live countdown ring or reps
   // Target block: live countdown ring or reps stepper
   var targetBlock='';
@@ -1342,13 +1351,16 @@ function timerSetupV(){
   modeHtml+='</div>';
   var configHtml='';
   if(T.mode==='amrap'||T.mode==='countdown'){
-    var presets=[{l:'5 min',s:300},{l:'8 min',s:480},{l:'10 min',s:600},{l:'12 min',s:720},{l:'15 min',s:900},{l:'20 min',s:1200}];
+    var presets=[];for(var pm=2;pm<=20;pm+=2)presets.push({l:pm+' min',s:pm*60});
     var ph='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">';
     for(var pi=0;pi<presets.length;pi++){
       var p=presets[pi];var on2=(T.totalSecs===p.s);
-      ph+='<button data-tset="'+p.s+'" style="padding:8px 16px;border-radius:10px;border:1px solid '+(on2?'var(--acc)':'var(--brd)')+';background:'+(on2?'#1e1000':'transparent')+';color:'+(on2?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+p.l+'</button>';
+      ph+='<button data-tset="'+p.s+'" style="padding:7px 13px;border-radius:10px;border:1px solid '+(on2?'var(--acc)':'var(--brd)')+';background:'+(on2?'#1e1000':'transparent')+';color:'+(on2?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+p.l+'</button>';
     }
     ph+='</div>';
+    // Custom time input
+    var customMins=Math.floor(T.totalSecs/60),customSecs=T.totalSecs%60;
+    ph+='<div style="display:flex;align-items:center;gap:8px;margin-top:12px"><span style="font-size:12px;color:var(--mu)">Custom:</span><input type="number" min="1" max="120" value="'+customMins+'" style="width:56px;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:7px 8px;border-radius:8px;font-size:14px;text-align:center" onchange="S.timer.totalSecs=Math.max(60,parseInt(this.value||1)*60);sv();draw()" /><span style="font-size:12px;color:var(--mu)">min</span></div>';
     configHtml='<div class="card" style="margin-bottom:16px"><span class="lbl">Duration</span>'+ph+'</div>';
   } else if(T.mode==='emom'){
     var emomOpts='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">';
@@ -1504,7 +1516,7 @@ function makeIcon(){
     var ctx=c.getContext('2d');
     ctx.fillStyle='#111';ctx.fillRect(0,0,192,192);
     ctx.fillStyle='#E07B3A';ctx.font='bold 100px -apple-system,sans-serif';
-    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('T',96,100);
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('F',96,100);
     var ico=document.createElement('link');ico.rel='icon';ico.href=c.toDataURL();
     document.head.appendChild(ico);
   } catch(e){}
