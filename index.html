@@ -65,7 +65,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
   <div style="background:var(--bg);padding:12px 20px 6px;display:flex;justify-content:space-between;align-items:center">
     <span id="clk" style="font-size:11px;color:var(--mu);font-weight:500">9:41</span>
     <span style="font-size:12px;color:var(--mu);font-weight:500">Train</span>
-    <button onclick="S.view='progress';sv();draw();" style="background:var(--bg3);border:none;color:var(--tx);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;letter-spacing:-2px" aria-label="More">&#8942;</button>
+    <button onclick="openProgress()" style="background:var(--bg3);border:none;color:var(--tx);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;letter-spacing:-2px" aria-label="More">&#8942;</button>
   </div>
   <div id="scr"></div>
   <nav id="tb" style="display:none">
@@ -79,9 +79,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 <script>
 // DATA -----------------------------------------------------------------------
 
-// ---- INFO BOARD URL: paste your Apps Script URL below ----
 var INFO_URL='https://script.google.com/macros/s/AKfycbwJM5zc5XzBjPFrC9pQqI1o6KH2QomR0BhBa9479osorQKe5j3X3QmUFucdpHgB8MY/exec';
-// -----------------------------------------------------------
 
 var INFO=[
   {type:'notice',title:'Welcome to Train!',body:'Your personal coaching app. Tap Today to see your first session.'},
@@ -96,7 +94,6 @@ function fetchInfo(){
     .then(function(data){
       if(Array.isArray(data)&&data.length>0){
         INFO=data;
-        // Refresh home if currently showing
         if(S.view==='app'&&S.tab==='home'&&!S.wx)draw();
       }
     })
@@ -202,7 +199,6 @@ var TPL={
     ]}
   ]
 };
-
 var TPL_HYP={name:'Hypertrophy',days:[{label:'Session A',focus:'Push — Chest, Shoulders, Triceps',mins:50,exercises:[
 {id:'h_pp',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rotator cuff',cues:['Arms stay straight — this is not a row','Pull to chest height, thumbs rotating outward at end range','Control the return — do not let the band snap back'],subs:'Face pull with band'},
 {id:'h_sp',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior, scapular stabilisers',cues:['Plank position — only the shoulder blades move, arms stay straight','Protract and retract slowly and controlled','Very small movement — if large movement occurs, something is wrong'],subs:'Wall scapular push-up'},
@@ -235,7 +231,6 @@ var TPL_HYP={name:'Hypertrophy',days:[{label:'Session A',focus:'Push — Chest, 
 {id:'h_pg',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel with the mat as mobility allows','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four stretch, hip 90/90'},
 {id:'h_hs',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings, calf',cues:['Hinge at the hip to reach — do not round the lower back','Flex the foot to include the calf in the stretch','Hold static — do not bounce'],subs:'Standing hamstring stretch with band'}
 ]}]};
-
 var TPL_STRENGTH={name:'Strength Building',days:[{label:'Session A',focus:'Bench press 5×5',mins:50,exercises:[
 {id:'sb_mr',ph:'primer',name:'Machine row (warm-up)',vol:'2 x 8',rest:0,muscles:'Mid-back, rhomboids',cues:['Light weight — this is activation, not training','Pull elbows back and squeeze the shoulder blades together','Sets the shoulder girdle before pressing'],subs:'Band row, cable row'},
 {id:'sb_mp',ph:'primer',name:'Machine shoulder press (warm-up)',vol:'2 x 8',rest:0,muscles:'Deltoid, triceps',cues:['Light weight — groove the pressing pattern','Full range — elbows open fully at the bottom','Prepares the shoulder joint before the main work'],subs:'Seated DB press (light)'},
@@ -255,7 +250,6 @@ var TPL_STRENGTH={name:'Strength Building',days:[{label:'Session A',focus:'Bench
 {id:'sb_ld',ph:'accessory',name:'Lat pulldown (neutral grip)',vol:'4 x 6',rest:120,sets:4,reps:6,kg:35,muscles:'Lats, biceps',cues:['Pull to upper chest — not below the chin','Elbows travel down toward your hip pockets','Depress shoulder blades before you pull — do not shrug'],subs:'Pull-up progression',prog:'Advance to pull-up when 4x6 lat pulldown is easy'},
 {id:'sb_cu',ph:'accessory',name:'DB bicep curl',vol:'4 x 6',rest:90,sets:4,reps:6,kg:12,muscles:'Biceps, brachialis',cues:['Elbows stay by your sides — do not swing them forward','Supinate the wrist as you curl — pinky side up at the top','Control the descent — the lowering builds the muscle too'],subs:'Cable curl, EZ bar curl',prog:'Add 2 kg when 4x6 is clean without any elbow swing'}
 ]}]};
-
 var TPL_ATHLETIC={name:'Athletic Performance',days:[{label:'Session A',focus:'Lower power — jump and land',mins:52,exercises:[
 {id:'ap_dd',ph:'primer',name:'Depth drop',vol:'2 x 4',rest:0,muscles:'Quads, glutes — landing mechanics',cues:['Step off a low box and land softly — absorb with a bent knee, not a stiff leg','Land quietly. A loud landing means the mechanics need work.','This is preparation — not training. It wakes up the landing system.'],subs:'Single-leg balance hold'},
 {id:'ap_cj',ph:'primer',name:'Countermovement jump',vol:'2 x 5',rest:0,muscles:'Full lower body — power activation',cues:['Arms drive forcefully upward — they contribute 10-15% of jump height','Triple extension: ankle, knee, hip — all three fully extend at the top','Land softly and reset fully between reps'],subs:'Bodyweight squat jumps'},
@@ -289,7 +283,6 @@ var TPL_ATHLETIC={name:'Athletic Performance',days:[{label:'Session A',focus:'Lo
 {id:'ap_h9',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators, hip flexors',cues:['Both hips grounded — do not tilt to one side','Breathe slowly into the restriction','Hold, do not bounce'],subs:'Pigeon pose'},
 {id:'ap_tr',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across the floor.','Follow your hand with your eyes','Keep knees together throughout'],subs:'Thread the needle'}
 ]}]};
-
 var TPL_HOME_BW={name:'At Home — Bodyweight',days:[{label:'Session A',focus:'Push + core',mins:40,exercises:[
 {id:'bw_db',ph:'primer',name:'Dead bug',vol:'2 x 6 each',rest:0,muscles:'Deep core — activation',cues:['Lower back pressed to the floor throughout — this cannot move','Move slowly: 3 seconds down, 3 seconds return','Exhale as you lower the arm and leg'],subs:'Bent-knee dead bug'},
 {id:'bw_gb',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes, hamstrings — activation',cues:['Drive through heels — not toes','Squeeze the glutes hard at the top','Do not hyperextend the lower back'],subs:'Single-leg glute bridge'},
@@ -321,7 +314,6 @@ var TPL_HOME_BW={name:'At Home — Bodyweight',days:[{label:'Session A',focus:'P
 {id:'bw_hs',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 40s each',rest:0,muscles:'Hamstrings, calf',cues:['Hinge at the hip to reach forward — do not round the lower back','Flex the foot to include the calf in the stretch','Hold static — do not bounce'],subs:'Supine hamstring stretch with a towel'},
 {id:'bw_cp',ph:'cooldown',name:"Child's pose and lat reach",vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward for more lat stretch','Let the chest sink toward the floor','Breathe into the upper back — let it expand'],subs:'Thread the needle'}
 ]}]};
-
 var TPL_HOME_DB={name:'At Home — Dumbbells',days:[{label:'Session A',focus:'Upper body push + pull',mins:45,exercises:[
 {id:'db_pp',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid, rotator cuff',cues:['Arms stay straight — this is not a row','Pull to chest height, thumbs rotating outward at end range','Control the return — do not let the band snap back'],subs:'Face pull with band, or arm circles if no band'},
 {id:'db_sp',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior, scapular stabilisers',cues:['Plank position — only the shoulder blades move, arms stay straight','Protract and retract slowly and controlled','Very small movement — if large movement occurs, something is wrong'],subs:'Wall scapular push-up'},
@@ -353,8 +345,6 @@ var TPL_HOME_DB={name:'At Home — Dumbbells',days:[{label:'Session A',focus:'Up
 {id:'db_hf',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 40s each',rest:0,muscles:'Hip flexors, quads',cues:['Back knee down — neutral pelvis, do not anterior tilt','Gently push hips forward into the stretch','Raise the same-side arm overhead for a greater reach'],subs:'Standing quad stretch'},
 {id:'db_cp',ph:'cooldown',name:"Child's pose and lat reach",vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward for more lat stretch','Let the chest sink toward the floor','Breathe into the upper back'],subs:'Thread the needle'}
 ]}]};
-
-
 var TPL_FAT={name:'Fat Loss',days:[{label:'Session A',focus:'Full body strength + conditioning',mins:45,exercises:[{id:'fl_db',ph:'primer',name:'Dead bug',vol:'2 x 6 each',rest:0,muscles:'Deep core',cues:['Lower back pressed to the floor','Move slowly','Exhale as you lower'],subs:'Bent-knee dead bug'},{id:'fl_gb',ph:'primer',name:'Glute bridge',vol:'2 x 15',rest:0,muscles:'Glutes, hamstrings',cues:['Drive through heels','Squeeze at the top','Do not hyperextend'],subs:'Single-leg glute bridge'},{id:'fl_gq',ph:'strength',name:'Goblet squat',vol:'4 x 12',rest:75,sets:4,reps:12,kg:12,muscles:'Quads, glutes, core',cues:['Brace core before descent','Knees track in line with toes','Full depth if available'],subs:'Box squat',prog:'Add 2.5 kg when 4x12 is clean'},{id:'fl_pu',ph:'strength',name:'Push-up (your level)',vol:'3 x 12',rest:60,sets:3,reps:12,kg:0,muscles:'Chest, deltoid, triceps',cues:['Rigid plank','Elbows at 45 degrees','Chest to surface, full lockout'],subs:'L1: Wall  L2: Incline  L3: Knee  L4: Full',prog:'Advance one level when 3x12 is clean'},{id:'fl_rw',ph:'strength',name:'DB row',vol:'3 x 12 each',rest:60,sets:3,reps:12,kg:12,muscles:'Lats, rhomboids, biceps',cues:['Pull elbow to the hip','Pause and squeeze','Neutral spine'],subs:'Cable row',prog:'Add 2 kg when 3x12 is comfortable'},{id:'fl_rd',ph:'accessory',name:'Romanian deadlift',vol:'3 x 12',rest:75,sets:3,reps:12,kg:18,muscles:'Hamstrings, glutes',cues:['Push hips back first','Keep weights close to the legs','Feel the hamstring stretch'],subs:'Single-leg RDL',prog:'Add 2.5 kg when 3x12 is clean'},{id:'fl_ca',ph:'accessory',name:'Farmer carry',vol:'3 x 25m',rest:60,sets:3,reps:0,kg:16,muscles:'Grip, core, traps',cues:['Stand tall','Normal walking gait','Breathe steadily'],subs:'Suitcase carry',prog:'Increase weight when 25m is easy'},{id:'fl_tr',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'},{id:'fl_hf',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 30s each',rest:0,muscles:'Hip flexors, quads',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm'],subs:'Standing quad stretch'}]},{label:'Session B',focus:'Upper body + core circuit',mins:42,exercises:[{id:'fl_pa',ph:'primer',name:'Band pull-apart',vol:'2 x 15',rest:0,muscles:'Rear deltoid',cues:['Arms stay straight','Pull to chest height, thumbs outward','Control the return'],subs:'Face pull'},{id:'fl_sc',ph:'primer',name:'Scapular push-up',vol:'2 x 10',rest:0,muscles:'Serratus anterior',cues:['Plank — only shoulder blades move','Protract and retract slowly','Very small movement'],subs:'Wall scapular push-up'},{id:'fl_lm',ph:'strength',name:'Landmine press',vol:'3 x 10 each',rest:75,sets:3,reps:10,kg:10,muscles:'Deltoid, triceps, core',cues:['Half-kneeling — brace the core','Press at 45 degrees','Stay tall — do not lean back'],subs:'Seated DB press',prog:'Add 2.5 kg when 3x10 is clean each side'},{id:'fl_pd',ph:'strength',name:'Lat pulldown or pull-up',vol:'3 x 10',rest:75,sets:3,reps:10,kg:28,muscles:'Lats, biceps',cues:['Pull to upper chest','Elbows travel down toward hip pockets','Depress shoulder blades'],subs:'L1: Band-assisted  L2: Machine  L3: Negative  L4: Full',prog:'Add 5 kg or advance pull-up level'},{id:'fl_pf',ph:'accessory',name:'Pallof press',vol:'2 x 12 each',rest:45,sets:2,reps:12,kg:0,muscles:'Obliques, core',cues:['Press straight out — resist rotation','Hold 1 second at full extension','Feet shoulder-width, perpendicular to cable'],subs:'Half-kneeling Pallof press',prog:'Step further or increase resistance'},{id:'fl_sp',ph:'accessory',name:'Side plank',vol:'2 x 25s each',rest:45,sets:2,reps:0,kg:0,muscles:'Obliques',cues:['Body in a straight line','Do not let the hips sag','Breathe steadily'],subs:'Kneeling side plank',prog:'Increase to 40 seconds'},{id:'fl_su',ph:'accessory',name:'Step-up',vol:'3 x 10 each',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, glutes',cues:['Drive through the heel of the elevated foot','Stand fully upright at the top','Control the descent'],subs:'Reverse lunge',prog:'Add dumbbells when 3x10 bodyweight is clean'},{id:'fl_cp',ph:'cooldown',name:"Child's pose",vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Walk hands forward','Let chest sink toward the floor','Breathe into the upper back'],subs:'Thread the needle'},{id:'fl_hs',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings, calf',cues:['Hinge at the hip to reach','Flex the foot','Hold static — do not bounce'],subs:'Standing hamstring stretch'}]},{label:'Session C',focus:'Lower body + loaded conditioning',mins:45,exercises:[{id:'fl_wg',ph:'primer',name:"World's greatest stretch",vol:'2 x 3 each',rest:0,muscles:'Full body mobility',cues:['Lunge — drop slowly','Front hand on floor, rotate thoracic spine upward','Hold 2 seconds at each end range'],subs:'Hip flexor stretch + thoracic rotation'},{id:'fl_wh',ph:'primer',name:'Wall hip hinge',vol:'2 x 10',rest:0,muscles:'Hamstrings, glutes',cues:['30cm from wall — push hips back until they touch','Neutral spine throughout','Pattern drill — no load'],subs:'Dowel rod hinge'},{id:'fl_ss',ph:'strength',name:'DB split squat',vol:'4 x 10 each',rest:75,sets:4,reps:10,kg:8,muscles:'Quads, glutes',cues:['Weight 70% on front foot','Drop back knee toward the floor','Torso tall'],subs:'Assisted split squat',prog:'Add 2 kg/hand when 4x10 is clean each side'},{id:'fl_dr',ph:'strength',name:'Dumbbell RDL',vol:'4 x 12',rest:75,sets:4,reps:12,kg:18,muscles:'Hamstrings, glutes',cues:['Lead with hips going back','Keep dumbbells close to legs','Strong hamstring stretch at the bottom'],subs:'Kettlebell deadlift',prog:'Add 2.5 kg when 4x12 is clean'},{id:'fl_ht',ph:'accessory',name:'Hip thrust',vol:'3 x 15',rest:60,sets:3,reps:15,kg:16,muscles:'Glutes',cues:['Upper back on bench, feet flat','Drive through heels and squeeze hard','Full hip extension'],subs:'Glute bridge on floor',prog:'Add 5 kg when 3x15 is clean'},{id:'fl_rl',ph:'accessory',name:'Reverse lunge',vol:'3 x 10 each',rest:60,sets:3,reps:10,kg:0,muscles:'Quads, glutes',cues:['Step back and lower the back knee','Front shin stays vertical','Drive through the front heel to return'],subs:'Split squat',prog:'Add light dumbbells when 3x10 is completely controlled'},{id:'fl_sc2',ph:'accessory',name:'Suitcase carry',vol:'3 x 20m each',rest:60,sets:3,reps:0,kg:14,muscles:'Obliques, grip',cues:['Stand tall — do not lean away','Shoulders level','Normal gait throughout'],subs:'Farmer carry',prog:'Increase weight when 20m is done without lateral lean'},{id:'fl_pg',ph:'cooldown',name:'Pigeon pose',vol:'2 x 40s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four, hip 90/90'},{id:'fl_h9',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 40s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded','Breathe slowly','Hold, do not bounce'],subs:'Pigeon pose'}]}]};
 
 var TPL_SOCCER={name:'Soccer Support',days:[{label:'Session A',focus:'Posterior chain + deceleration',mins:45,exercises:[{id:'sc_h9',ph:'primer',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded','Breathe slowly into the restriction','Hold, do not bounce'],subs:'Pigeon pose'},{id:'sc_co',ph:'primer',name:'Copenhagen adductor hold',vol:'2 x 20s each',rest:0,muscles:'Adductors',cues:['Side-lying, top leg on a bench at knee height. Lift the hips.','Body in a straight line','Most evidence-backed groin injury prevention exercise in football'],subs:'Side-lying adductor squeeze'},{id:'sc_nh',ph:'strength',name:'Nordic hamstring curl',vol:'4 x 5',rest:120,sets:4,reps:5,kg:0,muscles:'Hamstrings — eccentric strength',cues:['Kneel with feet anchored. Lower toward the floor as slowly as possible.','Use hands to catch yourself at the bottom','The lowering phase is the exercise'],subs:'Single-leg RDL',prog:'Add 1 rep per set when you can control the full descent'},{id:'sc_ss',ph:'strength',name:'DB split squat',vol:'3 x 8 each',rest:90,sets:3,reps:8,kg:10,muscles:'Quads, glutes',cues:['Weight 70% on front foot','Drop the back knee toward the floor','Torso upright throughout'],subs:'Reverse lunge',prog:'Add 2 kg/hand when 3x8 is clean each side'},{id:'sc_sl',ph:'accessory',name:'Single-leg RDL',vol:'3 x 8 each',rest:75,sets:3,reps:8,kg:10,muscles:'Hamstrings, glutes, hip stability',cues:['Hinge at the hip — free leg travels back as torso descends','Hips stay level','Light dumbbell in opposite hand'],subs:'Split-stance RDL',prog:'Add 2 kg when 3x8 is clean without any hip drop'},{id:'sc_lb',ph:'accessory',name:'Lateral band walk',vol:'3 x 15 each direction',rest:60,sets:3,reps:15,kg:0,muscles:'Glute med, hip abductors',cues:['Band around ankles or above knees. Quarter squat.','Step sideways — keep tension throughout','Do not let the feet come together'],subs:'Side-lying hip abduction',prog:'Move band lower or use heavier band'},{id:'sc_fc',ph:'accessory',name:'Farmer carry',vol:'3 x 20m',rest:60,sets:3,reps:0,kg:18,muscles:'Grip, core',cues:['Stand tall — shoulders level','Normal walking gait','Breathe steadily'],subs:'Suitcase carry',prog:'Increase weight when 20m is easy'},{id:'sc_pg',ph:'cooldown',name:'Pigeon pose',vol:'2 x 45s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four'},{id:'sc_hs',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings, calf',cues:['Hinge at the hip to reach','Flex the foot','Hold static — do not bounce'],subs:'Standing hamstring stretch'}]},{label:'Session B',focus:'Trunk stability + upper body balance',mins:40,exercises:[{id:'sc_db',ph:'primer',name:'Dead bug',vol:'2 x 6 each',rest:0,muscles:'Deep core',cues:['Lower back pressed to the floor','Move slowly','Exhale as you lower'],subs:'Bent-knee dead bug'},{id:'sc_fp',ph:'primer',name:'Band face pull',vol:'2 x 15',rest:0,muscles:'Rear deltoid',cues:['Pull to forehead height','Thumbs finishing behind ears','Elbows stay high'],subs:'Band pull-apart'},{id:'sc_pa',ph:'strength',name:'Pallof press',vol:'3 x 10 each',rest:60,sets:3,reps:10,kg:0,muscles:'Obliques, core — anti-rotation',cues:['Press straight out — resist rotation completely','Hold 1 second at full extension','Hips and shoulders stay square throughout'],subs:'Half-kneeling Pallof press',prog:'Step further or increase resistance'},{id:'sc_rw',ph:'strength',name:'DB row',vol:'3 x 10 each',rest:75,sets:3,reps:10,kg:14,muscles:'Lats, rhomboids',cues:['Pull elbow to the hip','Pause at the top — squeeze','Neutral spine throughout'],subs:'Cable row',prog:'Add 2 kg when 3x10 is clean'},{id:'sc_lr',ph:'accessory',name:'Landmine rotation',vol:'3 x 8 each',rest:60,sets:3,reps:8,kg:8,muscles:'Obliques, rotational power',cues:['Hold the end of the barbell. Rotate hip to hip.','Power comes from the hips — the arms follow','Slight bend in the elbows throughout'],subs:'Cable woodchop',prog:'Add weight when 3x8 is fluid and powerful each side'},{id:'sc_sp',ph:'accessory',name:'Side plank',vol:'3 x 25s each',rest:45,sets:3,reps:0,kg:0,muscles:'Obliques',cues:['Body in a straight line','Do not let the hips sag','Breathe steadily'],subs:'Kneeling side plank',prog:'Increase to 40 seconds'},{id:'sc_pu',ph:'accessory',name:'Push-up (your level)',vol:'3 x 10',rest:60,sets:3,reps:10,kg:0,muscles:'Chest, triceps, serratus',cues:['Rigid plank throughout','Elbows at 45 degrees','Full range every rep'],subs:'L1: Wall  L2: Incline  L3: Knee  L4: Full',prog:'Advance level when 3x10 is perfect for 2 sessions'},{id:'sc_tr',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Keep knees together'],subs:'Thread the needle'},{id:'sc_dc',ph:'cooldown',name:'Doorway chest stretch',vol:'2 x 30s each',rest:0,muscles:'Chest, anterior deltoid',cues:['Forearm on frame, elbow at 90 degrees','Step gently forward','Hold — do not bounce'],subs:'Foam roller thoracic extension'}]},{label:'Session C',focus:'Explosive lower body + prehab',mins:42,exercises:[{id:'sc_wh',ph:'primer',name:'Wall hip hinge',vol:'2 x 10',rest:0,muscles:'Hamstrings, glutes',cues:['30cm from wall — push hips back until they touch','Neutral spine throughout','Pattern drill'],subs:'Dowel rod hinge'},{id:'sc_ph',ph:'primer',name:'Pogo hops',vol:'2 x 20',rest:0,muscles:'Calves, Achilles — tendon prep',cues:['Small fast hops — minimal ground contact time','Land on balls of feet','Tendon conditioning, not height'],subs:'Slow calf raises'},{id:'sc_ht',ph:'strength',name:'Hip thrust',vol:'4 x 10',rest:90,sets:4,reps:10,kg:22,muscles:'Glutes — peak contraction and power',cues:['Upper back on bench, feet flat','Drive through heels and squeeze hard at the top','Full hip extension at the top'],subs:'Glute bridge on floor',prog:'Add 5 kg when 4x10 is clean'},{id:'sc_su',ph:'strength',name:'Step-up (explosive)',vol:'3 x 8 each',rest:75,sets:3,reps:8,kg:0,muscles:'Quads, glutes — single-leg power',cues:['Drive through the heel of the elevated foot explosively','Drive the opposite knee upward at the top','Control the descent'],subs:'Reverse lunge',prog:'Add light dumbbells when 3x8 bodyweight is powerful'},{id:'sc_ca',ph:'accessory',name:'Copenhagen adductor exercise',vol:'3 x 8 each',rest:60,sets:3,reps:8,kg:0,muscles:'Adductors — injury prevention',cues:['Side-lying, top leg on bench. Lower and raise the hips.','Full range — hip drops, then drives back up','Not easy. Start with shorter lever if needed.'],subs:'Side-lying adductor raise',prog:'Progress to longer lever (ankle on bench) when 3x8 is controlled'},{id:'sc_cr',ph:'accessory',name:'Single-leg calf raise',vol:'3 x 12 each',rest:60,sets:3,reps:12,kg:0,muscles:'Gastrocnemius, Achilles tendon',cues:['Full range — lower heel below the step','3 seconds up, 3 seconds down — tendon work','Hold 1 second at the top'],subs:'Bilateral calf raise',prog:'Add load when 3x12 is controlled through full range'},{id:'sc_lb2',ph:'accessory',name:'Lateral band walk',vol:'2 x 15 each direction',rest:45,sets:2,reps:15,kg:0,muscles:'Glute med',cues:['Band around ankles or above knees','Keep tension throughout','Controlled steps'],subs:'Clamshell',prog:'Move band lower or use heavier band'},{id:'sc_h9b',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 45s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded','Breathe slowly into the restriction','Hold, do not bounce'],subs:'Pigeon pose'},{id:'sc_as',ph:'cooldown',name:'Adductor stretch',vol:'2 x 40s each',rest:0,muscles:'Adductors, inner thigh',cues:['Seated, soles of feet together — let the knees fall outward','Lean gently forward from the hips','Hold — do not push the knees down'],subs:'Standing adductor stretch'}]}]};
@@ -370,7 +360,6 @@ var TPL_SHOULDER={name:'Shoulder Support',days:[{label:'Session A',focus:'Rotato
 var TPL_KNEE={name:'Knee Support',days:[{label:'Session A',focus:'VMO activation + hip strengthening',mins:35,exercises:[{id:'kn_tk',ph:'primer',name:'Terminal knee extension (band)',vol:'3 x 15 each',rest:0,muscles:'VMO, quads — activation',cues:['Band behind the knee. Straighten the knee against the band resistance.','Last 15 degrees of extension is the VMO — that is the target','Controlled extension only'],subs:'Quad set'},{id:'kn_cl',ph:'primer',name:'Clamshell',vol:'2 x 15 each',rest:0,muscles:'Glute med, hip external rotators',cues:['Side-lying, feet together. Rotate the top knee upward.','Do not let the pelvis roll backward','The glute med controls the knee — this is why it matters'],subs:'Side-lying hip abduction'},{id:'kn_sd',ph:'strength',name:'Step-down (controlled eccentric)',vol:'4 x 8 each',rest:90,sets:4,reps:8,kg:0,muscles:'Quads, VMO — progressive loading',cues:['Stand on a step. Lower the opposite heel toward the floor in 4 seconds.','The knee must track over the second toe — not cave inward','Primary exercise for patellar tendon and general knee rehab'],subs:'Slow split squat',prog:'Add a light dumbbell when 4x8 is completely controlled'},{id:'kn_ht',ph:'strength',name:'Hip thrust',vol:'3 x 12',rest:75,sets:3,reps:12,kg:16,muscles:'Glutes — hip strength reduces knee demand',cues:['Upper back on bench, feet flat','Drive through heels and squeeze hard','Strong glutes reduce compressive load through the knee'],subs:'Glute bridge on floor',prog:'Add 5 kg when 3x12 is clean'},{id:'kn_ws',ph:'accessory',name:'Wall sit isometric',vol:'3 x 30s',rest:60,sets:3,reps:0,kg:0,muscles:'Quads, VMO — isometric loading',cues:['Back flat against the wall, thighs parallel. Hold.','Knees over the toes — do not let them cave inward','Isometric loading reduces pain while building tissue capacity'],subs:'Partial wall sit',prog:'Increase hold time to 45 seconds, then 60 seconds'},{id:'kn_lb',ph:'accessory',name:'Lateral band walk',vol:'3 x 15 each direction',rest:60,sets:3,reps:15,kg:0,muscles:'Glute med — knee alignment',cues:['Band above the knees. Quarter squat.','Step sideways — keep tension throughout','Glute med activation reduces valgus collapse at the knee'],subs:'Clamshell',prog:'Move band to ankles or use heavier band'},{id:'kn_cr',ph:'accessory',name:'Single-leg calf raise (slow)',vol:'3 x 12 each',rest:60,sets:3,reps:12,kg:0,muscles:'Calf, Achilles — lower leg support',cues:['Full range — heel drops below the step','3 seconds up, 3 seconds down','Supports the overall lower leg chain'],subs:'Bilateral calf raise',prog:'Add load when 3x12 is controlled'},{id:'kn_hf',ph:'cooldown',name:'Kneeling hip flexor stretch',vol:'2 x 40s each',rest:0,muscles:'Hip flexors, quads',cues:['Back knee down — neutral pelvis','Gently push hips forward','Raise same-side arm overhead'],subs:'Standing quad stretch'},{id:'kn_hs',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip to reach','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}]},{label:'Session B',focus:'Glute strength + upper body balance',mins:35,exercises:[{id:'kn_sg',ph:'primer',name:'Single-leg glute bridge',vol:'3 x 12 each',rest:0,muscles:'Glutes — targeted activation',cues:['One foot on the floor, other leg extended. Drive through the heel.','Squeeze the glutes hard at the top','Do not let the hips drop sideways'],subs:'Bilateral glute bridge'},{id:'kn_tk2',ph:'primer',name:'Terminal knee extension (band)',vol:'2 x 15 each',rest:0,muscles:'VMO — activation before loading',cues:['Band behind the knee. Controlled knee extension.','Last 15 degrees — VMO focus','Controlled — not a snap'],subs:'Quad set'},{id:'kn_bs',ph:'strength',name:'Bulgarian split squat (light)',vol:'3 x 8 each',rest:90,sets:3,reps:8,kg:6,muscles:'Quads, glutes — progressive single-leg load',cues:['Back foot elevated. Front leg does the work.','Slow eccentric — 3 seconds down','Only progress load when knee tracks well and is pain-free'],subs:'Split squat',prog:'Add 1 kg/hand when 3x8 is pain-free and controlled'},{id:'kn_rw',ph:'strength',name:'DB row',vol:'3 x 10 each',rest:75,sets:3,reps:10,kg:12,muscles:'Back — upper body avoids knee loading',cues:['Pull elbow to the hip','Pause and squeeze','Neutral spine'],subs:'Cable row',prog:'Add 2 kg when 3x10 is clean'},{id:'kn_sd2',ph:'accessory',name:'Step-down (loaded)',vol:'3 x 8 each',rest:75,sets:3,reps:8,kg:0,muscles:'Quads, VMO — increasing challenge',cues:['Same as Session A — 4-second lowering','Knee tracks over second toe throughout','Only progress when Session A step-down is completely controlled'],subs:'Session A step-down',prog:'Add a light dumbbell when pain-free and controlled'},{id:'kn_pu',ph:'accessory',name:'Push-up (your level)',vol:'3 x 10',rest:60,sets:3,reps:10,kg:0,muscles:'Chest, triceps — upper body balance',cues:['Rigid plank throughout','Elbows at 45 degrees','Full range every rep'],subs:'L1: Wall  L2: Incline  L3: Knee  L4: Full',prog:'Advance level when 3x10 is perfect for 2 sessions'},{id:'kn_pa',ph:'accessory',name:'Pallof press',vol:'2 x 10 each',rest:45,sets:2,reps:10,kg:0,muscles:'Core — stability without knee load',cues:['Press straight out — resist rotation','Hold 1 second at full extension','Hips and shoulders stay square'],subs:'Half-kneeling Pallof press',prog:'Step further or increase resistance'},{id:'kn_pg',ph:'cooldown',name:'Pigeon pose',vol:'2 x 40s each',rest:0,muscles:'Glutes, hip rotators',cues:['Front shin toward parallel','Hips square to the floor','Breathe into the restriction'],subs:'Figure-four, hip 90/90'},{id:'kn_h9',ph:'cooldown',name:'Hip 90/90 stretch',vol:'2 x 40s each',rest:0,muscles:'Hip rotators',cues:['Both hips grounded','Breathe slowly','Hold, do not bounce'],subs:'Pigeon pose'}]},{label:'Session C',focus:'Load progression + full body',mins:35,exercises:[{id:'kn_cl2',ph:'primer',name:'Clamshell',vol:'2 x 15 each',rest:0,muscles:'Glute med',cues:['Side-lying, feet together. Rotate top knee upward.','Do not let the pelvis roll backward','Controlled throughout'],subs:'Lateral band walk'},{id:'kn_db',ph:'primer',name:'Dead bug',vol:'2 x 6 each',rest:0,muscles:'Core',cues:['Lower back pressed to the floor','Move slowly','Exhale as you lower'],subs:'Bent-knee dead bug'},{id:'kn_gq',ph:'strength',name:'Goblet squat (to tolerance)',vol:'3 x 10',rest:90,sets:3,reps:10,kg:10,muscles:'Quads, glutes',cues:['Only go as deep as is pain-free','Knees tracking over toes throughout','Progress the depth gradually as the knee adapts'],subs:'Box squat, wall sit',prog:'Increase depth before increasing load'},{id:'kn_rd',ph:'strength',name:'Romanian deadlift',vol:'3 x 10',rest:75,sets:3,reps:10,kg:16,muscles:'Hamstrings, glutes — posterior chain without knee stress',cues:['Push hips back first — the torso follows','Keep weights close to the legs','Strong hamstring stretch at the bottom'],subs:'Single-leg RDL',prog:'Add 2.5 kg when 3x10 is clean'},{id:'kn_su',ph:'accessory',name:'Step-up',vol:'3 x 10 each',rest:75,sets:3,reps:10,kg:0,muscles:'Quads, glutes',cues:['Drive through the heel of the elevated foot','Stand fully upright at the top','Control the descent'],subs:'Reverse lunge',prog:'Add dumbbells when 3x10 bodyweight is pain-free'},{id:'kn_fc',ph:'accessory',name:'Farmer carry',vol:'3 x 20m',rest:60,sets:3,reps:0,kg:14,muscles:'Core, gait',cues:['Stand tall — shoulders level','Normal walking gait','Breathe steadily'],subs:'Suitcase carry',prog:'Increase weight when 20m is easy'},{id:'kn_lb2',ph:'accessory',name:'Lateral band walk',vol:'2 x 15 each direction',rest:45,sets:2,reps:15,kg:0,muscles:'Glute med',cues:['Band above knees. Quarter squat.','Keep tension throughout','Do not let feet come together'],subs:'Clamshell',prog:'Move band to ankles or use heavier band'},{id:'kn_cs',ph:'cooldown',name:'Standing calf stretch',vol:'2 x 40s each',rest:0,muscles:'Gastrocnemius, soleus',cues:['Heel on the ground, toes up on a wall — lean gently forward','Straight knee for gastrocnemius, bent knee for soleus','Hold — do not bounce'],subs:'Downward dog calf stretch'},{id:'kn_hs2',ph:'cooldown',name:'Seated hamstring stretch',vol:'2 x 30s each',rest:0,muscles:'Hamstrings',cues:['Hinge at the hip to reach','Flex the foot','Hold static — do not bounce'],subs:'Supine hamstring stretch'}]}]};
 
 var TPL_BACK={name:'Back Health',days:[{label:'Session A',focus:'Spine sparing + bracing foundations',mins:35,exercises:[{id:'bk_cc',ph:'primer',name:'Cat-cow (controlled)',vol:'2 x 10 slow cycles',rest:0,muscles:'Spinal erectors, multifidus',cues:['On hands and knees. Arch upward (cat), then extend downward (cow). Slow.','Do not force either end range — stay within the pain-free zone','Mobilisation, not a stretch'],subs:'Supine knee rocks'},{id:'bk_bd',ph:'primer',name:'Bird dog',vol:'3 x 6 each',rest:0,muscles:'Erectors, glutes, core — spinal stability',cues:['On hands and knees. Extend the opposite arm and leg slowly — hold 2 seconds.','The lower back must not rotate or sag — keep the pelvis level','Most evidence-based spine stabilisation exercise that exists'],subs:'Bent-knee bird dog',prog:'Add a light resistance band when 3x6 is completely stable'},{id:'bk_db',ph:'strength',name:'Dead bug',vol:'3 x 6 each',rest:60,sets:3,reps:6,kg:0,muscles:'Deep core — anti-extension',cues:['Lower back pressed to the floor throughout','Move slowly','Trains the deep core muscles that directly stabilise the spine'],subs:'Bent-knee dead bug',prog:'Progress to dead bug with arms holding a light weight'},{id:'bk_ms',ph:'strength',name:'Modified side plank',vol:'3 x 20s each',rest:60,sets:3,reps:0,kg:0,muscles:'Quadratus lumborum, obliques',cues:['Knee on the floor (modified). Forearm on the floor. Lift the hips.','Body in a straight line — do not sag','Stuart McGill considers this one of the three essential spine exercises'],subs:'Full side plank when ready',prog:'Progress to full side plank when 3x20s is stable and pain-free'},{id:'bk_gb',ph:'accessory',name:'Glute bridge',vol:'3 x 15',rest:60,sets:3,reps:15,kg:0,muscles:'Glutes, hamstrings — hip extension without spine stress',cues:['Drive through heels — not toes','Squeeze the glutes hard at the top','Do not hyperextend the lower back'],subs:'Single-leg glute bridge',prog:'Add a plate across the hips when bodyweight is easy'},{id:'bk_wh',ph:'accessory',name:'Wall hip hinge',vol:'2 x 10',rest:45,sets:2,reps:10,kg:0,muscles:'Hamstrings, glutes — hinge pattern',cues:['Stand 30cm from wall. Push hips back until they touch.','Neutral spine throughout','Learning this pattern protects the spine on every bending task in daily life'],subs:'Dowel rod hinge'},{id:'bk_wk',ph:'accessory',name:'Walking (deliberate)',vol:'10-15 minutes',rest:0,sets:0,reps:0,kg:0,muscles:'Full body — most evidence-backed back exercise',cues:['Walk tall — do not shuffle. Arm swing is natural and important.','Stuart McGill consistently ranks walking as one of the best interventions for lower back pain','This is prescribed exercise — not casual movement'],subs:'Swimming, cycling'},{id:'bk_cp',ph:'cooldown',name:"Child's pose",vol:'2 x 40s',rest:0,muscles:'Lats, thoracic spine',cues:['Sit back toward the heels, arms extended forward','Breathe into the upper back','Do not force the lower back'],subs:'Supine knee hug'},{id:'bk_kh',ph:'cooldown',name:'Supine knee hug',vol:'2 x 30s each',rest:0,muscles:'Lower back, glutes — decompression',cues:['Lie on your back. Hug one or both knees gently to the chest.','Decompresses the lumbar spine after loading','Hold gently — do not pull aggressively'],subs:"Child's pose"}]},{label:'Session B',focus:'Hip strength + upper back endurance',mins:35,exercises:[{id:'bk_bd2',ph:'primer',name:'Bird dog',vol:'3 x 6 each',rest:0,muscles:'Spinal stabilisers',cues:['On hands and knees. Extend opposite arm and leg — hold 2 seconds.','Pelvis stays level throughout','Slow and deliberate'],subs:'Bent-knee bird dog'},{id:'bk_cl',ph:'primer',name:'Clamshell',vol:'2 x 15 each',rest:0,muscles:'Glute med — hip stabiliser',cues:['Side-lying, feet together. Rotate the top knee upward.','Do not let the pelvis roll backward','Glute med weakness is a frequent contributor to back pain'],subs:'Side-lying hip abduction'},{id:'bk_ht',ph:'strength',name:'Hip thrust',vol:'3 x 12',rest:75,sets:3,reps:12,kg:14,muscles:'Glutes — hip extension without axial spine load',cues:['Upper back on bench, feet flat','Drive through heels and squeeze hard at the top','Loads the glutes without compressing the spine'],subs:'Glute bridge on floor',prog:'Add 5 kg when 3x12 is clean and pain-free'},{id:'bk_rw',ph:'strength',name:'Chest-supported DB row',vol:'3 x 10',rest:75,sets:3,reps:10,kg:10,muscles:'Mid-back, rhomboids',cues:['Chest on incline bench — removes the temptation to use the lower back','Row elbows back and upward','Pause and squeeze at the top'],subs:'Band row',prog:'Add 2 kg when 3x10 is clean'},{id:'bk_sp',ph:'accessory',name:'Full side plank (when ready)',vol:'3 x 20s each',rest:60,sets:3,reps:0,kg:0,muscles:'Quadratus lumborum, obliques',cues:['Only progress to this from the modified side plank when pain-free','Body in a straight line from head to feet','Breathe steadily throughout'],subs:'Modified side plank',prog:'Increase to 35 seconds when 3x20s is stable'},{id:'bk_pa',ph:'accessory',name:'Pallof press',vol:'2 x 10 each',rest:45,sets:2,reps:10,kg:0,muscles:'Obliques — anti-rotation',cues:['Press straight out — resist rotation','Hold 1 second at full extension','Hips and shoulders stay square'],subs:'Half-kneeling Pallof press',prog:'Step further or increase resistance'},{id:'bk_ss',ph:'accessory',name:'DB split squat',vol:'3 x 8 each',rest:75,sets:3,reps:8,kg:6,muscles:'Quads, glutes — lower body without heavy axial load',cues:['Weight 70% on front foot','Drop the back knee toward the floor','Torso upright'],subs:'Reverse lunge',prog:'Add 1 kg/hand when 3x8 is pain-free and controlled'},{id:'bk_cc2',ph:'cooldown',name:'Cat-cow (slow)',vol:'2 x 8 slow cycles',rest:0,muscles:'Spinal mobilisation',cues:['Move slowly through the range','Stay within the comfortable zone','Breathe — inhale into the cow, exhale into the cat'],subs:'Supine knee rocks'},{id:'bk_tr',ph:'cooldown',name:'Thoracic rotation',vol:'2 x 5 each',rest:0,muscles:'Thoracic spine',cues:['Side-lying, knees at 90 degrees. Top arm sweeps across.','Follow your hand with your eyes','Thoracic mobility reduces compensatory movement at the lumbar spine'],subs:'Thread the needle'}]},{label:'Session C',focus:'Progressive loading + gait',mins:35,exercises:[{id:'bk_bd3',ph:'primer',name:'Bird dog',vol:'3 x 6 each',rest:0,muscles:'Spinal stabilisers — daily practice',cues:['On hands and knees. Opposite arm and leg — hold 2 seconds.','Pelvis stays level','This becomes easier — that is the point'],subs:'Bent-knee bird dog'},{id:'bk_db2',ph:'primer',name:'Dead bug',vol:'2 x 6 each',rest:0,muscles:'Deep core',cues:['Lower back pressed to the floor','Move slowly','Exhale as you lower'],subs:'Bent-knee dead bug'},{id:'bk_gq',ph:'strength',name:'Goblet squat (to tolerance)',vol:'3 x 10',rest:75,sets:3,reps:10,kg:10,muscles:'Quads, glutes — axial load management',cues:['Only go as deep as is pain-free','Brace the core before every rep','Progress depth before load'],subs:'Box squat, wall sit',prog:'Increase load only when full pain-free depth is available'},{id:'bk_dr',ph:'strength',name:'Romanian deadlift (light)',vol:'3 x 10',rest:75,sets:3,reps:10,kg:14,muscles:'Hamstrings, glutes',cues:['Push hips back first — neutral spine throughout','Never round under load','Start very light and build over weeks'],subs:'Single-leg RDL',prog:'Add 2.5 kg only when 3x10 is completely pain-free with perfect form'},{id:'bk_fc',ph:'accessory',name:'Farmer carry',vol:'3 x 20m',rest:60,sets:3,reps:0,kg:12,muscles:'Core stiffness, gait',cues:['Stand tall — the weight should not change your posture','Teaches the trunk to maintain stiffness under load','Start light — increase gradually as the back tolerates it'],subs:'Suitcase carry',prog:'Increase weight when 20m is easy with no discomfort'},{id:'bk_sg',ph:'accessory',name:'Single-leg glute bridge',vol:'3 x 10 each',rest:60,sets:3,reps:10,kg:0,muscles:'Glutes — progressive hip load',cues:['One foot on the floor, other leg extended','Drive through the heel and squeeze the glute at the top','Do not let the hips drop sideways'],subs:'Bilateral glute bridge',prog:'Add a plate across the hips when single-leg 3x10 is easy'},{id:'bk_wk2',ph:'accessory',name:'Walking (deliberate)',vol:'10-15 minutes',rest:0,sets:0,reps:0,kg:0,muscles:'Full body — therapeutic movement',cues:['Walk tall with a natural arm swing','Most consistently recommended intervention for chronic lower back pain','Frequency matters more than intensity'],subs:'Swimming, cycling'},{id:'bk_kh2',ph:'cooldown',name:'Supine knee hug',vol:'2 x 30s each',rest:0,muscles:'Lower back decompression',cues:['Lie on your back. Hug one knee gently to the chest.','Hold gently — do not pull aggressively','Breathe into the lower back'],subs:"Child's pose"},{id:'bk_sl',ph:'cooldown',name:'Side-lying rest position',vol:'2 minutes',rest:0,muscles:'Spinal decompression',cues:['Lie on your side in the foetal position with a pillow between the knees.','Lowest-load spine position available — allows discs to recover','Simply rest — breathe slowly. This is part of the prescription.'],subs:'Supine with knees bent'}]}]};
-
 
 var CATALOGUE=[
   {key:'balanced',tpl:'TPL',name:'Balanced Strength',tag:'Full body',
@@ -417,39 +406,6 @@ var CATALOGUE=[
    sessions:'3 days/week',mins:'~35 min',icon:'Bk',available:true}
 ];
 
-
-var SKILLS=[
-  {id:'hinge',name:'Hip hinge',ico:'H',lvls:[
-    {n:'Wall hip hinge',d:'Stand 30cm from wall. Push hips back until they touch. Spine neutral throughout.',t:'10 reps without spinal flexion'},
-    {n:'Dowel rod hinge',d:'Three contact points: back of head, thoracic spine, sacrum. Hinge while maintaining all three.',t:'10 reps maintaining all 3 contact points'},
-    {n:'Bodyweight RDL',d:'Own the pattern unloaded. Arms crossed on chest. Hip hinge only — no squatting.',t:'10 reps with perfect spine position'},
-    {n:'Dumbbell RDL',d:'Add light load. Pattern must remain identical to the bodyweight version.',t:'4x8 at working weight with clean form'},
-    {n:'Single-leg RDL',d:'Unilateral challenge. Hip stability and hinge combined. Start bodyweight.',t:'2x8 each side without balance loss'}
-  ]},
-  {id:'push',name:'Push-up',ico:'P',lvls:[
-    {n:'Wall push-up',d:'Upright angle. Build the pattern and scapular control with minimal load.',t:'3x12 with plank position maintained'},
-    {n:'Incline push-up',d:'Bench or box. Increasing load, same pattern demands.',t:'3x12 with chest touching the surface'},
-    {n:'Eccentric push-up',d:'From knees: lower in 5 seconds. Reset at top. Only the lowering phase counts.',t:'3x8 controlled 5-second eccentrics'},
-    {n:'Knee push-up',d:'Full range from knees. Both up and down phases.',t:'3x12 with full range and rigid body'},
-    {n:'Full push-up',d:'Full plank on toes. Rigid from head to heels. Full range.',t:'3x10 perfect form for 2 consecutive sessions'},
-    {n:'Weighted push-up',d:'Plate on back or weighted vest. Progressive loading from here.',t:'Progressive load increase over time'}
-  ]},
-  {id:'pull',name:'Pull-up',ico:'U',lvls:[
-    {n:'Dead hang',d:'Hang from the bar. Practise shoulder packing — retract and depress.',t:'3x20 seconds without losing shoulder position'},
-    {n:'Scapular pull-up',d:'Retract and depress only — no elbow bend at all. Pure shoulder blade control.',t:'3x10 controlled'},
-    {n:'Band-assisted pull-up',d:'Light band. Full range of motion. Control in both directions.',t:'3x8 with 3-second controlled descent'},
-    {n:'Negative pull-up',d:'Jump to the top position. Lower in exactly 5 seconds.',t:'3x6 consistent 5-second eccentrics'},
-    {n:'Full pull-up',d:'Dead hang to chin over bar. No kipping. Earn every rep.',t:'1 clean rep, then build to 3x5'},
-    {n:'Weighted pull-up',d:'Belt or dumbbell. The long game.',t:'Progressive load over months'}
-  ]},
-  {id:'squat',name:'Squat',ico:'S',lvls:[
-    {n:'Box squat',d:'Sit to box. Removes depth anxiety. Learn the sitting-back pattern.',t:'3x12 with upright torso and controlled descent'},
-    {n:'Goblet squat',d:'Counter-balance teaches upright torso. Elbows push knees out at bottom.',t:'4x10 with full available depth'},
-    {n:'DB front squat',d:'Dumbbells on shoulders. Increased core demand. Same pattern.',t:'4x8 with neutral spine and full depth'},
-    {n:'Barbell back squat',d:'Full loading potential. Requires solid thoracic mobility.',t:'Progressive loading over months'}
-  ]}
-];
-
 var OBQ=[
   {q:'What is your main goal?',sub:'We will build your program around this.',key:'goal',opts:[
     {v:'balanced',l:'Build strength and balance'},
@@ -487,22 +443,45 @@ var OBQ=[
 // STATE ----------------------------------------------------------------------
 
 var ACTIVE_TPL=TPL;
-var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],skOpen:null,theme:'dark',tplKey:'balanced',
+var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],theme:'dark',tplKey:'balanced',
   customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},
-  customTPL:null,
   customPrograms:[],
   timer:{mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true}
 };
 
 function applyTheme(){
   document.documentElement.classList.toggle('light',S.theme==='light');
-  var btn=document.getElementById('tmb');
-  if(btn)btn.innerHTML=S.theme==='light'?'&#9728;':'&#9790;';
 }
-function toggleTheme(){S.theme=S.theme==='dark'?'light':'dark';sv();applyTheme();}
 
 function ld(){try{var d=localStorage.getItem('train_v3');if(d)S=JSON.parse(d);}catch(e){}}
 function sv(){try{localStorage.setItem('train_v3',JSON.stringify(S));}catch(e){}}
+
+// TPL MAP HELPER -------------------------------------------------------------
+function tplMap(){
+  var m={
+    balanced:TPL,
+    hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:TPL,
+    strength:typeof TPL_STRENGTH!=='undefined'?TPL_STRENGTH:TPL,
+    athletic:typeof TPL_ATHLETIC!=='undefined'?TPL_ATHLETIC:TPL,
+    fatloss:typeof TPL_FAT!=='undefined'?TPL_FAT:TPL,
+    home_bw:typeof TPL_HOME_BW!=='undefined'?TPL_HOME_BW:TPL,
+    home_db:typeof TPL_HOME_DB!=='undefined'?TPL_HOME_DB:TPL,
+    soccer:typeof TPL_SOCCER!=='undefined'?TPL_SOCCER:TPL,
+    run:typeof TPL_RUN!=='undefined'?TPL_RUN:TPL,
+    climb:typeof TPL_CLIMB!=='undefined'?TPL_CLIMB:TPL,
+    court:typeof TPL_COURT!=='undefined'?TPL_COURT:TPL,
+    shoulder:typeof TPL_SHOULDER!=='undefined'?TPL_SHOULDER:TPL,
+    knee:typeof TPL_KNEE!=='undefined'?TPL_KNEE:TPL,
+    back:typeof TPL_BACK!=='undefined'?TPL_BACK:TPL
+  };
+  // Merge in saved custom programs
+  if(S.customPrograms){
+    for(var i=0;i<S.customPrograms.length;i++){
+      m[S.customPrograms[i].key]=S.customPrograms[i].tpl;
+    }
+  }
+  return m;
+}
 
 // ROUTER ---------------------------------------------------------------------
 
@@ -514,7 +493,6 @@ function draw(){
   var tb=document.getElementById('tb');
   if(!sc)return;
   if(S.view==='progress'){
-    // Render sheet overlay on top — don't replace sc content, inject alongside
     var existing=document.getElementById('prog-sheet');
     if(!existing){
       var sheet=document.createElement('div');
@@ -530,9 +508,6 @@ function draw(){
       });});
     }
     return;
-  }
-  if(S.view==='custom'){
-    S.view='app';S.tab='build';
   }
   if(S.view==='ob'){
     tb.style.display='none';
@@ -551,6 +526,9 @@ function draw(){
     try{sc.innerHTML=views[S.tab]?views[S.tab]():'';}catch(err){sc.innerHTML='<div class="pad"><p class="h2" style="color:var(--warn)">Something went wrong</p><p class="mu" style="margin-top:8px">'+err.message+'</p><button class="btn btno" style="margin-top:16px" onclick="go(\'home\')">Back to Home</button></div>';}
   }
 }
+
+// PROGRESS (open/close) ------------------------------------------------------
+function openProgress(){S.view='progress';sv();draw();}
 
 // ONBOARDING -----------------------------------------------------------------
 
@@ -587,7 +565,7 @@ function obV(){
     rh+='<div style="margin-top:18px;padding-top:16px;border-top:.5px solid var(--brd)">';
     rh+='<p class="mu" style="margin-bottom:10px">Want to browse all programmes?</p>';
     rh+='<button class="btn btno" data-action="goprograms">Browse all programmes</button>';
-    rh+='<button class="btng" style="margin-top:8px;display:block;width:100%;padding:10px" onclick="S.ob.step=0;S.ob.recs=[];draw();">Retake questionnaire</button>';
+    rh+='<button class="btng" style="margin-top:8px;display:block;width:100%;padding:10px" onclick="S.ob.step=0;S.ob.recs=[];sv();draw();">Retake questionnaire</button>';
     rh+='</div></div>';
     return rh;
   }
@@ -604,7 +582,6 @@ function obV(){
   var back=step>0?'<button class="btng" onclick="obBack()">Back</button>':'';
   return '<div class="pad"><div class="pb" style="margin-bottom:20px"><div class="pf" style="width:'+pct+'%"></div></div><span class="lbl">Question '+(step+1)+' of '+OBQ.length+'</span><p style="font-size:20px;font-weight:500;margin:8px 0 6px;line-height:1.3">'+q.q+'</p><p class="mu" style="margin-bottom:22px">'+q.sub+'</p>'+opts+cont+back+'</div>';
 }
-
 
 function getRecommendations(ans){
   var g=ans.goal||'general',sp=ans.sport||'none',inj=ans.injury||'none',exp=ans.exp||'new';
@@ -625,36 +602,19 @@ function getRecommendations(ans){
     else if(inj==='back')s+=(c.key==='back'?60:0);
     if(inj==='none'&&['shoulder','knee','back'].indexOf(c.key)>=0)s-=30;
     if(exp==='new'){if(c.key==='balanced')s+=15;if(['hyp','strength','athletic'].indexOf(c.key)>=0)s-=10;}
-    // home templates: boost for new users or those with no sport
-    if(c.key==='home_bw'||c.key==='home_db'){
-      if(exp==='new')s+=10;
-      if(g==='general')s+=10;
-    }
+    if(c.key==='home_bw'||c.key==='home_db'){if(exp==='new')s+=10;if(g==='general')s+=10;}
     if(s>0)sc[c.key]=(sc[c.key]||0)+s;
   });
   return Object.keys(sc).sort(function(a,b){return sc[b]-sc[a];}).slice(0,3);
 }
 function obRecommend(){S.ob.recs=getRecommendations(S.ob.ans);S.ob.step=OBQ.length;sv();draw();}
 function obSelectProgram(key){
-  var m={balanced:TPL,hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:null,
-    strength:typeof TPL_STRENGTH!=='undefined'?TPL_STRENGTH:null,
-    athletic:typeof TPL_ATHLETIC!=='undefined'?TPL_ATHLETIC:null,
-    fatloss:typeof TPL_FAT!=='undefined'?TPL_FAT:null,
-    soccer:typeof TPL_SOCCER!=='undefined'?TPL_SOCCER:null,
-    run:typeof TPL_RUN!=='undefined'?TPL_RUN:null,
-    climb:typeof TPL_CLIMB!=='undefined'?TPL_CLIMB:null,
-    court:typeof TPL_COURT!=='undefined'?TPL_COURT:null,
-    shoulder:typeof TPL_SHOULDER!=='undefined'?TPL_SHOULDER:null,
-    knee:typeof TPL_KNEE!=='undefined'?TPL_KNEE:null,
-    back:typeof TPL_BACK!=='undefined'?TPL_BACK:null,
-    home_bw:typeof TPL_HOME_BW!=='undefined'?TPL_HOME_BW:null,
-    home_db:typeof TPL_HOME_DB!=='undefined'?TPL_HOME_DB:null};
+  var m=tplMap();
   if(!m[key])return;
   S.tplKey=key;ACTIVE_TPL=m[key];S.day=0;S.view='app';S.tab='home';sv();draw();
 }
 function obNext(){S.ob.step++;draw();}
 function obBack(){S.ob.step=Math.max(0,S.ob.step-1);draw();}
-function obDone(){obRecommend();}
 
 // HOME -----------------------------------------------------------------------
 
@@ -662,6 +622,8 @@ function homeV(){
   var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var d=new Date();
+  // FIX: use ACTIVE_TPL
+  if(S.day>=ACTIVE_TPL.days.length)S.day=0;
   var sess=ACTIVE_TPL.days[S.day];
   var notices='';
   for(var i=0;i<INFO.length;i++){
@@ -672,6 +634,7 @@ function homeV(){
     var bc=n.type==='notice'?'#8a6430':'#336699';
     notices+='<div class="card '+cls+'" style="margin-bottom:8px"><span class="lbl" style="color:'+lc+'">'+( n.type==='notice'?'Coach notice':'Training tip')+'</span><p style="font-size:14px;font-weight:500;margin:5px 0 4px;color:'+tc+'">'+n.title+'</p><p style="font-size:13px;line-height:1.5;color:'+bc+'">'+n.body+'</p></div>';
   }
+  // FIX: use ACTIVE_TPL
   return '<div class="pad"><span class="lbl">'+dn[d.getDay()]+' · '+d.getDate()+' '+mn[d.getMonth()]+'</span><p class="h1" style="margin:6px 0 24px">Good to see you.</p><div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;cursor:pointer" onclick="go(\'today\')"><div><span class="lbl" style="color:var(--acc)">Today\'s session</span><p style="font-size:16px;font-weight:500;margin:5px 0 4px">'+ACTIVE_TPL.name+'</p><p class="mu">'+sess.label+' · '+sess.focus+' · ~'+sess.mins+' min</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div><span class="lbl" style="display:block;margin-bottom:12px">From your coach</span>'+notices+'</div>';
 }
 
@@ -680,27 +643,31 @@ function homeV(){
 function todayV(){
   if(!ACTIVE_TPL||!ACTIVE_TPL.days){return '<div class="pad"><p class="mu">No program loaded. <button class="btn btno" style="margin-top:12px" onclick="go(\'programs\')">Choose a program</button></p></div>';}
   if(S.day>=ACTIVE_TPL.days.length)S.day=0;
+  // FIX: use ACTIVE_TPL throughout
   var sess=ACTIVE_TPL.days[S.day];
   var rows='';
   for(var i=0;i<sess.exercises.length;i++){
     var ex=sess.exercises[i];
     var str=ex.ph==='strength';
-    var detail='';
     var cues='';
     for(var c=0;c<ex.cues.length;c++)cues+='<div class="cue">'+ex.cues[c]+'</div>';
-    detail='<div id="xd'+i+'" style="display:none;background:var(--bg2);border-radius:0 0 12px 12px;padding:12px 14px 14px;margin-top:-7px;margin-bottom:7px;border:.5px solid var(--brd);border-top:none"><p style="font-size:12px;color:var(--mu);margin-bottom:8px"><strong style="color:var(--tx)">Muscles:</strong> '+ex.muscles+'</p>'+cues+'<p style="font-size:12px;color:var(--dim);margin-top:8px;font-style:italic">Sub: '+ex.subs+'</p>'+(ex.prog?'<p style="font-size:12px;color:var(--acc);margin-top:6px">Progression: '+ex.prog+'</p>':'')+'</div>';
+    var detail='<div id="xd'+i+'" style="display:none;background:var(--bg2);border-radius:0 0 12px 12px;padding:12px 14px 14px;margin-top:-7px;margin-bottom:7px;border:.5px solid var(--brd);border-top:none"><p style="font-size:12px;color:var(--mu);margin-bottom:8px"><strong style="color:var(--tx)">Muscles:</strong> '+ex.muscles+'</p>'+cues+'<p style="font-size:12px;color:var(--dim);margin-top:8px;font-style:italic">Sub: '+ex.subs+'</p>'+(ex.prog?'<p style="font-size:12px;color:var(--acc);margin-top:6px">Progression: '+ex.prog+'</p>':'')+'</div>';
     rows+='<div class="exrow'+(str?' exstr':'')+'" data-xd="'+i+'"><div class="dot" style="background:'+PH[ex.ph].dot+'"></div><div style="flex:1;min-width:0"><span class="lbl" style="color:'+(str?'var(--acc)':'var(--mu)')+'">'+PH[ex.ph].label+'</span><p style="font-size:14px;font-weight:'+(str?'500':'400')+';color:'+(str?'var(--tx)':'#c0c0c0')+';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p></div><span style="font-size:12px;color:'+(str?'var(--acc)':'var(--mu)')+';white-space:nowrap;margin-left:8px">'+ex.vol+'</span></div>'+detail;
   }
   var daybts='';
-  for(var i=0;i<ACTIVE_TPL.days.length;i++){var on=i===S.day;daybts+='<button data-switchday="'+i+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer">'+TPL.days[i].label+'</button>';}
-  return '<div class="pad"><span class="lbl">'+TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px"></div>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
+  for(var di=0;di<ACTIVE_TPL.days.length;di++){
+    var on=di===S.day;
+    daybts+='<button data-switchday="'+di+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer">'+ACTIVE_TPL.days[di].label+'</button>';
+  }
+  return '<div class="pad"><span class="lbl">'+ACTIVE_TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+sess.focus+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises · ~'+sess.mins+' min</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px"></div>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
 }
 
 // WORKOUT PLAYER -------------------------------------------------------------
 
 function wxStart(){
+  // FIX: use ACTIVE_TPL
   var exs=[];
-  var sess=TPL.days[S.day];
+  var sess=ACTIVE_TPL.days[S.day];
   for(var i=0;i<sess.exercises.length;i++){if(sess.exercises[i].sets)exs.push(sess.exercises[i]);}
   var weights={};
   for(var i=0;i<exs.length;i++)weights[exs[i].id]=exs[i].kg||0;
@@ -766,44 +733,18 @@ function wxLog(){
 function wxSkip(){S.wx.rest=false;sv();draw();}
 function wxConfirmEnd(){if(confirm('End this session?'))wxEnd();}
 function wxEnd(){
-  if(S.wx&&S.wx.logs.length>0){S.hist.push({date:new Date().toISOString(),label:S.wx.label,logs:S.wx.logs});S.day=(S.day+1)%TPL.days.length;}
-  clearInterval(_t);S.wx=null;S.tab='home';sv();draw();
-}
-
-// SKILLS ---------------------------------------------------------------------
-
-function skillsV(){
-  var html='<div class="pad"><span class="lbl">Movement skills</span><p class="h1" style="margin:6px 0 8px">Master the foundations</p><p class="mu" style="margin-bottom:24px">These patterns underpin every exercise in your program. Work through each level at your own pace.</p>';
-  for(var s=0;s<SKILLS.length;s++){
-    var sk=SKILLS[s];
-    var lv=parseInt(localStorage.getItem('sk_'+sk.id)||'1');
-    var open=S.skOpen===sk.id;
-    var inner='';
-    if(open){
-      var pct=Math.round(lv/sk.lvls.length*100);
-      inner='<div style="margin-top:14px"><div class="pb" style="margin-bottom:16px"><div class="pf" style="width:'+pct+'%"></div></div>';
-      for(var l=0;l<sk.lvls.length;l++){
-        var lvi=sk.lvls[l];
-        var done=l+1<lv,cur=l+1===lv;
-        var bc=done?'var(--bg3)':cur?'#1c1000':'var(--bg3)';
-        var bdr=cur?'1px solid var(--acc)':'1px solid transparent';
-        var nc=done?'var(--ok)':cur?'var(--acc)':'var(--dim)';
-        var badge=done?'<span style="font-size:11px;color:var(--ok)">&#10003;</span>':cur?'<span style="font-size:11px;color:var(--acc)">current</span>':'';
-        inner+='<div style="padding:12px;border-radius:10px;background:'+bc+';border:'+bdr+';margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:'+nc+'">Level '+(l+1)+': '+lvi.n+'</span>'+badge+'</div><p style="font-size:13px;color:var(--mu);margin-bottom:5px">'+lvi.d+'</p><p style="font-size:12px;color:var(--dim);font-style:italic">Test: '+lvi.t+'</p></div>';
-      }
-      if(lv<sk.lvls.length)inner+='<button class="btn btno" style="margin-top:6px" data-advsk="'+sk.id+'">Mark level '+lv+' complete</button>';
-      else inner+='<p style="text-align:center;color:var(--ok);font-size:14px;padding:10px">Skill mastered &#10003;</p>';
-      inner+='</div>';
-    }
-    var rot=open?'180':'0';
-    html+='<div class="card" style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" data-togglesk="'+sk.id+'"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:var(--acc)">'+sk.ico+'</div><div><p style="font-size:15px;font-weight:500">'+sk.name+'</p><p class="mu">Level '+lv+' of '+sk.lvls.length+'</p></div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dim)" stroke-width="2" style="transform:rotate('+rot+'deg);transition:transform .2s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg></div>'+inner+'</div>';
+  // FIX: use ACTIVE_TPL for day cycling
+  if(S.wx&&S.wx.logs.length>0){
+    S.hist.push({date:new Date().toISOString(),label:S.wx.label,logs:S.wx.logs});
+    S.day=(S.day+1)%ACTIVE_TPL.days.length;
   }
-  return html+'</div>';
+  clearInterval(_t);S.wx=null;S.tab='home';sv();draw();
 }
 
 // PROGRESS -------------------------------------------------------------------
 
 function progV(){
+  // FIX: use ACTIVE_TPL
   var sessions=S.hist.length;
   var lifts={};
   for(var i=0;i<S.hist.length;i++){
@@ -820,43 +761,27 @@ function progV(){
     liftHtml+='<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><p style="font-size:14px;font-weight:500">'+nm+'</p>'+(delta!==0?'<span style="font-size:12px;color:var(--ok)">+'+delta+' kg</span>':'<span style="font-size:12px;color:var(--mu)">tracking</span>')+'</div><div class="pb"><div class="pf" style="width:'+pct+'%"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px"><span style="font-size:11px;color:var(--mu)">'+first+' kg</span><span style="font-size:11px;color:var(--acc)">'+last+' kg</span></div></div>';
   }
   var empty='<div class="card" style="text-align:center;padding:36px 20px"><p style="font-size:32px;margin-bottom:12px">&#8594;</p><p class="h2" style="margin-bottom:8px">No sessions yet</p><p class="mu">Complete your first session to see strength progress here.</p></div>';
-  var reset=sessions>0?'<div style="margin-top:16px"><button class="btng" style="width:100%;padding:12px;font-size:13px;border:.5px solid var(--brd);border-radius:12px" onclick="if(confirm(\'Reset all progress?\''+")"+"{"+"S.hist=[];sv();draw();"+"}"+')">Reset progress data</button></div>':'';
-  return '<div class="pad"><span class="lbl">Your progress</span><p class="h1" style="margin:6px 0 22px">'+TPL.name+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px"><div class="card" style="text-align:center"><span class="lbl">Sessions</span><p style="font-size:32px;font-weight:500;margin:8px 0 4px">'+sessions+'</p><p style="font-size:12px;color:var(--acc)">total logged</p></div><div class="card" style="text-align:center"><span class="lbl">Next up</span><p style="font-size:16px;font-weight:500;margin:8px 0 4px">'+TPL.days[S.day].label+'</p><p class="mu" style="font-size:12px">'+TPL.days[S.day].focus+'</p></div></div>'+(sessions===0?empty:'<span class="lbl" style="display:block;margin-bottom:12px">Strength progress</span>'+liftHtml)+reset+'</div>';
+  var reset=sessions>0?'<div style="margin-top:16px"><button class="btng" style="width:100%;padding:12px;font-size:13px;border:.5px solid var(--brd);border-radius:12px" onclick="if(confirm(\'Reset all progress?\')){'+'S.hist=[];sv();draw();}">Reset progress data</button></div>':'';
+  if(S.day>=ACTIVE_TPL.days.length)S.day=0;
+  return '<div class="pad"><span class="lbl">Your progress</span><p class="h1" style="margin:6px 0 22px">'+ACTIVE_TPL.name+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px"><div class="card" style="text-align:center"><span class="lbl">Sessions</span><p style="font-size:32px;font-weight:500;margin:8px 0 4px">'+sessions+'</p><p style="font-size:12px;color:var(--acc)">total logged</p></div><div class="card" style="text-align:center"><span class="lbl">Next up</span><p style="font-size:16px;font-weight:500;margin:8px 0 4px">'+ACTIVE_TPL.days[S.day].label+'</p><p class="mu" style="font-size:12px">'+ACTIVE_TPL.days[S.day].focus+'</p></div></div>'+(sessions===0?empty:'<span class="lbl" style="display:block;margin-bottom:12px">Strength progress</span>'+liftHtml)+reset+'</div>';
 }
 
 // EVENT DELEGATION -----------------------------------------------------------
 
 document.addEventListener('click',function(e){
   var t=e.target;
-  // Walk up to find a handled element
   while(t&&t!==document.body){
-    // Onboarding option
     if(t.dataset&&t.dataset.key&&t.dataset.val!==undefined){
       S.ob.ans[t.dataset.key]=t.dataset.val;draw();return;
     }
-    // Toggle exercise detail
     if(t.dataset&&t.dataset.xd!==undefined){
       var el=document.getElementById('xd'+t.dataset.xd);
       if(el)el.style.display=el.style.display==='none'?'block':'none';
       return;
     }
-    // Switch day
     if(t.dataset&&t.dataset.switchday!==undefined){
       S.day=parseInt(t.dataset.switchday);sv();draw();return;
     }
-    // Toggle skill
-    if(t.dataset&&t.dataset.togglesk){
-      S.skOpen=S.skOpen===t.dataset.togglesk?null:t.dataset.togglesk;draw();return;
-    }
-    // Advance skill
-    if(t.dataset&&t.dataset.advsk){
-      var id=t.dataset.advsk;
-      var sk=null;for(var i=0;i<SKILLS.length;i++)if(SKILLS[i].id===id)sk=SKILLS[i];
-      var cur=parseInt(localStorage.getItem('sk_'+id)||'1');
-      if(sk&&cur<sk.lvls.length){localStorage.setItem('sk_'+id,cur+1);draw();}
-      return;
-    }
-    // Tab bar
     if(t.dataset&&t.dataset.custdays){var ne=document.getElementById('cpname');if(ne&&ne.value.trim())S.customEdit.name=ne.value.trim();S.customEdit.numDays=parseInt(t.dataset.custdays);sv();draw();return;}
     if(t.dataset&&t.dataset.delex){var parts=t.dataset.delex.split('-');custDelEx(parseInt(parts[0]),parseInt(parts[1]));return;}
     if(t.dataset&&t.dataset.delcp){
@@ -876,13 +801,11 @@ document.addEventListener('click',function(e){
   }
 });
 
-// ICON -----------------------------------------------------------------------
-
+// PROGRAMS -------------------------------------------------------------------
 
 function programsV(){
   var html='<div class="pad"><span class="lbl">Training programs</span>';
   html+='<p class="h1" style="margin:6px 0 8px">Your programmes</p>';
-  
   html+='<div class="card" style="margin-bottom:24px;background:var(--str-bg);border-color:var(--str-brd)">';
   html+='<span class="lbl" style="color:var(--acc)">Current program</span>';
   html+='<p style="font-size:18px;font-weight:500;color:var(--tx);margin:6px 0 4px">'+ACTIVE_TPL.name+'</p>';
@@ -890,11 +813,10 @@ function programsV(){
   if(curE){html+='<p class="mu">'+curE.sessions+' · '+curE.mins+'</p><p style="font-size:13px;color:var(--mu);margin-top:6px">'+curE.who+'</p>';}
   html+='<button class="btn btno" style="padding:11px;font-size:13px;margin-top:12px" onclick="resetOnboarding()">Retake questionnaire</button>';
   html+='</div>';
-  // Custom programs section
   if(S.customPrograms&&S.customPrograms.length>0){
     html+='<span class="lbl" style="display:block;margin-bottom:10px">My custom programs</span>';
-    for(var ci=0;ci<S.customPrograms.length;ci++){
-      var cp=S.customPrograms[ci];
+    for(var cpi=0;cpi<S.customPrograms.length;cpi++){
+      var cp=S.customPrograms[cpi];
       var isCurCP=cp.key===S.tplKey;
       html+='<div style="background:'+(isCurCP?'var(--str-bg)':'var(--bg2)')+';border-radius:14px;padding:14px 15px;margin-bottom:9px;border:'+(isCurCP?'1.5px solid var(--acc)':'.5px solid var(--brd)')+'">';
       html+='<div style="display:flex;align-items:center;gap:10px">';
@@ -928,33 +850,19 @@ function programsV(){
 }
 
 function switchProgram(key){
-  // Check custom programs first
+  var m=tplMap();
+  // Check custom programs
   if(key.indexOf('custom_')===0){
-    var cp=null;for(var ci=0;ci<S.customPrograms.length;ci++)if(S.customPrograms[ci].key===key)cp=S.customPrograms[ci];
+    var cp=m[key];
     if(!cp)return;
     if(S.tplKey===key){go('today');return;}
-    if(!confirm('Switch to '+cp.name+'? Your session history is kept.'))return;
-    S.tplKey=key;ACTIVE_TPL=cp.tpl;S.day=0;sv();go('today');return;
+    var cpName='this program';
+    for(var i=0;i<S.customPrograms.length;i++)if(S.customPrograms[i].key===key)cpName=S.customPrograms[i].name;
+    if(!confirm('Switch to '+cpName+'? Your session history is kept.'))return;
+    S.tplKey=key;ACTIVE_TPL=cp;S.day=0;sv();go('today');return;
   }
   var entry=null;for(var i=0;i<CATALOGUE.length;i++)if(CATALOGUE[i].key===key)entry=CATALOGUE[i];
   if(!entry||!entry.available)return;
-  var m={
-    balanced:typeof TPL!=='undefined'?TPL:null,
-    custom:S.customTPL||null,
-    hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:null,
-    strength:typeof TPL_STRENGTH!=='undefined'?TPL_STRENGTH:null,
-    athletic:typeof TPL_ATHLETIC!=='undefined'?TPL_ATHLETIC:null,
-    fatloss:typeof TPL_FAT!=='undefined'?TPL_FAT:null,
-    home_bw:typeof TPL_HOME_BW!=='undefined'?TPL_HOME_BW:null,
-    home_db:typeof TPL_HOME_DB!=='undefined'?TPL_HOME_DB:null,
-    soccer:typeof TPL_SOCCER!=='undefined'?TPL_SOCCER:null,
-    run:typeof TPL_RUN!=='undefined'?TPL_RUN:null,
-    climb:typeof TPL_CLIMB!=='undefined'?TPL_CLIMB:null,
-    court:typeof TPL_COURT!=='undefined'?TPL_COURT:null,
-    shoulder:typeof TPL_SHOULDER!=='undefined'?TPL_SHOULDER:null,
-    knee:typeof TPL_KNEE!=='undefined'?TPL_KNEE:null,
-    back:typeof TPL_BACK!=='undefined'?TPL_BACK:null
-  };
   if(!m[key])return;
   if(S.tplKey===key){go('today');return;}
   if(!confirm('Switch to '+entry.name+'? Your session history is kept.'))return;
@@ -965,530 +873,321 @@ function resetOnboarding(){
   S.ob={step:0,ans:{},recs:[]};S.view='ob';sv();draw();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// CUSTOM PROGRAM BUILDER
-// ═══════════════════════════════════════════════════════════════
+// BUILD (CUSTOM PROGRAM) -----------------------------------------------------
 
-function buildV(){return customV();}
-function progressOverlay(){S.view='progress';sv();draw();}
-
-function customV(){
-  if(!S.customEdit)S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
+function buildV(){
   var ce=S.customEdit;
-
-  // ── Setup screen ────────────────────────────────────────────
-  if(!ce.days||ce.days.length===0){
-    var dayBtns='';
-    for(var d=1;d<=7;d++){
-      var on=(ce.numDays===d);
-      dayBtns+='<button data-custdays="'+d+'" style="flex:1;padding:12px 4px;border-radius:12px;'
-        +'border:1.5px solid '+(on?'var(--acc)':'var(--brd)')+';'
-        +'background:'+(on?'var(--str-bg)':'transparent')+';'
-        +'color:'+(on?'var(--acc)':'var(--mu)')+';'
-        +'font-size:15px;font-weight:'+(on?'600':'400')+';cursor:pointer">'+d+'</button>';
+  var stage=ce.activeDay!==null?'exercises':(ce.days.length>0?'review':'setup');
+  if(stage==='setup'){
+    var nameVal=ce.name||'My Program';
+    var daysHtml='';
+    for(var d=2;d<=5;d++){
+      var on=ce.numDays===d;
+      daysHtml+='<button data-custdays="'+d+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+d+' days</button>';
     }
-    return '<div class="pad">'
-      +'<span class="lbl">Build</span>'
-      +'<p class="h1" style="margin:6px 0 20px">Create your program</p>'
-      +'<p class="lbl" style="display:block;margin-bottom:6px">Program name</p>'
-      +'<input id="cpname" type="text" value="'+ce.name+'" placeholder="e.g. Push / Pull / Legs" '
-      +'style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--brd);background:var(--bg2);color:var(--tx);font-size:15px;margin-bottom:20px">'
-      +'<p class="lbl" style="display:block;margin-bottom:8px">Number of training days per week</p>'
-      +'<div style="display:flex;gap:7px;margin-bottom:28px">'+dayBtns+'</div>'
-      +'<button class="btn btnp" onclick="custStart()">Set up days &rarr;</button>'
-      +'</div>';
+    return '<div class="pad"><span class="lbl">Build tab</span><p class="h1" style="margin:6px 0 20px">Custom program</p><div class="card" style="margin-bottom:16px"><span class="lbl">Program name</span><input id="cpname" value="'+nameVal+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:12px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.customEdit.name=this.value;sv()" /></div><div class="card" style="margin-bottom:20px"><span class="lbl">Sessions per week</span><div style="display:flex;gap:8px;margin-top:12px">'+daysHtml+'</div></div><button class="btn btnp" onclick="custStart()">Set up sessions</button></div>';
   }
-
-  // ── Day editor ───────────────────────────────────────────────
-  var rows='';
-  for(var i=0;i<ce.days.length;i++){
-    var day=ce.days[i];
-    var exRows='';
-    for(var j=0;j<day.exercises.length;j++){
-      var ex=day.exercises[j];
-      var ph2=PH[ex.ph]||PH.strength;
-      exRows+='<div style="background:var(--bg3);border-radius:10px;padding:11px 13px;margin-bottom:6px;display:flex;align-items:center;gap:10px">'
-        +'<div class="dot" style="background:'+ph2.dot+';flex-shrink:0"></div>'
-        +'<div style="flex:1;min-width:0">'
-        +'<p style="font-size:14px;font-weight:500;color:var(--tx);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p>'
-        +'<p class="mu" style="font-size:12px">'+ex.vol+(ex.kg?' \xb7 '+ex.kg+'kg':'')+(ex.rest?' \xb7 '+ex.rest+'s rest':'')+'</p>'
-        +'</div>'
-        +'<button data-delex="'+i+'-'+j+'" style="background:transparent;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:4px 8px;flex-shrink:0">&#10005;</button>'
-        +'</div>';
+  if(stage==='review'){
+    var rows='';
+    for(var di=0;di<ce.days.length;di++){
+      var day=ce.days[di];
+      rows+='<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><p style="font-size:14px;font-weight:500">'+day.label+'</p><button onclick="S.customEdit.activeDay='+di+';sv();draw()" style="background:transparent;border:none;color:var(--acc);font-size:13px;cursor:pointer">Edit</button></div>';
+      for(var ei=0;ei<day.exercises.length;ei++){
+        var ex=day.exercises[ei];
+        rows+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--brd)"><div class="dot" style="background:'+PH[ex.ph].dot+'"></div><div style="flex:1"><p style="font-size:13px;color:var(--tx)">'+ex.name+'</p><p style="font-size:11px;color:var(--mu)">'+ex.vol+'</p></div><button data-delex="'+di+'-'+ei+'" style="background:transparent;border:none;color:var(--mu);font-size:13px;cursor:pointer;width:28px;height:28px">&#10005;</button></div>';
+      }
+      rows+='</div>';
     }
-    var isActive=(ce.activeDay===i);
-    var addForm='';
-    if(isActive){
-      var nx=ce.newEx||{ph:'strength',sets:3,reps:'10',kg:0,rest:90,muscles:'',cues:['','',''],subs:'',prog:''};
-      var phOpts=['primer','strength','accessory','cooldown'].map(function(p){
-        return '<option value="'+p+'"'+(nx.ph===p?' selected':'')+'>'+PH[p].label+'</option>';
-      }).join('');
-      var inp='style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px"';
-      addForm='<div style="background:var(--bg2);border:1.5px solid var(--acc);border-radius:14px;padding:16px;margin-top:10px">'
-        +'<p class="lbl" style="margin-bottom:12px;color:var(--acc)">Add exercise</p>'
-        +'<input id="exname" type="text" placeholder="Exercise name *" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
-        +'<select id="exph" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'+phOpts+'</select>'
-        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
-        +'<div><p class="lbl" style="margin-bottom:4px">Sets</p><input id="exsets" type="number" min="1" max="10" value="'+(nx.sets||3)+'" '+inp+'></div>'
-        +'<div><p class="lbl" style="margin-bottom:4px">Reps</p><input id="exreps" type="text" value="'+(nx.reps||'10')+'" placeholder="10" '+inp+'></div>'
-        +'<div><p class="lbl" style="margin-bottom:4px">kg</p><input id="exkg" type="number" min="0" value="'+(nx.kg||0)+'" '+inp+'></div>'
-        +'</div>'
-        +'<p class="lbl" style="margin-bottom:4px">Rest between sets (seconds)</p>'
-        +'<input id="exrest" type="number" min="0" max="600" step="15" value="'+(nx.rest||90)+'" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
-        +'<p class="lbl" style="margin-bottom:4px">Muscles worked</p>'
-        +'<input id="exmuscles" type="text" placeholder="e.g. Quads, glutes" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
-        +'<p class="lbl" style="margin-bottom:4px">Form cues (optional)</p>'
-        +'<input id="excue0" type="text" placeholder="Cue 1" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:6px">'
-        +'<input id="excue1" type="text" placeholder="Cue 2" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:6px">'
-        +'<input id="excue2" type="text" placeholder="Cue 3" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
-        +'<p class="lbl" style="margin-bottom:4px">Substitutes</p>'
-        +'<input id="exsubs" type="text" placeholder="e.g. Goblet squat, leg press" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
-        +'<p class="lbl" style="margin-bottom:4px">Progression note</p>'
-        +'<input id="exprog" type="text" placeholder="e.g. Add 2.5kg when all sets are clean" '+inp+' style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:14px">'
-        +'<div style="display:flex;gap:8px">'
-        +'<button class="btn btnp" style="flex:1" onclick="custAddEx('+i+')">Add exercise</button>'
-        +'<button class="btn btno" style="flex:1" onclick="custCancelEx()">Cancel</button>'
-        +'</div></div>';
-    }
-    rows+='<div class="card" style="margin-bottom:14px">'
-      +'<div style="margin-bottom:10px">'
-      +'<p class="lbl" style="margin-bottom:4px">Day '+(i+1)+' — label</p>'
-      +'<input id="dlabel'+i+'" type="text" value="'+day.label+'" placeholder="Session A" '
-      +'style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px;margin-bottom:8px">'
-      +'<p class="lbl" style="margin-bottom:4px">Focus / heading</p>'
-      +'<input id="dfocus'+i+'" type="text" value="'+day.focus+'" placeholder="e.g. Push — Chest, Shoulders" '
-      +'style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:14px">'
-      +'</div>'
-      +exRows
-      +(!isActive?'<button class="btn btno" style="padding:11px;font-size:13px;margin-top:8px" onclick="custOpenEx('+i+')">+ Add exercise</button>':'')
-      +addForm
-      +'</div>';
+    return '<div class="pad"><span class="lbl">Review</span><p class="h1" style="margin:6px 0 4px">'+ce.name+'</p><p class="mu" style="margin-bottom:18px">'+ce.numDays+' sessions per week</p>'+rows+'<button class="btn btnp" style="margin-top:8px" onclick="custSave()">Save and start this program</button><button class="btng" onclick="S.customEdit={name:\'My Program\',numDays:3,days:[],activeDay:null,newEx:null};sv();draw()">Start over</button></div>';
   }
-
-  var canSave=ce.days.length>0&&ce.days.every(function(d){return d.exercises.length>0;});
-  return '<div class="pad">'
-    +'<span class="lbl">Build</span>'
-    +'<p class="lbl" style="display:block;margin:8px 0 4px">Program name</p>'
-    +'<input id="cpname-edit" type="text" value="'+ce.name+'" placeholder="My Program" '
-    +'style="width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--brd);background:var(--bg2);color:var(--tx);font-size:15px;font-weight:500;margin-bottom:18px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
-    +'<span class="lbl">Days</span>'
-    +'<button onclick="S.customEdit.days=[];sv();draw();" style="font-size:12px;color:var(--mu);background:transparent;border:none;cursor:pointer;padding:4px 8px">\u21a9 Start over</button>'
-    +'</div>'
-    +rows
-    +(canSave?'<button class="btn btnp" onclick="custSave()" style="margin-top:8px">Save and start this program</button>':'<p class="mu" style="text-align:center;margin-top:8px;font-size:13px">Add at least one exercise to each day to save.</p>')
-    +'</div>';
+  // exercises stage
+  var dayObj=ce.days[ce.activeDay];
+  var exRows='';
+  for(var ei=0;ei<dayObj.exercises.length;ei++){
+    var ex=dayObj.exercises[ei];
+    exRows+='<div class="exrow"><div class="dot" style="background:'+PH[ex.ph].dot+'"></div><div style="flex:1"><span class="lbl">'+PH[ex.ph].label+'</span><p style="font-size:13px;color:var(--tx);margin-top:2px">'+ex.name+'</p></div><span style="font-size:12px;color:var(--mu)">'+ex.vol+'</span></div>';
+  }
+  if(!ce.newEx){
+    return '<div class="pad"><span class="lbl">'+dayObj.label+'</span><p class="h1" style="margin:6px 0 16px">Add exercises</p>'+exRows+'<button class="btn btno" style="margin-top:8px" onclick="custOpenEx()">+ Add exercise</button><button class="btn btnp" style="margin-top:10px" onclick="S.customEdit.activeDay=null;sv();draw()">'+(ce.activeDay<ce.days.length-1?'Next session':'Review program')+'</button></div>';
+  }
+  // Add exercise form
+  var phOpts='',cats=['primer','strength','accessory','cooldown'];
+  for(var pi=0;pi<cats.length;pi++){
+    var pv=cats[pi];var on2=(ce.newEx.ph===pv);
+    phOpts+='<button onclick="S.customEdit.newEx.ph=\''+pv+'\';sv();draw()" style="flex:1;padding:8px;border-radius:8px;border:1px solid '+(on2?'var(--acc)':'var(--brd)')+';background:'+(on2?'#1e1000':'transparent')+';color:'+(on2?'var(--acc)':'var(--mu)')+';font-size:11px;cursor:pointer">'+PH[pv].label+'</button>';
+  }
+  return '<div class="pad"><span class="lbl">'+dayObj.label+' · Add exercise</span><p class="h1" style="margin:6px 0 16px">New exercise</p><div class="card" style="margin-bottom:12px"><span class="lbl">Name</span><input value="'+ce.newEx.name+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.name=this.value;sv()" /></div><div class="card" style="margin-bottom:12px"><span class="lbl">Volume / instructions</span><input value="'+ce.newEx.vol+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" placeholder="e.g. 3 x 10" oninput="S.customEdit.newEx.vol=this.value;sv()" /></div><div class="card" style="margin-bottom:16px"><span class="lbl">Category</span><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+phOpts+'</div></div><button class="btn btnp" onclick="custAddEx()">Add to session</button><button class="btng" onclick="custCancelEx()">Cancel</button></div>';
 }
-
-// ── Custom builder helpers ─────────────────────────────────────
 
 function custStart(){
-  var nameEl=document.getElementById('cpname');
-  var nm=nameEl?nameEl.value.trim():'My Program';
-  S.customEdit.name=nm||'My Program';
   var days=[];
-  var labels=['Session A','Session B','Session C','Session D','Session E','Session F','Session G'];
+  var labels=['Session A','Session B','Session C','Session D','Session E'];
   for(var i=0;i<S.customEdit.numDays;i++){
-    days.push({label:labels[i]||('Day '+(i+1)),focus:'',exercises:[]});
+    days.push({label:labels[i],exercises:[]});
   }
   S.customEdit.days=days;
-  S.customEdit.activeDay=null;
-  sv();draw();
-}
-
-function custDayLabel(i,v){S.customEdit.days[i].label=v;}
-function custDayFocus(i,v){S.customEdit.days[i].focus=v;}
-
-function custOpenEx(i){
-  // Capture current day label/focus from DOM before redraw
-  var lEl=document.getElementById('dlabel'+i);
-  var fEl=document.getElementById('dfocus'+i);
-  if(lEl&&lEl.value)S.customEdit.days[i].label=lEl.value;
-  if(fEl&&fEl.value)S.customEdit.days[i].focus=fEl.value;
-  S.customEdit.activeDay=i;
-  S.customEdit.newEx={ph:'strength',sets:3,reps:'10',kg:0,rest:90};
-  sv();draw();
-}
-function custCancelEx(){S.customEdit.activeDay=null;sv();draw();}
-
-function custDelEx(d,e){
-  S.customEdit.days[d].exercises.splice(e,1);sv();draw();
-}
-
-function custAddEx(dayIdx){
-  var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
-  var name=g('exname').trim();
-  if(!name){alert('Exercise name is required.');return;}
-  var sets=parseInt(g('exsets'))||3;
-  var reps=g('exreps')||'10';
-  var repsNum=parseInt(reps)||10;
-  var kg=parseFloat(g('exkg'))||0;
-  var rest=parseInt(g('exrest'))||0;
-  var cues=[g('excue0').trim(),g('excue1').trim(),g('excue2').trim()].filter(function(c){return c.length>0;});
-  if(cues.length===0)cues=['Focus on form and controlled movement throughout'];
-  var ex={
-    id:'cx_'+dayIdx+'_'+Date.now(),
-    ph:g('exph')||'strength',
-    name:name,
-    vol:sets+' x '+reps,
-    rest:rest,
-    sets:sets,
-    reps:repsNum,
-    kg:kg,
-    muscles:g('exmuscles').trim()||'',
-    cues:cues,
-    subs:g('exsubs').trim()||'—',
-    prog:g('exprog').trim()||''
-  };
-  // Capture label/focus from DOM
-  var lEl=document.getElementById('dlabel'+dayIdx);
-  var fEl=document.getElementById('dfocus'+dayIdx);
-  if(lEl&&lEl.value)S.customEdit.days[dayIdx].label=lEl.value;
-  if(fEl&&fEl.value)S.customEdit.days[dayIdx].focus=fEl.value;
-  S.customEdit.days[dayIdx].exercises.push(ex);
-  S.customEdit.activeDay=null;
+  S.customEdit.activeDay=0;
   S.customEdit.newEx=null;
   sv();draw();
 }
-
+function custOpenEx(){S.customEdit.newEx={name:'',vol:'',ph:'strength'};sv();draw();}
+function custAddEx(){
+  var ne=S.customEdit.newEx;
+  if(!ne||!ne.name.trim())return;
+  ne.id='custom_ex_'+Date.now();
+  if(!ne.vol)ne.vol='';
+  S.customEdit.days[S.customEdit.activeDay].exercises.push(ne);
+  S.customEdit.newEx=null;
+  sv();draw();
+}
+function custCancelEx(){S.customEdit.newEx=null;sv();draw();}
+function custDelEx(dayIdx,exIdx){
+  S.customEdit.days[dayIdx].exercises.splice(exIdx,1);sv();draw();
+}
 function custSave(){
   var ce=S.customEdit;
-  // Capture name from whichever input is visible
-  var nameEl=document.getElementById('cpname-edit')||document.getElementById('cpname');
-  if(nameEl&&nameEl.value.trim())ce.name=nameEl.value.trim();
-  // Capture day labels and focuses from DOM
-  for(var i=0;i<ce.days.length;i++){
-    var lEl=document.getElementById('dlabel'+i);
-    var fEl=document.getElementById('dfocus'+i);
-    if(lEl&&lEl.value.trim())ce.days[i].label=lEl.value.trim();
-    if(fEl&&fEl.value.trim())ce.days[i].focus=fEl.value.trim();
-  }
-  var tpl={
-    name:ce.name||'My Program',
-    days:ce.days.map(function(d,i){
-      return {
-        label:d.label||('Session '+(i+1)),
-        focus:d.focus||'',
-        mins:Math.round(d.exercises.length*5+10),
-        exercises:d.exercises
-      };
-    })
-  };
-  var key=ce.editKey||('custom_'+Date.now());
-  var existing=-1;
-  for(var ci=0;ci<S.customPrograms.length;ci++)if(S.customPrograms[ci].key===key)existing=ci;
-  var now=new Date();
-  var dateStr=now.getDate()+'/'+(now.getMonth()+1)+'/'+now.getFullYear();
-  var entry={key:key,name:tpl.name,tpl:tpl,date:dateStr};
-  if(existing>=0)S.customPrograms[existing]=entry;
-  else S.customPrograms.push(entry);
-  S.customTPL=tpl;
+  var key='custom_'+Date.now();
+  var tpl={name:ce.name,days:ce.days};
+  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var d=new Date();
+  var dateStr=d.getDate()+' '+mn[d.getMonth()];
+  if(!S.customPrograms)S.customPrograms=[];
+  S.customPrograms.push({key:key,name:ce.name,date:dateStr,tpl:tpl});
   S.tplKey=key;
   ACTIVE_TPL=tpl;
   S.day=0;
-  // Reset builder for next use
   S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
-  S.view='app';S.tab='today';
-  sv();draw();
+  sv();go('today');
 }
 
+// TIMER ----------------------------------------------------------------------
 
-function beep(freq,dur,vol){
-  try{
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    var osc=ctx.createOscillator();
-    var gain=ctx.createGain();
-    osc.connect(gain);gain.connect(ctx.destination);
-    osc.frequency.value=freq||880;
-    gain.gain.value=vol||0.3;
-    osc.start();
-    setTimeout(function(){try{osc.stop();ctx.close();}catch(e){}},dur||150);
-  }catch(e){}
+var _timerInterval=null;
+
+function timerV(){
+  var T=S.timer;
+  if(T.setup){
+    return timerSetupV();
+  }
+  var mode=T.mode;
+  if(mode==='amrap'||mode==='countdown'){
+    var elapsed=T.elapsed;
+    var total=T.totalSecs;
+    var remaining=T.remaining;
+    var pct=Math.min(100,(mode==='amrap'?elapsed:total-remaining)/total*100);
+    var timeDisplay=mode==='amrap'?fmt(elapsed):fmt(remaining);
+    return '<div class="pad" style="padding-top:24px"><div style="text-align:center;margin-bottom:32px"><span class="lbl">'+(mode==='amrap'?'AMRAP — '+fmtTimer(total):('Countdown — '+fmtTimer(total)))+'</span></div><div class="pb" style="height:8px;margin-bottom:32px"><div class="pf" style="width:'+pct+'%;background:'+(T.running?'var(--acc)':'var(--mu)')+'"></div></div><div style="text-align:center;margin-bottom:40px"><p style="font-size:72px;font-weight:300;color:'+(T.running?'var(--acc)':'var(--tx)')+';font-variant-numeric:tabular-nums;letter-spacing:-2px">'+timeDisplay+'</p></div><div style="display:flex;gap:10px"><button class="btn '+(T.running?'btno':'btnp')+'" onclick="timerToggle()">'+( T.running?'Pause':'Start')+'</button><button class="btn btno" onclick="timerReset()">Reset</button></div><button class="btng" onclick="S.timer.setup=true;clearInterval(_timerInterval);sv();draw()">&#8592; Change timer</button></div>';
+  }
+  if(mode==='tabata'){
+    var phase=T.tabPhase;
+    var timeLeft=T.remaining;
+    var roundNum=T.tabCurrent+1;
+    var totalRounds=T.tabRounds;
+    var pct2=Math.min(100,(1-timeLeft/(phase==='work'?T.tabWork:T.tabRest))*100);
+    return '<div class="pad" style="padding-top:24px"><div style="text-align:center;margin-bottom:24px"><span class="lbl">TABATA · Round '+roundNum+' of '+totalRounds+'</span></div><div style="text-align:center;margin-bottom:16px"><p style="font-size:20px;font-weight:500;color:'+(phase==='work'?'var(--acc)':'var(--acc2)')+';margin-bottom:16px">'+(phase==='work'?'WORK':'REST')+'</p></div><div class="pb" style="height:8px;margin-bottom:32px"><div class="pf" style="width:'+pct2+'%;background:'+(phase==='work'?'var(--acc)':'var(--acc2)')+'"></div></div><div style="text-align:center;margin-bottom:40px"><p style="font-size:72px;font-weight:300;color:'+(T.running?'var(--acc)':'var(--tx)')+';font-variant-numeric:tabular-nums;letter-spacing:-2px">'+fmt(timeLeft)+'</p></div><div style="display:flex;gap:10px"><button class="btn '+(T.running?'btno':'btnp')+'" onclick="timerToggle()">'+( T.running?'Pause':'Start')+'</button><button class="btn btno" onclick="timerReset()">Reset</button></div><button class="btng" onclick="S.timer.setup=true;clearInterval(_timerInterval);sv();draw()">&#8592; Change timer</button></div>';
+  }
+  if(mode==='emom'){
+    // FIX: display round correctly — emomRound is 0 before first tick
+    var displayRound=T.running?T.emomRound:0;
+    return '<div class="pad" style="padding-top:24px"><div style="text-align:center;margin-bottom:24px"><span class="lbl">EMOM · '+(displayRound>0?'Round '+displayRound+' of '+T.emomMins:'Starting...')+'</span></div><div style="text-align:center;margin-bottom:40px"><p style="font-size:72px;font-weight:300;color:'+(T.running?'var(--acc)':'var(--tx)')+';font-variant-numeric:tabular-nums;letter-spacing:-2px">'+fmt(T.remaining)+'</p></div><div style="display:flex;gap:10px"><button class="btn '+(T.running?'btno':'btnp')+'" onclick="timerToggle()">'+( T.running?'Pause':'Start')+'</button><button class="btn btno" onclick="timerReset()">Reset</button></div><button class="btng" onclick="S.timer.setup=true;clearInterval(_timerInterval);sv();draw()">&#8592; Change timer</button></div>';
+  }
+  return timerSetupV();
+}
+
+function timerSetupV(){
+  var T=S.timer;
+  var modes=[{k:'amrap',l:'AMRAP',sub:'Count up — see how many rounds'},{k:'countdown',l:'Countdown',sub:'Count down from a set time'},{k:'emom',l:'EMOM',sub:'Every Minute On the Minute'},{k:'tabata',l:'Tabata',sub:'Work / Rest intervals'}];
+  var modeHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px">';
+  for(var i=0;i<modes.length;i++){
+    var m=modes[i];var on=(T.mode===m.k);
+    modeHtml+='<div data-timermode="'+m.k+'" style="background:'+(on?'#1e1000':'var(--bg2)')+';border:1px solid '+(on?'var(--acc)':'var(--brd)')+';border-radius:12px;padding:12px;cursor:pointer"><p style="font-size:13px;font-weight:500;color:'+(on?'var(--acc)':'var(--tx)')+';margin-bottom:3px">'+m.l+'</p><p style="font-size:11px;color:var(--mu)">'+m.sub+'</p></div>';
+  }
+  modeHtml+='</div>';
+  var configHtml='';
+  if(T.mode==='amrap'||T.mode==='countdown'){
+    var presets=[{l:'5 min',s:300},{l:'8 min',s:480},{l:'10 min',s:600},{l:'12 min',s:720},{l:'15 min',s:900},{l:'20 min',s:1200}];
+    var ph='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">';
+    for(var pi=0;pi<presets.length;pi++){
+      var p=presets[pi];var on2=(T.totalSecs===p.s);
+      ph+='<button data-tset="'+p.s+'" style="padding:8px 16px;border-radius:10px;border:1px solid '+(on2?'var(--acc)':'var(--brd)')+';background:'+(on2?'#1e1000':'transparent')+';color:'+(on2?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+p.l+'</button>';
+    }
+    ph+='</div>';
+    configHtml='<div class="card" style="margin-bottom:16px"><span class="lbl">Duration</span>'+ph+'</div>';
+  } else if(T.mode==='emom'){
+    var emomOpts='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">';
+    for(var em=5;em<=20;em+=5){
+      var on3=(T.emomMins===em);
+      emomOpts+='<button onclick="S.timer.emomMins='+em+';sv();draw()" style="padding:8px 16px;border-radius:10px;border:1px solid '+(on3?'var(--acc)':'var(--brd)')+';background:'+(on3?'#1e1000':'transparent')+';color:'+(on3?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+em+' min</button>';
+    }
+    emomOpts+='</div>';
+    configHtml='<div class="card" style="margin-bottom:16px"><span class="lbl">Duration (minutes = rounds)</span>'+emomOpts+'</div>';
+  } else if(T.mode==='tabata'){
+    configHtml='<div class="card" style="margin-bottom:16px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><span class="lbl">Work (sec)</span><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><button class="nb" onclick="S.timer.tabWork=Math.max(10,S.timer.tabWork-5);sv();draw()">&#8722;</button><span style="font-size:18px;font-weight:500;color:var(--acc);min-width:32px;text-align:center">'+T.tabWork+'</span><button class="nb" onclick="S.timer.tabWork+=5;sv();sv();draw()">+</button></div></div><div><span class="lbl">Rest (sec)</span><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><button class="nb" onclick="S.timer.tabRest=Math.max(5,S.timer.tabRest-5);sv();draw()">&#8722;</button><span style="font-size:18px;font-weight:500;color:var(--acc2);min-width:32px;text-align:center">'+T.tabRest+'</span><button class="nb" onclick="S.timer.tabRest+=5;sv();draw()">+</button></div></div></div><div style="border-top:.5px solid var(--brd);margin-top:12px;padding-top:12px"><span class="lbl">Rounds</span><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><button class="nb" onclick="S.timer.tabRounds=Math.max(1,S.timer.tabRounds-1);sv();draw()">&#8722;</button><span style="font-size:18px;font-weight:500;color:var(--tx);min-width:32px;text-align:center">'+T.tabRounds+'</span><button class="nb" onclick="S.timer.tabRounds+=1;sv();draw()">+</button></div><p class="mu" style="font-size:11px;margin-top:6px">Total: '+fmtTimer((T.tabWork+T.tabRest)*T.tabRounds)+'</p></div></div>';
+  }
+  return '<div class="pad"><span class="lbl">Timer</span><p class="h1" style="margin:6px 0 18px">Choose a format</p>'+modeHtml+configHtml+'<button class="btn btnp" onclick="timerStart()">Start timer</button></div>';
 }
 
 function fmtTimer(s){
-  var m=Math.floor(s/60);
-  var sec=s%60;
-  return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
+  var m=Math.floor(s/60);return m>0?m+' min '+(s%60?s%60+'s':''):s+'s';
+}
+
+function beep(freq,dur){
+  try{
+    var ctx=new (window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator();var g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.value=freq;g.gain.value=0.15;
+    o.start();o.stop(ctx.currentTime+dur/1000);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur/1000);
+  } catch(e){}
 }
 
 function timerStart(){
   var T=S.timer;
-  T.running=true;
-  T.setup=false;
-  sv();draw();
-  if(T.mode==='amrap'||T.mode==='fortime'){
-    if(T.mode==='amrap'){T.remaining=T.totalSecs;T.elapsed=0;}
-    else{T.elapsed=0;T.remaining=0;}
-  } else if(T.mode==='emom'){
-    T.emomRound=1;T.remaining=60;T.elapsed=0;
-  } else if(T.mode==='tabata'){
-    T.tabCurrent=1;T.tabPhase='work';T.remaining=T.tabWork;T.elapsed=0;
+  T.running=true;T.setup=false;
+  if(T.mode==='amrap'){T.elapsed=0;}
+  else if(T.mode==='countdown'){T.remaining=T.totalSecs;}
+  else if(T.mode==='emom'){
+    // FIX: initialise to 0, will be incremented on first tick
+    T.remaining=60;T.emomRound=0;
   }
-  sv();
+  else if(T.mode==='tabata'){T.tabCurrent=0;T.tabPhase='work';T.remaining=T.tabWork;}
+  sv();draw();
   clearInterval(_timerInterval);
   _timerInterval=setInterval(function(){
-    if(!S.timer.running){clearInterval(_timerInterval);return;}
-    var T=S.timer;
-    T.elapsed++;
+    var T=S.timer;if(!T.running)return;
     if(T.mode==='amrap'){
-      T.remaining=Math.max(0,T.totalSecs-T.elapsed);
-      if(T.remaining<=3&&T.remaining>0)beep(440,100);
-      if(T.remaining===0){T.running=false;beep(880,600);clearInterval(_timerInterval);}
-    } else if(T.mode==='fortime'){
-      T.remaining=T.elapsed;
+      T.elapsed++;
+      if(T.elapsed>=T.totalSecs){clearInterval(_timerInterval);T.running=false;beep(880,400);sv();draw();return;}
+    } else if(T.mode==='countdown'){
+      T.remaining--;
+      if(T.remaining<=0){clearInterval(_timerInterval);T.running=false;beep(880,400);sv();draw();return;}
     } else if(T.mode==='emom'){
-      T.remaining=60-(T.elapsed%60);
-      if(T.remaining===60){
+      T.remaining--;
+      if(T.remaining<=0){
+        // FIX: increment first, then check termination
         T.emomRound++;
-        beep(660,200);
-        setTimeout(function(){beep(660,200);},250);
-        if(T.emomRound>T.emomMins){T.running=false;beep(880,600);clearInterval(_timerInterval);}
+        if(T.emomRound>=T.emomMins){clearInterval(_timerInterval);T.running=false;beep(880,600);sv();draw();return;}
+        beep(660,200);T.remaining=60;
       }
     } else if(T.mode==='tabata'){
       T.remaining--;
-      if(T.remaining===3&&T.tabPhase==='work')beep(440,100);
-      if(T.remaining===0){
-        if(T.tabPhase==='work'){
-          T.tabPhase='rest';T.remaining=T.tabRest;
-          beep(550,300);
-        } else {
+      if(T.remaining<=0){
+        if(T.tabPhase==='work'){T.tabPhase='rest';T.remaining=T.tabRest;beep(440,200);}
+        else{
           T.tabCurrent++;
-          if(T.tabCurrent>T.tabRounds){T.running=false;beep(880,600);clearInterval(_timerInterval);}
-          else{T.tabPhase='work';T.remaining=T.tabWork;beep(880,300);setTimeout(function(){beep(880,300);},350);}
+          if(T.tabCurrent>=T.tabRounds){clearInterval(_timerInterval);T.running=false;beep(880,600);sv();draw();return;}
+          T.tabPhase='work';T.remaining=T.tabWork;beep(660,200);
         }
       }
     }
     sv();
-    // Update display without full redraw for performance
-    var disp=document.getElementById('tmr-disp');
-    var sub=document.getElementById('tmr-sub');
-    var bar=document.getElementById('tmr-bar');
-    if(disp){
-      if(T.mode==='amrap')disp.textContent=fmtTimer(T.remaining);
-      else if(T.mode==='fortime')disp.textContent=fmtTimer(T.elapsed);
-      else if(T.mode==='emom')disp.textContent=fmtTimer(T.remaining===60?60:60-(T.elapsed%60));
-      else if(T.mode==='tabata')disp.textContent=fmtTimer(T.remaining);
-    }
-    if(sub){
-      if(T.mode==='emom')sub.textContent='Round '+T.emomRound+' of '+T.emomMins;
-      if(T.mode==='tabata')sub.textContent=(T.tabPhase==='work'?'WORK':'REST')+' — Round '+T.tabCurrent+' of '+T.tabRounds;
-    }
-    if(bar){
-      var pct=0;
-      if(T.mode==='amrap')pct=T.remaining/T.totalSecs*100;
-      else if(T.mode==='emom')pct=(T.remaining/60)*100;
-      else if(T.mode==='tabata')pct=(T.remaining/(T.tabPhase==='work'?T.tabWork:T.tabRest))*100;
-      bar.style.width=pct+'%';
-    }
+    // Lightweight DOM update — avoid full redraw
+    var rt=document.getElementById('rt');
+    if(T.mode==='amrap'){if(rt)rt.textContent=fmt(T.elapsed);}
+    else if(rt){rt.textContent=fmt(T.remaining);}
+    // Re-render timer view in-place
+    var sc=document.getElementById('scr');
+    if(sc&&S.tab==='timer'&&!T.setup)sc.innerHTML=timerV();
   },1000);
 }
 
-function timerStop(){
-  clearInterval(_timerInterval);
-  S.timer.running=false;sv();draw();
-}
-function timerReset(){
-  clearInterval(_timerInterval);
+function timerToggle(){
   var T=S.timer;
-  T.running=false;T.setup=true;T.elapsed=0;
-  T.remaining=T.totalSecs;T.emomRound=0;T.tabCurrent=0;T.tabPhase='work';
+  T.running=!T.running;
+  if(T.running){
+    clearInterval(_timerInterval);
+    _timerInterval=setInterval(function(){
+      var T=S.timer;if(!T.running)return;
+      if(T.mode==='amrap'){T.elapsed++;}
+      else if(T.mode==='emom'){
+        T.remaining--;
+        if(T.remaining<=0){T.emomRound++;if(T.emomRound>=T.emomMins){clearInterval(_timerInterval);T.running=false;beep(880,600);sv();draw();return;}beep(660,200);T.remaining=60;}
+      }
+      else{T.remaining--;if(T.remaining<=0){clearInterval(_timerInterval);T.running=false;beep(880,400);sv();draw();return;}}
+      sv();
+      var sc=document.getElementById('scr');
+      if(sc&&S.tab==='timer'&&!T.setup)sc.innerHTML=timerV();
+    },1000);
+  } else {
+    clearInterval(_timerInterval);
+  }
   sv();draw();
 }
 
-function timerV(){
-  if(!S.timer)S.timer={mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true};
+function timerReset(){
+  clearInterval(_timerInterval);
   var T=S.timer;
-  var modes=[
-    {k:'amrap',l:'AMRAP'},
-    {k:'fortime',l:'For Time'},
-    {k:'emom',l:'EMOM'},
-    {k:'tabata',l:'Tabata'}
-  ];
-  var modeTabs=modes.map(function(m){
-    var on=T.mode===m.k;
-    return '<button data-timermode="'+m.k+'" style="flex:1;padding:9px 4px;border-radius:10px;border:1.5px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'var(--str-bg)':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;font-weight:'+(on?'600':'400')+';cursor:pointer">'+m.l+'</button>';
-  }).join('');
-
-  // ── Setup screens ────────────────────────────────────────────
-  if(T.setup){
-    var settings='';
-    if(T.mode==='amrap'){
-      var presets=[5,10,15,20];
-      var presRows=presets.map(function(p){
-        return '<button data-tset="'+p*60+'" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid '+(T.totalSecs===p*60?'var(--acc)':'var(--brd)')+';background:'+(T.totalSecs===p*60?'var(--str-bg)':'transparent')+';color:'+(T.totalSecs===p*60?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+p+' min</button>';
-      }).join('');
-      settings='<p class="lbl" style="display:block;margin-bottom:8px">Time cap</p>'
-        +'<div style="display:flex;gap:8px;margin-bottom:12px">'+presRows+'</div>'
-        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'
-        +'<p class="mu" style="font-size:13px;white-space:nowrap">Custom (min)</p>'
-        +'<input id="tval" type="number" min="1" max="120" value="'+Math.round(T.totalSecs/60)+'" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:15px">'
-        +'<button onclick="var v=parseInt(document.getElementById(\'tval\').value);if(v>0){S.timer.totalSecs=v*60;sv();draw();}" style="padding:10px 14px;border-radius:10px;border:1.5px solid var(--acc);background:var(--str-bg);color:var(--acc);font-size:13px;cursor:pointer">Set</button>'
-        +'</div>'
-        +'<p class="mu" style="font-size:12px;margin-top:8px">Set a time cap and complete as many rounds as possible.</p>';
-    } else if(T.mode==='fortime'){
-      settings='<p class="mu" style="margin-bottom:8px">Timer counts up. Stop it when you finish.</p>'
-        +'<p class="mu" style="font-size:12px">Optionally set a cap — the timer will stop when reached.</p>'
-        +'<div style="display:flex;align-items:center;gap:10px;margin-top:12px">'
-        +'<p class="mu" style="font-size:13px;white-space:nowrap">Cap (min, 0 = none)</p>'
-        +'<input id="tvalft" type="number" min="0" max="120" value="'+Math.round(T.totalSecs/60)+'" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:15px">'
-        +'<button onclick="var v=parseInt(document.getElementById(\'tvalft\').value)||0;S.timer.totalSecs=v*60;sv();draw();" style="padding:10px 14px;border-radius:10px;border:1.5px solid var(--acc);background:var(--str-bg);color:var(--acc);font-size:13px;cursor:pointer">Set</button>'
-        +'</div>';
-    } else if(T.mode==='emom'){
-      settings='<p class="lbl" style="display:block;margin-bottom:8px">Total minutes</p>'
-        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
-        +'<button class="nb" onclick="if(S.timer.emomMins>1){S.timer.emomMins--;sv();draw();}">&#8722;</button>'
-        +'<p style="flex:1;text-align:center;font-size:32px;font-weight:500;color:var(--acc)">'+T.emomMins+'</p>'
-        +'<button class="nb" onclick="S.timer.emomMins++;sv();draw();">+</button>'
-        +'</div>'
-        +'<p class="mu" style="font-size:12px">Complete your reps within each 60-second window. The timer beeps at the start of every minute.</p>';
-    } else if(T.mode==='tabata'){
-      settings='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">'
-        +'<div><p class="lbl" style="margin-bottom:6px">Work (sec)</p>'
-        +'<div style="display:flex;align-items:center;gap:6px">'
-        +'<button class="nb" onclick="if(S.timer.tabWork>5){S.timer.tabWork-=5;sv();draw();}">&#8722;</button>'
-        +'<p style="flex:1;text-align:center;font-size:22px;font-weight:500;color:var(--acc)">'+T.tabWork+'</p>'
-        +'<button class="nb" onclick="S.timer.tabWork+=5;sv();draw();">+</button>'
-        +'</div></div>'
-        +'<div><p class="lbl" style="margin-bottom:6px">Rest (sec)</p>'
-        +'<div style="display:flex;align-items:center;gap:6px">'
-        +'<button class="nb" onclick="if(S.timer.tabRest>5){S.timer.tabRest-=5;sv();draw();}">&#8722;</button>'
-        +'<p style="flex:1;text-align:center;font-size:22px;font-weight:500;color:var(--acc)">'+T.tabRest+'</p>'
-        +'<button class="nb" onclick="S.timer.tabRest+=5;sv();draw();">+</button>'
-        +'</div></div>'
-        +'</div>'
-        +'<p class="lbl" style="margin-bottom:6px">Rounds</p>'
-        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
-        +'<button class="nb" onclick="if(S.timer.tabRounds>1){S.timer.tabRounds--;sv();draw();}">&#8722;</button>'
-        +'<p style="flex:1;text-align:center;font-size:22px;font-weight:500;color:var(--acc)">'+T.tabRounds+'</p>'
-        +'<button class="nb" onclick="S.timer.tabRounds++;sv();draw();">+</button>'
-        +'</div>'
-        +'<p class="mu" style="font-size:12px">Classic Tabata: 20s work / 10s rest × 8 rounds = 4 minutes.</p>';
-    }
-    return '<div class="pad">'
-      +'<span class="lbl">Timer</span>'
-      +'<p class="h1" style="margin:6px 0 16px">Workout timer</p>'
-      +'<div style="display:flex;gap:7px;margin-bottom:24px">'+modeTabs+'</div>'
-      +'<div class="card" style="margin-bottom:24px">'+settings+'</div>'
-      +'<button class="btn btnp" onclick="timerStart()">Start</button>'
-      +'</div>';
-  }
-
-  // ── Running screen ───────────────────────────────────────────
-  var isTabata=T.mode==='tabata';
-  var isWork=T.tabPhase==='work';
-  var bgCol=isTabata?(isWork?'var(--acc-bg)':'var(--bg3)'):'var(--bg2)';
-  var accentCol=isTabata?(isWork?'var(--acc)':'var(--warn)'):'var(--acc)';
-
-  var disp='';
-  var sub='';
-  var barPct=100;
-  if(T.mode==='amrap'){disp=fmtTimer(T.remaining);sub='AMRAP · '+Math.round(T.totalSecs/60)+' min';barPct=T.remaining/T.totalSecs*100;}
-  else if(T.mode==='fortime'){disp=fmtTimer(T.elapsed);sub='For Time'+(T.totalSecs?(' · cap '+Math.round(T.totalSecs/60)+'min'):'');barPct=100;}
-  else if(T.mode==='emom'){disp=fmtTimer(60-(T.elapsed%60)||60);sub='Round '+T.emomRound+' of '+T.emomMins;barPct=((T.elapsed%60)===0?100:(60-(T.elapsed%60))/60*100);}
-  else if(T.mode==='tabata'){disp=fmtTimer(T.remaining);sub=(isWork?'WORK':'REST')+' — Round '+T.tabCurrent+' of '+T.tabRounds;barPct=T.remaining/(isWork?T.tabWork:T.tabRest)*100;}
-
-  if(!T.running){
-    disp=isTabata?fmtTimer(T.tabWork):(T.mode==='fortime'?'00:00':fmtTimer(T.totalSecs));
-    if(T.mode==='emom')disp='01:00';
-    sub=T.mode==='tabata'?'WORK — Round 1 of '+T.tabRounds:'Ready';
-  }
-
-  return '<div class="pad" style="padding-top:24px">'
-    +'<div style="display:flex;gap:7px;margin-bottom:28px">'+modeTabs+'</div>'
-    +'<div style="background:'+bgCol+';border-radius:20px;padding:32px 20px 28px;text-align:center;margin-bottom:20px;border:.5px solid var(--brd);transition:background .3s">'
-    +(T.mode==='tabata'&&T.running?'<p style="font-size:13px;font-weight:600;letter-spacing:1.5px;color:'+accentCol+';margin-bottom:12px">'+(isWork?'WORK':'REST')+'</p>':'')
-    +'<p id="tmr-disp" style="font-size:72px;font-weight:300;color:'+accentCol+';font-variant-numeric:tabular-nums;line-height:1;margin-bottom:12px">'+disp+'</p>'
-    +'<p id="tmr-sub" class="lbl" style="color:var(--mu)">'+sub+'</p>'
-    +'<div class="pb" style="margin-top:20px;height:6px"><div id="tmr-bar" class="pf" style="width:'+barPct+'%;background:'+accentCol+';transition:width 1s linear"></div></div>'
-    +'</div>'
-    +(T.running
-      ?'<div style="display:flex;gap:10px"><button class="btn btno" style="flex:1" onclick="timerStop()">Stop</button><button class="btn btng" style="flex:1;border:.5px solid var(--brd);border-radius:14px" onclick="timerReset()">Reset</button></div>'
-      :'<div style="display:flex;gap:10px"><button class="btn btnp" style="flex:1" onclick="timerStart()">'+(T.elapsed>0?'Resume':'Start')+'</button><button class="btn btng" style="flex:1;border:.5px solid var(--brd);border-radius:14px" onclick="timerReset()">Reset</button></div>'
-    )
-    +'</div>';
+  T.running=false;T.elapsed=0;T.remaining=T.totalSecs;
+  // FIX: reset EMOM round to 0
+  T.emomRound=0;
+  T.tabCurrent=0;T.tabPhase='work';T.remaining=T.mode==='tabata'?T.tabWork:T.totalSecs;
+  sv();draw();
 }
-
 
 function closeProgress(){
   var sheet=document.getElementById('prog-sheet');
   if(sheet){
     sheet.classList.remove('open');
-    setTimeout(function(){
-      if(sheet.parentNode)sheet.parentNode.removeChild(sheet);
-      S.view='app';sv();draw();
-    },360);
-  } else {
-    S.view='app';sv();draw();
+    setTimeout(function(){if(sheet.parentNode)sheet.parentNode.removeChild(sheet);},350);
   }
-}
-
-function makeIcon(){
-  try{
-    var c=document.createElement('canvas');
-    c.width=c.height=192;
-    var ctx=c.getContext('2d');
-    ctx.fillStyle='#111111';
-    ctx.beginPath();
-    if(ctx.roundRect)ctx.roundRect(0,0,192,192,40);
-    else{ctx.rect(0,0,192,192);}
-    ctx.fill();
-    ctx.fillStyle='#E07B3A';
-    ctx.font='bold 110px -apple-system,sans-serif';
-    ctx.textAlign='center';
-    ctx.textBaseline='middle';
-    ctx.fillText('T',96,102);
-    var url=c.toDataURL('image/png');
-    var lnk=document.createElement('link');
-    lnk.rel='apple-touch-icon';
-    lnk.href=url;
-    document.head.appendChild(lnk);
-  }catch(e){}
+  S.view='app';sv();
 }
 
 // INIT -----------------------------------------------------------------------
 
 ld();
-// Migrate state — add any fields missing from older saved versions
-if(!S.tplKey)S.tplKey='balanced';
-if(!S.theme)S.theme='dark';
-if(!S.ob)S.ob={step:0,ans:{},recs:[]};
-if(!S.ob.recs)S.ob.recs=[];
-if(!S.customEdit)S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
-if(!S.customTPL)S.customTPL=null;
-if(!S.customPrograms)S.customPrograms=[];
-if(!S.timer)S.timer={mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true};
-// Always reset running timer on reload
-S.timer.running=false;
-(function(){
-  var _m={balanced:TPL,hyp:typeof TPL_HYP!=='undefined'?TPL_HYP:TPL,
-    strength:typeof TPL_STRENGTH!=='undefined'?TPL_STRENGTH:TPL,
-    athletic:typeof TPL_ATHLETIC!=='undefined'?TPL_ATHLETIC:TPL,
-    fatloss:typeof TPL_FAT!=='undefined'?TPL_FAT:TPL,
-    home_bw:typeof TPL_HOME_BW!=='undefined'?TPL_HOME_BW:TPL,
-    home_db:typeof TPL_HOME_DB!=='undefined'?TPL_HOME_DB:TPL,
-    soccer:typeof TPL_SOCCER!=='undefined'?TPL_SOCCER:TPL,
-    run:typeof TPL_RUN!=='undefined'?TPL_RUN:TPL,
-    climb:typeof TPL_CLIMB!=='undefined'?TPL_CLIMB:TPL,
-    court:typeof TPL_COURT!=='undefined'?TPL_COURT:TPL,
-    shoulder:typeof TPL_SHOULDER!=='undefined'?TPL_SHOULDER:TPL,
-    knee:typeof TPL_KNEE!=='undefined'?TPL_KNEE:TPL,
-    back:typeof TPL_BACK!=='undefined'?TPL_BACK:TPL};
-  _m.custom=S.customTPL||null;
-  // Restore any saved custom program
-  if(S.tplKey&&S.tplKey.indexOf('custom_')===0&&S.customPrograms){
-    for(var ci=0;ci<S.customPrograms.length;ci++){
-      if(S.customPrograms[ci].key===S.tplKey){_m[S.tplKey]=S.customPrograms[ci].tpl;break;}
-    }
-  }
-  ACTIVE_TPL=_m[S.tplKey]||TPL;
+applyTheme();
+
+// Restore ACTIVE_TPL from saved tplKey
+(function restoreTPL(){
+  if(!S.tplKey)S.tplKey='balanced';
+  var m=tplMap();
+  ACTIVE_TPL=m[S.tplKey]||TPL;
 })();
-makeIcon();draw();fetchInfo();
+
+// Bounds guard
+if(S.day===undefined||S.day===null)S.day=0;
+if(S.view!=='ob'&&S.view!=='app'&&S.view!=='progress')S.view='app';
+if(!S.tab)S.tab='home';
+
+// State shape guards
+if(!S.customPrograms)S.customPrograms=[];
+if(!S.customEdit)S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
+if(!S.timer)S.timer={mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true};
+if(S.timer.emomRound===undefined)S.timer.emomRound=0;
+if(S.timer.setup===undefined)S.timer.setup=true;
+// Stop any persisted "running" state on load
+S.timer.running=false;
+S.wx=null;
+
+function makeIcon(){
+  try{
+    var c=document.createElement('canvas');c.width=192;c.height=192;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#111';ctx.fillRect(0,0,192,192);
+    ctx.fillStyle='#E07B3A';ctx.font='bold 100px -apple-system,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('T',96,100);
+    var ico=document.createElement('link');ico.rel='icon';ico.href=c.toDataURL();
+    document.head.appendChild(ico);
+  } catch(e){}
+}
+makeIcon();
+
+// Clock tick
 setInterval(function(){
-  var n=new Date();
-  var el=document.getElementById('clk');
-  if(el)el.textContent=n.getHours()+':'+('0'+n.getMinutes()).slice(-2);
-},15000);
+  var e=document.getElementById('clk');
+  if(!e)return;
+  var d=new Date();
+  e.textContent=d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
+},30000);
+(function(){var d=new Date();var e=document.getElementById('clk');if(e)e.textContent=d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();})();
+
+// CSS vars
+document.head.insertAdjacentHTML('beforeend','<style>:root{--str-bg:#1c1000;--str-brd:#3a1e00;--warn:#ff6b6b;}</style>');
+
+draw();
+fetchInfo();
 </script>
 </body>
 </html>
