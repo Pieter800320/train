@@ -462,7 +462,7 @@ var OBQ=[
 // STATE ----------------------------------------------------------------------
 
 var ACTIVE_TPL=TPL;
-var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],pr:{},theme:'dark',tplKey:'balanced',
+var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],pr:{},histPage:0,theme:'dark',tplKey:'balanced',
   customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},
   customPrograms:[],
   timer:{mode:'amrap',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true}
@@ -547,7 +547,7 @@ function draw(){
 }
 
 // PROGRESS (open/close) ------------------------------------------------------
-function openProgress(){S.view='progress';sv();draw();}
+function openProgress(){S.view='progress';S.histPage=0;sv();draw();}
 
 // ONBOARDING -----------------------------------------------------------------
 
@@ -696,7 +696,7 @@ function wxStart(){
     // Custom exercises always have sets (set in the form), so include them directly.
     if(e.category){
       // Custom exercise — always include, ensure defaults
-      exs.push(Object.assign({sets:1,reps:0,rest:0,kg:0,time:0},e));
+      if(e)exs.push(Object.assign({sets:1,reps:0,rest:0,kg:0,time:0},e));
     } else if(e.sets){
       // Built-in exercise with sets defined — include
       exs.push(e);
@@ -848,7 +848,7 @@ function wxV(){
     targetBlock='<div class="card" style="text-align:center"><span class="lbl">Reps</span><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px"><button class="nb" onclick="adjR(-1)">&#8722;</button><span id="rd" style="font-size:28px;font-weight:500;color:var(--tx);min-width:40px;text-align:center">'+(curReps||'&#8212;')+'</span><button class="nb" onclick="adjR(1)">+</button></div></div>';
   }
   var nextLine=w.idx<w.exs.length-1?'<p style="text-align:center;margin-top:10px;font-size:12px;color:var(--dim)">Next: '+w.exs[w.idx+1].name+'</p>':'';
-  return '<div><div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--brd)"><button class="btng" style="width:auto;padding:4px 8px;font-size:14px" onclick="wxConfirmEnd()">&#10005; End</button><p style="font-size:12px;color:var(--mu)">'+w.label+' &middot; '+(w.idx+1)+'/'+w.exs.length+'</p><div style="width:48px"></div></div><div class="pad" style="padding-top:18px"><span class="lbl" style="color:var(--mu)">'+exCatLabel+' · Set '+w.set+' of '+ex.sets+'</span><div style="display:flex;gap:5px;margin:7px 0 16px">'+pips+'</div><p class="h1" style="margin-bottom:4px">'+ex.name+'</p>'+(ex.muscles?'<p class="mu" style="margin-bottom:22px">'+ex.muscles+'</p>':'<div style="margin-bottom:22px"></div>')+(ex.time&&ex.time>0?'<div style="margin-bottom:12px">'+targetBlock+'</div><div style="margin-bottom:18px">'+wgtBlock+'</div>':'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">'+targetBlock+wgtBlock+'</div>')+infoBlock+'<button class="btn btnp" onclick="wxLog()">Log set and rest</button>'+nextLine+'</div></div>';
+  return '<div><div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--brd)"><button class="btng" style="width:auto;padding:4px 8px;font-size:14px" onclick="wxConfirmEnd()">&#10005; End</button><p style="font-size:12px;color:var(--mu)">'+w.label+' &middot; '+(w.idx+1)+'/'+w.exs.length+'</p><div style="width:48px"></div></div><div class="pad" style="padding-top:18px"><span class="lbl" style="color:var(--mu)">'+exCatLabel+' · Set '+w.set+' of '+ex.sets+'</span><div style="display:flex;gap:5px;margin:7px 0 16px">'+pips+'</div><p class="h1" style="margin-bottom:4px">'+ex.name+'</p>'+(ex.muscles?'<p class="mu" style="margin-bottom:22px">'+ex.muscles+'</p>':'<div style="margin-bottom:22px"></div>')+(ex.time&&ex.time>0?'<div style="margin-bottom:12px">'+targetBlock+'</div><div style="margin-bottom:18px">'+wgtBlock+'</div>':'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">'+targetBlock+wgtBlock+'</div>')+infoBlock+'<button class="btn btnp" onclick="wxLog()">Log set and rest</button><button id="pb-btn" onclick="wxAddPB()" style="display:block;width:100%;padding:10px;margin-top:8px;background:transparent;border:none;color:var(--mu);font-size:13px;cursor:pointer">★ Personal best</button>'+nextLine+'</div></div>';
 }
 
 function adjW(d){
@@ -881,8 +881,6 @@ function wxLog(){
   if(!w.reps)w.reps={};
   if(!w.times)w.times={};
   var eid=ex.id;
-  // Save personal record for this exercise
-  S.pr[eid]={kg:w.weights[eid],reps:w.reps[eid],time:w.times[eid]};
   // Stop exercise timer if running
   w.exTimerRunning=false;
   w.exTimer=0;
@@ -896,6 +894,23 @@ function wxLog(){
     if(w.idx<w.exs.length&&w.exs[w.idx].rest>0){w.rest=true;w.rl=w.exs[w.idx].rest;w.rt=w.exs[w.idx].rest;}
   }
   sv();draw();
+}
+function wxAddPB(){
+  if(!S.pr)S.pr={};
+  var w=S.wx;var ex=w.exs[w.idx];
+  if(!w.reps)w.reps={};if(!w.times)w.times={};
+  var eid=ex.id;
+  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var d=new Date();
+  var dateStr=d.getDate()+' '+mn[d.getMonth()]+' '+d.getFullYear();
+  if(!S.pr[eid])S.pr[eid]={name:ex.name,entries:[]};
+  if(!S.pr[eid].entries)S.pr[eid].entries=[];
+  S.pr[eid].name=ex.name;
+  S.pr[eid].entries.push({date:dateStr,kg:w.weights[eid]||0,reps:w.reps[eid]||0});
+  sv();
+  // Flash confirmation
+  var btn=document.getElementById('pb-btn');
+  if(btn){btn.textContent='✓ Saved!';btn.style.color='var(--ok)';setTimeout(function(){if(btn){btn.textContent='★ Personal best';btn.style.color='var(--mu)';}},1500);}
 }
 function wxSkip(){S.wx.rest=false;sv();draw();}
 function wxConfirmEnd(){if(confirm('End this session?'))wxEnd();}
@@ -911,80 +926,63 @@ function wxEnd(){
 // PROGRESS -------------------------------------------------------------------
 
 function progV(){
+  var PAGE_SIZE=20;
   var sessions=S.hist.length;
   var now=new Date();
   var weekStart=new Date(now);weekStart.setDate(now.getDate()-now.getDay());weekStart.setHours(0,0,0,0);
   var thisWeek=0;
   for(var i=0;i<S.hist.length;i++){if(new Date(S.hist[i].date)>=weekStart)thisWeek++;}
-  // Personal bests
-  var pbKg={},pbReps={};
-  for(var i=0;i<S.hist.length;i++){
-    for(var j=0;j<S.hist[i].logs.length;j++){
-      var l=S.hist[i].logs[j];
-      if(l.kg>0){if(pbKg[l.name]===undefined||l.kg>pbKg[l.name])pbKg[l.name]=l.kg;}
-      else if(l.reps>0){if(pbReps[l.name]===undefined||l.reps>pbReps[l.name])pbReps[l.name]=l.reps;}
-    }
-  }
-  var pbNames=Object.keys(pbKg);
+
+  // PBs — manual entries only
+  if(!S.pr)S.pr={};
+  var pbNames=Object.keys(S.pr);
   var pbHtml='';
   for(var i=0;i<pbNames.length;i++){
-    var nm=pbNames[i],best=pbKg[nm],first=null;
-    outer:for(var hi=0;hi<S.hist.length;hi++)for(var li=0;li<S.hist[hi].logs.length;li++){if(S.hist[hi].logs[li].name===nm&&S.hist[hi].logs[li].kg>0){first=S.hist[hi].logs[li].kg;break outer;}}
-    var gain=best-(first||best);
-    pbHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:.5px solid var(--brd)">'
-      +'<p style="font-size:14px;color:var(--tx)">'+nm+'</p>'
-      +'<div style="display:flex;align-items:center;gap:10px">'
-        +(gain>0?'<span style="font-size:11px;color:var(--ok)">+'+gain+' kg</span>':'')
-        +'<span style="font-size:15px;font-weight:500;color:var(--acc)">'+best+' kg</span>'
-      +'</div></div>';
-  }
-  var bwNames=Object.keys(pbReps);
-  for(var i=0;i<bwNames.length;i++){
-    var nm=bwNames[i];
-    pbHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:.5px solid var(--brd)">'
-      +'<p style="font-size:14px;color:var(--tx)">'+nm+'</p>'
-      +'<span style="font-size:15px;font-weight:500;color:var(--acc)">'+pbReps[nm]+' reps</span>'
+    var eid=pbNames[i];
+    var pr=S.pr[eid];
+    if(!pr||!pr.entries||!pr.entries.length)continue;
+    var best=pr.entries[pr.entries.length-1];
+    var valStr=best.kg>0?best.kg+' kg':(best.reps>0?best.reps+' reps':'—');
+    pbHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--brd)">'
+      +'<div><p style="font-size:13px;color:var(--tx)">'+(pr.name||eid)+'</p><p style="font-size:11px;color:var(--dim);margin-top:1px">'+best.date+'</p></div>'
+      +'<span style="font-size:14px;font-weight:500;color:var(--acc)">'+valStr+'</span>'
     +'</div>';
   }
-  // Session history
-  var histHtml='';
-  for(var i=S.hist.length-1;i>=0;i--){
+
+  // History — paginated, flat, read-only
+  var page=S.histPage||0;
+  var total=S.hist.length;
+  var startIdx=Math.max(0,total-PAGE_SIZE*(page+1));
+  var endIdx=total-PAGE_SIZE*page;
+  var histRows='';
+  var dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var mn2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  for(var i=endIdx-1;i>=startIdx;i--){
     var h=S.hist[i];
     var d=new Date(h.date);
-    var dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    var mn2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var dateStr=dn[d.getDay()]+' '+d.getDate()+' '+mn2[d.getMonth()];
     var timeStr=d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
-    var logRows='';
-    for(var j=0;j<h.logs.length;j++){
-      var l=h.logs[j];
-      var setStr=(l.reps&&l.reps>0?l.reps+' reps':'')+(l.kg&&l.kg>0?(l.reps?' · ':'')+l.kg+' kg':'');
-      if(!setStr)setStr='—';
-      logRows+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--brd)">'
-        +'<span style="font-size:13px;color:var(--tx)">'+l.name+'</span>'
-        +'<span style="font-size:13px;color:var(--mu)">'+setStr+'</span>'
-      +'</div>';
-    }
-    histHtml+='<div style="margin-bottom:8px">'
-      +'<div data-histtoggle="'+i+'" style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:var(--bg2);border-radius:12px;border:.5px solid var(--brd);cursor:pointer">'
-        +'<div><p style="font-size:14px;font-weight:500;color:var(--tx)">'+h.label+'</p><p style="font-size:12px;color:var(--mu);margin-top:2px">'+dateStr+' · '+timeStr+'</p></div>'
-        +'<span style="font-size:12px;color:var(--mu)">'+h.logs.length+' sets &#8250;</span>'
-      +'</div>'
-      +'<div id="hist'+i+'" style="display:none;background:var(--bg2);border:.5px solid var(--brd);border-top:none;border-radius:0 0 12px 12px;padding:4px 14px 10px">'
-        +logRows
-      +'</div>'
+    var setCount=h.logs.length;
+    histRows+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--brd)">'
+      +'<div><p style="font-size:12px;color:var(--tx)">'+h.label+'</p><p style="font-size:11px;color:var(--dim);margin-top:1px">'+dateStr+' · '+timeStr+'</p></div>'
+      +'<span style="font-size:11px;color:var(--mu)">'+setCount+' sets</span>'
     +'</div>';
   }
+  var loadMore=startIdx>0?'<button onclick="S.histPage=(S.histPage||0)+1;sv();var s=document.getElementById(\'prog-sheet\');if(s){var sc=s.querySelector(\'div:last-child\');if(sc)sc.innerHTML=progV();}" style="width:100%;padding:10px;background:transparent;border:.5px solid var(--brd);border-radius:10px;color:var(--mu);font-size:12px;cursor:pointer;margin-top:10px">Load more</button>':'';
+  var histSection=total>0
+    ?'<div style="margin-top:4px"><div onclick="var h=document.getElementById(\'hist-body\');h.style.display=h.style.display===\'none\'?\'block\':\'none\'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;cursor:pointer"><span class="lbl">History</span><span style="font-size:12px;color:var(--mu)">'+total+' sessions ›</span></div><div id="hist-body" style="display:none">'+histRows+loadMore+'</div></div>'
+    :'';
+
   var empty='<div class="card" style="text-align:center;padding:36px 20px"><p style="font-size:36px;margin-bottom:12px">&#128200;</p><p class="h2" style="margin-bottom:8px">No sessions yet</p><p class="mu">Complete your first session to start tracking.</p></div>';
-  var reset=sessions>0?'<div style="margin-top:20px"><button class="btng" style="width:100%;padding:12px;font-size:13px;border:.5px solid var(--brd);border-radius:12px" onclick="if(confirm(\'Reset all data? This cannot be undone.\')){S.hist=[];S.pr={};sv();closeProgress();}">Reset all log data</button></div>':'';
-  var pbSection=pbHtml?'<span class="lbl" style="display:block;margin-bottom:4px">Personal bests</span><div class="card" style="margin-bottom:24px">'+pbHtml+'</div>':'';
-  var histSection=sessions>0?'<span class="lbl" style="display:block;margin-bottom:10px">Session history</span>'+histHtml:'';
+  var reset=sessions>0?'<div style="margin-top:20px"><button class="btng" style="width:100%;padding:12px;font-size:13px;border:.5px solid var(--brd);border-radius:12px" onclick="if(confirm(\'Reset all data? This cannot be undone.\')){S.hist=[];S.pr={};S.histPage=0;sv();closeProgress();}">Reset all log data</button></div>':'';
+  var pbSection=pbHtml?'<span class="lbl" style="display:block;margin-bottom:4px">Personal bests</span><div class="card" style="margin-bottom:16px">'+pbHtml+'</div>':'';
+
   return '<div class="pad">'
     +'<p class="h1" style="margin:4px 0 20px">Log</p>'
     +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px">'
       +'<div class="card" style="text-align:center;padding:14px 8px"><span class="lbl">Total</span><p style="font-size:28px;font-weight:500;margin:6px 0 2px">'+sessions+'</p><p style="font-size:11px;color:var(--mu)">sessions</p></div>'
       +'<div class="card" style="text-align:center;padding:14px 8px"><span class="lbl">This week</span><p style="font-size:28px;font-weight:500;margin:6px 0 2px;color:var(--acc)">'+thisWeek+'</p><p style="font-size:11px;color:var(--mu)">sessions</p></div>'
-      +'<div class="card" style="text-align:center;padding:14px 8px"><span class="lbl">PBs tracked</span><p style="font-size:28px;font-weight:500;margin:6px 0 2px">'+pbNames.length+'</p><p style="font-size:11px;color:var(--mu)">exercises</p></div>'
+      +'<div class="card" style="text-align:center;padding:14px 8px"><span class="lbl">PBs</span><p style="font-size:28px;font-weight:500;margin:6px 0 2px">'+pbNames.length+'</p><p style="font-size:11px;color:var(--mu)">recorded</p></div>'
     +'</div>'
     +(sessions===0?empty:pbSection+histSection)
     +reset
@@ -1123,7 +1121,7 @@ function buildV(){
       var day=ce.days[di];
       rows+='<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><p style="font-size:14px;font-weight:500">'+day.label+'</p><button onclick="S.customEdit.activeDay='+di+';sv();draw()" style="background:transparent;border:none;color:var(--acc);font-size:13px;cursor:pointer">Edit</button></div>';
       for(var ei=0;ei<day.exercises.length;ei++){
-        var ex=day.exercises[ei];
+        var ex=day.exercises[ei];if(!ex)continue;
         rows+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--brd)"><div style="flex:1"><p style="font-size:11px;color:var(--mu);margin-bottom:1px">'+phLabel(ex.ph||ex.category||'')+'</p><p style="font-size:13px;color:var(--tx)">'+ex.name+'</p><p style="font-size:11px;color:var(--mu);margin-top:1px">'+exVolStr(ex)+'</p></div><button data-delex="'+di+'-'+ei+'" style="background:transparent;border:none;color:var(--mu);font-size:13px;cursor:pointer;width:28px;height:28px">&#10005;</button></div>';
       }
       rows+='</div>';
@@ -1134,7 +1132,7 @@ function buildV(){
   var dayObj=ce.days[ce.activeDay];
   var exRows='';
   for(var ei=0;ei<dayObj.exercises.length;ei++){
-    var ex=dayObj.exercises[ei];
+    var ex=dayObj.exercises[ei];if(!ex)continue;
     exRows+='<div class="exrow"><div style="flex:1"><span class="lbl">'+phLabel(ex.ph||ex.category||'')+'</span><p style="font-size:13px;color:var(--tx);margin-top:2px">'+ex.name+'</p></div><span style="font-size:12px;color:var(--mu)">'+exVolStr(ex)+'</span></div>';
   }
   if(!ce.newEx){
@@ -1218,6 +1216,7 @@ function custSave(){
   var dateStr=d.getDate()+' '+mn[d.getMonth()];
   if(!S.customPrograms)S.customPrograms=[];
 if(!S.pr)S.pr={};
+if(!S.histPage)S.histPage=0;
 // Patch stale wx state from pre-PR-system sessions
 if(S.wx){
   if(!S.wx.reps)S.wx.reps={};
