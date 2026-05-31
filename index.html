@@ -58,7 +58,16 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
   box-shadow:0 8px 40px rgba(0,0,0,.4);
 }
 #prog-sheet.open{transform:translate(-50%,0);}
-#drum-amrap::-webkit-scrollbar,#drum-cd::-webkit-scrollbar,#drum-emom::-webkit-scrollbar,#drum-work::-webkit-scrollbar,#drum-rest::-webkit-scrollbar,#drum-rounds::-webkit-scrollbar{display:none}
+#drum-amrap::-webkit-scrollbar,#drum-cd::-webkit-scrollbar,#drum-cd-min::-webkit-scrollbar,#drum-cd-sec::-webkit-scrollbar,#drum-emom::-webkit-scrollbar,#drum-work::-webkit-scrollbar,#drum-rest::-webkit-scrollbar,#drum-rounds::-webkit-scrollbar,#drum-weeks::-webkit-scrollbar,#drum-theme::-webkit-scrollbar,#drum-rpe::-webkit-scrollbar,#drum-weight::-webkit-scrollbar,#drum-session::-webkit-scrollbar{display:none}
+.drum-wrap{position:relative;height:160px;overflow:hidden;border-radius:12px;background:var(--bg3)}
+.drum-wrap::before,.drum-wrap::after{content:'';position:absolute;left:0;right:0;height:60px;z-index:2;pointer-events:none}
+.drum-wrap::before{top:0;background:linear-gradient(to bottom,var(--bg2) 0%,transparent 100%)}
+.drum-wrap::after{bottom:0;background:linear-gradient(to top,var(--bg2) 0%,transparent 100%)}
+.drum-sel{position:absolute;left:8px;right:8px;top:50%;transform:translateY(-50%);height:44px;background:#1e1000;border:1px solid var(--acc);border-radius:10px;box-shadow:0 0 12px rgba(224,123,58,0.2);pointer-events:none;z-index:1}
+.drum-scroll{overflow-y:scroll;height:160px;-webkit-overflow-scrolling:touch;scroll-snap-type:y mandatory;scrollbar-width:none}
+.drum-item{height:44px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:16px;font-weight:500;color:var(--tx);opacity:0.35;transition:opacity .15s,font-size .15s,color .15s}
+.drum-item.active{opacity:1;color:var(--acc);font-size:18px;font-weight:700}
+.drum-item.near{opacity:0.65}
 #modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;opacity:0;transition:opacity .2s}
 #modal-overlay.show{opacity:1}
 #modal-box{background:var(--bg2);border-radius:20px;padding:24px;width:100%;max-width:340px;border:.5px solid var(--brd);transform:scale(.95);transition:transform .2s}
@@ -1181,6 +1190,8 @@ var ACTIVE_TPL=TPL;
 var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],pr:{},histPage:0,theme:'dark',tplKey:'balanced',
   customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},
   customPrograms:[],
+  buildMode:'program',
+  planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},
   timer:{mode:'countdown',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true}
 };
 
@@ -1192,6 +1203,9 @@ function ld(){
   try{var d=localStorage.getItem('train_v3');if(d)S=JSON.parse(d);}catch(e){}
   if(S.plan===undefined)S.plan=null;
   if(S._planOpen===undefined)S._planOpen=false;
+  if(S.buildMode===undefined)S.buildMode='program';
+  if(S.planEdit===undefined)S.planEdit={name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};
+  if(S.customPlans===undefined)S.customPlans=[];
   if(S._pgOpen===undefined)S._pgOpen={};
 }
 
@@ -1252,7 +1266,7 @@ var PLANS=[
 ];
 
 
-function getPlanByKey(k){for(var i=0;i<PLANS.length;i++)if(PLANS[i].key===k)return PLANS[i];return null;}
+function getPlanByKey(k){for(var i=0;i<PLANS.length;i++)if(PLANS[i].key===k)return PLANS[i];if(S.customPlans){for(var j=0;j<S.customPlans.length;j++)if(S.customPlans[j].key===k)return S.customPlans[j];}return null;}
 function getActivePlan(){if(!S.plan||!S.plan.key)return null;return getPlanByKey(S.plan.key);}
 function getPlanWeek(){
   var p=getActivePlan();if(!p||!S.plan)return null;
@@ -1372,7 +1386,7 @@ function draw(){
       if(el)el.className='ti'+(t===S.tab?' on':'');
     });
     var views={home:homeV,today:todayV,programs:programsV,build:buildV,timer:timerV};
-    try{sc.innerHTML=views[S.tab]?views[S.tab]():'';if(S.tab==='timer')setTimeout(initDrumScroll,0);}catch(err){sc.innerHTML='<div class="pad"><p class="h2" style="color:var(--warn)">Something went wrong</p><p class="mu" style="margin-top:8px">'+err.message+'</p><button class="btn btno" style="margin-top:16px" onclick="go(\'home\')">Back to Home</button></div>';}
+    try{sc.innerHTML=views[S.tab]?views[S.tab]():'';if(S.tab==='timer'||S.tab==='today'||S.tab==='build')setTimeout(initDrumScroll,0);}catch(err){sc.innerHTML='<div class="pad"><p class="h2" style="color:var(--warn)">Something went wrong</p><p class="mu" style="margin-top:8px">'+err.message+'</p><button class="btn btno" style="margin-top:16px" onclick="go(\'home\')">Back to Home</button></div>';}
   }
 }
 
@@ -1638,12 +1652,9 @@ function todayV(){
       +'<span style="font-size:12px;color:'+(isStr?'var(--acc)':'var(--mu)')+';white-space:nowrap;margin-left:8px">'+volStr+'</span></div>'+detail;
   }
 
-  // ── Day selector ──────────────────────────────────────────────────────────
-  var daybts='';
-  for(var di=0;di<ACTIVE_TPL.days.length;di++){
-    var on=di===S.day;
-    daybts+='<button data-switchday="'+di+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer">'+ACTIVE_TPL.days[di].label+'</button>';
-  }
+  // ── Session drum selector ─────────────────────────────────────────────────
+  var sessionItems=ACTIVE_TPL.days.map(function(d,i){return {label:d.label,val:i};});
+  var sessionDrum=makeDrum('drum-session',sessionItems,S.day,'session');
 
   return '<div class="pad">'
     +'<span class="lbl">'+ACTIVE_TPL.name+' \u00b7 '+sess.label+'</span>'
@@ -1653,7 +1664,7 @@ function todayV(){
     +rows
     +'<div style="margin-top:8px">'
     +'<button class="btn btnp" onclick="wxStart()">Start session</button>'
-    +'<div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div>'
+    +'<div style="margin-top:14px"><span class="lbl" style="display:block;margin-bottom:8px">Session</span>'+sessionDrum+'</div>'
     +'</div></div>';
 }
 
@@ -2090,6 +2101,15 @@ document.addEventListener('click',function(e){
     if(t.dataset&&t.dataset.timermode){S.timer.mode=t.dataset.timermode;S.timer.setup=true;S.timer.running=false;clearInterval(_timerInterval);sv();draw();return;}
     if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
     if(t.dataset&&t.dataset.attachplan){attachPlan(t.dataset.attachplan);return;}
+    if(t.dataset&&t.dataset.delcplan){
+      var cpk=t.dataset.delcplan;
+      showModal('Delete plan?','This custom plan will be permanently removed.','Delete',function(){
+        if(!S.customPlans)return;
+        for(var di=0;di<S.customPlans.length;di++)if(S.customPlans[di].key===cpk){S.customPlans.splice(di,1);break;}
+        if(S.plan&&S.plan.key===cpk)S.plan=null;
+        sv();draw();
+      },true);return;
+    }
     // Walk up DOM tree to find pgopen - but NOT if a button was clicked
     var pgEl=null;
     if(e.target.tagName!=='BUTTON'&&e.target.tagName!=='INPUT'){
@@ -2333,6 +2353,14 @@ function resetOnboarding(){
 // BUILD (CUSTOM PROGRAM) -----------------------------------------------------
 
 function buildV(){
+  // ── Build tab mode selector ───────────────────────────────────────────────
+  var modeBar='<div style="display:flex;gap:0;margin-bottom:20px;border:1px solid var(--brd);border-radius:12px;overflow:hidden">';
+  modeBar+='<button onclick="S.buildMode=\'program\';sv();draw()" style="flex:1;padding:11px;background:'+(S.buildMode==='program'?'var(--acc)':'transparent')+';color:'+(S.buildMode==='program'?'#fff':'var(--mu)')+';border:none;font-size:13px;font-weight:600;cursor:pointer">Training Program</button>';
+  modeBar+='<button onclick="S.buildMode=\'plan\';sv();draw()" style="flex:1;padding:11px;background:'+(S.buildMode==='plan'?'var(--acc)':'transparent')+';color:'+(S.buildMode==='plan'?'#fff':'var(--mu)')+';border:none;font-size:13px;font-weight:600;cursor:pointer;border-left:1px solid var(--brd)">Progression Plan</button>';
+  modeBar+='</div>';
+  if(S.buildMode==='plan'){return buildPlanV(modeBar);}
+
+  // ══ PROGRAM BUILDER MODE ═════════════════════════════════════════════════
   var ce=S.customEdit;
   var stage=ce.activeDay!==null?'exercises':(ce.days.length>0?'review':'setup');
   if(stage==='setup'){
@@ -2342,7 +2370,7 @@ function buildV(){
       var on=ce.numDays===d;
       daysHtml+='<button data-custdays="'+d+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+d+' days</button>';
     }
-    return '<div class="pad"><span class="lbl">Build tab</span><p class="h1" style="margin:6px 0 20px">Custom program</p><div class="card" style="margin-bottom:16px"><span class="lbl">Program name</span><input id="cpname" value="'+nameVal+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:12px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.customEdit.name=this.value;sv()" /></div><div class="card" style="margin-bottom:20px"><span class="lbl">Sessions per week</span><div style="display:flex;gap:8px;margin-top:12px">'+daysHtml+'</div></div><button class="btn btnp" onclick="custStart()">Set up sessions</button></div>';
+    return '<div class="pad">'+modeBar+'<span class="lbl">Build tab</span><p class="h1" style="margin:6px 0 20px">Custom program</p><div class="card" style="margin-bottom:16px"><span class="lbl">Program name</span><input id="cpname" value="'+nameVal+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:12px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.customEdit.name=this.value;sv()" /></div><div class="card" style="margin-bottom:20px"><span class="lbl">Sessions per week</span><div style="display:flex;gap:8px;margin-top:12px">'+daysHtml+'</div></div><button class="btn btnp" onclick="custStart()">Set up sessions</button></div>';
   }
   if(stage==='review'){
     var rows='';
@@ -2355,7 +2383,7 @@ function buildV(){
       }
       rows+='</div>';
     }
-    return '<div class="pad"><span class="lbl">Review</span><p class="h1" style="margin:6px 0 4px">'+ce.name+'</p><p class="mu" style="margin-bottom:18px">'+ce.numDays+' sessions per week</p>'+rows+'<button class="btn btnp" style="margin-top:8px" onclick="custSave()">Save and start this program</button><button class="btng" onclick="S.customEdit={name:\'My Program\',numDays:3,days:[],activeDay:null,newEx:null};sv();draw()">Start over</button></div>';
+    return '<div class="pad">'+modeBar+'<span class="lbl">Review</span><p class="h1" style="margin:6px 0 4px">'+ce.name+'</p><p class="mu" style="margin-bottom:18px">'+ce.numDays+' sessions per week</p>'+rows+'<button class="btn btnp" style="margin-top:8px" onclick="custSave()">Save and start this program</button><button class="btng" onclick="S.customEdit={name:\'My Program\',numDays:3,days:[],activeDay:null,newEx:null};sv();draw()">Start over</button></div>';
   }
   // exercises stage
   var dayObj=ce.days[ce.activeDay];
@@ -2366,10 +2394,8 @@ function buildV(){
   }
   if(!ce.newEx){
     var labelInput='<div class="card" style="margin-bottom:14px"><span class="lbl">Session name</span><input value="'+dayObj.label+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.customEdit.days[S.customEdit.activeDay].label=this.value;sv()" /></div>';
-  return '<div class="pad"><span class="lbl">'+(ce.activeDay+1)+' of '+ce.days.length+'</span><p class="h1" style="margin:6px 0 14px">'+dayObj.label+'</p>'+labelInput+exRows+'<button class="btn btno" style="margin-top:8px" onclick="custOpenEx()">+ Add exercise</button><button class="btn btnp" style="margin-top:10px" onclick="S.customEdit.activeDay=null;sv();draw()">'+(ce.activeDay<ce.days.length-1?'Next session':'Review program')+'</button></div>';
+    return '<div class="pad"><span class="lbl">'+(ce.activeDay+1)+' of '+ce.days.length+'</span><p class="h1" style="margin:6px 0 14px">'+dayObj.label+'</p>'+labelInput+exRows+'<button class="btn btno" style="margin-top:8px" onclick="custOpenEx()">+ Add exercise</button><button class="btn btnp" style="margin-top:10px" onclick="S.customEdit.activeDay=null;sv();draw()">'+(ce.activeDay<ce.days.length-1?'Next session':'Review program')+'</button></div>';
   }
-  // Add exercise form
-  // Category picker
   var CATS=['Warm-up','Mobility','Activation','Strength','Hypertrophy','Power','Cardio','HIIT','Core','Accessory','Finisher','Cooldown','Stretch','Custom'];
   var catOpts='';
   for(var ci2=0;ci2<CATS.length;ci2++){
@@ -2378,14 +2404,12 @@ function buildV(){
     catOpts+='<button onclick="custSetCat(\''+cv+'\');" style="padding:7px 12px;border-radius:20px;border:1px solid '+(onC?'var(--acc)':'var(--brd)')+';background:'+(onC?'#1e1000':'transparent')+';color:'+(onC?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer;white-space:nowrap">'+cv+'</button>';
   }
   var customCatInput=ce.newEx.customCat!==undefined?'<input value="'+(ce.newEx.customCat||'')+'" placeholder="Type category name..." style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:10px" oninput="S.customEdit.newEx.customCat=this.value;sv()" />':'';
-  // Time dropdown options (0 + 10s increments to 300s)
   var timeOpts='<option value="0"'+(ce.newEx.time===0?' selected':'')+'>Off</option>';
   for(var ts=10;ts<=300;ts+=10)timeOpts+='<option value="'+ts+'"'+(ce.newEx.time===ts?' selected':'')+'>'+fmt(ts)+'</option>';
-  // Rest dropdown (0 + 30s increments to 300s)
   var restOpts='<option value="0"'+(ce.newEx.rest===0?' selected':'')+'>Off</option>';
   for(var rs=30;rs<=300;rs+=30)restOpts+='<option value="'+rs+'"'+(ce.newEx.rest===rs?' selected':'')+'>'+fmt(rs)+'</option>';
   var selStyle='width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px;-webkit-appearance:none;appearance:none';
-  return '<div class="pad"><span class="lbl">'+dayObj.label+' · Add exercise</span><p class="h1" style="margin:6px 0 16px">New exercise</p>'
+  return '<div class="pad"><span class="lbl">'+dayObj.label+' \u00b7 Add exercise</span><p class="h1" style="margin:6px 0 16px">New exercise</p>'
     +'<div class="card" style="margin-bottom:12px"><span class="lbl">Name</span><input value="'+ce.newEx.name+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.name=this.value;sv()" /></div>'
     +'<div class="card" style="margin-bottom:12px"><span class="lbl">Category</span><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px">'+catOpts+'</div>'+customCatInput+'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
@@ -2396,8 +2420,204 @@ function buildV(){
       +'<div class="card"><span class="lbl">Time</span><select style="'+selStyle+'" onchange="S.customEdit.newEx.time=parseInt(this.value);sv()">'+timeOpts+'</select></div>'
       +'<div class="card"><span class="lbl">Rest between sets</span><select style="'+selStyle+'" onchange="S.customEdit.newEx.rest=parseInt(this.value);sv()">'+restOpts+'</select></div>'
     +'</div>'
-    +'<div class="card" style="margin-bottom:18px"><span class="lbl">Notes</span><input value="'+(ce.newEx.notes||'')+'" placeholder="Optional — shown during the session" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.notes=this.value;sv()" /></div>'
+    +'<div class="card" style="margin-bottom:18px"><span class="lbl">Notes</span><input value="'+(ce.newEx.notes||'')+'" placeholder="Optional \u2014 shown during the session" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.notes=this.value;sv()" /></div>'
     +'<button class="btn btnp" onclick="custAddEx()">Add to session</button><button class="btng" onclick="custCancelEx()">Cancel</button></div>';
+}
+
+function buildPlanV(modeBar){
+  var pe=S.planEdit;
+  if(!pe.targetWeeks)pe.targetWeeks=4;
+  var tw=pe.targetWeeks;
+
+  // ── Editing a specific week ───────────────────────────────────────────────
+  if(pe.editWeek!==null&&pe.editWeek<pe.weeks.length){
+    var wk=pe.weeks[pe.editWeek];
+    var wIdx=pe.editWeek;
+
+    // Theme drum items
+    var themeItems=[
+      {label:'None',val:'none'},
+      {label:'Learn',val:'learn'},
+      {label:'Build',val:'build'},
+      {label:'Progress',val:'progress'},
+      {label:'Peak',val:'peak'},
+      {label:'Peak & Deload',val:'peakdeload'},
+      {label:'Deload',val:'deload'},
+      {label:'Custom',val:'custom'}
+    ];
+    var themeDrum=makeDrum('drum-theme',themeItems,wk.theme||'learn','editweek');
+
+    // RPE drum items (5–10)
+    var rpeItems=[];for(var ri=5;ri<=10;ri++)rpeItems.push({label:'RPE '+ri,val:ri});
+    var rpeDrum=makeDrum('drum-rpe',rpeItems,wk.rpe||7,'editweek');
+
+    // Weight drum items (50–120%, 5% steps)
+    var wtItems=[];for(var wi=50;wi<=120;wi+=5)wtItems.push({label:wi+'%',val:wi});
+    var wtDrum=makeDrum('drum-weight',wtItems,wk.weightPct||100,'editweek');
+
+    var customThemeInput=(wk.theme==='custom')?'<input id="custom-theme-input" value="'+(wk.customThemeLabel||'')+'" placeholder="Name this week..." style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:10px" oninput="S.planEdit.weeks['+wIdx+'].customThemeLabel=this.value;sv()" />':'';
+
+    var deloadOn=wk.volMod<1;
+    var rir=Math.max(0,10-(wk.rpe||7));
+
+    return '<div class="pad">'
+      +'<span class="lbl">Week '+(wIdx+1)+' of '+pe.weeks.length+'</span>'
+      +'<p class="h1" style="margin:6px 0 20px">Edit week</p>'
+
+      +'<div class="card" style="margin-bottom:12px"><span class="lbl">Week label</span>'
+      +'<input value="'+(wk.label||'')+'" placeholder="e.g. Heavy week, Deload..." style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.planEdit.weeks['+wIdx+'].label=this.value;sv()" /></div>'
+
+      +'<div class="card" style="margin-bottom:12px"><span class="lbl">Theme</span>'
+      +'<div style="margin-top:10px">'+themeDrum+'</div>'
+      +customThemeInput+'</div>'
+
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">'
+        +'<div class="card"><span class="lbl">RPE</span><div style="margin-top:8px">'+rpeDrum+'</div></div>'
+        +'<div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center"><span class="lbl">RIR</span><p style="font-size:28px;font-weight:700;color:var(--tx);margin:12px 0 4px" id="rir-display">'+rir+'</p><p class="mu" style="font-size:10px">auto</p></div>'
+        +'<div class="card"><span class="lbl">Weight</span><div style="margin-top:8px">'+wtDrum+'</div></div>'
+      +'</div>'
+
+      +'<div class="card" style="margin-bottom:12px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center">'
+          +'<div><span class="lbl">Deload week</span><p class="mu" style="font-size:12px;margin-top:3px">Halves the number of sets</p></div>'
+          +'<button onclick="S.planEdit.weeks['+wIdx+'].volMod='+(deloadOn?'1.0':'0.5')+';sv();draw()" style="width:48px;height:28px;border-radius:14px;border:none;background:'+(deloadOn?'var(--acc)':'var(--brd)')+';cursor:pointer;transition:background .2s;position:relative">'
+          +'<span style="position:absolute;top:3px;'+(deloadOn?'right:3px':'left:3px')+';width:22px;height:22px;background:#fff;border-radius:50%;display:block"></span>'
+          +'</button>'
+        +'</div>'
+      +'</div>'
+
+      +'<div class="card" style="margin-bottom:20px"><span class="lbl">Coaching tip</span>'
+      +'<textarea style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:13px;margin-top:8px;min-height:80px;resize:vertical;line-height:1.5" oninput="S.planEdit.weeks['+wIdx+'].tip=this.value;sv()" placeholder="Optional \u2014 shown in Today when this week is active">'+(wk.tip||'')+'</textarea></div>'
+
+      +'<button class="btn btnp" onclick="planEditWeekDone('+wIdx+')">Done</button>'
+      +'</div>';
+  }
+
+  // ── Plan overview ─────────────────────────────────────────────────────────
+  var nameVal=pe.name||'My Plan';
+  var cyclicOn=pe.cyclic;
+
+  // Number of weeks drum (2–16)
+  var weekCountItems=[];for(var wci=2;wci<=16;wci++)weekCountItems.push({label:wci+' weeks',val:wci});
+  var weeksDrum=makeDrum('drum-weeks',weekCountItems,tw,'planbuilder');
+
+  // Week rows
+  var weekRows='';
+  for(var wi=0;wi<pe.weeks.length;wi++){
+    var wk2=pe.weeks[wi];
+    var themeColors={none:'var(--mu)',learn:'#c85a1a',build:'#d9692a',progress:'#e07b3a',peak:'#f0a060',peakdeload:'#f0a060',deload:'#888',custom:'var(--acc2)'};
+    var wCol=themeColors[wk2.theme||'learn']||'var(--acc)';
+    var wLabel=wk2.label||('Week '+(wi+1));
+    weekRows+='<div style="padding:11px 14px;background:var(--bg);border-top:1px solid var(--brd);display:flex;align-items:center;gap:10px">';
+    weekRows+='<div style="background:var(--bg3);border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:44px">';
+    weekRows+='<p style="font-size:16px;font-weight:700;color:'+wCol+';margin:0;line-height:1">'+(wk2.rpe||7)+'</p>';
+    weekRows+='<p style="font-size:9px;color:var(--mu);margin:2px 0 0;text-transform:uppercase">RPE</p></div>';
+    weekRows+='<div style="flex:1;min-width:0">';
+    weekRows+='<p style="font-size:13px;font-weight:600;color:var(--tx);margin:0 0 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+wLabel+'</p>';
+    weekRows+='<p class="mu" style="font-size:11px;margin:0">'+(wk2.weightPct||100)+'% weight'+(wk2.volMod<1?' \u00b7 Deload':'')+' \u00b7 RIR '+Math.max(0,10-(wk2.rpe||7))+'</p>';
+    weekRows+='</div>';
+    weekRows+='<button onclick="S.planEdit.editWeek='+wi+';sv();draw()" style="background:transparent;border:none;color:var(--acc);font-size:13px;cursor:pointer;padding:4px 8px">Edit</button>';
+    if(pe.weeks.length>1)weekRows+='<button onclick="S.planEdit.weeks.splice('+wi+',1);sv();draw()" style="background:transparent;border:none;color:var(--mu);font-size:16px;cursor:pointer;padding:4px 6px">\u00d7</button>';
+    weekRows+='</div>';
+  }
+
+  var addBtn=pe.weeks.length<tw?'<button class="btn btnp" style="width:100%;margin-bottom:10px" onclick="planFillAll()">Add '+tw+' weeks</button>':'';
+  if(pe.weeks.length>0&&pe.weeks.length<tw)addBtn='<button class="btn btnp" style="width:100%;margin-bottom:10px" onclick="planFillAll()">Fill remaining '+(tw-pe.weeks.length)+'</button>';
+  if(pe.weeks.length>=tw&&pe.weeks.length>0)addBtn='<button class="btn btnp" style="width:100%;margin-bottom:10px" onclick="planSave()">Save plan</button>';
+
+  return '<div class="pad">'+modeBar
+    +'<span class="lbl">Build tab</span><p class="h1" style="margin:6px 0 20px">Custom progression plan</p>'
+
+    +'<div class="card" style="margin-bottom:12px"><span class="lbl">Plan name</span>'
+    +'<input value="'+nameVal+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:12px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.planEdit.name=this.value;sv()" /></div>'
+
+    +'<div class="card" style="margin-bottom:12px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+        +'<div><span class="lbl">Repeating cycle</span><p class="mu" style="font-size:12px;margin-top:3px">Restarts from Week 1 after the last week</p></div>'
+        +'<button onclick="S.planEdit.cyclic=!S.planEdit.cyclic;sv();draw()" style="width:48px;height:28px;border-radius:14px;border:none;background:'+(cyclicOn?'var(--acc)':'var(--brd)')+';cursor:pointer;position:relative">'
+        +'<span style="position:absolute;top:3px;'+(cyclicOn?'right:3px':'left:3px')+';width:22px;height:22px;background:#fff;border-radius:50%;display:block"></span>'
+        +'</button>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="card" style="margin-bottom:16px">'
+      +'<span class="lbl">Number of weeks</span>'
+      +'<div style="margin-top:10px">'+weeksDrum+'</div>'
+      +'<p class="mu" style="font-size:12px;margin-top:8px">Common: 4 (mesocycle), 6 (linear), 8, 12 (full block)</p>'
+    +'</div>'
+
+    +(pe.weeks.length>0?'<div style="border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:16px">'+weekRows+'</div>':'')
+    +addBtn
+    +'<button class="btng" onclick="S.planEdit={name:\'My Plan\',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};sv();draw()">Start over</button>'
+    +'</div>';
+}
+
+function planEditWeekDone(wIdx){
+  // Read drum values and save before closing edit screen
+  var pe=S.planEdit;
+  var wk=pe.weeks[wIdx];
+  // Theme drum
+  var td=document.getElementById('drum-theme');
+  if(td){var ti=Math.round(td.scrollTop/44);var themes=['none','learn','build','progress','peak','peakdeload','deload','custom'];wk.theme=themes[Math.min(ti,themes.length-1)]||'learn';}
+  // RPE drum
+  var rd=document.getElementById('drum-rpe');
+  if(rd){var ri=Math.round(rd.scrollTop/44);wk.rpe=5+ri;wk.rir=Math.max(0,10-wk.rpe);}
+  // Weight drum
+  var wd=document.getElementById('drum-weight');
+  if(wd){var wi=Math.round(wd.scrollTop/44);wk.weightPct=50+wi*5;}
+  // Custom theme label
+  var ct=document.getElementById('custom-theme-input');
+  if(ct)wk.customThemeLabel=ct.value;
+  pe.editWeek=null;
+  sv();draw();
+}
+
+function planAddWeek(){
+  var pe=S.planEdit;
+  var wNum=pe.weeks.length+1;
+  var defaults=[
+    {label:'Week 1 \u2014 Learn & Groove',theme:'learn',rpe:7,weightPct:90,volMod:1.0,tip:''},
+    {label:'Week 2 \u2014 Build',theme:'build',rpe:8,weightPct:95,volMod:1.0,tip:''},
+    {label:'Week 3 \u2014 Progress',theme:'progress',rpe:9,weightPct:100,volMod:1.0,tip:''},
+    {label:'Week 4 \u2014 Deload',theme:'deload',rpe:7,weightPct:105,volMod:0.5,tip:''}
+  ];
+  var d=defaults[Math.min(wNum-1,defaults.length-1)];
+  pe.weeks.push({label:d.label,theme:d.theme,rpe:d.rpe,rir:10-d.rpe,weightPct:d.weightPct,volMod:d.volMod,tip:d.tip});
+  pe.editWeek=pe.weeks.length-1;
+  sv();draw();
+}
+
+function planFillAll(){
+  var pe=S.planEdit;
+  var tw=pe.targetWeeks||4;
+  while(pe.weeks.length<tw){
+    var wNum=pe.weeks.length+1;
+    var isLast=(wNum===tw);
+    var isDeload=isLast||(tw>4&&wNum%4===0);
+    var pos=(wNum-1)%4;
+    var rpeMap=[7,8,9,9];
+    var rpe=isDeload?7:rpeMap[Math.min(pos,3)];
+    var wPct=isDeload?105:[90,95,100,100][Math.min(pos,3)];
+    var theme=isDeload?'deload':['learn','build','progress','progress'][Math.min(pos,3)];
+    var sub=isDeload?'Deload':['Learn & Groove','Build','Progress','Peak'][Math.min(pos,3)];
+    pe.weeks.push({label:'Week '+wNum+' \u2014 '+sub,theme:theme,rpe:rpe,rir:10-rpe,weightPct:wPct,volMod:isDeload?0.5:1.0,tip:''});
+  }
+  pe.editWeek=null;
+  sv();draw();
+}
+
+function planSave(){
+  var pe=S.planEdit;
+  if(!pe.name.trim()||!pe.weeks.length)return;
+  if(!S.customPlans)S.customPlans=[];
+  var key='cplan_'+Date.now();
+  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var d=new Date();
+  S.customPlans.push({key:key,name:pe.name.trim(),desc:'Custom plan \u00b7 '+pe.weeks.length+' weeks',weeks:pe.weeks,cyclic:pe.cyclic,date:d.getDate()+' '+mn[d.getMonth()]});
+  S.planEdit={name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};
+  sv();
+  S.tab='programs';
+  draw();
 }
 
 function custStart(){
@@ -2494,18 +2714,20 @@ function swReset(){
 // swCard removed — stopwatch is now a full mode screen
 
 // ── Drum builder helper ───────────────────────────────────────────────────────
-function makeDrum(id,items,selVal){
-  // items: [{label, val}]
+function makeDrum(id,items,selVal,ctx){
+  // items: [{label, val}]  ctx: optional context string for data attribute
+  var selIdx=0;
+  for(var i=0;i<items.length;i++){if(items[i].val===selVal)selIdx=i;}
   var cells='<div style="height:58px"></div>';
   for(var i=0;i<items.length;i++){
-    cells+='<div style="height:44px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:17px;font-weight:500;color:var(--tx)" data-drumval="'+items[i].val+'" data-drumid="'+id+'">'+items[i].label+'</div>';
+    var dist=Math.abs(i-selIdx);
+    var cls=dist===0?'drum-item active':dist===1?'drum-item near':'drum-item';
+    cells+='<div class="'+cls+'" style="height:44px;scroll-snap-align:center" data-drumval="'+items[i].val+'" data-drumid="'+id+'"'+(ctx?' data-drumctx="'+ctx+'"':'')+'>'+items[i].label+'</div>';
   }
   cells+='<div style="height:58px"></div>';
-  return '<div style="position:relative;height:160px;overflow:hidden">'
-    +'<div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:44px;background:transparent;border:.5px solid rgba(255,255,255,0.15);border-radius:10px;pointer-events:none;z-index:1"></div>'
-    +'<div style="position:absolute;left:0;right:0;top:0;height:58px;background:linear-gradient(var(--bg2),transparent);pointer-events:none;z-index:2"></div>'
-    +'<div style="position:absolute;left:0;right:0;bottom:0;height:58px;background:linear-gradient(transparent,var(--bg2));pointer-events:none;z-index:2"></div>'
-    +'<div id="'+id+'" style="overflow-y:scroll;height:160px;-webkit-overflow-scrolling:touch;scroll-snap-type:y mandatory;scrollbar-width:none">'+cells+'</div>'
+  return '<div class="drum-wrap">'
+    +'<div class="drum-sel"></div>'
+    +'<div id="'+id+'" class="drum-scroll">'+cells+'</div>'
   +'</div>';
 }
 
@@ -2752,43 +2974,77 @@ function timerReset(){
   sv();draw();
 }
 
+function updateDrumActive(drum){
+  var items=drum.querySelectorAll('.drum-item');
+  var selIdx=Math.round(drum.scrollTop/44);
+  for(var i=0;i<items.length;i++){
+    var dist=Math.abs(i-selIdx);
+    items[i].className=dist===0?'drum-item active':dist===1?'drum-item near':'drum-item';
+  }
+}
+function initDrum(id,selIdx,onChange){
+  var drum=document.getElementById(id);
+  if(!drum)return;
+  drum.scrollTop=selIdx*44;
+  updateDrumActive(drum);
+  var debounce;
+  drum.addEventListener('scroll',function(){
+    updateDrumActive(drum);
+    clearTimeout(debounce);
+    debounce=setTimeout(function(){
+      var idx=Math.round(drum.scrollTop/44);
+      onChange(idx);sv();
+    },150);
+  });
+}
 function initDrumScroll(){
   var T=S.timer;
-  // Map drum id -> {get initial index, on change}
-  var drums={
-    'drum-cd-min':{idx:Math.max(0,Math.floor(T.totalSecs/60)),step:1,onChange:function(v){
-      var secs=T.totalSecs%60;T.totalSecs=Math.max(5,v*60+secs);
-    }},
-    'drum-cd-sec':{idx:Math.max(0,Math.round((T.totalSecs%60)/5)),step:5,onChange:function(v){
-      var mins=Math.floor(T.totalSecs/60);T.totalSecs=Math.max(5,mins*60+v);
-    }},
-    'drum-emom': {idx:Math.max(0,(T.emomMins||10)-1),             step:60,onChange:function(v){T.emomMins=Math.round(v/60);}},
-    'drum-work': {idx:Math.max(0,Math.round((T.tabWork-5)/5)),     step:5, onChange:function(v){T.tabWork=v;}},
-    'drum-rest': {idx:Math.max(0,Math.round((T.tabRest-5)/5)),     step:5, onChange:function(v){T.tabRest=v;}},
-    'drum-rounds':{idx:Math.max(0,T.tabRounds-1),                  step:1, onChange:function(v){T.tabRounds=v;}}
-  };
-  var ids=Object.keys(drums);
-  for(var i=0;i<ids.length;i++){
-    (function(id,cfg){
-      var drum=document.getElementById(id);
-      if(!drum)return;
-      drum.scrollTop=cfg.idx*44;
-      var debounce;
-      drum.addEventListener('scroll',function(){
-        clearTimeout(debounce);
-        debounce=setTimeout(function(){
-          var idx=Math.round(drum.scrollTop/44);
-          idx=Math.max(0,idx);
-          var val;
-          if(id==='drum-rounds')val=idx+1;
-          else if(id==='drum-work'||id==='drum-rest')val=(idx+1)*5;
-          else if(id==='drum-cd-min')val=idx;
-          else if(id==='drum-cd-sec')val=idx*5;
-          else val=(idx+1)*60;
-          cfg.onChange(val);sv();
-        },150);
-      });
-    })(ids[i],drums[ids[i]]);
+  initDrum('drum-cd-min',Math.max(0,Math.floor(T.totalSecs/60)),function(i){var s=T.totalSecs%60;T.totalSecs=Math.max(5,i*60+s);});
+  initDrum('drum-cd-sec',Math.max(0,Math.round((T.totalSecs%60)/5)),function(i){var m=Math.floor(T.totalSecs/60);T.totalSecs=Math.max(5,m*60+i*5);});
+  initDrum('drum-emom',Math.max(0,(T.emomMins||10)-1),function(i){T.emomMins=i+1;});
+  initDrum('drum-work',Math.max(0,Math.round((T.tabWork-5)/5)),function(i){T.tabWork=(i+1)*5;});
+  initDrum('drum-rest',Math.max(0,Math.round((T.tabRest-5)/5)),function(i){T.tabRest=(i+1)*5;});
+  initDrum('drum-rounds',Math.max(0,T.tabRounds-1),function(i){T.tabRounds=i+1;});
+  // Session drum
+  initDrum('drum-session',Math.max(0,S.day),function(i){S.day=i;sv();draw();});
+  // Plan builder — number of weeks drum
+  var weeksDrumEl=document.getElementById('drum-weeks');
+  if(weeksDrumEl){
+    var pe=S.planEdit;if(!pe.targetWeeks)pe.targetWeeks=4;
+    initDrum('drum-weeks',Math.max(0,pe.targetWeeks-2),function(i){if(S.planEdit)S.planEdit.targetWeeks=i+2;sv();});
+  }
+  // Edit week drums (theme, rpe, weight)
+  var themeDrumEl=document.getElementById('drum-theme');
+  if(themeDrumEl&&S.planEdit&&S.planEdit.editWeek!==null){
+    var wIdx=S.planEdit.editWeek;
+    var wk=S.planEdit.weeks[wIdx];
+    var themes=['none','learn','build','progress','peak','peakdeload','deload','custom'];
+    var tIdx=themes.indexOf(wk.theme||'learn');if(tIdx<0)tIdx=1;
+    initDrum('drum-theme',tIdx,function(i){
+      var themes=['none','learn','build','progress','peak','peakdeload','deload','custom'];
+      if(S.planEdit&&S.planEdit.editWeek!==null){
+        S.planEdit.weeks[S.planEdit.editWeek].theme=themes[i]||'learn';
+        // Show/hide custom input
+        var ci=document.getElementById('custom-theme-input');
+        if(ci)ci.style.display=(themes[i]==='custom')?'block':'none';
+        sv();
+      }
+    });
+    initDrum('drum-rpe',Math.max(0,(wk.rpe||7)-5),function(i){
+      if(S.planEdit&&S.planEdit.editWeek!==null){
+        S.planEdit.weeks[S.planEdit.editWeek].rpe=5+i;
+        S.planEdit.weeks[S.planEdit.editWeek].rir=Math.max(0,5-i);
+        var rd=document.getElementById('rir-display');
+        if(rd)rd.textContent=Math.max(0,5-i);
+        sv();
+      }
+    });
+    initDrum('drum-weight',Math.max(0,Math.round(((wk.weightPct||100)-50)/5)),function(i){
+      if(S.planEdit&&S.planEdit.editWeek!==null){
+        S.planEdit.weeks[S.planEdit.editWeek].weightPct=50+i*5;
+        sv();
+      }
+    });
   }
 }
 function refreshLogSheet(){
@@ -2830,6 +3086,7 @@ if(!S.tab)S.tab='home';
 // State shape guards
 if(!S.customPrograms)S.customPrograms=[];
 if(!S.customEdit)S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
+if(!S.customPlans)S.customPlans=[];
 if(!S.timer)S.timer={mode:'countdown',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true};
 if(S.timer.emomRound===undefined)S.timer.emomRound=0;
 if(S.timer.setup===undefined)S.timer.setup=true;
