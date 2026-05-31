@@ -1188,7 +1188,102 @@ function applyTheme(){
   document.documentElement.classList.toggle('light',S.theme==='light');
 }
 
-function ld(){try{var d=localStorage.getItem('train_v3');if(d)S=JSON.parse(d);}catch(e){}}
+function ld(){
+  try{var d=localStorage.getItem('train_v3');if(d)S=JSON.parse(d);}catch(e){}
+  if(S.plan===undefined)S.plan=null;
+  if(S._planOpen===undefined)S._planOpen=false;
+}
+
+// PROGRESSION PLANS ----------------------------------------------------------
+var PLANS=[
+  {key:'classic_meso',name:'Classic Mesocycle',
+   desc:'4-week RPE wave. Build intensity across 3 weeks, peak, then reset. The foundation of periodised training.',
+   weeks:[
+    {label:'Week 1 — Learn & Groove',theme:'learn',rpe:7,rir:3,volMod:1.0,
+     tip:'Start conservatively. Use around 90% of your usual weight. Focus on form, not load. RPE 7 means you should finish each set feeling like you had 3 reps left.'},
+    {label:'Week 2 — Build',theme:'build',rpe:8,rir:2,volMod:1.0,
+     tip:'Add a little weight or tighten form. RPE 8 — last set should feel genuinely hard, 2 reps left in the tank.'},
+    {label:'Week 3 — Progress',theme:'progress',rpe:9,rir:1,volMod:1.0,
+     tip:'Train at your working weight limit. RPE 9 — by the last set you should have at most 1 rep left. This is where adaptation happens.'},
+    {label:'Week 4 — Peak & Deload',theme:'peak',rpe:7,rir:3,volMod:0.5,
+     tip:'Halve the sets, maintain the weight. Add 5% if possible. Volume drives fatigue — reduce it, keep the load. You will feel fresh for the next cycle.'}
+   ],cyclic:true},
+  {key:'linear',name:'Linear Progression',
+   desc:'Add weight every session. Best for beginners and strength programs. Simple and evidence-backed.',
+   weeks:[
+    {label:'Week 1',theme:'learn',rpe:7,rir:3,volMod:1.0,
+     tip:'Establish your starting weights. RPE 7 — conservative. You are building the habit and the base, not testing limits.'},
+    {label:'Week 2',theme:'build',rpe:8,rir:2,volMod:1.0,
+     tip:'Add 2.5 kg to compound lifts, 1 kg to isolation work from last week. If a set felt easy, add weight. If form broke, hold.'},
+    {label:'Week 3',theme:'progress',rpe:8,rir:2,volMod:1.0,
+     tip:'Continue adding. Same rule: 2.5 kg compounds, 1 kg isolation. Keep a note of weights — you are building your personal records.'},
+    {label:'Week 4',theme:'progress',rpe:8,rir:2,volMod:1.0,
+     tip:'Keep adding. If you stalled on a lift, repeat the same weight with better form before trying to increase again.'},
+    {label:'Week 5',theme:'peak',rpe:9,rir:1,volMod:1.0,
+     tip:'Continue progressing. The accumulated load is now significant. This is real progress.'},
+    {label:'Week 6 — Deload',theme:'learn',rpe:6,rir:4,volMod:0.5,
+     tip:'Take a deload. Reduce weight by 20%, halve the sets. Recovery is where you actually get stronger. Come back next week ready to push past your old numbers.'}
+   ],cyclic:true},
+  {key:'wave_3_1',name:'3/1 Wave',
+   desc:'3 weeks of progressive loading followed by a full deload week. More recovery than a classic mesocycle.',
+   weeks:[
+    {label:'Week 1 — Accumulate',theme:'learn',rpe:7,rir:3,volMod:1.0,
+     tip:'Accumulation week. Moderate intensity, full volume. RPE 7 — form focus.'},
+    {label:'Week 2 — Intensify',theme:'build',rpe:8,rir:2,volMod:1.0,
+     tip:'Intensity week. Same volume, more weight. RPE 8 — each set should feel like a real effort.'},
+    {label:'Week 3 — Peak',theme:'progress',rpe:9,rir:1,volMod:1.0,
+     tip:'Peak week. Maximum intensity. RPE 9 — approach your limits with good form. This is where you test what you have built.'},
+    {label:'Week 4 — Full Deload',theme:'peak',rpe:6,rir:4,volMod:0.5,
+     tip:'Full deload. Half the sets, weight reduced 20-30%. This week is not optional — it is when your nervous system recovers. Skip it and you accumulate fatigue instead of fitness.'}
+   ],cyclic:true},
+  {key:'maintenance',name:'Maintenance',
+   desc:'Keep what you have built. Reduce volume, maintain intensity. For busy periods or between training blocks.',
+   weeks:[
+    {label:'Week 1',theme:'learn',rpe:7,rir:3,volMod:0.75,
+     tip:'Maintenance mode. Reduce to 3 sets per exercise. Keep the same weight. Research shows 1/3 of normal volume maintains strength for weeks.'},
+    {label:'Week 2',theme:'build',rpe:7,rir:3,volMod:0.75,
+     tip:'Keep it going. Same reduced volume, same weight. You are not losing fitness at this volume.'},
+    {label:'Week 3',theme:'progress',rpe:7,rir:3,volMod:0.75,
+     tip:'Still maintaining. If you feel fresh, nudge intensity up slightly. The goal is preserving what you have.'},
+    {label:'Week 4',theme:'peak',rpe:7,rir:3,volMod:0.75,
+     tip:'Final maintenance week. Next week return to full volume. The foundation held — now build on it again.'}
+   ],cyclic:false}
+];
+
+function getPlanByKey(k){for(var i=0;i<PLANS.length;i++)if(PLANS[i].key===k)return PLANS[i];return null;}
+function getActivePlan(){if(!S.plan||!S.plan.key)return null;return getPlanByKey(S.plan.key);}
+function getPlanWeek(){
+  var p=getActivePlan();if(!p||!S.plan)return null;
+  var w=S.plan.weekIdx||0;
+  if(p.cyclic)w=w%p.weeks.length;else w=Math.min(w,p.weeks.length-1);
+  return p.weeks[w];
+}
+function getPlanWeekNum(){
+  var p=getActivePlan();if(!p||!S.plan)return 1;
+  var w=S.plan.weekIdx||0;
+  if(p.cyclic)return(w%p.weeks.length)+1;
+  return Math.min(w,p.weeks.length-1)+1;
+}
+function attachPlan(planKey){
+  var p=getPlanByKey(planKey);if(!p)return;
+  S.plan={key:planKey,weekIdx:0,weekStart:new Date().toISOString(),sessionsThisWeek:0,notified:false};
+  sv();draw();
+}
+function detachPlan(){S.plan=null;sv();draw();}
+function advancePlanWeek(){
+  if(!S.plan)return;
+  S.plan.weekIdx=(S.plan.weekIdx||0)+1;
+  S.plan.sessionsThisWeek=0;
+  S.plan.weekStart=new Date().toISOString();
+  S.plan.notified=false;
+  sv();draw();
+}
+function checkPlanAdvance(){
+  if(!S.plan||!S.plan.weekStart)return false;
+  var diff=(new Date()-new Date(S.plan.weekStart))/(1000*60*60*24);
+  return diff>=7&&!S.plan.notified;
+}
+
 function sv(){try{localStorage.setItem('train_v3',JSON.stringify(S));}catch(e){}}
 
 // TPL MAP HELPER -------------------------------------------------------------
@@ -1428,10 +1523,59 @@ function homeV(){
 // TODAY ----------------------------------------------------------------------
 
 function todayV(){
-  if(!ACTIVE_TPL||!ACTIVE_TPL.days){return '<div class="pad"><p class="mu">No program loaded. <button class="btn btno" style="margin-top:12px" onclick="go(\'programs\')">Choose a program</button></p></div>';}
+  if(!ACTIVE_TPL||!ACTIVE_TPL.days){
+    return '<div class="pad"><p class="mu">No program loaded. <button class="btn btno" style="margin-top:12px" onclick="go(\'programs\')">Choose a program</button></p></div>';
+  }
   if(S.day>=ACTIVE_TPL.days.length)S.day=0;
-  // FIX: use ACTIVE_TPL throughout
   var sess=ACTIVE_TPL.days[S.day];
+
+  // ── Plan banner ───────────────────────────────────────────────────────────
+  var planBanner='';
+  var planPrompt='';
+  if(S.plan&&S.plan.key){
+    var pl=getActivePlan();
+    var pw=getPlanWeek();
+    if(pl&&pw){
+      var wNum=getPlanWeekNum();
+      var totalW=pl.weeks.length;
+      var themeColors={learn:'#3ab8e0',build:'var(--acc)',progress:'#e07030',peak:'var(--ok)'};
+      var themeCol=themeColors[pw.theme]||'var(--acc)';
+      var rpeBar='';
+      for(var ri=1;ri<=10;ri++){
+        rpeBar+='<div style="width:16px;height:5px;border-radius:3px;margin-right:2px;background:'+(ri<=pw.rpe?themeCol:'var(--bg3)')+'"></div>';
+      }
+      if(checkPlanAdvance()){
+        var nextW=wNum<totalW?wNum+1:1;
+        planPrompt='<div class="card" style="margin-bottom:10px;border-color:'+themeCol+';background:var(--str-bg)">';
+        planPrompt+='<span class="lbl" style="color:'+themeCol+'">Plan update available</span>';
+        planPrompt+='<p style="font-size:14px;font-weight:500;margin:4px 0 6px">7 days have passed \u2014 advance to Week '+nextW+'?</p>';
+        planPrompt+='<div style="display:flex;gap:8px">';
+        planPrompt+='<button class="btn btnp" style="flex:1;font-size:13px" onclick="advancePlanWeek()">Yes, advance</button>';
+        planPrompt+='<button class="btn btno" style="font-size:13px" onclick="S.plan.notified=true;sv();draw()">Stay on Week '+wNum+'</button>';
+        planPrompt+='</div></div>';
+      }
+      var halfVol=pw.volMod<1;
+      planBanner='<div class="card" style="margin-bottom:12px;border-left:3px solid '+themeCol+';background:var(--bg2);cursor:pointer" onclick="S._planOpen=!S._planOpen;sv();draw()">';
+      planBanner+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      planBanner+='<div style="flex:1;min-width:0"><span class="lbl" style="color:'+themeCol+'">Progression plan</span>';
+      planBanner+='<p style="font-size:14px;font-weight:600;margin:3px 0 2px;color:var(--tx)">'+pw.label+'</p>';
+      planBanner+='<p class="mu" style="font-size:12px;margin:0">Week '+wNum+' of '+totalW+' \u00b7 RPE '+pw.rpe+' \u00b7 RIR '+pw.rir+(halfVol?' \u00b7 Half volume':'')+'</p>';
+      planBanner+='</div>';
+      planBanner+='<div style="display:flex;flex-wrap:wrap;width:86px;gap:2px;margin-left:10px;flex-shrink:0">'+rpeBar+'</div></div>';
+      if(S._planOpen){
+        planBanner+='<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--brd)">';
+        planBanner+='<p style="font-size:13px;color:var(--tx);line-height:1.6;margin:0 0 10px">'+pw.tip+'</p>';
+        if(halfVol) planBanner+='<div style="background:var(--bg3);border-radius:8px;padding:8px 10px;margin-bottom:10px"><p style="font-size:12px;color:'+themeCol+';margin:0"><strong>Volume this week:</strong> Do half your normal sets \u2014 this is the prescribed deload.</p></div>';
+        planBanner+='<div style="display:flex;gap:8px">';
+        planBanner+='<button class="btn btnp" style="font-size:12px;padding:5px 10px" onclick="advancePlanWeek();event.stopPropagation()">Advance week</button>';
+        planBanner+='<button class="btn btno" style="font-size:12px;padding:5px 10px;color:var(--mu)" onclick="detachPlan();event.stopPropagation()">Remove plan</button>';
+        planBanner+='</div></div>';
+      }
+      planBanner+='</div>';
+    }
+  }
+
+  // ── Exercise rows ─────────────────────────────────────────────────────────
   var rows='';
   for(var i=0;i<sess.exercises.length;i++){
     var ex=sess.exercises[i];
@@ -1441,16 +1585,38 @@ function todayV(){
     var cues='';
     var exCues=ex.cues||[];
     for(var c=0;c<exCues.length;c++)cues+='<div class="cue">'+exCues[c]+'</div>';
-    var detail='<div id="xd'+i+'" style="display:none;background:var(--bg2);border-radius:0 0 12px 12px;padding:12px 14px 14px;margin-top:-7px;margin-bottom:7px;border:.5px solid var(--brd);border-top:none">'+(ex.muscles?'<p style="font-size:12px;color:var(--mu);margin-bottom:8px"><strong style="color:var(--tx)">Muscles:</strong> '+ex.muscles+'</p>':'')+cues+(ex.subs?'<p style="font-size:12px;color:var(--dim);margin-top:8px;font-style:italic">Sub: '+ex.subs+'</p>':'')+(ex.prog?'<p style="font-size:12px;color:var(--acc);margin-top:6px">Progression: '+ex.prog+'</p>':'')+'</div>';
-    rows+='<div class="exrow'+(isStr?' exstr':'')+'" data-xd="'+i+'"><div style="flex:1;min-width:0"><span class="lbl" style="color:'+(isStr?'var(--acc)':'var(--mu)')+'">'+catLabel+'</span><p style="font-size:14px;font-weight:'+(isStr?'500':'400')+';color:'+(isStr?'var(--tx)':'#c0c0c0')+';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p></div><span style="font-size:12px;color:'+(isStr?'var(--acc)':'var(--mu)')+';white-space:nowrap;margin-left:8px">'+volStr+'</span></div>'+detail;
+    var detail='<div id="xd'+i+'" style="display:none;background:var(--bg2);border-radius:0 0 12px 12px;padding:12px 14px 14px;margin-top:-7px;margin-bottom:7px;border:.5px solid var(--brd);border-top:none">'
+      +(ex.muscles?'<p style="font-size:12px;color:var(--mu);margin-bottom:8px"><strong style="color:var(--tx)">Muscles:</strong> '+ex.muscles+'</p>':'')
+      +cues
+      +(ex.subs?'<p style="font-size:12px;color:var(--dim);margin-top:8px;font-style:italic">Sub: '+ex.subs+'</p>':'')
+      +(ex.prog?'<p style="font-size:12px;color:var(--acc);margin-top:6px">Progression: '+ex.prog+'</p>':'')
+      +'</div>';
+    rows+='<div class="exrow'+(isStr?' exstr':'')+'\" data-xd="'+i+'">'
+      +'<div style="flex:1;min-width:0"><span class="lbl" style="color:'+(isStr?'var(--acc)':'var(--mu)')+'">'+catLabel+'</span>'
+      +'<p style="font-size:14px;font-weight:'+(isStr?'500':'400')+';color:'+(isStr?'var(--tx)':'#c0c0c0')+';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ex.name+'</p></div>'
+      +'<span style="font-size:12px;color:'+(isStr?'var(--acc)':'var(--mu)')+';white-space:nowrap;margin-left:8px">'+volStr+'</span></div>'+detail;
   }
+
+  // ── Day selector ──────────────────────────────────────────────────────────
   var daybts='';
   for(var di=0;di<ACTIVE_TPL.days.length;di++){
     var on=di===S.day;
     daybts+='<button data-switchday="'+di+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer">'+ACTIVE_TPL.days[di].label+'</button>';
   }
-  return '<div class="pad"><span class="lbl">'+ACTIVE_TPL.name+' · '+sess.label+'</span><p class="h1" style="margin:6px 0 4px">'+(sess.focus||'')+'</p><p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises'+(sess.mins?' · ~'+sess.mins+' min':'')+'</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px"></div>'+rows+'<div style="margin-top:8px"><button class="btn btnp" onclick="wxStart()">Start session</button><div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div></div></div>';
+
+  return '<div class="pad">'
+    +'<span class="lbl">'+ACTIVE_TPL.name+' \u00b7 '+sess.label+'</span>'
+    +'<p class="h1" style="margin:6px 0 '+(planBanner||planPrompt?'12':'4')+'px">'+(sess.focus||sess.label)+'</p>'
+    +planPrompt
+    +planBanner
+    +(planBanner?'':('<p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises'+(sess.mins?' \u00b7 ~'+sess.mins+' min':'')+'</p>'))
+    +rows
+    +'<div style="margin-top:8px">'
+    +'<button class="btn btnp" onclick="wxStart()">Start session</button>'
+    +'<div style="display:flex;gap:8px;margin-top:10px">'+daybts+'</div>'
+    +'</div></div>';
 }
+
 
 // WORKOUT PLAYER -------------------------------------------------------------
 
@@ -1872,9 +2038,18 @@ document.addEventListener('click',function(e){
       sv();draw();
       },true);return;
     }
+    if(t.dataset&&t.dataset.delprog){
+      var dpkey=t.dataset.delprog;
+      showModal('Delete program?','This custom program will be permanently removed.','Delete',function(){
+      for(var dpi=0;dpi<S.customPrograms.length;dpi++)if(S.customPrograms[dpi].key===dpkey){S.customPrograms.splice(dpi,1);break;}
+      if(S.tplKey===dpkey){S.tplKey='balanced';ACTIVE_TPL=TPL;}
+      sv();draw();
+      },true);return;
+    }
     if(t.dataset&&t.dataset.tset){S.timer.totalSecs=parseInt(t.dataset.tset);sv();draw();return;}
     if(t.dataset&&t.dataset.timermode){S.timer.mode=t.dataset.timermode;S.timer.setup=true;S.timer.running=false;clearInterval(_timerInterval);sv();draw();return;}
     if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
+    if(t.dataset&&t.dataset.attachplan){attachPlan(t.dataset.attachplan);return;}
     if(t.dataset&&t.dataset.selectprog){obSelectProgram(t.dataset.selectprog);return;}
     if(t.dataset&&t.dataset.action==='goprograms'){S.view='app';S.tab='programs';sv();draw();return;}
     if(t.id&&t.id.indexOf('t-')===0){go(t.id.slice(2));return;}
@@ -1963,7 +2138,86 @@ function programsV(){
     html+='<div style="margin-bottom:18px"></div>';
   });
 
+  // ── Progression plans section ─────────────────────────────────────────────
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+  html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Progression Plan</span>';
+  html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+
+  if(S.plan&&S.plan.key){
+    var ap=getPlanByKey(S.plan.key);
+    var aw=getPlanWeek();
+    var awNum=getPlanWeekNum();
+    if(ap&&aw){
+      html+='<div class="card" style="margin-bottom:8px;border-color:var(--acc);background:var(--str-bg)">';
+      html+='<span class="lbl" style="color:var(--acc)">Active plan</span>';
+      html+='<p style="font-size:15px;font-weight:500;margin:4px 0 2px">'+ap.name+'</p>';
+      html+='<p class="mu" style="font-size:12px;margin:0 0 8px">'+aw.label+' (Week '+awNum+' of '+ap.weeks.length+')</p>';
+      html+='<div style="display:flex;gap:8px">';
+      html+='<button class="btn btnp" style="font-size:12px;flex:1" onclick="advancePlanWeek()">Advance week</button>';
+      html+='<button class="btn btno" style="font-size:12px" onclick="detachPlan()">Remove</button>';
+      html+='</div></div>';
+    }
+  } else {
+    html+='<p class="mu" style="font-size:12px;margin-bottom:10px">Add a progression plan to get weekly RPE targets and coaching cues in Today.</p>';
+  }
+
+  for(var pi=0;pi<PLANS.length;pi++){
+    var pl=PLANS[pi];
+    var isActive=S.plan&&S.plan.key===pl.key;
+    if(isActive)continue; // already shown above
+    html+='<div class="card" style="margin-bottom:8px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
+    html+='<div style="flex:1;padding-right:10px">';
+    html+='<p style="font-weight:500;margin:0 0 2px;font-size:14px">'+pl.name+'</p>';
+    html+='<p style="font-size:12px;color:var(--mu);margin:0 0 3px">'+pl.weeks.length+' weeks'+(!pl.cyclic?' · one-off':'  · repeating')+'</p>';
+    html+='<p style="font-size:12px;color:var(--tx);margin:0;opacity:0.75">'+pl.desc+'</p>';
+    html+='</div>';
+    html+='<button class="btn btnp" style="font-size:12px;padding:5px 10px;flex-shrink:0;margin-top:2px" data-attachplan="'+pl.key+'">Attach</button>';
+    html+='</div></div>';
+  }
+
+  html+='<div style="margin-bottom:20px"></div>';
   html+='<button class="btn btnp" style="width:100%;margin-bottom:24px" onclick="resetOnboarding()">Retake questionnaire</button>';
+
+  // ── Progression Plans section ─────────────────────────────────────────────
+  html+='<div style="display:flex;align-items:center;gap:8px;margin:4px 0 8px">';
+  html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Progression Plan</span>';
+  html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+
+  if(S.plan&&S.plan.key){
+    var ap=getPlanByKey(S.plan.key);
+    var aw=getPlanWeek();
+    var awNum=getPlanWeekNum();
+    if(ap&&aw){
+      html+='<div class="card" style="margin-bottom:8px;border-color:var(--acc);background:var(--str-bg)">';
+      html+='<span class="lbl" style="color:var(--acc)">Active plan</span>';
+      html+='<p style="font-size:15px;font-weight:500;margin:4px 0 2px">'+ap.name+'</p>';
+      html+='<p class="mu" style="font-size:12px;margin:0 0 8px">'+aw.label+' · Week '+awNum+' of '+ap.weeks.length+'</p>';
+      html+='<div style="display:flex;gap:8px">';
+      html+='<button class="btn btnp" style="font-size:12px;flex:1" onclick="advancePlanWeek()">Advance week</button>';
+      html+='<button class="btn btno" style="font-size:12px" onclick="detachPlan()">Remove plan</button>';
+      html+='</div></div>';
+    }
+  } else {
+    html+='<p class="mu" style="font-size:12px;margin:0 0 10px">Attach a plan to get weekly RPE targets and coaching guidance in Today.</p>';
+  }
+
+  for(var pli=0;pli<PLANS.length;pli++){
+    var pl=PLANS[pli];
+    var isAct=S.plan&&S.plan.key===pl.key;
+    if(isAct)continue;
+    html+='<div class="card" style="margin-bottom:8px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
+    html+='<div style="flex:1;padding-right:10px">';
+    html+='<p style="font-weight:500;margin:0 0 2px;font-size:14px">'+pl.name+'</p>';
+    html+='<p style="font-size:11px;color:var(--mu);margin:0 0 3px">'+pl.weeks.length+' weeks · '+(pl.cyclic?'repeating':'one-off')+'</p>';
+    html+='<p style="font-size:12px;color:var(--tx);margin:0;opacity:0.8">'+pl.desc+'</p>';
+    html+='</div>';
+    html+='<button class="btn btnp" style="font-size:12px;padding:5px 10px;flex-shrink:0;margin-top:2px" data-attachplan="'+pl.key+'">Attach</button>';
+    html+='</div></div>';
+  }
+
+  html+='<div style="margin-bottom:24px"></div>';
   html+='</div>';
   return html;
 }
