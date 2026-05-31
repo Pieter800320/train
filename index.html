@@ -1192,6 +1192,7 @@ function ld(){
   try{var d=localStorage.getItem('train_v3');if(d)S=JSON.parse(d);}catch(e){}
   if(S.plan===undefined)S.plan=null;
   if(S._planOpen===undefined)S._planOpen=false;
+  if(S._pgOpen===undefined)S._pgOpen={};
 }
 
 // PROGRESSION PLANS ----------------------------------------------------------
@@ -1540,36 +1541,75 @@ function todayV(){
       var totalW=pl.weeks.length;
       var themeColors={learn:'#3ab8e0',build:'var(--acc)',progress:'#e07030',peak:'var(--ok)'};
       var themeCol=themeColors[pw.theme]||'var(--acc)';
-      var rpeBar='';
-      for(var ri=1;ri<=10;ri++){
-        rpeBar+='<div style="width:16px;height:5px;border-radius:3px;margin-right:2px;background:'+(ri<=pw.rpe?themeCol:'var(--bg3)')+'"></div>';
-      }
+      var halfVol=pw.volMod<1;
+
+      // Week-advance prompt
       if(checkPlanAdvance()){
         var nextW=wNum<totalW?wNum+1:1;
         planPrompt='<div class="card" style="margin-bottom:10px;border-color:'+themeCol+';background:var(--str-bg)">';
-        planPrompt+='<span class="lbl" style="color:'+themeCol+'">Plan update available</span>';
-        planPrompt+='<p style="font-size:14px;font-weight:500;margin:4px 0 6px">7 days have passed \u2014 advance to Week '+nextW+'?</p>';
+        planPrompt+='<span class="lbl" style="color:'+themeCol+'">Plan update</span>';
+        planPrompt+='<p style="font-size:14px;font-weight:500;margin:4px 0 8px">7 days have passed \u2014 advance to Week '+nextW+'?</p>';
         planPrompt+='<div style="display:flex;gap:8px">';
         planPrompt+='<button class="btn btnp" style="flex:1;font-size:13px" onclick="advancePlanWeek()">Yes, advance</button>';
-        planPrompt+='<button class="btn btno" style="font-size:13px" onclick="S.plan.notified=true;sv();draw()">Stay on Week '+wNum+'</button>';
+        planPrompt+='<button class="btn btno" style="flex:1;font-size:13px" onclick="S.plan.notified=true;sv();draw()">Stay on Week '+wNum+'</button>';
         planPrompt+='</div></div>';
       }
-      var halfVol=pw.volMod<1;
-      planBanner='<div class="card" style="margin-bottom:12px;border-left:3px solid '+themeCol+';background:var(--bg2);cursor:pointer" onclick="S._planOpen=!S._planOpen;sv();draw()">';
-      planBanner+='<div style="display:flex;justify-content:space-between;align-items:center">';
-      planBanner+='<div style="flex:1;min-width:0"><span class="lbl" style="color:'+themeCol+'">Progression plan</span>';
-      planBanner+='<p style="font-size:14px;font-weight:600;margin:3px 0 2px;color:var(--tx)">'+pw.label+'</p>';
-      planBanner+='<p class="mu" style="font-size:12px;margin:0">Week '+wNum+' of '+totalW+' \u00b7 RPE '+pw.rpe+' \u00b7 RIR '+pw.rir+(halfVol?' \u00b7 Half volume':'')+'</p>';
-      planBanner+='</div>';
-      planBanner+='<div style="display:flex;flex-wrap:wrap;width:86px;gap:2px;margin-left:10px;flex-shrink:0">'+rpeBar+'</div></div>';
-      if(S._planOpen){
-        planBanner+='<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--brd)">';
-        planBanner+='<p style="font-size:13px;color:var(--tx);line-height:1.6;margin:0 0 10px">'+pw.tip+'</p>';
-        if(halfVol) planBanner+='<div style="background:var(--bg3);border-radius:8px;padding:8px 10px;margin-bottom:10px"><p style="font-size:12px;color:'+themeCol+';margin:0"><strong>Volume this week:</strong> Do half your normal sets \u2014 this is the prescribed deload.</p></div>';
-        planBanner+='<div style="display:flex;gap:8px">';
-        planBanner+='<button class="btn btnp" style="font-size:12px;padding:5px 10px" onclick="advancePlanWeek();event.stopPropagation()">Advance week</button>';
-        planBanner+='<button class="btn btno" style="font-size:12px;padding:5px 10px;color:var(--mu)" onclick="detachPlan();event.stopPropagation()">Remove plan</button>';
+
+      // Collapsed state: compact single row
+      planBanner='<div class="card" style="margin-bottom:12px;border-left:3px solid '+themeCol+';background:var(--bg2);cursor:pointer;padding:12px 14px" onclick="S._planOpen=!S._planOpen;sv();draw()">';
+
+      if(!S._planOpen){
+        // Compact view
+        planBanner+='<div style="display:flex;align-items:center;justify-content:space-between">';
+        planBanner+='<div>';
+        planBanner+='<span class="lbl" style="color:'+themeCol+'">Progression plan</span>';
+        planBanner+='<p style="font-size:14px;font-weight:600;margin:3px 0 2px;color:var(--tx)">'+pw.label+'</p>';
+        planBanner+='<p class="mu" style="font-size:12px;margin:0">Week '+wNum+' of '+totalW+(halfVol?' \u00b7 Half volume':'')+'</p>';
+        planBanner+='</div>';
+        // Simple RPE badge
+        planBanner+='<div style="background:var(--bg3);border-radius:10px;padding:8px 12px;text-align:center;flex-shrink:0">';
+        planBanner+='<p style="font-size:18px;font-weight:700;color:'+themeCol+';margin:0;line-height:1">'+pw.rpe+'</p>';
+        planBanner+='<p style="font-size:9px;color:var(--mu);margin:2px 0 0;text-transform:uppercase;letter-spacing:0.05em">RPE</p>';
         planBanner+='</div></div>';
+      } else {
+        // Expanded view
+        planBanner+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">';
+        planBanner+='<div>';
+        planBanner+='<span class="lbl" style="color:'+themeCol+'">Progression plan</span>';
+        planBanner+='<p style="font-size:14px;font-weight:600;margin:3px 0 2px;color:var(--tx)">'+pw.label+'</p>';
+        planBanner+='<p class="mu" style="font-size:12px;margin:0">Week '+wNum+' of '+totalW+'</p>';
+        planBanner+='</div>';
+        planBanner+='<div style="background:var(--bg3);border-radius:10px;padding:8px 12px;text-align:center;flex-shrink:0">';
+        planBanner+='<p style="font-size:18px;font-weight:700;color:'+themeCol+';margin:0;line-height:1">'+pw.rpe+'</p>';
+        planBanner+='<p style="font-size:9px;color:var(--mu);margin:2px 0 0;text-transform:uppercase;letter-spacing:0.05em">RPE</p>';
+        planBanner+='</div></div>';
+        // Stats row
+        planBanner+='<div style="display:flex;gap:8px;margin-bottom:12px">';
+        planBanner+='<div style="flex:1;background:var(--bg3);border-radius:8px;padding:8px 10px">';
+        planBanner+='<p style="font-size:10px;color:var(--mu);margin:0 0 2px;text-transform:uppercase;letter-spacing:0.05em">RIR</p>';
+        planBanner+='<p style="font-size:16px;font-weight:600;color:var(--tx);margin:0">'+pw.rir+' reps</p>';
+        planBanner+='</div>';
+        planBanner+='<div style="flex:1;background:var(--bg3);border-radius:8px;padding:8px 10px">';
+        planBanner+='<p style="font-size:10px;color:var(--mu);margin:0 0 2px;text-transform:uppercase;letter-spacing:0.05em">Volume</p>';
+        planBanner+='<p style="font-size:16px;font-weight:600;color:'+(halfVol?themeCol:'var(--tx)')+';margin:0">'+(halfVol?'Half':'Full')+'</p>';
+        planBanner+='</div>';
+        planBanner+='<div style="flex:1;background:var(--bg3);border-radius:8px;padding:8px 10px">';
+        planBanner+='<p style="font-size:10px;color:var(--mu);margin:0 0 2px;text-transform:uppercase;letter-spacing:0.05em">Effort</p>';
+        planBanner+='<p style="font-size:12px;font-weight:600;color:'+themeCol+';margin:0;line-height:1.3">'+pw.theme.charAt(0).toUpperCase()+pw.theme.slice(1)+'</p>';
+        planBanner+='</div></div>';
+        // Coaching tip
+        planBanner+='<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:12px">';
+        planBanner+='<p style="font-size:13px;color:var(--tx);line-height:1.6;margin:0">'+pw.tip+'</p>';
+        planBanner+='</div>';
+        if(halfVol){
+          planBanner+='<div style="background:var(--str-bg);border:1px solid '+themeCol+';border-radius:8px;padding:8px 12px;margin-bottom:12px">';
+          planBanner+='<p style="font-size:12px;color:'+themeCol+';margin:0"><strong>Deload week:</strong> Do half your normal number of sets today.</p>';
+          planBanner+='</div>';
+        }
+        planBanner+='<div style="display:flex;gap:8px">';
+        planBanner+='<button class="btn btnp" style="flex:1;font-size:13px" onclick="advancePlanWeek();event.stopPropagation()">Advance week</button>';
+        planBanner+='<button class="btn btno" style="flex:1;font-size:13px" onclick="detachPlan();event.stopPropagation()">Remove plan</button>';
+        planBanner+='</div>';
       }
       planBanner+='</div>';
     }
@@ -1606,10 +1646,9 @@ function todayV(){
 
   return '<div class="pad">'
     +'<span class="lbl">'+ACTIVE_TPL.name+' \u00b7 '+sess.label+'</span>'
-    +'<p class="h1" style="margin:6px 0 '+(planBanner||planPrompt?'12':'4')+'px">'+(sess.focus||sess.label)+'</p>'
+    +'<p class="h1" style="margin:6px 0 16px">'+(sess.focus||sess.label)+'</p>'
     +planPrompt
     +planBanner
-    +(planBanner?'':('<p class="mu" style="margin-bottom:14px">'+sess.exercises.length+' exercises'+(sess.mins?' \u00b7 ~'+sess.mins+' min':'')+'</p>'))
     +rows
     +'<div style="margin-top:8px">'
     +'<button class="btn btnp" onclick="wxStart()">Start session</button>'
@@ -2050,6 +2089,11 @@ document.addEventListener('click',function(e){
     if(t.dataset&&t.dataset.timermode){S.timer.mode=t.dataset.timermode;S.timer.setup=true;S.timer.running=false;clearInterval(_timerInterval);sv();draw();return;}
     if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
     if(t.dataset&&t.dataset.attachplan){attachPlan(t.dataset.attachplan);return;}
+    if(t.dataset&&t.dataset.pgopen){
+      if(!S._pgOpen)S._pgOpen={};
+      S._pgOpen[t.dataset.pgopen]=!S._pgOpen[t.dataset.pgopen];
+      sv();draw();return;
+    }
     if(t.dataset&&t.dataset.selectprog){obSelectProgram(t.dataset.selectprog);return;}
     if(t.dataset&&t.dataset.action==='goprograms'){S.view='app';S.tab='programs';sv();draw();return;}
     if(t.id&&t.id.indexOf('t-')===0){go(t.id.slice(2));return;}
@@ -2060,86 +2104,12 @@ document.addEventListener('click',function(e){
 // PROGRAMS -------------------------------------------------------------------
 
 function programsV(){
-  var html='<div class="pad"><span class="lbl">Training programs</span>';
-  html+='<p class="h1" style="margin:6px 0 16px">Your programmes</p>';
+  var html='<div class="pad">';
 
-  // ── Current program ──────────────────────────────────────────────────────
-  var curE=null;
-  for(var ci=0;ci<CATALOGUE.length;ci++)if(CATALOGUE[ci].key===S.tplKey){curE=CATALOGUE[ci];break;}
-  html+='<div class="card" style="margin-bottom:24px;background:var(--str-bg);border-color:var(--str-brd)">';
-  html+='<span class="lbl" style="color:var(--acc)">Active program</span>';
-  if(curE){
-    html+='<p style="font-size:18px;font-weight:500;margin:4px 0 2px">'+curE.name+'</p>';
-    html+='<p class="mu" style="margin-bottom:8px">'+curE.sessions+' &nbsp;·&nbsp; '+curE.mins+'</p>';
-    html+='<p style="font-size:13px;color:var(--tx);margin:0">'+curE.who+'</p>';
-  } else {
-    html+='<p style="font-size:16px;margin:4px 0">'+ACTIVE_TPL.name+'</p>';
-  }
-  html+='</div>';
+  // ── 1. PROGRESSION PLAN (top) ─────────────────────────────────────────────
+  html+='<p class="h1" style="margin:0 0 16px">Programs</p>';
 
-  // ── Custom programs ──────────────────────────────────────────────────────
-  if(S.customPrograms&&S.customPrograms.length>0){
-    html+='<p class="h2" style="margin-bottom:8px">Custom programs</p>';
-    for(var cpi=0;cpi<S.customPrograms.length;cpi++){
-      var cp=S.customPrograms[cpi];
-      var isCurCP=cp.key===S.tplKey;
-      html+='<div class="card" style="margin-bottom:8px'+(isCurCP?';border-color:var(--acc)':'')+'">';
-      html+='<div style="display:flex;justify-content:space-between;align-items:center">';
-      html+='<div><p style="font-weight:500;margin:0 0 2px">'+cp.name+'</p>';
-      html+='<p class="mu" style="font-size:12px;margin:0">'+cp.date+'</p></div>';
-      html+='<div>';
-      if(!isCurCP)html+='<button class="btn" style="margin-right:6px" data-switchprog="'+cp.key+'">Switch</button>';
-      html+='<button class="btn" style="color:var(--warn)" data-delprog="'+cp.key+'">Delete</button>';
-      html+='</div></div></div>';
-    }
-    html+='<div style="margin-bottom:24px"></div>';
-  }
-
-  // ── Program groups ────────────────────────────────────────────────────────
-  var groups=[
-    {label:'Muscle Building',keys:['hyp_b3','hyp_b4','hyp_b5','hyp_a3','hyp_a4','hyp_a5','hyp'],col:'var(--acc)'},
-    {label:'Strength Building',keys:['str_b3','str_b4','str_b5','str_a3','str_a4','str_a5','strength'],col:'#e07030'},
-    {label:'Muscular Endurance',keys:['end_b3','end_b4','end_b5','end_a3','end_a4','end_a5'],col:'#3ab8e0'},
-    {label:'Fat Loss',keys:['fatloss'],col:'var(--ok)'},
-    {label:'Home Training',keys:['home_bw','home_db'],col:'#9b8de0'},
-    {label:'Athletic & Sport',keys:['athletic','soccer','run','court','climb'],col:'#e0b83a'},
-    {label:'Balanced',keys:['balanced'],col:'#aaa'},
-    {label:'Rehab & Support',keys:['shoulder','knee','back'],col:'#888'}
-  ];
-
-  groups.forEach(function(g){
-    var entries=[];
-    g.keys.forEach(function(k){
-      for(var i=0;i<CATALOGUE.length;i++){
-        if(CATALOGUE[i].key===k){entries.push(CATALOGUE[i]);break;}
-      }
-    });
-    if(!entries.length)return;
-    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
-    html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:'+g.col+';text-transform:uppercase;white-space:nowrap">'+g.label+'</span>';
-    html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
-    entries.forEach(function(c){
-      var isCur=c.key===S.tplKey;
-      html+='<div class="card" style="margin-bottom:8px;'+(isCur?'border-color:var(--acc);background:var(--str-bg)':'')+'">';
-      html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
-      html+='<div style="flex:1;min-width:0;padding-right:10px">';
-      html+='<p style="font-weight:500;margin:0 0 2px;font-size:14px">'+c.name+'</p>';
-      html+='<p class="mu" style="font-size:11px;margin:0 0 3px">'+c.sessions+'&nbsp;·&nbsp;'+c.mins+'</p>';
-      html+='<p style="font-size:12px;color:var(--tx);margin:0;opacity:0.75">'+c.who+'</p>';
-      html+='</div>';
-      html+='<div style="flex-shrink:0;padding-top:2px">';
-      if(isCur){
-        html+='<span style="font-size:11px;color:var(--acc);font-weight:700">✓ Active</span>';
-      } else {
-        html+='<button class="btn btnp" style="font-size:12px;padding:5px 10px" data-switchprog="'+c.key+'">Switch</button>';
-      }
-      html+='</div></div></div>';
-    });
-    html+='<div style="margin-bottom:18px"></div>';
-  });
-
-  // ── Progression plans section ─────────────────────────────────────────────
-  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+  html+='<div class="section-hdr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
   html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Progression Plan</span>';
   html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
 
@@ -2149,75 +2119,137 @@ function programsV(){
     var awNum=getPlanWeekNum();
     if(ap&&aw){
       html+='<div class="card" style="margin-bottom:8px;border-color:var(--acc);background:var(--str-bg)">';
-      html+='<span class="lbl" style="color:var(--acc)">Active plan</span>';
-      html+='<p style="font-size:15px;font-weight:500;margin:4px 0 2px">'+ap.name+'</p>';
-      html+='<p class="mu" style="font-size:12px;margin:0 0 8px">'+aw.label+' (Week '+awNum+' of '+ap.weeks.length+')</p>';
+      html+='<span class="lbl" style="color:var(--acc)">Active</span>';
+      html+='<p style="font-size:16px;font-weight:600;margin:4px 0 2px">'+ap.name+'</p>';
+      html+='<p class="mu" style="font-size:12px;margin:0 0 10px">'+aw.label+' \u00b7 Week '+awNum+' of '+ap.weeks.length+'</p>';
       html+='<div style="display:flex;gap:8px">';
-      html+='<button class="btn btnp" style="font-size:12px;flex:1" onclick="advancePlanWeek()">Advance week</button>';
-      html+='<button class="btn btno" style="font-size:12px" onclick="detachPlan()">Remove</button>';
+      html+='<button class="btn btnp" style="flex:1;font-size:13px" onclick="advancePlanWeek()">Advance week</button>';
+      html+='<button class="btn btno" style="flex:1;font-size:13px" onclick="detachPlan()">Remove plan</button>';
       html+='</div></div>';
     }
-  } else {
-    html+='<p class="mu" style="font-size:12px;margin-bottom:10px">Add a progression plan to get weekly RPE targets and coaching cues in Today.</p>';
-  }
-
-  for(var pi=0;pi<PLANS.length;pi++){
-    var pl=PLANS[pi];
-    var isActive=S.plan&&S.plan.key===pl.key;
-    if(isActive)continue; // already shown above
-    html+='<div class="card" style="margin-bottom:8px">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
-    html+='<div style="flex:1;padding-right:10px">';
-    html+='<p style="font-weight:500;margin:0 0 2px;font-size:14px">'+pl.name+'</p>';
-    html+='<p style="font-size:12px;color:var(--mu);margin:0 0 3px">'+pl.weeks.length+' weeks'+(!pl.cyclic?' · one-off':'  · repeating')+'</p>';
-    html+='<p style="font-size:12px;color:var(--tx);margin:0;opacity:0.75">'+pl.desc+'</p>';
-    html+='</div>';
-    html+='<button class="btn btnp" style="font-size:12px;padding:5px 10px;flex-shrink:0;margin-top:2px" data-attachplan="'+pl.key+'">Attach</button>';
-    html+='</div></div>';
-  }
-
-  html+='<div style="margin-bottom:20px"></div>';
-  html+='<button class="btn btnp" style="width:100%;margin-bottom:24px" onclick="resetOnboarding()">Retake questionnaire</button>';
-
-  // ── Progression Plans section ─────────────────────────────────────────────
-  html+='<div style="display:flex;align-items:center;gap:8px;margin:4px 0 8px">';
-  html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Progression Plan</span>';
-  html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
-
-  if(S.plan&&S.plan.key){
-    var ap=getPlanByKey(S.plan.key);
-    var aw=getPlanWeek();
-    var awNum=getPlanWeekNum();
-    if(ap&&aw){
-      html+='<div class="card" style="margin-bottom:8px;border-color:var(--acc);background:var(--str-bg)">';
-      html+='<span class="lbl" style="color:var(--acc)">Active plan</span>';
-      html+='<p style="font-size:15px;font-weight:500;margin:4px 0 2px">'+ap.name+'</p>';
-      html+='<p class="mu" style="font-size:12px;margin:0 0 8px">'+aw.label+' · Week '+awNum+' of '+ap.weeks.length+'</p>';
-      html+='<div style="display:flex;gap:8px">';
-      html+='<button class="btn btnp" style="font-size:12px;flex:1" onclick="advancePlanWeek()">Advance week</button>';
-      html+='<button class="btn btno" style="font-size:12px" onclick="detachPlan()">Remove plan</button>';
-      html+='</div></div>';
-    }
-  } else {
-    html+='<p class="mu" style="font-size:12px;margin:0 0 10px">Attach a plan to get weekly RPE targets and coaching guidance in Today.</p>';
   }
 
   for(var pli=0;pli<PLANS.length;pli++){
     var pl=PLANS[pli];
-    var isAct=S.plan&&S.plan.key===pl.key;
-    if(isAct)continue;
+    if(S.plan&&S.plan.key===pl.key)continue;
     html+='<div class="card" style="margin-bottom:8px">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
-    html+='<div style="flex:1;padding-right:10px">';
-    html+='<p style="font-weight:500;margin:0 0 2px;font-size:14px">'+pl.name+'</p>';
-    html+='<p style="font-size:11px;color:var(--mu);margin:0 0 3px">'+pl.weeks.length+' weeks · '+(pl.cyclic?'repeating':'one-off')+'</p>';
-    html+='<p style="font-size:12px;color:var(--tx);margin:0;opacity:0.8">'+pl.desc+'</p>';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">';
+    html+='<div style="flex:1;min-width:0">';
+    html+='<p style="font-weight:600;margin:0 0 2px;font-size:14px">'+pl.name+'</p>';
+    html+='<p class="mu" style="font-size:11px;margin:0">'+pl.weeks.length+' weeks \u00b7 '+(pl.cyclic?'repeating':'one-off')+'</p>';
     html+='</div>';
-    html+='<button class="btn btnp" style="font-size:12px;padding:5px 10px;flex-shrink:0;margin-top:2px" data-attachplan="'+pl.key+'">Attach</button>';
-    html+='</div></div>';
+    html+='<button class="btn btnp" style="font-size:13px;padding:7px 16px;flex-shrink:0" data-attachplan="'+pl.key+'">Attach</button>';
+    html+='</div>';
+    html+='<p style="font-size:12px;color:var(--mu);margin:8px 0 0;line-height:1.5">'+pl.desc+'</p>';
+    html+='</div>';
   }
 
-  html+='<div style="margin-bottom:24px"></div>';
+  html+='<div style="height:20px"></div>';
+
+  // ── 2. CURRENT PROGRAM ───────────────────────────────────────────────────
+  html+='<div class="section-hdr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+  html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Current Program</span>';
+  html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+  var curE=null;
+  for(var ci=0;ci<CATALOGUE.length;ci++)if(CATALOGUE[ci].key===S.tplKey){curE=CATALOGUE[ci];break;}
+  html+='<div class="card" style="margin-bottom:20px;background:var(--str-bg);border-color:var(--str-brd)">';
+  if(curE){
+    html+='<p style="font-size:16px;font-weight:600;margin:0 0 2px">'+curE.name+'</p>';
+    html+='<p class="mu" style="font-size:12px;margin:0 0 6px">'+curE.sessions+' \u00b7 '+curE.mins+'</p>';
+    html+='<p style="font-size:13px;color:var(--mu);margin:0">'+curE.who+'</p>';
+  } else {
+    html+='<p style="font-size:16px;margin:0">'+ACTIVE_TPL.name+'</p>';
+  }
+  html+='</div>';
+
+  // ── 3. CUSTOM PROGRAMS ───────────────────────────────────────────────────
+  if(S.customPrograms&&S.customPrograms.length>0){
+    html+='<div class="section-hdr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Custom Programs</span>';
+    html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+    for(var cpi=0;cpi<S.customPrograms.length;cpi++){
+      var cp=S.customPrograms[cpi];
+      var isCurCP=cp.key===S.tplKey;
+      html+='<div class="card" style="margin-bottom:8px'+(isCurCP?';border-color:var(--acc)':'')+'\">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">';
+      html+='<div style="flex:1;min-width:0">';
+      html+='<p style="font-weight:600;margin:0 0 2px;font-size:14px">'+cp.name+'</p>';
+      html+='<p class="mu" style="font-size:11px;margin:0">'+cp.date+(isCurCP?' \u00b7 Active':'')+'</p>';
+      html+='</div>';
+      html+='<div style="display:flex;gap:8px;flex-shrink:0">';
+      if(!isCurCP)html+='<button class="btn btnp" style="font-size:13px;padding:7px 14px" data-switchprog="'+cp.key+'">Switch</button>';
+      html+='<button class="btn btno" style="font-size:13px;padding:7px 14px;color:var(--warn)" data-delprog="'+cp.key+'">Delete</button>';
+      html+='</div></div></div>';
+    }
+    html+='<div style="height:20px"></div>';
+  }
+
+  // ── 4. ALL PROGRAMS (grouped, collapsible) ───────────────────────────────
+  html+='<div class="section-hdr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+  html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">All Programs</span>';
+  html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+
+  var groups=[
+    {id:'g_muscle',label:'Muscle Building',keys:['hyp_b3','hyp_b4','hyp_b5','hyp_a3','hyp_a4','hyp_a5','hyp'],col:'var(--acc)'},
+    {id:'g_strength',label:'Strength Building',keys:['str_b3','str_b4','str_b5','str_a3','str_a4','str_a5','strength'],col:'#e07030'},
+    {id:'g_endurance',label:'Muscular Endurance',keys:['end_b3','end_b4','end_b5','end_a3','end_a4','end_a5'],col:'#3ab8e0'},
+    {id:'g_fatloss',label:'Fat Loss',keys:['fatloss'],col:'var(--ok)'},
+    {id:'g_home',label:'Home Training',keys:['home_bw','home_db'],col:'#9b8de0'},
+    {id:'g_sport',label:'Athletic & Sport',keys:['athletic','soccer','run','court','climb'],col:'#e0b83a'},
+    {id:'g_balanced',label:'Balanced',keys:['balanced'],col:'#888'},
+    {id:'g_rehab',label:'Rehab & Support',keys:['shoulder','knee','back'],col:'#666'}
+  ];
+
+  // Determine which group is currently active (to auto-open it)
+  var activeGroup='';
+  for(var gi=0;gi<groups.length;gi++){
+    for(var gki=0;gki<groups[gi].keys.length;gki++){
+      if(groups[gi].keys[gki]===S.tplKey){activeGroup=groups[gi].id;break;}
+    }
+    if(activeGroup)break;
+  }
+  if(!S._pgOpen)S._pgOpen={};
+  // Auto-open the active group if nothing is manually open
+  var anyOpen=false;
+  for(var pgk in S._pgOpen)if(S._pgOpen[pgk])anyOpen=true;
+  if(!anyOpen&&activeGroup)S._pgOpen[activeGroup]=true;
+
+  groups.forEach(function(g){
+    var entries=[];
+    g.keys.forEach(function(k){
+      for(var i=0;i<CATALOGUE.length;i++)if(CATALOGUE[i].key===k){entries.push(CATALOGUE[i]);break;}
+    });
+    if(!entries.length)return;
+    var isOpen=!!(S._pgOpen&&S._pgOpen[g.id]);
+    // Header / toggle row
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;background:var(--bg2);margin-bottom:'+(isOpen?'0':'8')+'px;cursor:pointer;border:1px solid var(--brd)" data-pgopen="'+g.id+'">';
+    html+='<span style="font-size:13px;font-weight:600;color:'+g.col+'">'+g.label+'</span>';
+    html+='<span style="font-size:18px;color:var(--mu);line-height:1">'+(isOpen?'\u2212':'\u002b')+'</span>';
+    html+='</div>';
+    if(isOpen){
+      html+='<div style="border:1px solid var(--brd);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;margin-bottom:8px">';
+      entries.forEach(function(c,idx){
+        var isCur=c.key===S.tplKey;
+        var notLast=idx<entries.length-1;
+        html+='<div style="padding:12px 14px;background:'+(isCur?'var(--str-bg)':'var(--bg)')+';'+(notLast?'border-bottom:1px solid var(--brd)':'')+'\">';
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">';
+        html+='<div style="flex:1;min-width:0">';
+        html+='<p style="font-weight:'+(isCur?'600':'500')+';margin:0 0 1px;font-size:13px;color:'+(isCur?'var(--acc)':'var(--tx)')+'">'+c.name+'</p>';
+        html+='<p class="mu" style="font-size:11px;margin:0">'+c.sessions+' \u00b7 '+c.mins+'</p>';
+        html+='</div>';
+        if(isCur){
+          html+='<span style="font-size:11px;color:var(--acc);font-weight:700;flex-shrink:0">\u2713 Active</span>';
+        } else {
+          html+='<button class="btn btnp" style="font-size:12px;padding:6px 14px;flex-shrink:0" data-switchprog="'+c.key+'">Switch</button>';
+        }
+        html+='</div></div>';
+      });
+      html+='</div>';
+    }
+  });
+
+  html+='<div style="height:20px"></div>';
+  html+='<button class="btn btno" style="width:100%;margin-bottom:24px;color:var(--mu);font-size:13px" onclick="resetOnboarding()">Retake questionnaire</button>';
   html+='</div>';
   return html;
 }
