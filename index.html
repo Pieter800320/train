@@ -1475,8 +1475,10 @@ function wxStart(){
   for(var i=0;i<exs.length;i++){
     var eid=exs[i].id;
     var pr=S.pr[eid]||{};
-    weights[eid]=pr.kg!==undefined?pr.kg:(exs[i].kg||0);
-    reps[eid]=pr.reps!==undefined?pr.reps:(exs[i].reps||0);
+    // Load weight: prefer flat pr.kg (auto-saved), fall back to last entry, then TPL default
+    var lastEntry=pr.entries&&pr.entries.length?pr.entries[pr.entries.length-1]:null;
+    weights[eid]=pr.kg!==undefined?pr.kg:(lastEntry?lastEntry.kg:(exs[i].kg||0));
+    reps[eid]=pr.reps!==undefined?pr.reps:(lastEntry?lastEntry.reps:(exs[i].reps||0));
     times[eid]=pr.time!==undefined?pr.time:(exs[i].time||0);
   }
   S.wx={on:true,label:sess.label,exs:exs,idx:0,set:1,logs:[],rest:false,rl:0,rt:0,weights:weights,reps:reps,times:times,exTimer:0,exTimerRunning:false};
@@ -1678,6 +1680,13 @@ function wxLog(){
   w.noteDraft='';
   w.exTimer=0;
   w.logs.push({name:ex.name,set:w.set,reps:w.reps[eid],kg:w.weights[eid]});
+  // ── Auto-persist weight and reps to S.pr so next session pre-fills ────────
+  if(!S.pr)S.pr={};
+  if(!S.pr[eid])S.pr[eid]={name:ex.name,entries:[]};
+  S.pr[eid].name=ex.name;
+  if(w.weights[eid]!==undefined)S.pr[eid].kg=w.weights[eid];
+  if(w.reps[eid]!==undefined)S.pr[eid].reps=w.reps[eid];
+  // ─────────────────────────────────────────────────────────────────────────
   if(w.set<ex.sets){
     w.set++;
     if(ex.time>0||w.times[eid]>0)w.exTimer=0;
