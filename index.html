@@ -1182,7 +1182,7 @@ var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],pr:
   customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},
   customPrograms:[],
   buildMode:'program',
-  planEdit:{name:'My Plan',numWeeks:4,cyclic:true,weeks:[],editWeek:null},
+  planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},
   timer:{mode:'countdown',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true}
 };
 
@@ -1197,7 +1197,7 @@ function ld(){
   if(S._pgOpen===undefined)S._pgOpen={};
   if(S._pgOpenInit===undefined)S._pgOpenInit=false;
   if(S.buildMode===undefined)S.buildMode='program';
-  if(S.planEdit===undefined)S.planEdit={name:'My Plan',numWeeks:4,cyclic:true,weeks:[],editWeek:null};
+  if(S.planEdit===undefined)S.planEdit={name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};
   if(S.customPlans===undefined)S.customPlans=[];
 }
 
@@ -2474,6 +2474,10 @@ function buildPlanV(modeBar){
   }
 
   var cyclicOn=pe.cyclic;
+  // Week count stepper - the target number of weeks (may differ from pe.weeks.length during setup)
+  if(pe.targetWeeks===undefined)pe.targetWeeks=4;
+  var tw=pe.targetWeeks;
+
   return '<div class="pad">'+modeBar
     +'<span class="lbl">Build tab</span><p class="h1" style="margin:6px 0 20px">Custom progression plan</p>'
 
@@ -2489,9 +2493,20 @@ function buildPlanV(modeBar){
       +'</div>'
     +'</div>'
 
+    +'<div class="card" style="margin-bottom:16px">'
+      +'<span class="lbl">Number of weeks</span>'
+      +'<div style="display:flex;align-items:center;gap:0;margin-top:12px;border:1px solid var(--brd);border-radius:10px;overflow:hidden">'
+        +'<button class="nb" style="padding:12px 18px;font-size:20px;border-right:1px solid var(--brd);border-radius:0" onclick="if(S.planEdit.targetWeeks>1)S.planEdit.targetWeeks--;sv();draw()">&#8722;</button>'
+        +'<span style="flex:1;text-align:center;font-size:24px;font-weight:700;color:var(--tx)">'+tw+'</span>'
+        +'<button class="nb" style="padding:12px 18px;font-size:20px;border-left:1px solid var(--brd);border-radius:0" onclick="if(S.planEdit.targetWeeks<16)S.planEdit.targetWeeks++;sv();draw()">+</button>'
+      +'</div>'
+      +'<p class="mu" style="font-size:12px;margin-top:8px">Choose 2–16 weeks. Common lengths: 4 (mesocycle), 6 (linear), 8, 12 (full block).</p>'
+    +'</div>'
+
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-      +'<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase">Weeks ('+pe.weeks.length+')</span>'
-      +'<button class="btn btnp" style="font-size:12px;padding:5px 14px" onclick="planAddWeek()">+ Add week</button>'
+      +'<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase">Weeks ('+pe.weeks.length+' of '+tw+')</span>'
+      +'<button class="btn btnp" style="font-size:12px;padding:5px 14px;'+(pe.weeks.length>=tw?'opacity:0.4;pointer-events:none':'')+'" onclick="planAddWeek()">+ Add week</button>'
+      +(pe.weeks.length<tw&&tw-pe.weeks.length>1?'<button class="btn btno" style="font-size:12px;padding:5px 14px" onclick="planFillAll()">Fill all '+(tw-pe.weeks.length)+'</button>':'')
     +'</div>'
     +(pe.weeks.length?
       '<div style="border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:16px">'+weekRows+'</div>'
@@ -2499,7 +2514,7 @@ function buildPlanV(modeBar){
     )
 
     +(pe.weeks.length>=1?'<button class="btn btnp" style="width:100%;margin-bottom:10px" onclick="planSave()">Save plan</button>':'')
-    +'<button class="btng" onclick="S.planEdit={name:\'My Plan\',numWeeks:4,cyclic:true,weeks:[],editWeek:null};sv();draw()">Start over</button>'
+    +'<button class="btng" onclick="S.planEdit={name:\'My Plan\',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};sv();draw()">Start over</button>'
     +'</div>';
 }
 
@@ -2519,6 +2534,28 @@ function planAddWeek(){
     weightPct:d.weightPct,volMod:d.volMod,tip:d.tip
   });
   pe.editWeek=pe.weeks.length-1;
+  sv();draw();
+}
+
+function planFillAll(){
+  var pe=S.planEdit;
+  var tw=pe.targetWeeks||4;
+  while(pe.weeks.length<tw){
+    // Use same logic as planAddWeek but without opening edit screen
+    var wNum=pe.weeks.length+1;
+    var isLast=(wNum===tw);
+    var isDeload=isLast||(tw>4&&wNum%4===0);
+    var posInBlock=(wNum-1)%4;
+    var rpeMap=[7,8,9,9];
+    var rpe=isDeload?7:rpeMap[Math.min(posInBlock,3)];
+    var wPctMap=[90,95,100,100];
+    var wPct=isDeload?105:wPctMap[Math.min(posInBlock,3)];
+    var themeMap=['learn','build','progress','progress'];
+    var theme=isDeload?'peak':themeMap[Math.min(posInBlock,3)];
+    var subLabel=isDeload?'Deload':['Learn & Groove','Build','Progress','Peak'][Math.min(posInBlock,3)];
+    pe.weeks.push({label:'Week '+wNum+' — '+subLabel,theme:theme,rpe:rpe,rir:10-rpe,weightPct:wPct,volMod:isDeload?0.5:1.0,tip:''});
+  }
+  pe.editWeek=null;
   sv();draw();
 }
 
