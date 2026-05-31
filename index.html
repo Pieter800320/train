@@ -1181,8 +1181,6 @@ var ACTIVE_TPL=TPL;
 var S={view:'ob',tab:'home',day:0,ob:{step:0,ans:{},recs:[]},wx:null,hist:[],pr:{},histPage:0,theme:'dark',tplKey:'balanced',
   customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},
   customPrograms:[],
-  buildMode:'program',
-  planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},
   timer:{mode:'countdown',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:20,tabRest:10,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true}
 };
 
@@ -1195,10 +1193,6 @@ function ld(){
   if(S.plan===undefined)S.plan=null;
   if(S._planOpen===undefined)S._planOpen=false;
   if(S._pgOpen===undefined)S._pgOpen={};
-  if(S._pgOpenInit===undefined)S._pgOpenInit=false;
-  if(S.buildMode===undefined)S.buildMode='program';
-  if(S.planEdit===undefined)S.planEdit={name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};
-  if(S.customPlans===undefined)S.customPlans=[];
 }
 
 // PROGRESSION PLANS ----------------------------------------------------------
@@ -1258,11 +1252,7 @@ var PLANS=[
 ];
 
 
-function getPlanByKey(k){
-  for(var i=0;i<PLANS.length;i++)if(PLANS[i].key===k)return PLANS[i];
-  if(S.customPlans){for(var j=0;j<S.customPlans.length;j++)if(S.customPlans[j].key===k)return S.customPlans[j];}
-  return null;
-}
+function getPlanByKey(k){for(var i=0;i<PLANS.length;i++)if(PLANS[i].key===k)return PLANS[i];return null;}
 function getActivePlan(){if(!S.plan||!S.plan.key)return null;return getPlanByKey(S.plan.key);}
 function getPlanWeek(){
   var p=getActivePlan();if(!p||!S.plan)return null;
@@ -1574,8 +1564,8 @@ function todayV(){
         planBanner+='<div style="display:flex;align-items:center;justify-content:space-between">';
         planBanner+='<div>';
         planBanner+='<span class="lbl" style="color:'+themeCol+'">Progression plan</span>';
-        planBanner+='<p style="font-size:14px;font-weight:600;margin:3px 0 2px;color:var(--tx)">'+pw.label+'</p>';
-        planBanner+='<p class="mu" style="font-size:12px;margin:0">Week '+wNum+' of '+totalW+(halfVol?' \u00b7 Half volume':'')+'</p>';
+        planBanner+='<p style="font-size:15px;font-weight:700;margin:3px 0 1px;color:var(--tx)">'+pl.name+'</p>';
+        planBanner+='<p class="mu" style="font-size:12px;margin:0">'+pw.label+' \u00b7 Week '+wNum+' of '+totalW+(halfVol?' \u00b7 Half volume':'')+'</p>';
         planBanner+='</div>';
         // Simple RPE badge
         planBanner+='<div style="background:var(--bg3);border-radius:10px;padding:8px 12px;text-align:center;flex-shrink:0">';
@@ -2100,15 +2090,6 @@ document.addEventListener('click',function(e){
     if(t.dataset&&t.dataset.timermode){S.timer.mode=t.dataset.timermode;S.timer.setup=true;S.timer.running=false;clearInterval(_timerInterval);sv();draw();return;}
     if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
     if(t.dataset&&t.dataset.attachplan){attachPlan(t.dataset.attachplan);return;}
-    if(t.dataset&&t.dataset.delcplan){
-      var cpk=t.dataset.delcplan;
-      showModal('Delete plan?','This custom plan will be permanently removed.','Delete',function(){
-        if(!S.customPlans)return;
-        for(var di=0;di<S.customPlans.length;di++)if(S.customPlans[di].key===cpk){S.customPlans.splice(di,1);break;}
-        if(S.plan&&S.plan.key===cpk)S.plan=null;
-        sv();draw();
-      },true);return;
-    }
     // Walk up DOM tree to find pgopen - but NOT if a button was clicked
     var pgEl=null;
     if(e.target.tagName!=='BUTTON'&&e.target.tagName!=='INPUT'){
@@ -2165,6 +2146,8 @@ function programsV(){
   html+='</div>';
   html+='</div>';
 
+  html+='<button class="btn btno" style="width:100%;margin-bottom:20px;font-size:13px;color:var(--mu)" onclick="resetOnboarding()">Retake questionnaire</button>';
+
   // Helper: section heading
   function secHead(label){
     return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
@@ -2209,19 +2192,6 @@ function programsV(){
   html+='</div>';
 
   // ── CUSTOM PROGRAMS ───────────────────────────────────────────────────────
-  // ── PATCH 2: Replace the entire g_custom block in programsV() ────────────────
-//
-// FIND this entire block (from "var isCustomOpen" down to and including
-// the final "html+='</div>';" before "secHead('Pre-built Programs')"):
-//
-//   var isCustomOpen=!!(S._pgOpen&&S._pgOpen['g_custom']);
-//   html+=secHead('Custom Programs');
-//   ... (the whole block) ...
-//   html+='</div>';
-//
-// REPLACE with everything between the dashed lines below:
-// ─────────────────────────────────────────────────────────────────────────────
-
   var isCustomOpen=!!(S._pgOpen&&S._pgOpen['g_custom']);
   html+=secHead('Custom Programs');
   html+='<div style="border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:20px">';
@@ -2230,7 +2200,6 @@ function programsV(){
   html+='<span style="font-size:18px;color:var(--mu);line-height:1;width:20px;text-align:center">'+(isCustomOpen?'\u2212':'\u002b')+'</span>';
   html+='</div>';
   if(isCustomOpen){
-    // ── Sub-group: Training Programs ──────────────────────────────────────
     html+='<div style="padding:10px 14px 4px;border-top:1px solid var(--brd);background:var(--bg)">';
     html+='<p style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:'+ACC+';text-transform:uppercase;margin:0 0 8px">Training Programs</p>';
     html+='</div>';
@@ -2250,7 +2219,6 @@ function programsV(){
         html+='</div></div></div>';
       }
     }
-    // ── Sub-group: Progression Plans ──────────────────────────────────────
     html+='<div style="padding:10px 14px 4px;border-top:2px solid var(--brd);background:var(--bg)">';
     html+='<p style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:'+ACC+';text-transform:uppercase;margin:0 0 8px">Progression Plans</p>';
     html+='</div>';
@@ -2274,9 +2242,6 @@ function programsV(){
   }
   html+='</div>';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// END OF PATCH 2
-
   // ── PRE-BUILT PROGRAMS (grouped, collapsible) ────────────────────────────
   html+=secHead('Pre-built Programs');
 
@@ -2291,20 +2256,19 @@ function programsV(){
     {id:'g_rehab',label:'Rehab & Support',keys:['shoulder','knee','back']}
   ];
 
-  // Auto-open the active group ONLY on first visit (nothing open yet at all)
+  // Auto-open the group containing the active program
   if(!S._pgOpen)S._pgOpen={};
-  if(!S._pgOpenInit){
-    var activeGroup='';
-    for(var gi=0;gi<groups.length;gi++){
-      for(var gki=0;gki<groups[gi].keys.length;gki++){
-        if(groups[gi].keys[gki]===S.tplKey){activeGroup=groups[gi].id;break;}
-      }
-      if(activeGroup)break;
+  var activeGroup='';
+  for(var gi=0;gi<groups.length;gi++){
+    for(var gki=0;gki<groups[gi].keys.length;gki++){
+      if(groups[gi].keys[gki]===S.tplKey){activeGroup=groups[gi].id;break;}
     }
-    if(activeGroup)S._pgOpen[activeGroup]=true;
-    S._pgOpenInit=true;
-    sv();
+    if(activeGroup)break;
   }
+  // Only auto-open if user hasn't manually toggled anything (fresh load)
+  var hasManual=false;
+  for(var pgk in S._pgOpen)if(S._pgOpen[pgk]&&pgk!=='g_plans'&&pgk!=='g_custom')hasManual=true;
+  if(!hasManual&&activeGroup)S._pgOpen[activeGroup]=true;
 
   groups.forEach(function(g){
     var entries=[];
@@ -2340,8 +2304,6 @@ function programsV(){
     html+='</div>';
   });
 
-  html+='<div style="height:16px"></div>';
-  html+='<button class="btn btno" style="width:100%;margin-bottom:24px;font-size:13px;color:var(--mu)" onclick="resetOnboarding()">Retake questionnaire</button>';
   html+='</div>';
   return html;
 }
@@ -2371,18 +2333,6 @@ function resetOnboarding(){
 // BUILD (CUSTOM PROGRAM) -----------------------------------------------------
 
 function buildV(){
-  // ── Build tab mode selector ───────────────────────────────────────────────
-  var modeBar='<div style="display:flex;gap:0;margin-bottom:20px;border:1px solid var(--brd);border-radius:12px;overflow:hidden">';
-  modeBar+='<button onclick="S.buildMode=\'program\';sv();draw()" style="flex:1;padding:11px;background:'+(S.buildMode==='program'?'var(--acc)':'transparent')+';color:'+(S.buildMode==='program'?'#fff':'var(--mu)')+';border:none;font-size:13px;font-weight:600;cursor:pointer">Training Program</button>';
-  modeBar+='<button onclick="S.buildMode=\'plan\';sv();draw()" style="flex:1;padding:11px;background:'+(S.buildMode==='plan'?'var(--acc)':'transparent')+';color:'+(S.buildMode==='plan'?'#fff':'var(--mu)')+';border:none;font-size:13px;font-weight:600;cursor:pointer;border-left:1px solid var(--brd)">Progression Plan</button>';
-  modeBar+='</div>';
-
-  // ══ PLAN BUILDER MODE ═════════════════════════════════════════════════════
-  if(S.buildMode==='plan'){
-    return buildPlanV(modeBar);
-  }
-
-  // ══ PROGRAM BUILDER MODE (original) ═══════════════════════════════════════
   var ce=S.customEdit;
   var stage=ce.activeDay!==null?'exercises':(ce.days.length>0?'review':'setup');
   if(stage==='setup'){
@@ -2392,7 +2342,7 @@ function buildV(){
       var on=ce.numDays===d;
       daysHtml+='<button data-custdays="'+d+'" style="flex:1;padding:10px;border-radius:10px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:13px;cursor:pointer">'+d+' days</button>';
     }
-    return '<div class="pad">'+modeBar+'<span class="lbl">Build tab</span><p class="h1" style="margin:6px 0 20px">Custom program</p><div class="card" style="margin-bottom:16px"><span class="lbl">Program name</span><input id="cpname" value="'+nameVal+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:12px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.customEdit.name=this.value;sv()" /></div><div class="card" style="margin-bottom:20px"><span class="lbl">Sessions per week</span><div style="display:flex;gap:8px;margin-top:12px">'+daysHtml+'</div></div><button class="btn btnp" onclick="custStart()">Set up sessions</button></div>';
+    return '<div class="pad"><span class="lbl">Build tab</span><p class="h1" style="margin:6px 0 20px">Custom program</p><div class="card" style="margin-bottom:16px"><span class="lbl">Program name</span><input id="cpname" value="'+nameVal+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:12px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.customEdit.name=this.value;sv()" /></div><div class="card" style="margin-bottom:20px"><span class="lbl">Sessions per week</span><div style="display:flex;gap:8px;margin-top:12px">'+daysHtml+'</div></div><button class="btn btnp" onclick="custStart()">Set up sessions</button></div>';
   }
   if(stage==='review'){
     var rows='';
@@ -2405,7 +2355,7 @@ function buildV(){
       }
       rows+='</div>';
     }
-    return '<div class="pad">'+modeBar+'<span class="lbl">Review</span><p class="h1" style="margin:6px 0 4px">'+ce.name+'</p><p class="mu" style="margin-bottom:18px">'+ce.numDays+' sessions per week</p>'+rows+'<button class="btn btnp" style="margin-top:8px" onclick="custSave()">Save and start this program</button><button class="btng" onclick="S.customEdit={name:\'My Program\',numDays:3,days:[],activeDay:null,newEx:null};sv();draw()">Start over</button></div>';
+    return '<div class="pad"><span class="lbl">Review</span><p class="h1" style="margin:6px 0 4px">'+ce.name+'</p><p class="mu" style="margin-bottom:18px">'+ce.numDays+' sessions per week</p>'+rows+'<button class="btn btnp" style="margin-top:8px" onclick="custSave()">Save and start this program</button><button class="btng" onclick="S.customEdit={name:\'My Program\',numDays:3,days:[],activeDay:null,newEx:null};sv();draw()">Start over</button></div>';
   }
   // exercises stage
   var dayObj=ce.days[ce.activeDay];
@@ -2416,8 +2366,10 @@ function buildV(){
   }
   if(!ce.newEx){
     var labelInput='<div class="card" style="margin-bottom:14px"><span class="lbl">Session name</span><input value="'+dayObj.label+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.customEdit.days[S.customEdit.activeDay].label=this.value;sv()" /></div>';
-    return '<div class="pad"><span class="lbl">'+(ce.activeDay+1)+' of '+ce.days.length+'</span><p class="h1" style="margin:6px 0 14px">'+dayObj.label+'</p>'+labelInput+exRows+'<button class="btn btno" style="margin-top:8px" onclick="custOpenEx()">+ Add exercise</button><button class="btn btnp" style="margin-top:10px" onclick="S.customEdit.activeDay=null;sv();draw()">'+(ce.activeDay<ce.days.length-1?'Next session':'Review program')+'</button></div>';
+  return '<div class="pad"><span class="lbl">'+(ce.activeDay+1)+' of '+ce.days.length+'</span><p class="h1" style="margin:6px 0 14px">'+dayObj.label+'</p>'+labelInput+exRows+'<button class="btn btno" style="margin-top:8px" onclick="custOpenEx()">+ Add exercise</button><button class="btn btnp" style="margin-top:10px" onclick="S.customEdit.activeDay=null;sv();draw()">'+(ce.activeDay<ce.days.length-1?'Next session':'Review program')+'</button></div>';
   }
+  // Add exercise form
+  // Category picker
   var CATS=['Warm-up','Mobility','Activation','Strength','Hypertrophy','Power','Cardio','HIIT','Core','Accessory','Finisher','Cooldown','Stretch','Custom'];
   var catOpts='';
   for(var ci2=0;ci2<CATS.length;ci2++){
@@ -2426,12 +2378,14 @@ function buildV(){
     catOpts+='<button onclick="custSetCat(\''+cv+'\');" style="padding:7px 12px;border-radius:20px;border:1px solid '+(onC?'var(--acc)':'var(--brd)')+';background:'+(onC?'#1e1000':'transparent')+';color:'+(onC?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer;white-space:nowrap">'+cv+'</button>';
   }
   var customCatInput=ce.newEx.customCat!==undefined?'<input value="'+(ce.newEx.customCat||'')+'" placeholder="Type category name..." style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:10px" oninput="S.customEdit.newEx.customCat=this.value;sv()" />':'';
+  // Time dropdown options (0 + 10s increments to 300s)
   var timeOpts='<option value="0"'+(ce.newEx.time===0?' selected':'')+'>Off</option>';
   for(var ts=10;ts<=300;ts+=10)timeOpts+='<option value="'+ts+'"'+(ce.newEx.time===ts?' selected':'')+'>'+fmt(ts)+'</option>';
+  // Rest dropdown (0 + 30s increments to 300s)
   var restOpts='<option value="0"'+(ce.newEx.rest===0?' selected':'')+'>Off</option>';
   for(var rs=30;rs<=300;rs+=30)restOpts+='<option value="'+rs+'"'+(ce.newEx.rest===rs?' selected':'')+'>'+fmt(rs)+'</option>';
   var selStyle='width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px;-webkit-appearance:none;appearance:none';
-  return '<div class="pad"><span class="lbl">'+dayObj.label+' \u00b7 Add exercise</span><p class="h1" style="margin:6px 0 16px">New exercise</p>'
+  return '<div class="pad"><span class="lbl">'+dayObj.label+' · Add exercise</span><p class="h1" style="margin:6px 0 16px">New exercise</p>'
     +'<div class="card" style="margin-bottom:12px"><span class="lbl">Name</span><input value="'+ce.newEx.name+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.name=this.value;sv()" /></div>'
     +'<div class="card" style="margin-bottom:12px"><span class="lbl">Category</span><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px">'+catOpts+'</div>'+customCatInput+'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
@@ -2442,183 +2396,9 @@ function buildV(){
       +'<div class="card"><span class="lbl">Time</span><select style="'+selStyle+'" onchange="S.customEdit.newEx.time=parseInt(this.value);sv()">'+timeOpts+'</select></div>'
       +'<div class="card"><span class="lbl">Rest between sets</span><select style="'+selStyle+'" onchange="S.customEdit.newEx.rest=parseInt(this.value);sv()">'+restOpts+'</select></div>'
     +'</div>'
-    +'<div class="card" style="margin-bottom:18px"><span class="lbl">Notes</span><input value="'+(ce.newEx.notes||'')+'" placeholder="Optional \u2014 shown during the session" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.notes=this.value;sv()" /></div>'
+    +'<div class="card" style="margin-bottom:18px"><span class="lbl">Notes</span><input value="'+(ce.newEx.notes||'')+'" placeholder="Optional — shown during the session" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.customEdit.newEx.notes=this.value;sv()" /></div>'
     +'<button class="btn btnp" onclick="custAddEx()">Add to session</button><button class="btng" onclick="custCancelEx()">Cancel</button></div>';
 }
-
-function buildPlanV(modeBar){
-  var pe=S.planEdit;
-  // ── Editing a specific week ────────────────────────────────────────────────
-  if(pe.editWeek!==null&&pe.editWeek<pe.weeks.length){
-    var wk=pe.weeks[pe.editWeek];
-    var wIdx=pe.editWeek;
-    var themeOpts=['learn','build','progress','peak'];
-    var themeLabels={learn:'Learn & Groove',build:'Build',progress:'Progress',peak:'Peak / Deload'};
-    var themePills='';
-    themeOpts.forEach(function(th){
-      var on=wk.theme===th;
-      themePills+='<button onclick="S.planEdit.weeks['+wIdx+'].theme=\''+th+'\';sv();draw()" style="padding:7px 12px;border-radius:20px;border:1px solid '+(on?'var(--acc)':'var(--brd)')+';background:'+(on?'#1e1000':'transparent')+';color:'+(on?'var(--acc)':'var(--mu)')+';font-size:12px;cursor:pointer;white-space:nowrap">'+themeLabels[th]+'</button>';
-    });
-    var deloadOn=wk.volMod<1;
-    return '<div class="pad">'
-      +'<span class="lbl">Week '+(wIdx+1)+' of '+pe.weeks.length+'</span>'
-      +'<p class="h1" style="margin:6px 0 20px">Edit week</p>'
-
-      +'<div class="card" style="margin-bottom:12px"><span class="lbl">Week label</span>'
-      +'<input value="'+(wk.label||'')+'" placeholder="e.g. Heavy week, Deload..." style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:14px;margin-top:8px" oninput="S.planEdit.weeks['+wIdx+'].label=this.value;sv()" /></div>'
-
-      +'<div class="card" style="margin-bottom:12px"><span class="lbl">Theme</span>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">'+themePills+'</div></div>'
-
-      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">'
-        +'<div class="card"><span class="lbl">RPE</span><div style="display:flex;align-items:center;gap:8px;margin-top:8px;justify-content:center"><button class="nb" onclick="S.planEdit.weeks['+wIdx+'].rpe=Math.max(5,S.planEdit.weeks['+wIdx+'].rpe-1);S.planEdit.weeks['+wIdx+'].rir=10-S.planEdit.weeks['+wIdx+'].rpe;sv();draw()">&#8722;</button><span style="font-size:22px;font-weight:700;color:var(--acc);min-width:28px;text-align:center">'+wk.rpe+'</span><button class="nb" onclick="S.planEdit.weeks['+wIdx+'].rpe=Math.min(10,S.planEdit.weeks['+wIdx+'].rpe+1);S.planEdit.weeks['+wIdx+'].rir=10-S.planEdit.weeks['+wIdx+'].rpe;sv();draw()">+</button></div><p class="mu" style="font-size:10px;text-align:center;margin-top:4px">RPE</p></div>'
-        +'<div class="card"><span class="lbl">RIR</span><div style="margin-top:12px;text-align:center"><span style="font-size:22px;font-weight:700;color:var(--tx)">'+(10-wk.rpe)+'</span></div><p class="mu" style="font-size:10px;text-align:center;margin-top:4px">auto</p></div>'
-        +'<div class="card"><span class="lbl">Weight</span><div style="display:flex;align-items:center;gap:6px;margin-top:8px;justify-content:center"><button class="nb" onclick="S.planEdit.weeks['+wIdx+'].weightPct=Math.max(50,S.planEdit.weeks['+wIdx+'].weightPct-5);sv();draw()">&#8722;</button><span style="font-size:18px;font-weight:700;color:var(--acc);min-width:36px;text-align:center">'+wk.weightPct+'%</span><button class="nb" onclick="S.planEdit.weeks['+wIdx+'].weightPct=Math.min(120,S.planEdit.weeks['+wIdx+'].weightPct+5);sv();draw()">+</button></div><p class="mu" style="font-size:10px;text-align:center;margin-top:4px">of max</p></div>'
-      +'</div>'
-
-      +'<div class="card" style="margin-bottom:12px">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center">'
-          +'<div><span class="lbl">Deload week</span><p class="mu" style="font-size:12px;margin-top:3px">Halves the number of sets</p></div>'
-          +'<button onclick="S.planEdit.weeks['+wIdx+'].volMod='+(deloadOn?'1.0':'0.5')+';sv();draw()" style="width:48px;height:28px;border-radius:14px;border:none;background:'+(deloadOn?'var(--acc)':'var(--brd)')+';cursor:pointer;transition:background .2s;position:relative">'
-          +'<span style="position:absolute;top:3px;'+(deloadOn?'right:3px':'left:3px')+';width:22px;height:22px;background:#fff;border-radius:50%;display:block"></span>'
-          +'</button>'
-        +'</div>'
-      +'</div>'
-
-      +'<div class="card" style="margin-bottom:20px"><span class="lbl">Coaching tip</span>'
-      +'<textarea style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:10px;border-radius:10px;font-size:13px;margin-top:8px;min-height:80px;resize:vertical;line-height:1.5" oninput="S.planEdit.weeks['+wIdx+'].tip=this.value;sv()" placeholder="Optional \u2014 shown in Today when this week is active">'+( wk.tip||'')+'</textarea></div>'
-
-      +'<button class="btn btnp" onclick="S.planEdit.editWeek=null;sv();draw()">Done</button>'
-      +'</div>';
-  }
-
-  // ── Plan overview ─────────────────────────────────────────────────────────
-  var nameVal=pe.name||'My Plan';
-  var weekRows='';
-  for(var wi=0;wi<pe.weeks.length;wi++){
-    var wk2=pe.weeks[wi];
-    weekRows+='<div style="padding:11px 14px;background:var(--bg);border-top:1px solid var(--brd);display:flex;align-items:center;gap:10px">';
-    weekRows+='<div style="background:var(--bg3);border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:44px">';
-    weekRows+='<p style="font-size:16px;font-weight:700;color:var(--acc);margin:0;line-height:1">'+wk2.rpe+'</p>';
-    weekRows+='<p style="font-size:9px;color:var(--mu);margin:2px 0 0;text-transform:uppercase">RPE</p></div>';
-    weekRows+='<div style="flex:1;min-width:0">';
-    weekRows+='<p style="font-size:13px;font-weight:600;color:var(--tx);margin:0 0 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(wk2.label||'Week '+(wi+1))+'</p>';
-    weekRows+='<p class="mu" style="font-size:11px;margin:0">'+wk2.weightPct+'% weight'+(wk2.volMod<1?' \u00b7 Deload':'')+' \u00b7 RIR '+(10-wk2.rpe)+'</p>';
-    weekRows+='</div>';
-    weekRows+='<button onclick="S.planEdit.editWeek='+wi+';sv();draw()" style="background:transparent;border:none;color:var(--acc);font-size:13px;cursor:pointer;padding:4px 8px">Edit</button>';
-    if(pe.weeks.length>1)weekRows+='<button onclick="S.planEdit.weeks.splice('+wi+',1);if(S.planEdit.editWeek>=S.planEdit.weeks.length)S.planEdit.editWeek=null;sv();draw()" style="background:transparent;border:none;color:var(--mu);font-size:16px;cursor:pointer;padding:4px 6px">\u00d7</button>';
-    weekRows+='</div>';
-  }
-
-  var cyclicOn=pe.cyclic;
-  // Week count stepper - the target number of weeks (may differ from pe.weeks.length during setup)
-  if(pe.targetWeeks===undefined)pe.targetWeeks=4;
-  var tw=pe.targetWeeks;
-
-  return '<div class="pad">'+modeBar
-    +'<span class="lbl">Build tab</span><p class="h1" style="margin:6px 0 20px">Custom progression plan</p>'
-
-    +'<div class="card" style="margin-bottom:12px"><span class="lbl">Plan name</span>'
-    +'<input value="'+nameVal+'" style="width:100%;background:var(--bg3);border:.5px solid var(--brd);color:var(--tx);padding:12px;border-radius:10px;font-size:15px;margin-top:8px" oninput="S.planEdit.name=this.value;sv()" /></div>'
-
-    +'<div class="card" style="margin-bottom:12px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center">'
-        +'<div><span class="lbl">Repeating cycle</span><p class="mu" style="font-size:12px;margin-top:3px">Restarts from Week 1 after the last week</p></div>'
-        +'<button onclick="S.planEdit.cyclic=!S.planEdit.cyclic;sv();draw()" style="width:48px;height:28px;border-radius:14px;border:none;background:'+(cyclicOn?'var(--acc)':'var(--brd)')+';cursor:pointer;position:relative">'
-        +'<span style="position:absolute;top:3px;'+(cyclicOn?'right:3px':'left:3px')+';width:22px;height:22px;background:#fff;border-radius:50%;display:block"></span>'
-        +'</button>'
-      +'</div>'
-    +'</div>'
-
-    +'<div class="card" style="margin-bottom:16px">'
-      +'<span class="lbl">Number of weeks</span>'
-      +'<div style="display:flex;align-items:center;gap:0;margin-top:12px;border:1px solid var(--brd);border-radius:10px;overflow:hidden">'
-        +'<button class="nb" style="padding:12px 18px;font-size:20px;border-right:1px solid var(--brd);border-radius:0" onclick="if(S.planEdit.targetWeeks>1)S.planEdit.targetWeeks--;sv();draw()">&#8722;</button>'
-        +'<span style="flex:1;text-align:center;font-size:24px;font-weight:700;color:var(--tx)">'+tw+'</span>'
-        +'<button class="nb" style="padding:12px 18px;font-size:20px;border-left:1px solid var(--brd);border-radius:0" onclick="if(S.planEdit.targetWeeks<16)S.planEdit.targetWeeks++;sv();draw()">+</button>'
-      +'</div>'
-      +'<p class="mu" style="font-size:12px;margin-top:8px">Choose 2–16 weeks. Common lengths: 4 (mesocycle), 6 (linear), 8, 12 (full block).</p>'
-    +'</div>'
-
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-      +'<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase">Weeks ('+pe.weeks.length+' of '+tw+')</span>'
-      +'<button class="btn btnp" style="font-size:12px;padding:5px 14px;'+(pe.weeks.length>=tw?'opacity:0.4;pointer-events:none':'')+'" onclick="planAddWeek()">+ Add week</button>'
-      +(pe.weeks.length<tw&&tw-pe.weeks.length>1?'<button class="btn btno" style="font-size:12px;padding:5px 14px" onclick="planFillAll()">Fill all '+(tw-pe.weeks.length)+'</button>':'')
-    +'</div>'
-    +(pe.weeks.length?
-      '<div style="border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:16px">'+weekRows+'</div>'
-      :'<div style="border:1px dashed var(--brd);border-radius:10px;padding:20px;text-align:center;margin-bottom:16px"><p class="mu" style="font-size:13px;margin:0">No weeks yet. Add a week to begin.</p></div>'
-    )
-
-    +(pe.weeks.length>=1?'<button class="btn btnp" style="width:100%;margin-bottom:10px" onclick="planSave()">Save plan</button>':'')
-    +'<button class="btng" onclick="S.planEdit={name:\'My Plan\',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};sv();draw()">Start over</button>'
-    +'</div>';
-}
-
-function planAddWeek(){
-  var pe=S.planEdit;
-  var wNum=pe.weeks.length+1;
-  // Suggest sensible defaults based on position in a 4-week mesocycle
-  var defaults=[
-    {label:'Week 1 \u2014 Learn & Groove',theme:'learn',rpe:7,weightPct:90,volMod:1.0,tip:''},
-    {label:'Week 2 \u2014 Build',theme:'build',rpe:8,weightPct:95,volMod:1.0,tip:''},
-    {label:'Week 3 \u2014 Progress',theme:'progress',rpe:9,weightPct:100,volMod:1.0,tip:''},
-    {label:'Week 4 \u2014 Deload',theme:'peak',rpe:7,weightPct:105,volMod:0.5,tip:''}
-  ];
-  var d=defaults[Math.min(wNum-1,defaults.length-1)];
-  pe.weeks.push({
-    label:d.label,theme:d.theme,rpe:d.rpe,rir:10-d.rpe,
-    weightPct:d.weightPct,volMod:d.volMod,tip:d.tip
-  });
-  pe.editWeek=pe.weeks.length-1;
-  sv();draw();
-}
-
-function planFillAll(){
-  var pe=S.planEdit;
-  var tw=pe.targetWeeks||4;
-  while(pe.weeks.length<tw){
-    // Use same logic as planAddWeek but without opening edit screen
-    var wNum=pe.weeks.length+1;
-    var isLast=(wNum===tw);
-    var isDeload=isLast||(tw>4&&wNum%4===0);
-    var posInBlock=(wNum-1)%4;
-    var rpeMap=[7,8,9,9];
-    var rpe=isDeload?7:rpeMap[Math.min(posInBlock,3)];
-    var wPctMap=[90,95,100,100];
-    var wPct=isDeload?105:wPctMap[Math.min(posInBlock,3)];
-    var themeMap=['learn','build','progress','progress'];
-    var theme=isDeload?'peak':themeMap[Math.min(posInBlock,3)];
-    var subLabel=isDeload?'Deload':['Learn & Groove','Build','Progress','Peak'][Math.min(posInBlock,3)];
-    pe.weeks.push({label:'Week '+wNum+' — '+subLabel,theme:theme,rpe:rpe,rir:10-rpe,weightPct:wPct,volMod:isDeload?0.5:1.0,tip:''});
-  }
-  pe.editWeek=null;
-  sv();draw();
-}
-
-function planSave(){
-  var pe=S.planEdit;
-  if(!pe.name.trim()||!pe.weeks.length)return;
-  if(!S.customPlans)S.customPlans=[];
-  var key='cplan_'+Date.now();
-  var mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var d=new Date();
-  S.customPlans.push({
-    key:key,
-    name:pe.name.trim(),
-    desc:'Custom plan \u00b7 '+pe.weeks.length+' weeks',
-    weeks:pe.weeks,
-    cyclic:pe.cyclic,
-    date:d.getDate()+' '+mn[d.getMonth()]
-  });
-  // Reset builder
-  S.planEdit={name:'My Plan',numWeeks:4,cyclic:true,weeks:[],editWeek:null};
-  sv();
-  // Go to Programs tab to see it
-  S.tab='programs';
-  draw();
-}
-
 
 function custStart(){
   var days=[];
