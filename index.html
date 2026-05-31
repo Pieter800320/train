@@ -1198,58 +1198,59 @@ function ld(){
 // PROGRESSION PLANS ----------------------------------------------------------
 var PLANS=[
   {key:'classic_meso',name:'Classic Mesocycle',
-   desc:'4-week RPE wave. Build intensity across 3 weeks, peak, then reset. The foundation of periodised training.',
+   desc:'4-week RPE wave. Build intensity across 3 weeks, peak and deload. The foundation of periodised training.',
    weeks:[
-    {label:'Week 1 — Learn & Groove',theme:'learn',rpe:7,rir:3,volMod:1.0,
-     tip:'Start conservatively. Use around 90% of your usual weight. Focus on form, not load. RPE 7 means you should finish each set feeling like you had 3 reps left.'},
-    {label:'Week 2 — Build',theme:'build',rpe:8,rir:2,volMod:1.0,
-     tip:'Add a little weight or tighten form. RPE 8 — last set should feel genuinely hard, 2 reps left in the tank.'},
-    {label:'Week 3 — Progress',theme:'progress',rpe:9,rir:1,volMod:1.0,
-     tip:'Train at your working weight limit. RPE 9 — by the last set you should have at most 1 rep left. This is where adaptation happens.'},
-    {label:'Week 4 — Peak & Deload',theme:'peak',rpe:7,rir:3,volMod:0.5,
-     tip:'Halve the sets, maintain the weight. Add 5% if possible. Volume drives fatigue — reduce it, keep the load. You will feel fresh for the next cycle.'}
+    {label:'Week 1 — Learn & Groove',theme:'learn',rpe:7,rir:3,weightPct:90,volMod:1.0,
+     tip:'Start conservatively at 90% of your usual weight. Focus on form, not load. RPE 7 means you finish each set feeling like you had 3 reps left.'},
+    {label:'Week 2 — Build',theme:'build',rpe:8,rir:2,weightPct:95,volMod:1.0,
+     tip:'Bring the weight up to 95%. RPE 8 — the last set should feel genuinely hard, 2 reps left in the tank.'},
+    {label:'Week 3 — Progress',theme:'progress',rpe:9,rir:1,weightPct:100,volMod:1.0,
+     tip:'Train at your full working weight (100%). RPE 9 — by the last set you should have at most 1 rep left. This is where adaptation happens.'},
+    {label:'Week 4 — Peak & Deload',theme:'peak',rpe:7,rir:3,weightPct:105,volMod:0.5,
+     tip:'Add 5% to the weight but halve the sets. Volume drives fatigue — reduce it, keep the load high. You will feel fresh for the next cycle.'}
    ],cyclic:true},
   {key:'linear',name:'Linear Progression',
    desc:'Add weight every session. Best for beginners and strength programs. Simple and evidence-backed.',
    weeks:[
-    {label:'Week 1',theme:'learn',rpe:7,rir:3,volMod:1.0,
-     tip:'Establish your starting weights. RPE 7 — conservative. You are building the habit and the base, not testing limits.'},
-    {label:'Week 2',theme:'build',rpe:8,rir:2,volMod:1.0,
-     tip:'Add 2.5 kg to compound lifts, 1 kg to isolation work from last week. If a set felt easy, add weight. If form broke, hold.'},
-    {label:'Week 3',theme:'progress',rpe:8,rir:2,volMod:1.0,
-     tip:'Continue adding. Same rule: 2.5 kg compounds, 1 kg isolation. Keep a note of weights — you are building your personal records.'},
-    {label:'Week 4',theme:'progress',rpe:8,rir:2,volMod:1.0,
-     tip:'Keep adding. If you stalled on a lift, repeat the same weight with better form before trying to increase again.'},
-    {label:'Week 5',theme:'peak',rpe:9,rir:1,volMod:1.0,
-     tip:'Continue progressing. The accumulated load is now significant. This is real progress.'},
-    {label:'Week 6 — Deload',theme:'learn',rpe:6,rir:4,volMod:0.5,
-     tip:'Take a deload. Reduce weight by 20%, halve the sets. Recovery is where you actually get stronger. Come back next week ready to push past your old numbers.'}
+    {label:'Week 1',theme:'learn',rpe:7,rir:3,weightPct:90,volMod:1.0,
+     tip:'Establish your starting weights at 90%. RPE 7 — conservative. Build the habit and the base, not your limits.'},
+    {label:'Week 2',theme:'build',rpe:8,rir:2,weightPct:95,volMod:1.0,
+     tip:'95% this week. Add 2.5 kg to compound lifts, 1 kg to isolation from last week. If a set felt easy, add weight. If form broke, hold.'},
+    {label:'Week 3',theme:'progress',rpe:8,rir:2,weightPct:100,volMod:1.0,
+     tip:'Full working weight (100%). Continue adding. Keep a note — you are building your personal records.'},
+    {label:'Week 4',theme:'progress',rpe:8,rir:2,weightPct:100,volMod:1.0,
+     tip:'Hold at 100%. If you stalled on a lift, repeat the same weight with better form before trying to increase.'},
+    {label:'Week 5',theme:'peak',rpe:9,rir:1,weightPct:105,volMod:1.0,
+     tip:'Push past 100% — 105% this week. The accumulated load is now significant. This is real progress.'},
+    {label:'Week 6 — Deload',theme:'learn',rpe:6,rir:4,weightPct:80,volMod:0.5,
+     tip:'Back to 80%, half the sets. Recovery is where you actually get stronger. Come back next week ready to push past your old numbers.'}
    ],cyclic:true},
   {key:'wave_3_1',name:'3/1 Wave',
-   desc:'3 weeks of progressive loading followed by a full deload week. More recovery than a classic mesocycle.',
+   desc:'3 weeks of progressive loading followed by a full deload week. More recovery built in than a classic mesocycle.',
    weeks:[
-    {label:'Week 1 — Accumulate',theme:'learn',rpe:7,rir:3,volMod:1.0,
-     tip:'Accumulation week. Moderate intensity, full volume. RPE 7 — form focus.'},
-    {label:'Week 2 — Intensify',theme:'build',rpe:8,rir:2,volMod:1.0,
-     tip:'Intensity week. Same volume, more weight. RPE 8 — each set should feel like a real effort.'},
-    {label:'Week 3 — Peak',theme:'progress',rpe:9,rir:1,volMod:1.0,
-     tip:'Peak week. Maximum intensity. RPE 9 — approach your limits with good form. This is where you test what you have built.'},
-    {label:'Week 4 — Full Deload',theme:'peak',rpe:6,rir:4,volMod:0.5,
-     tip:'Full deload. Half the sets, weight reduced 20-30%. This week is not optional — it is when your nervous system recovers. Skip it and you accumulate fatigue instead of fitness.'}
+    {label:'Week 1 — Accumulate',theme:'learn',rpe:7,rir:3,weightPct:90,volMod:1.0,
+     tip:'90% this week. Moderate intensity, full volume. RPE 7 — form focus. You are loading up volume here.'},
+    {label:'Week 2 — Intensify',theme:'build',rpe:8,rir:2,weightPct:95,volMod:1.0,
+     tip:'95%. Same volume, more weight. RPE 8 — each set should feel like a real effort. Last set should challenge you.'},
+    {label:'Week 3 — Peak',theme:'progress',rpe:9,rir:1,weightPct:100,volMod:1.0,
+     tip:'100% — full working weight. RPE 9. This is where you test what you have built.'},
+    {label:'Week 4 — Full Deload',theme:'peak',rpe:6,rir:4,weightPct:80,volMod:0.5,
+     tip:'80% and half the sets. This week is not optional — it is when your nervous system recovers. Skip it and you accumulate fatigue instead of fitness.'}
    ],cyclic:true},
   {key:'maintenance',name:'Maintenance',
-   desc:'Keep what you have built. Reduce volume, maintain intensity. For busy periods or between training blocks.',
+   desc:'Reduce volume, maintain intensity. For busy periods, travel, or between training blocks.',
    weeks:[
-    {label:'Week 1',theme:'learn',rpe:7,rir:3,volMod:0.75,
-     tip:'Maintenance mode. Reduce to 3 sets per exercise. Keep the same weight. Research shows 1/3 of normal volume maintains strength for weeks.'},
-    {label:'Week 2',theme:'build',rpe:7,rir:3,volMod:0.75,
-     tip:'Keep it going. Same reduced volume, same weight. You are not losing fitness at this volume.'},
-    {label:'Week 3',theme:'progress',rpe:7,rir:3,volMod:0.75,
-     tip:'Still maintaining. If you feel fresh, nudge intensity up slightly. The goal is preserving what you have.'},
-    {label:'Week 4',theme:'peak',rpe:7,rir:3,volMod:0.75,
-     tip:'Final maintenance week. Next week return to full volume. The foundation held — now build on it again.'}
+    {label:'Week 1',theme:'learn',rpe:7,rir:3,weightPct:95,volMod:0.75,
+     tip:'95% weight, 75% of your normal sets. Research shows 1/3 of normal volume maintains strength for weeks.'},
+    {label:'Week 2',theme:'build',rpe:7,rir:3,weightPct:95,volMod:0.75,
+     tip:'Same reduced volume, same weight. You are not losing fitness at this load and frequency.'},
+    {label:'Week 3',theme:'progress',rpe:7,rir:3,weightPct:95,volMod:0.75,
+     tip:'Still maintaining. If you feel fresh, you can nudge intensity up slightly.'},
+    {label:'Week 4',theme:'peak',rpe:7,rir:3,weightPct:95,volMod:0.75,
+     tip:'Final maintenance week. Next week return to full volume and progress. The foundation held.'}
    ],cyclic:false}
 ];
+
 
 function getPlanByKey(k){for(var i=0;i<PLANS.length;i++)if(PLANS[i].key===k)return PLANS[i];return null;}
 function getActivePlan(){if(!S.plan||!S.plan.key)return null;return getPlanByKey(S.plan.key);}
@@ -1539,7 +1540,7 @@ function todayV(){
     if(pl&&pw){
       var wNum=getPlanWeekNum();
       var totalW=pl.weeks.length;
-      var themeColors={learn:'#3ab8e0',build:'var(--acc)',progress:'#e07030',peak:'var(--ok)'};
+      var themeColors={learn:'#c85a1a',build:'#d9692a',progress:'#e07b3a',peak:'#f0a060'};
       var themeCol=themeColors[pw.theme]||'var(--acc)';
       var halfVol=pw.volMod<1;
 
@@ -1590,8 +1591,8 @@ function todayV(){
         planBanner+='<p style="font-size:16px;font-weight:600;color:var(--tx);margin:0">'+pw.rir+' reps</p>';
         planBanner+='</div>';
         planBanner+='<div style="flex:1;background:var(--bg3);border-radius:8px;padding:8px 10px">';
-        planBanner+='<p style="font-size:10px;color:var(--mu);margin:0 0 2px;text-transform:uppercase;letter-spacing:0.05em">Volume</p>';
-        planBanner+='<p style="font-size:16px;font-weight:600;color:'+(halfVol?themeCol:'var(--tx)')+';margin:0">'+(halfVol?'Half':'Full')+'</p>';
+        planBanner+='<p style="font-size:10px;color:var(--mu);margin:0 0 2px;text-transform:uppercase;letter-spacing:0.05em">Weight</p>';
+        planBanner+='<p style="font-size:16px;font-weight:600;color:'+themeCol+';margin:0">'+(pw.weightPct||100)+'%</p>';
         planBanner+='</div>';
         planBanner+='<div style="flex:1;background:var(--bg3);border-radius:8px;padding:8px 10px">';
         planBanner+='<p style="font-size:10px;color:var(--mu);margin:0 0 2px;text-transform:uppercase;letter-spacing:0.05em">Effort</p>';
@@ -1603,7 +1604,7 @@ function todayV(){
         planBanner+='</div>';
         if(halfVol){
           planBanner+='<div style="background:var(--str-bg);border:1px solid '+themeCol+';border-radius:8px;padding:8px 12px;margin-bottom:12px">';
-          planBanner+='<p style="font-size:12px;color:'+themeCol+';margin:0"><strong>Deload week:</strong> Do half your normal number of sets today.</p>';
+          planBanner+='<p style="font-size:12px;color:'+themeCol+';margin:0"><strong>Deload week:</strong> Half your normal sets, weight at '+(pw.weightPct||100)+'%.</p>';
           planBanner+='</div>';
         }
         planBanner+='<div style="display:flex;gap:8px">';
@@ -2104,103 +2105,132 @@ document.addEventListener('click',function(e){
 // PROGRAMS -------------------------------------------------------------------
 
 function programsV(){
+  var ACC='var(--acc)';  // #E07B3A - the single accent colour for ALL headings
   var html='<div class="pad">';
+  html+='<p class="h1" style="margin:0 0 20px">Programs</p>';
 
-  // ── 1. PROGRESSION PLAN (top) ─────────────────────────────────────────────
-  html+='<p class="h1" style="margin:0 0 16px">Programs</p>';
-
-  html+='<div class="section-hdr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
-  html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Progression Plan</span>';
-  html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
-
-  if(S.plan&&S.plan.key){
-    var ap=getPlanByKey(S.plan.key);
-    var aw=getPlanWeek();
-    var awNum=getPlanWeekNum();
-    if(ap&&aw){
-      html+='<div class="card" style="margin-bottom:8px;border-color:var(--acc);background:var(--str-bg)">';
-      html+='<span class="lbl" style="color:var(--acc)">Active</span>';
-      html+='<p style="font-size:16px;font-weight:600;margin:4px 0 2px">'+ap.name+'</p>';
-      html+='<p class="mu" style="font-size:12px;margin:0 0 10px">'+aw.label+' \u00b7 Week '+awNum+' of '+ap.weeks.length+'</p>';
-      html+='<div style="display:flex;gap:8px">';
-      html+='<button class="btn btnp" style="flex:1;font-size:13px" onclick="advancePlanWeek()">Advance week</button>';
-      html+='<button class="btn btno" style="flex:1;font-size:13px" onclick="detachPlan()">Remove plan</button>';
-      html+='</div></div>';
-    }
-  }
-
-  for(var pli=0;pli<PLANS.length;pli++){
-    var pl=PLANS[pli];
-    if(S.plan&&S.plan.key===pl.key)continue;
-    html+='<div class="card" style="margin-bottom:8px">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">';
-    html+='<div style="flex:1;min-width:0">';
-    html+='<p style="font-weight:600;margin:0 0 2px;font-size:14px">'+pl.name+'</p>';
-    html+='<p class="mu" style="font-size:11px;margin:0">'+pl.weeks.length+' weeks \u00b7 '+(pl.cyclic?'repeating':'one-off')+'</p>';
-    html+='</div>';
-    html+='<button class="btn btnp" style="font-size:13px;padding:7px 16px;flex-shrink:0" data-attachplan="'+pl.key+'">Attach</button>';
-    html+='</div>';
-    html+='<p style="font-size:12px;color:var(--mu);margin:8px 0 0;line-height:1.5">'+pl.desc+'</p>';
-    html+='</div>';
-  }
-
-  html+='<div style="height:20px"></div>';
-
-  // ── 2. CURRENT PROGRAM ───────────────────────────────────────────────────
-  html+='<div class="section-hdr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
-  html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Current Program</span>';
-  html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+  // ── HERO CARD: Current program + plan ────────────────────────────────────
   var curE=null;
   for(var ci=0;ci<CATALOGUE.length;ci++)if(CATALOGUE[ci].key===S.tplKey){curE=CATALOGUE[ci];break;}
-  html+='<div class="card" style="margin-bottom:20px;background:var(--str-bg);border-color:var(--str-brd)">';
+  var ap=S.plan&&S.plan.key?getPlanByKey(S.plan.key):null;
+  var aw=ap?getPlanWeek():null;
+  var awNum=ap?getPlanWeekNum():1;
+
+  html+='<div class="card" style="margin-bottom:24px;background:var(--str-bg);border-color:var(--str-brd);border-width:1.5px">';
+  html+='<span class="lbl" style="color:'+ACC+'">Your current setup</span>';
+  // Training program row
+  html+='<div style="margin-top:10px;padding:10px 12px;background:var(--bg3);border-radius:8px;margin-bottom:8px">';
+  html+='<p style="font-size:10px;font-weight:700;letter-spacing:0.06em;color:var(--mu);text-transform:uppercase;margin:0 0 4px">Training program</p>';
   if(curE){
-    html+='<p style="font-size:16px;font-weight:600;margin:0 0 2px">'+curE.name+'</p>';
-    html+='<p class="mu" style="font-size:12px;margin:0 0 6px">'+curE.sessions+' \u00b7 '+curE.mins+'</p>';
-    html+='<p style="font-size:13px;color:var(--mu);margin:0">'+curE.who+'</p>';
+    html+='<p style="font-size:15px;font-weight:600;color:var(--tx);margin:0 0 1px">'+curE.name+'</p>';
+    html+='<p class="mu" style="font-size:12px;margin:0">'+curE.sessions+' \u00b7 '+curE.mins+'</p>';
   } else {
-    html+='<p style="font-size:16px;margin:0">'+ACTIVE_TPL.name+'</p>';
+    html+='<p style="font-size:14px;color:var(--mu);margin:0;font-style:italic">No training program selected</p>';
+  }
+  html+='</div>';
+  // Progression plan row
+  html+='<div style="padding:10px 12px;background:var(--bg3);border-radius:8px">';
+  html+='<p style="font-size:10px;font-weight:700;letter-spacing:0.06em;color:var(--mu);text-transform:uppercase;margin:0 0 4px">Progression plan</p>';
+  if(ap&&aw){
+    html+='<p style="font-size:15px;font-weight:600;color:var(--tx);margin:0 0 1px">'+ap.name+'</p>';
+    html+='<p class="mu" style="font-size:12px;margin:0">'+aw.label+' \u00b7 Week '+awNum+' of '+ap.weeks.length+'</p>';
+  } else {
+    html+='<p style="font-size:14px;color:var(--mu);margin:0;font-style:italic">No progression plan yet</p>';
+  }
+  html+='</div>';
+  html+='</div>';
+
+  // Helper: section heading
+  function secHead(label){
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+      +'<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:'+ACC+';text-transform:uppercase;white-space:nowrap">'+label+'</span>'
+      +'<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+  }
+
+  // ── PROGRESSION PLANS ────────────────────────────────────────────────────
+  var isPlanOpen=!!(S._pgOpen&&S._pgOpen['g_plans']);
+  html+=secHead('Progression Plans');
+  html+='<div style="border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:20px">';
+  // Toggle header
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg2);cursor:pointer" data-pgopen="g_plans">';
+  html+='<span style="font-size:13px;color:var(--mu)">'+(isPlanOpen?'Hide plans':'Show plans')+'</span>';
+  html+='<span style="font-size:18px;color:var(--mu);line-height:1;width:20px;text-align:center">'+(isPlanOpen?'\u2212':'\u002b')+'</span>';
+  html+='</div>';
+  if(isPlanOpen){
+    for(var pli=0;pli<PLANS.length;pli++){
+      var pl=PLANS[pli];
+      var isAct=S.plan&&S.plan.key===pl.key;
+      var notLast=pli<PLANS.length-1;
+      html+='<div style="padding:12px 14px;background:'+(isAct?'var(--str-bg)':'var(--bg)')+';'+(notLast?'border-top:1px solid var(--brd)':'border-top:1px solid var(--brd)')+'\">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">';
+      html+='<div style="flex:1;min-width:0">';
+      html+='<p style="font-size:14px;font-weight:600;color:var(--tx);margin:0 0 2px">'+pl.name+'</p>';
+      html+='<p class="mu" style="font-size:12px;margin:0">'+pl.weeks.length+' weeks \u00b7 '+(pl.cyclic?'repeating':'one-off')+'</p>';
+      html+='<p style="font-size:12px;color:var(--mu);margin:5px 0 0;line-height:1.5">'+pl.desc+'</p>';
+      html+='</div>';
+      html+='<div style="flex-shrink:0;margin-left:12px">';
+      if(isAct){
+        html+='<span style="font-size:11px;color:'+ACC+';font-weight:700">\u2713 Active</span>';
+      } else {
+        html+='<button class="btn btnp" style="font-size:13px;padding:7px 16px" data-attachplan="'+pl.key+'">Attach</button>';
+      }
+      html+='</div></div>';
+      if(isAct){
+        html+='<button class="btn btno" style="font-size:12px;padding:5px 14px;margin-top:10px;color:var(--mu)" onclick="detachPlan()">Remove plan</button>';
+      }
+      html+='</div>';
+    }
   }
   html+='</div>';
 
-  // ── 3. CUSTOM PROGRAMS ───────────────────────────────────────────────────
-  if(S.customPrograms&&S.customPrograms.length>0){
-    html+='<div class="section-hdr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
-    html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">Custom Programs</span>';
-    html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
-    for(var cpi=0;cpi<S.customPrograms.length;cpi++){
-      var cp=S.customPrograms[cpi];
-      var isCurCP=cp.key===S.tplKey;
-      html+='<div class="card" style="margin-bottom:8px'+(isCurCP?';border-color:var(--acc)':'')+'\">';
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">';
-      html+='<div style="flex:1;min-width:0">';
-      html+='<p style="font-weight:600;margin:0 0 2px;font-size:14px">'+cp.name+'</p>';
-      html+='<p class="mu" style="font-size:11px;margin:0">'+cp.date+(isCurCP?' \u00b7 Active':'')+'</p>';
+  // ── CUSTOM PROGRAMS ───────────────────────────────────────────────────────
+  var isCustomOpen=!!(S._pgOpen&&S._pgOpen['g_custom']);
+  html+=secHead('Custom Programs');
+  html+='<div style="border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:20px">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg2);cursor:pointer" data-pgopen="g_custom">';
+  html+='<span style="font-size:13px;color:var(--mu)">'+(isCustomOpen?'Hide custom programs':'Show custom programs')+'</span>';
+  html+='<span style="font-size:18px;color:var(--mu);line-height:1;width:20px;text-align:center">'+(isCustomOpen?'\u2212':'\u002b')+'</span>';
+  html+='</div>';
+  if(isCustomOpen){
+    if(!S.customPrograms||!S.customPrograms.length){
+      html+='<div style="padding:14px;border-top:1px solid var(--brd)">';
+      html+='<p style="font-size:13px;color:var(--mu);margin:0;font-style:italic">You have not built any custom programs yet. Use the Build tab to create one.</p>';
       html+='</div>';
-      html+='<div style="display:flex;gap:8px;flex-shrink:0">';
-      if(!isCurCP)html+='<button class="btn btnp" style="font-size:13px;padding:7px 14px" data-switchprog="'+cp.key+'">Switch</button>';
-      html+='<button class="btn btno" style="font-size:13px;padding:7px 14px;color:var(--warn)" data-delprog="'+cp.key+'">Delete</button>';
-      html+='</div></div></div>';
+    } else {
+      for(var cpi=0;cpi<S.customPrograms.length;cpi++){
+        var cp=S.customPrograms[cpi];
+        var isCurCP=cp.key===S.tplKey;
+        html+='<div style="padding:12px 14px;background:'+(isCurCP?'var(--str-bg)':'var(--bg)')+';border-top:1px solid var(--brd)">';
+        html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">';
+        html+='<div style="flex:1;min-width:0">';
+        html+='<p style="font-size:14px;font-weight:600;color:var(--tx);margin:0 0 2px">'+cp.name+'</p>';
+        html+='<p class="mu" style="font-size:12px;margin:0">'+cp.date+(isCurCP?' \u00b7 <span style="color:'+ACC+'">Active</span>':'')+'</p>';
+        html+='</div>';
+        html+='<div style="display:flex;gap:8px;flex-shrink:0">';
+        if(!isCurCP)html+='<button class="btn btnp" style="font-size:13px;padding:7px 14px" data-switchprog="'+cp.key+'">Switch</button>';
+        html+='<button class="btn btno" style="font-size:13px;padding:7px 14px;color:'+ACC+'" data-delprog="'+cp.key+'">Delete</button>';
+        html+='</div></div></div>';
+      }
     }
-    html+='<div style="height:20px"></div>';
   }
+  html+='</div>';
 
-  // ── 4. ALL PROGRAMS (grouped, collapsible) ───────────────────────────────
-  html+='<div class="section-hdr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
-  html+='<span style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:var(--acc);text-transform:uppercase;white-space:nowrap">All Programs</span>';
-  html+='<div style="flex:1;height:1px;background:var(--brd)"></div></div>';
+  // ── PRE-BUILT PROGRAMS (grouped, collapsible) ────────────────────────────
+  html+=secHead('Pre-built Programs');
 
   var groups=[
-    {id:'g_muscle',label:'Muscle Building',keys:['hyp_b3','hyp_b4','hyp_b5','hyp_a3','hyp_a4','hyp_a5','hyp'],col:'var(--acc)'},
-    {id:'g_strength',label:'Strength Building',keys:['str_b3','str_b4','str_b5','str_a3','str_a4','str_a5','strength'],col:'#e07030'},
-    {id:'g_endurance',label:'Muscular Endurance',keys:['end_b3','end_b4','end_b5','end_a3','end_a4','end_a5'],col:'#3ab8e0'},
-    {id:'g_fatloss',label:'Fat Loss',keys:['fatloss'],col:'var(--ok)'},
-    {id:'g_home',label:'Home Training',keys:['home_bw','home_db'],col:'#9b8de0'},
-    {id:'g_sport',label:'Athletic & Sport',keys:['athletic','soccer','run','court','climb'],col:'#e0b83a'},
-    {id:'g_balanced',label:'Balanced',keys:['balanced'],col:'#888'},
-    {id:'g_rehab',label:'Rehab & Support',keys:['shoulder','knee','back'],col:'#666'}
+    {id:'g_muscle',label:'Muscle Building',keys:['hyp_b3','hyp_b4','hyp_b5','hyp_a3','hyp_a4','hyp_a5','hyp']},
+    {id:'g_strength',label:'Strength Building',keys:['str_b3','str_b4','str_b5','str_a3','str_a4','str_a5','strength']},
+    {id:'g_endurance',label:'Muscular Endurance',keys:['end_b3','end_b4','end_b5','end_a3','end_a4','end_a5']},
+    {id:'g_fatloss',label:'Fat Loss',keys:['fatloss']},
+    {id:'g_home',label:'Home Training',keys:['home_bw','home_db']},
+    {id:'g_sport',label:'Athletic & Sport',keys:['athletic','soccer','run','court','climb']},
+    {id:'g_balanced',label:'Balanced',keys:['balanced']},
+    {id:'g_rehab',label:'Rehab & Support',keys:['shoulder','knee','back']}
   ];
 
-  // Determine which group is currently active (to auto-open it)
+  // Auto-open the group containing the active program
+  if(!S._pgOpen)S._pgOpen={};
   var activeGroup='';
   for(var gi=0;gi<groups.length;gi++){
     for(var gki=0;gki<groups[gi].keys.length;gki++){
@@ -2208,11 +2238,10 @@ function programsV(){
     }
     if(activeGroup)break;
   }
-  if(!S._pgOpen)S._pgOpen={};
-  // Auto-open the active group if nothing is manually open
-  var anyOpen=false;
-  for(var pgk in S._pgOpen)if(S._pgOpen[pgk])anyOpen=true;
-  if(!anyOpen&&activeGroup)S._pgOpen[activeGroup]=true;
+  // Only auto-open if user hasn't manually toggled anything (fresh load)
+  var hasManual=false;
+  for(var pgk in S._pgOpen)if(S._pgOpen[pgk]&&pgk!=='g_plans'&&pgk!=='g_custom')hasManual=true;
+  if(!hasManual&&activeGroup)S._pgOpen[activeGroup]=true;
 
   groups.forEach(function(g){
     var entries=[];
@@ -2221,35 +2250,35 @@ function programsV(){
     });
     if(!entries.length)return;
     var isOpen=!!(S._pgOpen&&S._pgOpen[g.id]);
-    // Header / toggle row
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;background:var(--bg2);margin-bottom:'+(isOpen?'0':'8')+'px;cursor:pointer;border:1px solid var(--brd)" data-pgopen="'+g.id+'">';
-    html+='<span style="font-size:13px;font-weight:600;color:'+g.col+'">'+g.label+'</span>';
-    html+='<span style="font-size:18px;color:var(--mu);line-height:1">'+(isOpen?'\u2212':'\u002b')+'</span>';
+    html+='<div style="border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:8px">';
+    // Group header
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg2);cursor:pointer" data-pgopen="'+g.id+'">';
+    html+='<span style="font-size:13px;font-weight:600;color:'+ACC+'">'+g.label+'</span>';
+    html+='<span style="font-size:18px;color:var(--mu);line-height:1;width:20px;text-align:center">'+(isOpen?'\u2212':'\u002b')+'</span>';
     html+='</div>';
     if(isOpen){
-      html+='<div style="border:1px solid var(--brd);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;margin-bottom:8px">';
       entries.forEach(function(c,idx){
         var isCur=c.key===S.tplKey;
-        var notLast=idx<entries.length-1;
-        html+='<div style="padding:12px 14px;background:'+(isCur?'var(--str-bg)':'var(--bg)')+';'+(notLast?'border-bottom:1px solid var(--brd)':'')+'\">';
-        html+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">';
+        html+='<div style="padding:12px 14px;background:'+(isCur?'var(--str-bg)':'var(--bg)')+';border-top:1px solid var(--brd)">';
+        html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">';
         html+='<div style="flex:1;min-width:0">';
-        html+='<p style="font-weight:'+(isCur?'600':'500')+';margin:0 0 1px;font-size:13px;color:'+(isCur?'var(--acc)':'var(--tx)')+'">'+c.name+'</p>';
-        html+='<p class="mu" style="font-size:11px;margin:0">'+c.sessions+' \u00b7 '+c.mins+'</p>';
+        html+='<p style="font-size:13px;font-weight:600;color:'+(isCur?ACC:'var(--tx)')+';margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.name+'</p>';
+        html+='<p class="mu" style="font-size:11px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.sessions+' \u00b7 '+c.mins+'</p>';
         html+='</div>';
+        html+='<div style="flex-shrink:0;margin-left:10px">';
         if(isCur){
-          html+='<span style="font-size:11px;color:var(--acc);font-weight:700;flex-shrink:0">\u2713 Active</span>';
+          html+='<span style="font-size:11px;color:'+ACC+';font-weight:700;white-space:nowrap">\u2713 Active</span>';
         } else {
-          html+='<button class="btn btnp" style="font-size:12px;padding:6px 14px;flex-shrink:0" data-switchprog="'+c.key+'">Switch</button>';
+          html+='<button class="btn btnp" style="font-size:13px;padding:7px 16px;white-space:nowrap" data-switchprog="'+c.key+'">Switch</button>';
         }
-        html+='</div></div>';
+        html+='</div></div></div>';
       });
-      html+='</div>';
     }
+    html+='</div>';
   });
 
-  html+='<div style="height:20px"></div>';
-  html+='<button class="btn btno" style="width:100%;margin-bottom:24px;color:var(--mu);font-size:13px" onclick="resetOnboarding()">Retake questionnaire</button>';
+  html+='<div style="height:16px"></div>';
+  html+='<button class="btn btno" style="width:100%;margin-bottom:24px;font-size:13px;color:var(--mu)" onclick="resetOnboarding()">Retake questionnaire</button>';
   html+='</div>';
   return html;
 }
