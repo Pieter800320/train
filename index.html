@@ -2209,6 +2209,19 @@ function programsV(){
   html+='</div>';
 
   // ── CUSTOM PROGRAMS ───────────────────────────────────────────────────────
+  // ── PATCH 2: Replace the entire g_custom block in programsV() ────────────────
+//
+// FIND this entire block (from "var isCustomOpen" down to and including
+// the final "html+='</div>';" before "secHead('Pre-built Programs')"):
+//
+//   var isCustomOpen=!!(S._pgOpen&&S._pgOpen['g_custom']);
+//   html+=secHead('Custom Programs');
+//   ... (the whole block) ...
+//   html+='</div>';
+//
+// REPLACE with everything between the dashed lines below:
+// ─────────────────────────────────────────────────────────────────────────────
+
   var isCustomOpen=!!(S._pgOpen&&S._pgOpen['g_custom']);
   html+=secHead('Custom Programs');
   html+='<div style="border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:20px">';
@@ -2217,28 +2230,52 @@ function programsV(){
   html+='<span style="font-size:18px;color:var(--mu);line-height:1;width:20px;text-align:center">'+(isCustomOpen?'\u2212':'\u002b')+'</span>';
   html+='</div>';
   if(isCustomOpen){
+    // ── Sub-group: Training Programs ──────────────────────────────────────
+    html+='<div style="padding:10px 14px 4px;border-top:1px solid var(--brd);background:var(--bg)">';
+    html+='<p style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:'+ACC+';text-transform:uppercase;margin:0 0 8px">Training Programs</p>';
+    html+='</div>';
     if(!S.customPrograms||!S.customPrograms.length){
-      html+='<div style="padding:14px;border-top:1px solid var(--brd)">';
-      html+='<p style="font-size:13px;color:var(--mu);margin:0;font-style:italic">You have not built any custom programs yet. Use the Build tab to create one.</p>';
-      html+='</div>';
+      html+='<div style="padding:4px 14px 14px;background:var(--bg)"><p style="font-size:13px;color:var(--mu);margin:0;font-style:italic">No custom training programs yet. Use the Build tab to create one.</p></div>';
     } else {
       for(var cpi=0;cpi<S.customPrograms.length;cpi++){
         var cp=S.customPrograms[cpi];
         var isCurCP=cp.key===S.tplKey;
-        html+='<div style="padding:12px 14px;background:'+(isCurCP?'var(--str-bg)':'var(--bg)')+';border-top:1px solid var(--brd)">';
+        html+='<div style="padding:10px 14px;background:'+(isCurCP?'var(--str-bg)':'var(--bg)')+';border-top:.5px solid var(--brd)">';
         html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">';
-        html+='<div style="flex:1;min-width:0">';
-        html+='<p style="font-size:14px;font-weight:600;color:var(--tx);margin:0 0 2px">'+cp.name+'</p>';
-        html+='<p class="mu" style="font-size:12px;margin:0">'+cp.date+(isCurCP?' \u00b7 <span style="color:'+ACC+'">Active</span>':'')+'</p>';
-        html+='</div>';
+        html+='<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:600;color:var(--tx);margin:0 0 2px">'+cp.name+'</p>';
+        html+='<p class="mu" style="font-size:12px;margin:0">'+cp.date+(isCurCP?' \u00b7 <span style="color:'+ACC+'">Active</span>':'')+'</p></div>';
         html+='<div style="display:flex;gap:8px;flex-shrink:0">';
         if(!isCurCP)html+='<button class="btn btnp" style="font-size:13px;padding:7px 14px" data-switchprog="'+cp.key+'">Switch</button>';
         html+='<button class="btn btno" style="font-size:13px;padding:7px 14px;color:'+ACC+'" data-delprog="'+cp.key+'">Delete</button>';
         html+='</div></div></div>';
       }
     }
+    // ── Sub-group: Progression Plans ──────────────────────────────────────
+    html+='<div style="padding:10px 14px 4px;border-top:2px solid var(--brd);background:var(--bg)">';
+    html+='<p style="font-size:10px;font-weight:700;letter-spacing:0.07em;color:'+ACC+';text-transform:uppercase;margin:0 0 8px">Progression Plans</p>';
+    html+='</div>';
+    if(!S.customPlans||!S.customPlans.length){
+      html+='<div style="padding:4px 14px 14px;background:var(--bg)"><p style="font-size:13px;color:var(--mu);margin:0;font-style:italic">No custom progression plans yet. Use the Build tab to create one.</p></div>';
+    } else {
+      for(var clpi=0;clpi<S.customPlans.length;clpi++){
+        var clp=S.customPlans[clpi];
+        var isActCLP=S.plan&&S.plan.key===clp.key;
+        html+='<div style="padding:10px 14px;background:'+(isActCLP?'var(--str-bg)':'var(--bg)')+';border-top:.5px solid var(--brd)">';
+        html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">';
+        html+='<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:600;color:var(--tx);margin:0 0 2px">'+clp.name+'</p>';
+        html+='<p class="mu" style="font-size:12px;margin:0">'+clp.weeks.length+' weeks \u00b7 '+(clp.cyclic?'repeating':'one-off')+(isActCLP?' \u00b7 <span style="color:'+ACC+'">Active</span>':'')+'</p></div>';
+        html+='<div style="display:flex;gap:8px;flex-shrink:0">';
+        if(isActCLP){html+='<button class="btn btno" style="font-size:13px;padding:7px 14px;color:var(--mu)" onclick="detachPlan()">Remove</button>';}
+        else{html+='<button class="btn btnp" style="font-size:13px;padding:7px 14px" data-attachplan="'+clp.key+'">Attach</button>';}
+        html+='<button class="btn btno" style="font-size:13px;padding:7px 14px;color:'+ACC+'" data-delcplan="'+clp.key+'">Delete</button>';
+        html+='</div></div></div>';
+      }
+    }
   }
   html+='</div>';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// END OF PATCH 2
 
   // ── PRE-BUILT PROGRAMS (grouped, collapsible) ────────────────────────────
   html+=secHead('Pre-built Programs');
