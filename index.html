@@ -1576,7 +1576,7 @@ function todayV(){
         // Expanded view
         planBanner+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">';
         planBanner+='<div>';
-        planBanner+='<span class="lbl" style="color:'+themeCol+'">Progression plan</span>';
+        planBanner+='<span class="lbl" style="color:'+themeCol+'">'+pl.name+'</span>';
         planBanner+='<p style="font-size:14px;font-weight:600;margin:3px 0 2px;color:var(--tx)">'+pw.label+'</p>';
         planBanner+='<p class="mu" style="font-size:12px;margin:0">Week '+wNum+' of '+totalW+'</p>';
         planBanner+='</div>';
@@ -2090,9 +2090,15 @@ document.addEventListener('click',function(e){
     if(t.dataset&&t.dataset.timermode){S.timer.mode=t.dataset.timermode;S.timer.setup=true;S.timer.running=false;clearInterval(_timerInterval);sv();draw();return;}
     if(t.dataset&&t.dataset.switchprog){switchProgram(t.dataset.switchprog);return;}
     if(t.dataset&&t.dataset.attachplan){attachPlan(t.dataset.attachplan);return;}
-    if(t.dataset&&t.dataset.pgopen){
+    // Walk up DOM tree to find pgopen - but NOT if a button was clicked
+    var pgEl=null;
+    if(e.target.tagName!=='BUTTON'&&e.target.tagName!=='INPUT'){
+      pgEl=e.target;
+      while(pgEl&&!pgEl.dataset.pgopen)pgEl=pgEl.parentElement;
+    }
+    if(pgEl&&pgEl.dataset&&pgEl.dataset.pgopen){
       if(!S._pgOpen)S._pgOpen={};
-      S._pgOpen[t.dataset.pgopen]=!S._pgOpen[t.dataset.pgopen];
+      S._pgOpen[pgEl.dataset.pgopen]=!S._pgOpen[pgEl.dataset.pgopen];
       sv();draw();return;
     }
     if(t.dataset&&t.dataset.selectprog){obSelectProgram(t.dataset.selectprog);return;}
