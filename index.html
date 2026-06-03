@@ -7,6 +7,39 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Falkenburg">
 <meta name="theme-color" content="#D4691E">
+<script>
+// Generate PWA icon as data URI and inject into manifest dynamically
+(function(){
+  try{
+    var c=document.createElement('canvas');c.width=512;c.height=512;
+    var ctx=c.getContext('2d');
+    // Background
+    ctx.fillStyle='#D4691E';
+    ctx.beginPath();ctx.roundRect(0,0,512,512,80);ctx.fill();
+    // Letter F
+    ctx.fillStyle='#ffffff';
+    ctx.font='bold 320px -apple-system,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('F',256,270);
+    var data512=c.toDataURL('image/png');
+    // 192x192
+    var c2=document.createElement('canvas');c2.width=192;c2.height=192;
+    var ctx2=c2.getContext('2d');
+    ctx2.fillStyle='#D4691E';
+    ctx2.beginPath();ctx2.roundRect(0,0,192,192,30);ctx2.fill();
+    ctx2.fillStyle='#ffffff';
+    ctx2.font='bold 120px -apple-system,sans-serif';
+    ctx2.textAlign='center';ctx2.textBaseline='middle';
+    ctx2.fillText('F',96,102);
+    var data192=c2.toDataURL('image/png');
+    // Override apple-touch-icon
+    var atIcon=document.querySelector('link[rel="apple-touch-icon"]');
+    if(atIcon)atIcon.href=data192;
+    // Store globally for manifest
+    window._icon192=data192;window._icon512=data512;
+  }catch(e){}
+})();
+</script>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Falkenburg</title>
@@ -30,7 +63,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative}
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
 #screen::-webkit-scrollbar{display:none}
-#tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg2);border-top:0.5px solid var(--brd);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 0 max(14px,env(safe-area-inset-bottom));z-index:100}
+#tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg2);border-top:0.5px solid var(--brd);display:grid;grid-template-columns:repeat(6,1fr);padding:6px 0 max(14px,env(safe-area-inset-bottom));z-index:100}
 .tb{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:8px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mu);cursor:pointer;padding:2px 0;transition:color .15s}
 .tb i{font-size:22px}
 .tb.on{color:var(--acc)}
@@ -132,6 +165,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
     <div class="tb" data-tab="programs"><i class="ti ti-layout-grid"></i>Programs</div>
     <div class="tb" data-tab="build"><i class="ti ti-hammer"></i>Build</div>
     <div class="tb" data-tab="timer"><i class="ti ti-clock"></i>Timer</div>
+    <div class="tb" data-tab="journal"><i class="ti ti-book"></i>Journal</div>
   </div>
   <div id="sheet-overlay" class="sheet-overlay"></div>
   <div id="sheet" class="sheet"><div class="sheet-handle"></div><div id="sheet-body"></div></div>
@@ -277,7 +311,7 @@ var TPL = [
     ex('Dumbbell Overhead Press (Seated)',3,10,90,'strength','Keep ribs down. Press straight up.'),
     ex('Dumbbell Bench Press (Incline)',3,10,90,'strength'),
     ex('Cable Tricep Pushdown (Rope)',3,12,60,'accessory'),ex('Dumbbell Lateral Raise',3,12,60,'accessory'),
-    ex('Doorway Pec Stretch',2,0,0,'cooldown','Hold 30 seconds each side.',{vol:'30s'})
+    ex('Doorway Pec Stretch',2,0,0,'cooldown','Hold 30 seconds each side.','30s')
   ]},
   {label:'Session B',focus:'Pull + Hinge',exercises:[
     ex('Cat-Cow',2,10,30,'warmup'),ex('Hip Hinge (Wall Drill)',2,10,45,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
@@ -285,17 +319,17 @@ var TPL = [
     ex('Dumbbell Row (Single-Arm)',3,10,90,'strength','Chest parallel to floor. Pull elbow to hip.'),
     ex('Lat Pulldown (Wide Grip)',3,10,90,'strength'),
     ex('Face Pull',3,15,60,'accessory'),ex('Dumbbell Bicep Curl',3,12,60,'accessory'),
-    ex('Child\'s Pose',2,0,0,'cooldown','Hold 30–45 seconds.',{vol:'45s'})
+    ex('Child\'s Pose',2,0,0,'cooldown','Hold 30–45 seconds.','45s')
   ]},
   {label:'Session C',focus:'Legs + Core',exercises:[
     ex('Leg Swing (Forward)',2,10,30,'warmup'),ex('Glute Bridge (Bodyweight)',2,15,45,'warmup'),ex('Bodyweight Squat',2,10,45,'warmup'),
     ex('Goblet Squat (Dumbbell)',3,10,90,'strength','Sit into your hips. Keep chest tall.'),
     ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
     ex('Reverse Lunge (Dumbbell)',3,10,90,'strength'),
-    ex('Plank',3,0,60,'core','Squeeze glutes. Don\'t let hips sag.',{vol:'30s'}),
+    ex('Plank',3,0,60,'core','Squeeze glutes. Don\'t let hips sag.','30s'),
     ex('Dead Bug',3,8,60,'core'),
-    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,{vol:'30s'}),
-    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,{vol:'30s'})
+    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s')
   ]}
 ]},
 
@@ -308,17 +342,17 @@ var TPL = [
     ex('Cable Fly (Low to High)',3,12,60,'accessory'),
     ex('Cable Tricep Pushdown (Rope)',3,12,60,'accessory'),
     ex('Dumbbell Lateral Raise',3,15,60,'accessory'),
-    ex('Doorway Pec Stretch',2,0,0,'cooldown',null,{vol:'30s'})
+    ex('Doorway Pec Stretch',2,0,0,'cooldown',null,'30s')
   ]},
   {label:'Session B',focus:'Pull',exercises:[
-    ex('Band Pull-Apart',2,15,30,'warmup'),ex('Cat-Cow',2,10,30,'warmup'),ex('Dead Hang',2,0,45,'warmup',null,{vol:'20s'}),
+    ex('Band Pull-Apart',2,15,30,'warmup'),ex('Cat-Cow',2,10,30,'warmup'),ex('Dead Hang',2,0,45,'warmup',null,'20s'),
     ex('Barbell Row (Overhand)',4,8,120,'strength','Hinge to 45°. Pull bar to lower chest.'),
     ex('Pull-Up',4,8,90,'strength','Full hang at bottom. Chin clears bar at top.'),
     ex('Seated Cable Row',3,10,90,'strength'),
     ex('Face Pull',3,15,60,'accessory'),
     ex('Dumbbell Bicep Curl',3,12,60,'accessory'),
     ex('Hammer Curl',3,12,60,'accessory'),
-    ex('Kneeling Lat Stretch',2,0,0,'cooldown',null,{vol:'30s'})
+    ex('Kneeling Lat Stretch',2,0,0,'cooldown',null,'30s')
   ]},
   {label:'Session C',focus:'Legs — Quad',exercises:[
     ex('Leg Swing (Forward)',2,10,30,'warmup'),ex('Walking Lunge (Dumbbell)',2,10,45,'warmup'),ex('Goblet Squat (Dumbbell)',2,10,45,'warmup'),
@@ -327,18 +361,18 @@ var TPL = [
     ex('Reverse Lunge (Dumbbell)',3,10,90,'strength'),
     ex('Leg Extension (Machine)',3,12,60,'accessory'),
     ex('Calf Raise (Standing, Machine)',4,15,60,'accessory'),
-    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,{vol:'30s'}),
-    ex('Standing Calf Stretch',2,0,0,'cooldown',null,{vol:'30s'})
+    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Standing Calf Stretch',2,0,0,'cooldown',null,'30s')
   ]},
   {label:'Session D',focus:'Hinge + Core',exercises:[
     ex('Hip Hinge (Wall Drill)',2,10,45,'warmup'),ex('Glute Bridge (Bodyweight)',2,15,45,'warmup'),ex('Cat-Cow',2,10,30,'warmup'),
     ex('Conventional Deadlift',4,6,150,'strength','Lat engagement first. Drive through the floor.'),
     ex('Romanian Deadlift (Barbell)',3,10,90,'strength'),
     ex('Hip Thrust (Barbell)',3,12,90,'strength','Chin to chest at top. Full hip extension.'),
-    ex('Plank',3,0,60,'core',null,{vol:'45s'}),
+    ex('Plank',3,0,60,'core',null,'45s'),
     ex('Dead Bug',3,10,60,'core'),
     ex('Pallof Press (Standing)',3,10,60,'core'),
-    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,{vol:'30s'})
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s')
   ]}
 ]},
 
@@ -350,7 +384,7 @@ var TPL = [
     ex('Cable Tricep Pushdown (Rope)',3,12,60,'accessory'),ex('Dumbbell Lateral Raise',3,15,60,'accessory')
   ]},
   {label:'Session B',focus:'Pull',exercises:[
-    ex('Band Pull-Apart',2,15,30,'warmup'),ex('Dead Hang',2,0,45,'warmup',null,{vol:'20s'}),
+    ex('Band Pull-Apart',2,15,30,'warmup'),ex('Dead Hang',2,0,45,'warmup',null,'20s'),
     ex('Pull-Up',4,8,90,'strength'),ex('Barbell Row (Overhand)',4,8,120,'strength'),
     ex('Seated Cable Row',3,10,90,'strength'),ex('Face Pull',3,15,60,'accessory'),
     ex('Dumbbell Bicep Curl',3,12,60,'accessory'),ex('Hammer Curl',3,12,60,'accessory')
@@ -365,10 +399,10 @@ var TPL = [
     ex('Hip Hinge (Wall Drill)',2,10,45,'warmup'),ex('Glute Bridge (Bodyweight)',2,15,45,'warmup'),
     ex('Conventional Deadlift',4,5,150,'strength'),ex('Romanian Deadlift (Barbell)',3,10,90,'strength'),
     ex('Hip Thrust (Barbell)',3,12,90,'strength'),
-    ex('Plank',3,0,60,'core',null,{vol:'45s'}),ex('Dead Bug',3,10,60,'core')
+    ex('Plank',3,0,60,'core',null,'45s'),ex('Dead Bug',3,10,60,'core')
   ]},
   {label:'Session E',focus:'Full Body Strength',exercises:[
-    ex('Jump Rope',1,0,0,'warmup',null,{vol:'2min'}),ex('Band Pull-Apart',2,15,30,'warmup'),ex('Goblet Squat (Dumbbell)',2,10,45,'warmup'),
+    ex('Jump Rope',1,0,0,'warmup',null,'2min'),ex('Band Pull-Apart',2,15,30,'warmup'),ex('Goblet Squat (Dumbbell)',2,10,45,'warmup'),
     ex('Back Squat',3,5,120,'strength'),ex('Barbell Bench Press (Flat)',3,5,120,'strength'),
     ex('Barbell Row (Overhand)',3,5,120,'strength'),ex('Barbell Overhead Press',3,5,120,'strength'),
     ex('Conventional Deadlift',2,3,150,'strength'),
@@ -390,7 +424,7 @@ var TPL = [
     ex('Overhead Tricep Extension (Dumbbell)',3,15,60,'accessory')
   ]},
   {label:'Session B',focus:'Pull + Back',exercises:[
-    ex('Face Pull',2,15,30,'warmup'),ex('Dead Hang',2,0,45,'warmup',null,{vol:'20s'}),
+    ex('Face Pull',2,15,30,'warmup'),ex('Dead Hang',2,0,45,'warmup',null,'20s'),
     ex('Pull-Up',4,8,90,'strength','Full range. Dead hang to chin over bar.'),
     ex('Barbell Row (Overhand)',4,10,90,'strength'),
     ex('Seated Cable Row',3,12,75,'strength'),
@@ -448,7 +482,7 @@ var TPL = [
     ex('Dumbbell Lateral Raise',4,15,60,'accessory'),ex('Cable Tricep Pushdown (Rope)',4,15,60,'accessory')
   ]},
   {label:'Session B',focus:'Pull (Strength)',exercises:[
-    ex('Face Pull',2,15,30,'warmup'),ex('Dead Hang',2,0,45,'warmup',null,{vol:'20s'}),
+    ex('Face Pull',2,15,30,'warmup'),ex('Dead Hang',2,0,45,'warmup',null,'20s'),
     ex('Pull-Up',5,8,90,'strength'),ex('Barbell Row (Overhand)',4,8,120,'strength'),
     ex('Seated Cable Row',3,12,75,'strength'),ex('Face Pull',3,15,60,'accessory'),
     ex('Dumbbell Bicep Curl',4,12,60,'accessory'),ex('Hammer Curl',3,12,60,'accessory')
@@ -491,7 +525,7 @@ var TPL = [
     exT('Dumbbell Overhead Press (Standing)','4','45s',30,'strength'),exT('Dumbbell Row (Single-Arm)','4','45s',30,'strength'),
     exT('Dead Bug','3','45s',30,'core'),exT('Side Plank','3','30s',30,'core'),
     exT('Jump Squat','3','30s',30,'cardio'),
-    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,{vol:'30s'})
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s')
   ]},
   {label:'Session C',focus:'Cardio + Core',exercises:[
     exT('Assault Bike (Steady State)','1','20min',0,'cardio'),
@@ -816,8 +850,8 @@ var TPL = [
     ex('Step-Up (Dumbbell)',3,10,90,'strength'),
     ex('Calf Raise (Standing, Machine)',3,18,60,'accessory'),
     ex('Dead Bug',3,10,60,'core'),
-    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,{vol:'30s'}),
-    ex('Standing Calf Stretch',2,0,0,'cooldown',null,{vol:'30s'})
+    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Standing Calf Stretch',2,0,0,'cooldown',null,'30s')
   ]},
   {label:'Session B',focus:'Unilateral + Upper',exercises:[
     exT('High Knees','1','5min',0,'warmup'),ex('Leg Swing (Lateral)',2,10,30,'warmup'),
@@ -825,8 +859,8 @@ var TPL = [
     ex('Calf Raise (Single-Leg, Dumbbell)',3,14,60,'accessory'),
     ex('Pull-Up',3,8,120,'strength'),ex('Push-Up',3,12,90,'strength'),
     exT('Plank','3','45s',60,'core'),
-    ex('Standing Calf Stretch',2,0,0,'cooldown',null,{vol:'30s'}),
-    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,{vol:'30s'})
+    ex('Standing Calf Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s')
   ]}
 ]},
 
@@ -848,7 +882,7 @@ var TPL = [
     ex('Barbell Bench Press (Flat)',4,5,180,'strength'),
     ex('Pull-Up',4,8,120,'strength'),
     ex('Step-Up (Barbell)',3,6,120,'strength'),
-    ex('Plank',3,0,60,'core',null,{vol:'45s'}),
+    ex('Plank',3,0,60,'core',null,'45s'),
     ex('Pallof Press (Standing)',3,12,60,'core')
   ]},
   {label:'Session C',focus:'Multi-Plane + Agility',exercises:[
@@ -864,10 +898,10 @@ var TPL = [
 
 {key:'spt_climb',name:'Rock Climbing Strength',cat:'sport',desc:'Intermediate+ climbers only — 2 sessions per week',days:2,duration:60,defaultPlan:'sport_12',days:[
   {label:'Session A',focus:'Finger + Pull Strength',exercises:[
-    ex('Arm Circles',1,0,0,'warmup',null,{vol:'5min'}),
+    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
     exT('Dead Hang','1','5min',0,'warmup','Light activation only. Easy climbing warm-up.'),
-    ex('Dead Hang (Hangboard)',3,0,180,'strength','Open hand, 20–25mm. 10s hang, 3 min rest.',{vol:'10s'}),
-    ex('Half Crimp Hang',3,0,180,'strength','10s hang, 3 min rest.',{vol:'10s'}),
+    ex('Dead Hang (Hangboard)',3,0,180,'strength','Open hand, 20–25mm. 10s hang, 3 min rest.','10s'),
+    ex('Half Crimp Hang',3,0,180,'strength','10s hang, 3 min rest.','10s'),
     ex('Pull-Up',3,5,180,'strength'),
     ex('Push-Up',3,15,90,'strength','Antagonist work. Keep shoulders healthy.'),
     ex('Face Pull',3,15,60,'accessory'),
@@ -875,11 +909,11 @@ var TPL = [
     exT('Wrist CARs','2','30s',20,'cooldown'),exT('Doorway Pec Stretch','2','30s',20,'cooldown')
   ]},
   {label:'Session B',focus:'One-Arm + Antagonist',exercises:[
-    ex('Arm Circles',1,0,0,'warmup',null,{vol:'5min'}),
+    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
     exT('Dead Hang','1','5min',0,'warmup'),
-    ex('One-Arm Hang',3,0,180,'strength','Assisted. 5s each side, 3 min rest.',{vol:'5s'}),
+    ex('One-Arm Hang',3,0,180,'strength','Assisted. 5s each side, 3 min rest.','5s'),
     ex('Barbell Overhead Press',3,10,90,'strength','Antagonist. Keep rotator cuff strong.'),
-    ex('Plank',3,0,60,'core',null,{vol:'45s'}),
+    ex('Plank',3,0,60,'core',null,'45s'),
     ex('Hanging Knee Raise',3,12,90,'core'),
     exT('Wrist CARs','2','30s',20,'cooldown'),exT('Shoulder CARs','2','5rep',20,'cooldown')
   ]}
@@ -989,7 +1023,7 @@ var TPL = [
     ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength','Strict form. Never round the lower back.'),
     ex('Pallof Press (Standing)',3,10,60,'core'),
     ex('Goblet Squat (Dumbbell)',3,10,90,'strength'),
-    ex('Farmer\'s Carry (Dumbbell)',3,0,60,'strength','45 seconds. Brace your core throughout.',{vol:'45s'})
+    ex('Farmer\'s Carry (Dumbbell)',3,0,60,'strength','45 seconds. Brace your core throughout.','45s')
   ]},
   {label:'Phase 3 — Workout A',focus:'Return to Full Function',exercises:[
     exT('Walking','1','10min',0,'warmup'),ex('Cat-Cow',2,10,30,'warmup'),ex('Bird Dog',2,10,30,'warmup'),
@@ -1110,7 +1144,7 @@ function startSession(){
     var volMod=banner?banner.volMod:1;
     var sets=Math.max(1,Math.round((exEntry.sets||1)*volMod));
     for(var s=0;s<sets;s++){
-      setsData.push({exIdx:ei,setNum:s+1,totalSets:sets,done:false,kg:0,reps:exEntry.reps||0});
+      setsData.push({exIdx:ei,setNum:s+1,totalSets:sets,done:false,kg:0,reps:exEntry.reps||0,vol:exEntry.vol||''});
     }
   });
   S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:day.exercises,sets:setsData,currentSet:0,startTime:Date.now(),restActive:false,restEnd:0};
@@ -1127,7 +1161,13 @@ function logSet(si,kg){
   var restSecs=S.wx.exercises[set.exIdx].rest||60;
   if(restSecs>0){S.wx.restActive=true;S.wx.restEnd=Date.now()+restSecs*1000;}
   checkPR(set);
-  sv();draw();
+  sv();
+  // Preserve scroll position - redraw without scrolling to top
+  var scrollPos=document.getElementById('screen').scrollTop;
+  draw();
+  document.getElementById('screen').scrollTop=scrollPos;
+  // Start rest timer and show pill
+  if(S.wx.restActive){startRestTick();updateRestPill();}
 }
 function checkPR(set){
   var ex=S.wx.exercises[set.exIdx];
@@ -1431,6 +1471,13 @@ function todayV(){
     });
   });
   h+='<div style="padding:14px">';
+  // Session picker
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+  tpl.days.forEach(function(d,i){
+    var isActive=i===dayIdx;
+    h+='<button class="btn btn-pill'+(isActive?' btn-acc':' btn-ghost')+'" onclick="selectSessionDay('+i+')">'+(d.label||'Day '+(i+1))+'</button>';
+  });
+  h+='</div>';
   h+='<button class="btn btn-acc" onclick="startSession()">Start Session</button>';
   h+='</div>';
   return h;
@@ -1449,18 +1496,8 @@ function wxV(){
   // Progress bar
   h+='<div style="margin:8px 14px 0;height:3px;background:var(--brd);border-radius:2px"><div style="height:100%;width:'+pct+'%;background:var(--acc);border-radius:2px;transition:width .3s"></div></div>';
 
-  // Rest timer
-  if(wx.restActive&&wx.restEnd>Date.now()){
-    var remaining=Math.ceil((wx.restEnd-Date.now())/1000);
-    var exIdx=wx.sets[wx.currentSet]?wx.sets[wx.currentSet].exIdx:0;
-    var restTotal=wx.exercises[exIdx]?wx.exercises[exIdx].rest||60:60;
-    var pctRest=Math.round(remaining/restTotal*100);
-    h+='<div class="rest-bar">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center">';
-    h+='<span class="lbl lbl-coral">REST</span><span style="font-size:20px;font-weight:800;color:var(--coral)">'+remaining+'s</span>';
-    h+='<button class="btn-ghost btn-sm" onclick="skipRest()" style="color:var(--acc)">Skip</button></div>';
-    h+='<div class="rest-progress"><div class="rest-fill" style="width:'+pctRest+'%"></div></div></div>';
-  }
+  // Rest timer - floating pill (rendered separately, see draw())
+  
 
   // Exercise groups with sets
   var phases=['warmup','strength','accessory','core','cardio','mobility','cooldown'];
@@ -1483,18 +1520,24 @@ function wxV(){
         var globalIdx=wx.sets.indexOf(set);
         var isActive=globalIdx===wx.currentSet&&!set.done;
         var cls=set.done?'set-done':isActive?'set-active':'';
+        var isStrength=(ph==='strength'||ph==='accessory');
         h+='<div class="set-row '+cls+'" style="margin:0">';
         h+='<span class="set-num">'+set.setNum+'</span>';
         if(set.done){
-          h+='<span class="set-reps">'+set.reps+' reps</span>';
+          var dispReps=set.reps||set.vol||'✓';
+          h+='<span class="set-reps">'+dispReps+(set.reps?' reps':'')+'</span>';
           if(set.kg>0)h+='<span class="set-kg">'+set.kg+'kg</span>';
         } else if(isActive){
-          h+='<span class="set-reps">'+set.reps+' reps</span>';
-          h+='<input type="number" id="kg-'+globalIdx+'" placeholder="kg" style="width:60px;padding:4px 8px;font-size:12px;text-align:center" onclick="event.stopPropagation()">';
+          var dispReps2=set.vol||(set.reps>0?set.reps+' reps':'—');
+          h+='<span class="set-reps">'+dispReps2+'</span>';
+          if(isStrength){
+            h+='<input type="number" id="kg-'+globalIdx+'" placeholder="kg" style="width:60px;padding:4px 8px;font-size:12px;text-align:center" onclick="event.stopPropagation()">';
+          }
           h+='<button class="btn btn-teal btn-pill" onclick="doLogSet('+globalIdx+')">Done</button>';
         } else {
-          h+='<span class="set-reps">'+set.reps+' reps</span>';
-          h+='<span class="set-kg" style="color:var(--brd)">—</span>';
+          var dispReps3=set.vol||(set.reps>0?set.reps+' reps':'—');
+          h+='<span class="set-reps">'+dispReps3+'</span>';
+          if(isStrength)h+='<span class="set-kg" style="color:var(--brd)">—</span>';
         }
         h+='</div>';
       });
@@ -1521,6 +1564,26 @@ function doLogSet(idx){
 function skipRest(){
   if(S.wx){S.wx.restActive=false;sv();draw();}
 }
+function selectSessionDay(idx){
+  var cl=C();var tpl=ACTIVE_TPL();
+  if(idx>=0&&idx<tpl.days.length){cl.day=idx;sv();draw();}
+}
+
+// FLOATING REST PILL
+function updateRestPill(){
+  var existing=document.getElementById('rest-pill');
+  if(existing)existing.parentNode.removeChild(existing);
+  if(!S.wx||!S.wx.restActive||S.wx.restEnd<=Date.now())return;
+  var remaining=Math.ceil((S.wx.restEnd-Date.now())/1000);
+  var exIdx=S.wx.sets[S.wx.currentSet]?S.wx.sets[S.wx.currentSet].exIdx:0;
+  var restTotal=S.wx.exercises[exIdx]?S.wx.exercises[exIdx].rest||60:60;
+  var pctRest=Math.round(remaining/restTotal*100);
+  var pill=document.createElement('div');
+  pill.id='rest-pill';
+  pill.innerHTML='<div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center"><span class="lbl lbl-coral" style="font-size:9px">REST</span><span id="rest-pill-secs" style="font-size:18px;font-weight:900;color:var(--coral)">'+remaining+'s</span></div><div style="height:3px;background:var(--brd);border-radius:2px;margin-top:4px;overflow:hidden"><div id="rest-pill-bar" style="height:100%;width:'+pctRest+'%;background:var(--coral);border-radius:2px;transition:width .5s linear"></div></div></div><button onclick="skipRest()" style="background:none;border:none;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer;padding:4px 8px;white-space:nowrap">Skip</button></div>';
+  Object.assign(pill.style,{position:'fixed',bottom:'calc(max(14px,env(safe-area-inset-bottom)) + 56px + 8px)',right:'14px',background:'var(--bg2)',border:'0.5px solid var(--coral)',borderRadius:'14px',padding:'10px 14px',zIndex:'90',boxShadow:'0 4px 20px rgba(0,0,0,.4)',minWidth:'180px',maxWidth:'240px'});
+  document.getElementById('app').appendChild(pill);
+}
 
 // REST TIMER TICK
 var _restTick=null;
@@ -1528,17 +1591,22 @@ function startRestTick(){
   if(_restTick)return;
   _restTick=setInterval(function(){
     if(S.wx&&S.wx.restActive){
-      if(Date.now()>=S.wx.restEnd){S.wx.restActive=false;sv();}
-      var restEl=document.querySelector('.rest-fill');
-      if(restEl){
-        var remaining=Math.ceil((S.wx.restEnd-Date.now())/1000);
-        var exIdx=S.wx.sets[S.wx.currentSet]?S.wx.sets[S.wx.currentSet].exIdx:0;
-        var restTotal=S.wx.exercises[exIdx]?S.wx.exercises[exIdx].rest||60:60;
-        restEl.style.width=Math.round(remaining/restTotal*100)+'%';
-        var numEl=restEl.closest('.rest-bar');
-        if(numEl){var sp=numEl.querySelector('span:nth-child(2)');if(sp)sp.textContent=remaining+'s';}
-      }
-      if(Date.now()>=S.wx.restEnd)draw();
+      if(Date.now()>=S.wx.restEnd){S.wx.restActive=false;sv();
+        var ep=document.getElementById('rest-pill');if(ep)ep.parentNode.removeChild(ep);
+        draw();return;}
+      var remaining=Math.ceil((S.wx.restEnd-Date.now())/1000);
+      var exIdx=S.wx.sets[S.wx.currentSet]?S.wx.sets[S.wx.currentSet].exIdx:0;
+      var restTotal=S.wx.exercises[exIdx]?S.wx.exercises[exIdx].rest||60:60;
+      var pct=Math.round(remaining/restTotal*100);
+      // Update floating pill
+      var secsEl=document.getElementById('rest-pill-secs');
+      var barEl=document.getElementById('rest-pill-bar');
+      if(secsEl)secsEl.textContent=remaining+'s';
+      if(barEl)barEl.style.width=pct+'%';
+      if(!secsEl)updateRestPill(); // re-create if missing
+    } else {
+      // No active rest - clear tick
+      clearInterval(_restTick);_restTick=null;
     }
   },500);
 }
@@ -1570,6 +1638,8 @@ function programsV(){
     h+='<div><div class="lbl">PROGRESSION PLAN</div><div style="font-size:14px;font-weight:700;margin-top:2px">'+banner.planName+'</div></div>';
     h+='<div style="text-align:right"><div style="font-size:11px;color:var(--acc);font-weight:700">Week '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</div></div></div>';
     h+='<div style="font-size:12px;color:var(--mu);margin-top:4px">'+banner.weekLabel+'</div>';
+    h+='<div style="display:flex;gap:8px;margin-top:6px"><span style="font-size:10px;font-weight:700;background:var(--acc-bg);color:var(--acc);border:0.5px solid var(--acc-brd);border-radius:8px;padding:2px 8px">RPE '+banner.rpe+'</span><span style="font-size:10px;font-weight:700;background:var(--bg3);color:var(--tx2);border:0.5px solid var(--brd);border-radius:8px;padding:2px 8px">'+banner.rir+' RIR</span></div>';
+    if(banner.tip)h+='<div style="font-size:11px;color:var(--tx2);margin-top:6px;font-style:italic">'+banner.tip+'</div>';
     if(S.admin.active){
       h+='<div style="display:flex;gap:8px;margin-top:10px">';
       h+='<button class="btn btn-ghost btn-sm" onclick="advancePlanWeek();draw()">Advance Week</button>';
@@ -1583,6 +1653,7 @@ function programsV(){
       h+='<div class="lbl" style="margin-bottom:8px">ATTACH PLAN</div>';
       h+='<select id="plan-select" style="margin-bottom:8px"><option value="">-- Select plan --</option>';
       PLANS.forEach(function(p){h+='<option value="'+p.key+'">'+p.name+'</option>';});
+      var cp2=C().customPlans||[];cp2.forEach(function(p){h+='<option value="'+p.key+'">'+p.name+' (custom)</option>';});
       h+='</select><button class="btn btn-acc btn-sm" onclick="doAttachPlan()">Attach Plan</button>';
       h+='</div>';
     }
@@ -1602,7 +1673,7 @@ function programsV(){
     var inCat=TPL.filter(function(t){return t.cat===cat;});
     if(inCat.length===0)return;
     var isOpen=cl._pgOpen&&cl._pgOpen[cat];
-    h+='<div style="padding:0 14px;margin-bottom:3px">';
+    h+='<div data-pgcat="'+cat+'" style="padding:0 14px;margin-bottom:3px">';
     h+='<div class="group-head'+(isOpen?' open':'')+'" onclick="togglePgGroup(\''+cat+'\')">';
     h+='<span style="font-size:14px;font-weight:700">'+catNames[cat]+'</span>';
     h+='<span style="color:var(--mu);font-size:12px">'+inCat.length+' <span style="font-size:14px">'+(isOpen?'▴':'▾')+'</span></span>';
@@ -1632,7 +1703,7 @@ function programsV(){
     cl.customPrograms.forEach(function(cp){
       h+='<div style="padding:0 14px;margin-bottom:3px"><div class="prog-item card">';
       h+='<div style="font-size:13px;font-weight:600">'+cp.name+'</div>';
-      h+='<button class="btn btn-acc btn-pill" onclick="switchTPL(\''+cp.key+'\')">Use</button>';
+      h+='<button class="btn btn-acc btn-pill" onclick="switchTPL(\''+cp.key+'\')">Switch</button>';
       h+='</div></div>';
     });
   }
@@ -1640,10 +1711,41 @@ function programsV(){
   return h;
 }
 function catLabel(c){var m={strength:'Strength',hypertrophy:'Hypertrophy',endurance:'Endurance',fatloss:'Fat Loss',foundation:'Foundation',sport:'Sport',rehab:'Rehab'};return m[c]||c;}
-function togglePgGroup(cat){var cl=C();if(!cl._pgOpen)cl._pgOpen={};cl._pgOpen[cat]=!cl._pgOpen[cat];sv();draw();}
+function togglePgGroup(cat){
+  var cl=C();if(!cl._pgOpen)cl._pgOpen={};
+  cl._pgOpen[cat]=!cl._pgOpen[cat];sv();
+  // Update DOM in-place to preserve scroll position
+  var groupEl=document.querySelector('[data-pgcat="'+cat+'"]');
+  if(groupEl){
+    var isOpen=cl._pgOpen[cat];
+    var head=groupEl.querySelector('.group-head');
+    var body=groupEl.querySelector('.group-body');
+    if(head){head.classList.toggle('open',isOpen);}
+    // Rebuild group body in-place
+    var inCat=TPL.filter(function(t){return t.cat===cat;});
+    var customProgs=cl.customPrograms||[];
+    if(body){groupEl.removeChild(body);}
+    if(isOpen){
+      var nb=document.createElement('div');nb.className='group-body';
+      inCat.forEach(function(t){
+        var isActive=t.key===cl.tplKey;
+        var item=document.createElement('div');
+        item.className='prog-item'+(isActive?' active-prog':'');
+        var nameDiv='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+t.name+'</div>';
+        nameDiv+='<div class="lbl">'+t.days.length+' days/wk · '+t.duration+'min</div></div>';
+        var btn=isActive?'<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>':('<button class="btn btn-acc btn-pill" data-key="'+t.key+'" onclick="switchTPL(this.dataset.key)">Switch</button>');
+        item.innerHTML=nameDiv+btn;
+        nb.appendChild(item);
+      });
+      groupEl.appendChild(nb);
+    }
+    // Update arrow
+    if(head){var arrow=head.querySelector('span:last-child');if(arrow)arrow.innerHTML=''+inCat.length+' <span style="font-size:14px">'+(isOpen?'▴':'▾')+'</span>';}
+  } else {draw();}
+}
 function switchTPL(key){if(confirm('Switch to this programme? Your current day progress will reset.')){C().tplKey=key;C().day=0;sv();draw();}}
 function retakeOB(){if(confirm('Retake setup? Your data will be preserved.')){C().ob={done:false,step:0,ans:{}};sv();draw();}}
-function doAttachPlan(){var sel=document.getElementById('plan-select');if(sel&&sel.value){attachPlan(sel.value);draw();}}
+function doAttachPlan(){var sel=document.getElementById('plan-select');if(sel&&sel.value){attachPlan(sel.value);sv();draw();}}
 
 // BUILD VIEW
 function buildV(){
@@ -1760,7 +1862,40 @@ function saveBuildProgram(){
 
 function buildPlanV(){
   var e=S.planEdit;
-  var h='<div class="lbl" style="margin-bottom:8px">PLAN NAME</div>';
+  var cl=C();
+  var h='';
+  // Show existing built-in and custom plans for reference
+  var allPlans=PLANS.concat(cl.customPlans||[]);
+  if(allPlans.length>0){
+    h+='<div class="lbl" style="margin-bottom:8px">EXISTING PLANS</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">';
+    allPlans.forEach(function(p){
+      var isActive=cl.plan&&cl.plan.key===p.key;
+      h+='<div style="background:var(--bg3);border:0.5px solid '+(isActive?'var(--acc)':'var(--brd)')+';border-radius:10px;padding:8px 12px;flex:1;min-width:140px">';
+      h+='<div style="font-size:12px;font-weight:700;color:'+(isActive?'var(--acc)':'var(--tx)')+'">'+p.name+'</div>';
+      h+='<div style="font-size:10px;color:var(--mu);margin-top:2px">'+p.weeks.length+' weeks'+(p.cyclic?' · cyclic':'')+' '+(isActive?'· Active':'')+'</div>';
+      if(!isActive){h+='<button class="btn btn-acc btn-pill" style="margin-top:6px;font-size:10px" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Use</button>';}
+      h+='</div>';
+    });
+    h+='</div>';
+    // Show saved custom plans prominently
+    var customPlans=cl.customPlans||[];
+    if(customPlans.length>0){
+      h+='<div class="lbl" style="margin-bottom:8px">MY PLANS</div>';
+      customPlans.forEach(function(p){
+        var isActive=cl.plan&&cl.plan.key===p.key;
+        h+='<div class="card" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">';
+        h+='<div><div style="font-size:13px;font-weight:700">'+p.name+'</div>';
+        h+='<div class="lbl">'+p.weeks.length+' weeks'+(p.cyclic?' · cyclic':'')+'</div></div>';
+        if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
+        else{h+='<button class="btn btn-acc btn-pill" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Use</button>';}
+        h+='</div>';
+      });
+    }
+    h+='<div style="border-top:0.5px solid var(--brd);margin:16px 0"></div>';
+    h+='<div class="lbl" style="margin-bottom:8px">CREATE NEW PLAN</div>';
+  }
+  h+='<div class="lbl" style="margin-bottom:8px">PLAN NAME</div>';
   h+='<input type="text" value="'+e.name+'" oninput="S.planEdit.name=this.value;sv()" style="margin-bottom:14px">';
   h+='<div class="lbl" style="margin-bottom:8px">NUMBER OF WEEKS</div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
@@ -1837,7 +1972,7 @@ function timerV(){
   } else if(t.mode==='countdown'){
     if(t.setup){
       h+='<div class="lbl" style="margin-bottom:8px">SET DURATION</div>';
-      h+=makeDrum('cd-mins',[1,2,3,4,5,6,7,8,9,10,12,15,20,25,30,45,60].map(function(n){return{val:n,label:n+'m'};}),Math.floor(t.totalSecs/60)||10,{cls:'compact'});
+      h+=makeDrum('cd-mins',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,35,40,45,50,55,60].map(function(n){return{val:n,label:n+'m'};}),Math.floor(t.totalSecs/60)||10,{cls:'compact'});
       h+='<button class="btn btn-acc" style="margin-top:12px" onclick="startCountdown()">Start</button>';
     } else {
       var rem=t.remaining;
@@ -1854,7 +1989,7 @@ function timerV(){
       h+='<div class="lbl" style="margin:12px 0 4px">REST (seconds)</div>';
       h+=makeDrum('tab-rest',[5,10,15,20,25,30,40,60].map(function(n){return{val:n,label:n+'s'};}),t.tabRest,{cls:'compact'});
       h+='<div class="lbl" style="margin:12px 0 4px">ROUNDS</div>';
-      h+=makeDrum('tab-rounds',[2,4,6,8,10,12,16,20].map(function(n){return{val:n,label:n+' rounds'};}),t.tabRounds,{cls:'compact'});
+      h+=makeDrum('tab-rounds',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(n){return{val:n,label:n+' rounds'};}),t.tabRounds,{cls:'compact'});
       h+='<button class="btn btn-acc" style="margin-top:16px" onclick="startTabata()">Start</button>';
     } else {
       var phase=t.tabPhase;
@@ -1872,7 +2007,7 @@ function timerV(){
   } else { // EMOM
     if(t.setup){
       h+='<div class="lbl" style="margin-bottom:4px">TOTAL MINUTES</div>';
-      h+=makeDrum('emom-mins',[5,8,10,12,15,20,25,30,40,60].map(function(n){return{val:n,label:n+' min'};}),t.emomMins,{cls:'compact'});
+      h+=makeDrum('emom-mins',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,35,40,45,50,55,60].map(function(n){return{val:n,label:n+' min'};}),t.emomMins,{cls:'compact'});
       h+='<button class="btn btn-acc" style="margin-top:16px" onclick="startEMOM()">Start</button>';
     } else {
       var secInMin=t.elapsed%(60);
@@ -1926,7 +2061,7 @@ function timerReset(){S.timer.running=false;S.timer.setup=true;S.timer.elapsed=0
 
 var _timerTick=null;
 function startTimerTick(){
-  if(_timerTick)return;
+  if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
   _timerTick=setInterval(function(){
     var t=S.timer;
     if(!t.running){clearInterval(_timerTick);_timerTick=null;return;}
@@ -2133,7 +2268,14 @@ function draw(){
   // Active workout takes over today tab
   if(S.wx&&S.tab==='today'){
     screen.innerHTML=wxV();
-    bindScreen();startRestTick();return;
+    // Update tab bar active state
+    document.querySelectorAll('.tb').forEach(function(tb){
+      tb.classList.toggle('on',tb.dataset.tab===S.tab);
+    });
+    bindScreen();startRestTick();
+    // Render floating rest pill
+    updateRestPill();
+    return;
   }
 
   // Onboarding gate
@@ -2161,15 +2303,17 @@ function draw(){
 
   // Init drums on timer tab
   if(S.tab==='timer'){
+    // Re-attach timer tick after DOM replacement
+    if(S.timer.running&&!S.timer.setup)setTimeout(startTimerTick,0);
     var t=S.timer;
     if(t.mode==='countdown'&&t.setup){
-      initDrumScroll('cd-mins',[1,2,3,4,5,6,7,8,9,10,12,15,20,25,30,45,60].map(function(n){return{val:n,label:n+'m'};}),Math.floor(t.totalSecs/60)||10,function(v){S.timer.totalSecs=v*60;});
+      initDrumScroll('cd-mins',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,35,40,45,50,55,60].map(function(n){return{val:n,label:n+'m'};}),Math.floor(t.totalSecs/60)||10,function(v){S.timer.totalSecs=v*60;});
     } else if(t.mode==='tabata'&&t.setup){
       initDrumScroll('tab-work',[10,15,20,25,30,35,40,45,50,60].map(function(n){return{val:n,label:n+'s'};}),t.tabWork,function(v){S.timer.tabWork=v;});
       initDrumScroll('tab-rest',[5,10,15,20,25,30,40,60].map(function(n){return{val:n,label:n+'s'};}),t.tabRest,function(v){S.timer.tabRest=v;});
-      initDrumScroll('tab-rounds',[2,4,6,8,10,12,16,20].map(function(n){return{val:n,label:n+' rounds'};}),t.tabRounds,function(v){S.timer.tabRounds=v;});
+      initDrumScroll('tab-rounds',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(n){return{val:n,label:n+' rounds'};}),t.tabRounds,function(v){S.timer.tabRounds=v;});
     } else if(t.mode==='emom'&&t.setup){
-      initDrumScroll('emom-mins',[5,8,10,12,15,20,25,30,40,60].map(function(n){return{val:n,label:n+' min'};}),t.emomMins,function(v){S.timer.emomMins=v;});
+      initDrumScroll('emom-mins',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,35,40,45,50,55,60].map(function(n){return{val:n,label:n+' min'};}),t.emomMins,function(v){S.timer.emomMins=v;});
     }
   }
 }
@@ -2177,10 +2321,13 @@ function draw(){
 function bindScreen(){
   // Tab clicks
   document.querySelectorAll('.tb').forEach(function(tb){
-    tb.onclick=function(){S.tab=this.dataset.tab;sv();draw();};
+    tb.onclick=function(){
+      var newTab=this.dataset.tab;
+      var tabChanged=newTab!==S.tab;
+      S.tab=newTab;sv();draw();
+      if(tabChanged)document.getElementById('screen').scrollTop=0;
+    };
   });
-  // Scroll to top on tab change
-  document.getElementById('screen').scrollTop=0;
 }
 
 // ═══════════════════════════════════════════════════════════════
