@@ -7,39 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Falkenburg">
 <meta name="theme-color" content="#D4691E">
-<script>
-// Generate PWA icon as data URI and inject into manifest dynamically
-(function(){
-  try{
-    var c=document.createElement('canvas');c.width=512;c.height=512;
-    var ctx=c.getContext('2d');
-    // Background
-    ctx.fillStyle='#D4691E';
-    ctx.beginPath();ctx.roundRect(0,0,512,512,80);ctx.fill();
-    // Letter F
-    ctx.fillStyle='#ffffff';
-    ctx.font='bold 320px -apple-system,sans-serif';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('F',256,270);
-    var data512=c.toDataURL('image/png');
-    // 192x192
-    var c2=document.createElement('canvas');c2.width=192;c2.height=192;
-    var ctx2=c2.getContext('2d');
-    ctx2.fillStyle='#D4691E';
-    ctx2.beginPath();ctx2.roundRect(0,0,192,192,30);ctx2.fill();
-    ctx2.fillStyle='#ffffff';
-    ctx2.font='bold 120px -apple-system,sans-serif';
-    ctx2.textAlign='center';ctx2.textBaseline='middle';
-    ctx2.fillText('F',96,102);
-    var data192=c2.toDataURL('image/png');
-    // Override apple-touch-icon
-    var atIcon=document.querySelector('link[rel="apple-touch-icon"]');
-    if(atIcon)atIcon.href=data192;
-    // Store globally for manifest
-    window._icon192=data192;window._icon512=data512;
-  }catch(e){}
-})();
-</script>
+
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Falkenburg</title>
