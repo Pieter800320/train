@@ -2687,10 +2687,10 @@ function retakeOB(){
 function buildV(){
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
   h+='<div class="h1" style="margin-bottom:4px">Build</div>';
-  h+='<div style="font-size:13px;color:var(--mu);margin-bottom:16px">Create custom programmes and plans</div>';
+  h+='<div style="font-size:13px;color:var(--mu);margin-bottom:16px">Create custom training plans & progression plans</div>';
   h+='<div style="display:flex;gap:6px;margin-bottom:20px">';
-  h+='<button class="btn'+(S.buildMode==='program'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'program\';sv();draw()" style="flex:1">Programme</button>';
-  h+='<button class="btn'+(S.buildMode==='plan'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'plan\';sv();draw()" style="flex:1">Plan</button>';
+  h+='<button class="btn'+(S.buildMode==='program'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'program\';sv();draw()" style="flex:1">Training Plan</button>';
+  h+='<button class="btn'+(S.buildMode==='plan'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'plan\';sv();draw()" style="flex:1">Progression Plan</button>';
   h+='</div>';
   if(S.buildMode==='program'){h+=buildProgramV();}
   else{h+=buildPlanV();}
@@ -2699,51 +2699,201 @@ function buildV(){
   return h;
 }
 
+// ─── TRAINING PLAN BUILDER ───────────────────────────────────────
 function buildProgramV(){
   var e=S.customEdit;
-  var h='<div class="lbl" style="margin-bottom:8px">PROGRAMME NAME</div>';
-  h+='<input type="text" value="'+e.name+'" oninput="S.customEdit.name=this.value;sv()" style="margin-bottom:14px">';
-  h+='<div class="lbl" style="margin-bottom:8px">SESSIONS PER WEEK</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
+  var h='';
+
+  // Programme name
+  h+='<div class="lbl" style="margin-bottom:6px">PLAN NAME</div>';
+  h+='<input type="text" value="'+e.name+'" oninput="S.customEdit.name=this.value;sv()" style="margin-bottom:16px">';
+
+  // Sessions per week pills
+  h+='<div class="lbl" style="margin-bottom:6px">SESSIONS PER WEEK</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
   [2,3,4,5,6].forEach(function(n){
     h+='<button class="btn btn-pill'+(e.numDays===n?' btn-acc':' btn-ghost')+'" onclick="setBuildDays('+n+')">'+n+' days</button>';
   });
   h+='</div>';
+
+  // Sessions
   if(e.days.length>0){
-    h+='<div class="lbl" style="margin-bottom:8px">SESSIONS</div>';
     e.days.forEach(function(day,di){
-      h+='<div class="card" style="margin-bottom:8px">';
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
-      h+='<input type="text" value="'+day.label+'" oninput="S.customEdit.days['+di+'].label=this.value;sv()" style="flex:1;margin-right:8px">';
-      h+='<button class="btn-ghost btn-sm" onclick="removeBuildDay('+di+')">✕</button>';
+      h+='<div class="card" style="margin-bottom:10px">';
+      // Session header
+      h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">';
+      h+='<input type="text" value="'+day.label+'" placeholder="Session name" oninput="S.customEdit.days['+di+'].label=this.value;sv()" style="flex:1;font-size:13px">';
+      h+='<button class="btn-ghost btn-sm" style="color:var(--mu)" onclick="removeBuildDay('+di+')">✕</button>';
       h+='</div>';
+
+      // Exercise rows
       day.exercises.forEach(function(exEntry,ei){
-        h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:0.5px solid var(--brd)">';
-        h+='<div style="font-size:12px;font-weight:600;flex:1">'+exEntry.name+'</div>';
-        h+='<div style="display:flex;gap:4px;align-items:center">';
-        h+='<input type="number" value="'+exEntry.sets+'" min="1" max="6" oninput="S.customEdit.days['+di+'].exercises['+ei+'].sets=parseInt(this.value)||1;sv()" style="width:36px;padding:3px 4px;font-size:11px;text-align:center">';
-        h+='<span style="font-size:11px;color:var(--mu)">×</span>';
-        h+='<input type="number" value="'+exEntry.reps+'" min="0" max="99" oninput="S.customEdit.days['+di+'].exercises['+ei+'].reps=parseInt(this.value)||0;sv()" style="width:36px;padding:3px 4px;font-size:11px;text-align:center">';
-        h+='<input type="number" value="'+(exEntry.rest||60)+'" min="0" max="300" placeholder="rest" oninput="S.customEdit.days['+di+'].exercises['+ei+'].rest=parseInt(this.value)||60;sv()" style="width:44px;padding:3px 4px;font-size:11px;text-align:center" title="Rest (s)">';
-        h+='<button class="btn-ghost btn-sm" style="padding:3px 6px;font-size:11px" onclick="removeBuildEx('+di+','+ei+')">✕</button>';
-        h+='</div></div>';
+        var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
+        var trackSummary=track.map(function(t){return t.charAt(0).toUpperCase()+t.slice(1);}).join('+');
+        var phLabel={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+        var volStr=exEntry.reps>0?(exEntry.sets+'×'+exEntry.reps):(exEntry.vol||'—');
+        h+='<div style="border-top:0.5px solid var(--brd);padding:8px 0">'
+        h+='<div style="display:flex;align-items:center;justify-content:space-between">'
+        h+='<div style="flex:1;min-width:0">'
+        h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+exEntry.name+'</div>'
+        h+='<div style="font-size:10px;color:var(--mu);margin-top:2px">'+
+           (phLabel[exEntry.ph]||'Strength')+' · '+trackSummary+' · '+volStr+' · '+
+           (exEntry.rest||60)+'s rest</div>'
+        h+='</div>'
+        // Arrow buttons + config + delete
+        h+='<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
+        if(ei>0)h+='<button onclick="moveBuildEx('+di+','+ei+',-1)" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px 4px">↑</button>';
+        if(ei<day.exercises.length-1)h+='<button onclick="moveBuildEx('+di+','+ei+',1)" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px 4px">↓</button>';
+        h+='<button onclick="openExConfig('+di+','+ei+')" style="background:none;border:none;color:var(--acc);cursor:pointer;font-size:13px;padding:2px 6px;font-weight:700">Edit</button>'
+        h+='<button onclick="removeBuildEx('+di+','+ei+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px">✕</button>'
+        h+='</div></div></div>'
       });
+
       h+='<button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="openExPicker('+di+')">+ Add Exercise</button>';
       h+='</div>';
     });
   }
+
   h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="addBuildDay()">+ Add Session</button>';
-  h+='<button class="btn btn-acc" onclick="saveBuildProgram()">Save Programme</button>';
+  h+='<button class="btn btn-acc" onclick="saveBuildProgram()">Save Training Plan</button>';
   return h;
 }
 
+// ─── EXERCISE CONFIG SHEET ───────────────────────────────────────
+function openExConfig(di,ei){
+  var exEntry=S.customEdit.days[di].exercises[ei];
+  var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
+  var phases=['warmup','strength','accessory','core','cardio','mobility','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+  var allTrack=['reps','weight','time','distance','calories','rounds','height'];
+  var trackLabels={reps:'Reps',weight:'Weight',time:'Time',distance:'Distance',calories:'Calories',rounds:'Rounds',height:'Height'};
+
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:16px">'+exEntry.name+'</div>';
+
+  // Phase selector
+  h+='<div class="lbl" style="margin-bottom:8px">PHASE</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
+  phases.forEach(function(ph){
+    var isActive=(exEntry.ph||'strength')===ph;
+    h+='<button class="btn btn-pill'+(isActive?' btn-acc':' btn-ghost')+'" onclick="setBuildExPh('+di+','+ei+',\''+ph+'\')">'+phaseLabels[ph]+'</button>';
+  });
+  h+='</div>';
+
+  // Track fields
+  h+='<div class="lbl" style="margin-bottom:8px">TRACK FIELDS</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
+  allTrack.forEach(function(t){
+    var isActive=track.indexOf(t)>=0;
+    h+='<button class="btn btn-pill'+(isActive?' btn-acc':' btn-ghost')+'" onclick="toggleBuildExTrack('+di+','+ei+',\''+t+'\')">'+trackLabels[t]+'</button>';
+  });
+  h+='</div>';
+
+  // Sets stepper
+  h+='<div style="display:flex;gap:12px;margin-bottom:16px">';
+  h+='<div style="flex:1"><div class="lbl" style="margin-bottom:6px">SETS</div>';
+  h+='<div style="display:flex;align-items:center;gap:0">';
+  h+='<button onclick="adjBuildEx('+di+','+ei+',\'sets\',-1)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
+  h+='<div id="bex-sets" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+exEntry.sets+'</div>';
+  h+='<button onclick="adjBuildEx('+di+','+ei+',\'sets\',1)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
+  h+='</div></div>';
+
+  // Reps stepper (only if reps in track)
+  if(track.indexOf('reps')>=0){
+    h+='<div style="flex:1"><div class="lbl" style="margin-bottom:6px">REPS</div>';
+    h+='<div style="display:flex;align-items:center;gap:0">';
+    h+='<button onclick="adjBuildEx('+di+','+ei+',\'reps\',-1)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
+    h+='<div id="bex-reps" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+exEntry.reps+'</div>';
+    h+='<button onclick="adjBuildEx('+di+','+ei+',\'reps\',1)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
+    h+='</div></div>';
+  }
+  h+='</div>';
+
+  // Vol stepper (if time in track)
+  if(track.indexOf('time')>=0){
+    var volSecs=parseVolToSecs(exEntry.vol||'45s');
+    h+='<div class="lbl" style="margin-bottom:6px">DURATION</div>';
+    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:16px">';
+    h+='<button onclick="adjBuildEx('+di+','+ei+',\'vol\',-5)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
+    h+='<div id="bex-vol" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+fmtSecs(volSecs)+'</div>';
+    h+='<button onclick="adjBuildEx('+di+','+ei+',\'vol\',5)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
+    h+='</div>';
+  }
+
+  // Rest stepper
+  h+='<div class="lbl" style="margin-bottom:6px">REST (seconds)</div>';
+  h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
+  h+='<button onclick="adjBuildEx('+di+','+ei+',\'rest\',-15)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
+  h+='<div id="bex-rest" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+(exEntry.rest||60)+'s</div>';
+  h+='<button onclick="adjBuildEx('+di+','+ei+',\'rest\',15)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
+  h+='</div>';
+
+  // Cue input
+  h+='<div class="lbl" style="margin-bottom:6px">COACHING CUE (optional)</div>';
+  h+='<input type="text" value="'+(exEntry.cue||'')+'" placeholder="e.g. Keep chest up" oninput="S.customEdit.days['+di+'].exercises['+ei+'].cue=this.value;sv()" style="margin-bottom:20px">';
+
+  h+='<button class="btn btn-acc" onclick="closeSheet();sv();draw()">Done</button>';
+  h+='</div>';
+  openSheet(h,null);
+}
+
+// ─── Exercise config helpers ──────────────────────────────────────
+function setBuildExPh(di,ei,ph){
+  S.customEdit.days[di].exercises[ei].ph=ph;
+  // Recalculate track based on new phase
+  var ex=S.customEdit.days[di].exercises[ei];
+  ex.track=resolveTrack(ex.name,ph,ex.reps,ex.vol);
+  sv();
+  // Re-render sheet
+  openExConfig(di,ei);
+}
+function toggleBuildExTrack(di,ei,field){
+  var ex=S.customEdit.days[di].exercises[ei];
+  if(!ex.track)ex.track=resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol);
+  var idx=ex.track.indexOf(field);
+  if(idx>=0)ex.track.splice(idx,1);
+  else ex.track.push(field);
+  sv();
+  openExConfig(di,ei);
+}
+function adjBuildEx(di,ei,field,delta){
+  var ex=S.customEdit.days[di].exercises[ei];
+  if(field==='sets'){
+    ex.sets=Math.max(1,Math.min(10,(ex.sets||3)+delta));
+    var el=document.getElementById('bex-sets');if(el)el.textContent=ex.sets;
+  } else if(field==='reps'){
+    ex.reps=Math.max(0,Math.min(50,(ex.reps||10)+delta));
+    var el=document.getElementById('bex-reps');if(el)el.textContent=ex.reps;
+  } else if(field==='rest'){
+    ex.rest=Math.max(0,Math.min(300,(ex.rest||60)+delta));
+    var el=document.getElementById('bex-rest');if(el)el.textContent=ex.rest+'s';
+  } else if(field==='vol'){
+    var cur=parseVolToSecs(ex.vol||'45s');
+    var next=Math.max(5,cur+delta);
+    ex.vol=next+'s';
+    var el=document.getElementById('bex-vol');if(el)el.textContent=fmtSecs(next);
+  }
+  sv();
+}
+function moveBuildEx(di,ei,dir){
+  var exs=S.customEdit.days[di].exercises;
+  var ni=ei+dir;
+  if(ni<0||ni>=exs.length)return;
+  var tmp=exs[ei];exs[ei]=exs[ni];exs[ni]=tmp;
+  sv();draw();
+}
+
+// ─── Exercise picker ──────────────────────────────────────────────
 function setBuildDays(n){
   S.customEdit.numDays=n;
   while(S.customEdit.days.length<n)S.customEdit.days.push({label:'Session '+(S.customEdit.days.length+1),focus:'',exercises:[]});
   S.customEdit.days=S.customEdit.days.slice(0,n);
   sv();draw();
 }
-function addBuildDay(){S.customEdit.days.push({label:'Session '+(S.customEdit.days.length+1),focus:'',exercises:[]});S.customEdit.numDays=S.customEdit.days.length;sv();draw();}
+function addBuildDay(){
+  S.customEdit.days.push({label:'Session '+(S.customEdit.days.length+1),focus:'',exercises:[]});
+  S.customEdit.numDays=S.customEdit.days.length;sv();draw();
+}
 function removeBuildDay(di){S.customEdit.days.splice(di,1);S.customEdit.numDays=S.customEdit.days.length;sv();draw();}
 function removeBuildEx(di,ei){S.customEdit.days[di].exercises.splice(ei,1);sv();draw();}
 function openExPicker(di){
@@ -2752,8 +2902,9 @@ function openExPicker(di){
   h+='<input type="text" id="ex-search" placeholder="Search exercises…" oninput="filterExPicker()" style="margin-bottom:12px">';
   h+='<div id="ex-results">';
   EX.slice(0,30).forEach(function(e){
-    h+='<div class="prog-item" onclick="addBuildEx(\''+e.name+'\')">';
-    h+='<div><div style="font-size:13px;font-weight:600">'+e.name+'</div><div class="lbl">'+e.patterns.join(' · ')+'</div></div>';
+    h+='<div class="prog-item" data-name="'+e.name+'" onclick="addBuildEx(this.dataset.name)">';
+    h+='<div><div style="font-size:13px;font-weight:600">'+e.name+'</div>';
+    h+='<div class="lbl">'+e.patterns.join(' · ')+'</div></div>';
     h+='<button class="btn btn-acc btn-pill">Add</button></div>';
   });
   h+='</div></div>';
@@ -2761,15 +2912,25 @@ function openExPicker(di){
 }
 function filterExPicker(){
   var q=(document.getElementById('ex-search')||{}).value||'';q=q.toLowerCase();
-  var results=EX.filter(function(e){return e.name.toLowerCase().indexOf(q)>=0||e.tags.join(' ').indexOf(q)>=0;}).slice(0,30);
+  var results=EX.filter(function(e){return e.name.toLowerCase().indexOf(q)>=0||(e.tags||[]).join(' ').indexOf(q)>=0;}).slice(0,30);
   var el=document.getElementById('ex-results');if(!el)return;
   el.innerHTML=results.map(function(e){
-    return '<div class="prog-item" onclick="addBuildEx(\''+e.name+'\')"><div><div style="font-size:13px;font-weight:600">'+e.name+'</div><div class="lbl">'+e.patterns.join(' · ')+'</div></div><button class="btn btn-acc btn-pill">Add</button></div>';
+    return '<div class="prog-item" data-name="'+e.name+'" onclick="addBuildEx(this.dataset.name)"><div><div style="font-size:13px;font-weight:600">'+e.name+'</div><div class="lbl">'+e.patterns.join(' · ')+'</div></div><button class="btn btn-acc btn-pill">Add</button></div>';
   }).join('');
 }
 function addBuildEx(name){
   var di=S.customEdit.activeDay;if(di===null||di===undefined)return;
-  S.customEdit.days[di].exercises.push({name:name,sets:3,reps:10,rest:90,ph:'strength',cue:'',vol:''});
+  var defaultEx=EX_MAP[exKey(name)]||{};
+  var ph=defaultEx.phases&&defaultEx.phases.length>0?defaultEx.phases[0]:'strength';
+  // Map EX phases to our phases
+  var phMap={kpi:'strength',activation:'warmup',primer:'strength',finisher:'accessory',cooldown:'cooldown',warmup:'warmup',accessory:'accessory',core:'core'};
+  ph=phMap[ph]||'strength';
+  var track=resolveTrack(name,ph,10,null);
+  var hasTime=track.indexOf('time')>=0&&track.indexOf('reps')<0;
+  S.customEdit.days[di].exercises.push({
+    name:name,sets:3,reps:hasTime?0:10,rest:90,
+    ph:ph,cue:'',vol:hasTime?'45s':'',track:track
+  });
   closeSheet();sv();draw();
 }
 function saveBuildProgram(){
@@ -2777,57 +2938,112 @@ function saveBuildProgram(){
   if(!e.name||e.days.length===0){alert('Add a name and at least one session.');return;}
   var key='custom_'+(Date.now());var cl=C();
   if(!cl.customPrograms)cl.customPrograms=[];
-  cl.customPrograms.push({key:key,name:e.name,tpl:{key:key,name:e.name,cat:'custom',desc:'Custom programme',days:e.days.length,duration:55,defaultPlan:'wave_3_1',days:e.days}});
-  S.customEdit={name:'My Program',numDays:3,days:[],activeDay:null,newEx:null};
-  sv();alert('Programme saved!');draw();
+  var tplDays=e.days.map(function(d){
+    return {label:d.label,focus:d.label,exercises:d.exercises.map(function(ex){
+      return {name:ex.name,sets:ex.sets,reps:ex.reps||0,vol:ex.vol||'',
+              rest:ex.rest||60,ph:ex.ph||'strength',cue:ex.cue||'',
+              track:ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol)};
+    })};
+  });
+  cl.customPrograms.push({key:key,name:e.name,cat:'custom',desc:'Custom training plan',
+    days:tplDays.length,duration:55,defaultPlan:'wave_3_1',tpl:{
+      key:key,name:e.name,cat:'custom',desc:'Custom training plan',
+      days:tplDays,duration:55
+    }
+  });
+  S.customEdit={name:'My Plan',numDays:3,days:[],activeDay:null};
+  sv();
+  // Clear confirm dialog
+  if(confirm('Training plan saved! Switch to it now?')){
+    C().tplKey=key;C().day=0;sv();
+  }
+  draw();
 }
 
+// ─── PROGRESSION PLAN BUILDER ────────────────────────────────────
 function buildPlanV(){
   var e=S.planEdit;
-  var h='<div class="lbl" style="margin-bottom:8px">PLAN NAME</div>';
-  h+='<input type="text" value="'+e.name+'" oninput="S.planEdit.name=this.value;sv()" style="margin-bottom:14px">';
-  h+='<div class="lbl" style="margin-bottom:8px">NUMBER OF WEEKS</div>';
+  var h='';
+  h+='<div class="lbl" style="margin-bottom:6px">PLAN NAME</div>';
+  h+='<input type="text" value="'+e.name+'" oninput="S.planEdit.name=this.value;sv()" style="margin-bottom:16px">';
+
+  h+='<div class="lbl" style="margin-bottom:6px">NUMBER OF WEEKS</div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
   [2,4,6,8,12,16].forEach(function(n){
     h+='<button class="btn btn-pill'+(e.targetWeeks===n?' btn-acc':' btn-ghost')+'" onclick="setBuildPlanWeeks('+n+')">'+n+'wk</button>';
   });
   h+='</div>';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">';
-  h+='<div style="font-size:13px;font-weight:600">Repeating (cyclic)</div>';
+
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--brd);margin-bottom:16px">';
+  h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">Repeating (cyclic)</div>';
   h+='<button class="toggle '+(e.cyclic?'toggle-on':'toggle-off')+'" onclick="S.planEdit.cyclic=!S.planEdit.cyclic;sv();draw()"><div class="toggle-knob"></div></button>';
   h+='</div>';
+
   if(e.weeks.length>0){
     h+='<div class="lbl" style="margin-bottom:8px">WEEKS</div>';
     e.weeks.forEach(function(wk,wi){
       var deload=wk.theme==='deload';
-      h+='<div class="card'+(deload?' card-coral':'')+'" style="margin-bottom:8px">';
-      h+='<div class="lbl" style="margin-bottom:8px">Week '+(wi+1)+(deload?' — DELOAD':'')+'</div>';
-      h+='<input type="text" value="'+wk.label+'" placeholder="Label e.g. Build Week" oninput="S.planEdit.weeks['+wi+'].label=this.value;sv()" style="margin-bottom:6px">';
-      h+='<div style="display:flex;gap:6px;margin-bottom:6px">';
-      h+='<div style="flex:1"><div class="lbl" style="margin-bottom:4px">RPE</div>';
-      h+='<input type="number" min="1" max="10" value="'+wk.rpe+'" oninput="S.planEdit.weeks['+wi+'].rpe=parseInt(this.value)||7;sv()" style="padding:7px 10px;font-size:13px"></div>';
-      h+='<div style="flex:1"><div class="lbl" style="margin-bottom:4px">RIR</div>';
-      h+='<input type="number" min="0" max="5" value="'+wk.rir+'" oninput="S.planEdit.weeks['+wi+'].rir=parseInt(this.value)||2;sv()" style="padding:7px 10px;font-size:13px"></div>';
-      h+='<div style="flex:1"><div class="lbl" style="margin-bottom:4px">VOL%</div>';
-      h+='<input type="number" min="50" max="120" value="'+Math.round(wk.volMod*100)+'" oninput="S.planEdit.weeks['+wi+'].volMod=(parseInt(this.value)||100)/100;sv()" style="padding:7px 10px;font-size:13px"></div>';
-      h+='<div style="flex:1"><div class="lbl" style="margin-bottom:4px">REST</div>';
-      h+='<input type="number" min="30" max="300" value="'+(wk.defaultRest||90)+'" oninput="S.planEdit.weeks['+wi+'].defaultRest=parseInt(this.value)||90;sv()" style="padding:7px 10px;font-size:13px"></div>';
+      h+='<div class="card" style="margin-bottom:8px;border-color:'+(deload?'var(--acc-brd)':'var(--brd)')+';background:'+(deload?'var(--acc-bg)':'var(--bg2)')+'">';
+      // Week header
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+      h+='<div style="font-size:13px;font-weight:700;color:'+(deload?'var(--acc)':'var(--tx)')+'">Week '+(wi+1)+'</div>';
+      h+='<button class="toggle '+(deload?'toggle-on':'toggle-off')+'" onclick="S.planEdit.weeks['+wi+'].theme=S.planEdit.weeks['+wi+'].theme===\'deload\'?\'build\':\'deload\';sv();draw()" title="Deload"><div class="toggle-knob"></div></button>';
       h+='</div>';
-      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
-      h+='<span style="font-size:13px">Deload week</span>';
-      h+='<button class="toggle '+(deload?'toggle-on':'toggle-off')+'" onclick="S.planEdit.weeks['+wi+'].theme=S.planEdit.weeks['+wi+'].theme===\'deload\'?\'build\':\'deload\';sv();draw()"><div class="toggle-knob"></div></button>';
+      // Label
+      h+='<input type="text" value="'+wk.label+'" placeholder="Week label e.g. Build" oninput="S.planEdit.weeks['+wi+'].label=this.value;sv()" style="margin-bottom:10px;font-size:12px">';
+      // RPE / RIR / VOL / REST row
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">';
+      [
+        {label:'RPE',key:'rpe',min:1,max:10,step:1},
+        {label:'RIR',key:'rir',min:0,max:5,step:1},
+        {label:'VOL%',key:'volMod',min:50,max:130,step:5,scale:100},
+        {label:'REST',key:'defaultRest',min:30,max:300,step:15}
+      ].forEach(function(f){
+        var val=f.scale?Math.round((wk[f.key]||1)*f.scale):(wk[f.key]||0);
+        var suffix=f.key==='defaultRest'?'s':f.key==='volMod'?'%':'';
+        h+='<div style="text-align:center">';
+        h+='<div class="lbl" style="margin-bottom:4px">'+f.label+'</div>';
+        h+='<div style="display:flex;align-items:center">';
+        h+='<button onclick="adjPlanWeek('+wi+',\''+f.key+'\','+(-f.step)+','+f.min+','+f.max+')"'
+          +' style="width:28px;height:32px;border-radius:6px 0 0 6px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
+        h+='<div id="pw-'+wi+'-'+f.key+'" style="flex:1;height:32px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--acc)">'+val+suffix+'</div>';
+        h+='<button onclick="adjPlanWeek('+wi+',\''+f.key+'\','+f.step+','+f.min+','+f.max+')"'
+          +' style="width:28px;height:32px;border-radius:0 6px 6px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
+        h+='</div></div>';
+      });
       h+='</div>';
-      h+='<textarea placeholder="Coach tip for this week…" oninput="S.planEdit.weeks['+wi+'].tip=this.value;sv()" style="min-height:56px;font-size:12px">'+wk.tip+'</textarea>';
+      // Coach tip
+      h+='<div class="lbl" style="margin-bottom:4px">COACH TIP</div>';
+      h+='<textarea placeholder="e.g. Focus on technique this week." oninput="S.planEdit.weeks['+wi+'].tip=this.value;sv()" style="min-height:52px;font-size:12px">'+wk.tip+'</textarea>';
       h+='</div>';
     });
   }
-  h+='<button class="btn btn-acc" style="margin-top:8px" onclick="saveBuildPlan()">Save Plan</button>';
+
+  h+='<button class="btn btn-acc" style="margin-top:8px" onclick="saveBuildPlan()">Save Progression Plan</button>';
   return h;
+}
+
+function adjPlanWeek(wi,key,delta,min,max){
+  var wk=S.planEdit.weeks[wi];
+  if(key==='volMod'){
+    var cur=Math.round((wk.volMod||1)*100);
+    var next=Math.max(min,Math.min(max,cur+delta));
+    wk.volMod=next/100;
+    var el=document.getElementById('pw-'+wi+'-volMod');if(el)el.textContent=next+'%';
+  } else {
+    wk[key]=Math.max(min,Math.min(max,(wk[key]||0)+delta));
+    var suffix=key==='defaultRest'?'s':'';
+    var el=document.getElementById('pw-'+wi+'-'+key);if(el)el.textContent=wk[key]+suffix;
+  }
+  sv();
 }
 
 function setBuildPlanWeeks(n){
   S.planEdit.targetWeeks=n;
-  while(S.planEdit.weeks.length<n)S.planEdit.weeks.push({label:'Week '+(S.planEdit.weeks.length+1),theme:'build',rpe:7,rir:3,weightPct:90,volMod:1.0,defaultRest:90,tip:''});
+  while(S.planEdit.weeks.length<n)S.planEdit.weeks.push({
+    label:'Week '+(S.planEdit.weeks.length+1),theme:'build',
+    rpe:7,rir:3,volMod:1.0,defaultRest:90,tip:''
+  });
   S.planEdit.weeks=S.planEdit.weeks.slice(0,n);
   sv();draw();
 }
@@ -2836,174 +3052,15 @@ function saveBuildPlan(){
   if(!e.name||e.weeks.length===0){alert('Add a name and at least one week.');return;}
   var key='cplan_'+(Date.now());var cl=C();
   if(!cl.customPlans)cl.customPlans=[];
-  cl.customPlans.push({key:key,name:e.name,desc:'Custom plan',cyclic:e.cyclic,weeks:e.weeks});
+  cl.customPlans.push({key:key,name:e.name,desc:'Custom progression plan',cyclic:e.cyclic,weeks:e.weeks});
   S.planEdit={name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};
-  sv();alert('Plan saved!');draw();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TIMER VIEW
-// ═══════════════════════════════════════════════════════════════
-function timerV(){
-  var t=S.timer;
-  var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  h+='<div class="h1" style="margin-bottom:16px">Timer</div>';
-  var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
-  h+='<div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">';
-  modes.forEach(function(m){
-    h+='<button class="btn btn-pill'+(t.mode===m.k?' btn-acc':' btn-ghost')+'" onclick="setTimerMode(\''+m.k+'\')">'+m.l+'</button>';
-  });
-  h+='</div>';
-
-  if(t.mode==='stopwatch'){
-    var secs=t.elapsed;var sm=Math.floor(secs/60);var ss=secs%60;
-    h+='<div style="text-align:center;padding:20px 0"><div id="timer-big" style="font-size:72px;font-weight:900;color:var(--acc);letter-spacing:-2px">'+(sm<10?'0':'')+sm+':'+(ss<10?'0':'')+ss+'</div></div>';
-    h+='<div style="display:flex;gap:8px;margin-top:16px">';
-    h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1">'+(t.running?'Pause':'Start')+'</button>';
-    h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1">Reset</button>';
-    h+='</div>';
-  } else if(t.mode==='countdown'){
-    if(t.setup){
-      h+='<div class="lbl" style="margin-bottom:8px">SET DURATION</div>';
-      h+=makeDrum('cd-mins',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,35,40,45,50,55,60].map(function(n){return{val:n,label:n+'m'};}),Math.floor(t.totalSecs/60)||10,{cls:'compact'});
-      h+='<button class="btn btn-acc" style="margin-top:12px" onclick="startCountdown()">Start</button>';
-    } else {
-      var rem=t.remaining;var rm=Math.floor(rem/60);var rs=rem%60;
-      h+='<div style="text-align:center;padding:20px 0"><div id="timer-big" style="font-size:72px;font-weight:900;color:var(--acc);letter-spacing:-2px">'+(rm<10?'0':'')+rm+':'+(rs<10?'0':'')+rs+'</div></div>';
-      h+='<div style="display:flex;gap:8px;margin-top:16px">';
-      h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1">'+(t.running?'Pause':'Resume')+'</button>';
-      h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1">Reset</button>';
-      h+='</div>';
-    }
-  } else if(t.mode==='tabata'){
-    if(t.setup){
-      h+='<div class="lbl" style="margin-bottom:4px">WORK</div>';
-      h+=makeDrum('tab-work',[10,15,20,25,30,35,40,45,50,60].map(function(n){return{val:n,label:n+'s'};}),t.tabWork,{cls:'compact'});
-      h+='<div class="lbl" style="margin:12px 0 4px">REST</div>';
-      h+=makeDrum('tab-rest',[5,10,15,20,25,30,40,60].map(function(n){return{val:n,label:n+'s'};}),t.tabRest,{cls:'compact'});
-      h+='<div class="lbl" style="margin:12px 0 4px">ROUNDS</div>';
-      h+=makeDrum('tab-rounds',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(n){return{val:n,label:n+' rounds'};}),t.tabRounds,{cls:'compact'});
-      h+='<button class="btn btn-acc" style="margin-top:16px" onclick="startTabata()">Start</button>';
-    } else {
-      var phase=t.tabPhase;var rd=t.tabCurrent;var total=t.tabRounds;
-      h+='<div style="text-align:center;padding:20px 0">';
-      h+='<div class="lbl '+(phase==='work'?'lbl-acc':'lbl-teal')+'" style="font-size:14px;margin-bottom:8px">'+(phase==='work'?'WORK':'REST')+'</div>';
-      h+='<div id="timer-big" style="font-size:72px;font-weight:900;color:'+(phase==='work'?'var(--acc)':'var(--teal)')+'">'+t.remaining+'</div>';
-      h+='<div class="lbl" style="margin-top:8px">Round '+(rd+1)+' / '+total+'</div>';
-      h+='</div>';
-      h+='<div style="display:flex;gap:8px">';
-      h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1">'+(t.running?'Pause':'Resume')+'</button>';
-      h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1">Reset</button>';
-      h+='</div>';
-    }
-  } else {
-    if(t.setup){
-      h+='<div class="lbl" style="margin-bottom:4px">TOTAL MINUTES</div>';
-      h+=makeDrum('emom-mins',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,35,40,45,50,55,60].map(function(n){return{val:n,label:n+' min'};}),t.emomMins,{cls:'compact'});
-      h+='<button class="btn btn-acc" style="margin-top:16px" onclick="startEMOM()">Start</button>';
-    } else {
-      var secInMin=t.elapsed%60;var emRem=60-secInMin;var emRd=t.emomRound;
-      h+='<div style="text-align:center;padding:20px 0">';
-      h+='<div class="lbl" style="font-size:14px;margin-bottom:8px">MINUTE '+(emRd+1)+' / '+t.emomMins+'</div>';
-      h+='<div id="timer-big" style="font-size:72px;font-weight:900;color:var(--acc)">'+emRem+'</div>';
-      h+='<div class="lbl" style="margin-top:8px">seconds remaining</div>';
-      h+='</div>';
-      h+='<div style="display:flex;gap:8px">';
-      h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1">'+(t.running?'Pause':'Resume')+'</button>';
-      h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1">Reset</button>';
-      h+='</div>';
-    }
+  sv();
+  if(confirm('Progression plan saved! Attach it now?')){
+    attachPlan(key);sv();
   }
-  h+='</div>';
-  return h;
-}
-
-function setTimerMode(m){S.timer.mode=m;S.timer.setup=true;S.timer.running=false;if(_timerTick){clearInterval(_timerTick);_timerTick=null;}sv();draw();}
-function startCountdown(){
-  var cd=document.getElementById('ds-cd-mins');
-  var active=cd?cd.querySelector('.drum-item.active'):null;
-  var mins=active?parseInt(active.dataset.val)||10:10;
-  S.timer.totalSecs=mins*60;S.timer.remaining=mins*60;S.timer.setup=false;S.timer.running=true;sv();draw();
-  startTimerTick();
-}
-function startTabata(){
-  var tw=document.getElementById('ds-tab-work');var tr=document.getElementById('ds-tab-rest');var trr=document.getElementById('ds-tab-rounds');
-  var getVal=function(el){var a=el?el.querySelector('.drum-item.active'):null;return a?parseInt(a.dataset.val)||0:0;};
-  S.timer.tabWork=getVal(tw)||40;S.timer.tabRest=getVal(tr)||20;S.timer.tabRounds=getVal(trr)||8;
-  S.timer.tabCurrent=0;S.timer.tabPhase='work';S.timer.remaining=S.timer.tabWork;
-  S.timer.setup=false;S.timer.running=true;sv();draw();startTimerTick();
-}
-function startEMOM(){
-  var em=document.getElementById('ds-emom-mins');
-  var active=em?em.querySelector('.drum-item.active'):null;
-  var mins=active?parseInt(active.dataset.val)||10:10;
-  S.timer.emomMins=mins;S.timer.emomRound=0;S.timer.elapsed=0;
-  S.timer.setup=false;S.timer.running=true;sv();draw();startTimerTick();
-}
-function timerToggle(){
-  S.timer.running=!S.timer.running;sv();
-  if(S.timer.running)startTimerTick();
-  else{if(_timerTick){clearInterval(_timerTick);_timerTick=null;}}
   draw();
 }
-function timerReset(){
-  S.timer.running=false;S.timer.setup=true;S.timer.elapsed=0;S.timer.remaining=S.timer.totalSecs;
-  if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
-  sv();draw();
-}
 
-// ═══════════════════════════════════════════════════════════════
-// TIMER TICK — uses stable element ID, no fragile selectors
-// ═══════════════════════════════════════════════════════════════
-var _timerTick=null;
-function startTimerTick(){
-  if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
-  _timerTick=setInterval(function(){
-    var t=S.timer;
-    if(!t.running){clearInterval(_timerTick);_timerTick=null;return;}
-    if(t.mode==='stopwatch'){
-      t.elapsed++;sv();
-      if(S.tab==='timer'){
-        var big=document.getElementById('timer-big');
-        if(big){var m=Math.floor(t.elapsed/60);var s=t.elapsed%60;big.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
-      }
-    } else if(t.mode==='countdown'){
-      if(t.remaining>0){t.remaining--;sv();}
-      else{t.running=false;sv();draw();return;}
-      if(S.tab==='timer'){
-        var big=document.getElementById('timer-big');
-        if(big){var m=Math.floor(t.remaining/60);var s=t.remaining%60;big.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
-      }
-    } else if(t.mode==='tabata'){
-      if(t.remaining>0){t.remaining--;sv();}
-      else{
-        if(t.tabPhase==='work'){t.tabPhase='rest';t.remaining=t.tabRest;sv();}
-        else{
-          t.tabCurrent++;
-          if(t.tabCurrent>=t.tabRounds){t.running=false;t.setup=true;sv();draw();return;}
-          t.tabPhase='work';t.remaining=t.tabWork;sv();
-        }
-        draw();return;
-      }
-      if(S.tab==='timer'){
-        var big=document.getElementById('timer-big');
-        if(big)big.textContent=t.remaining;
-      }
-    } else if(t.mode==='emom'){
-      t.elapsed++;sv();
-      var newRound=Math.floor(t.elapsed/60);
-      if(newRound!==t.emomRound){
-        t.emomRound=newRound;
-        if(newRound>=t.emomMins){t.running=false;t.setup=true;sv();draw();return;}
-        draw();return;
-      }
-      if(S.tab==='timer'){
-        var big=document.getElementById('timer-big');
-        if(big)big.textContent=60-(t.elapsed%60);
-      }
-    }
-  },1000);
-}
 
 // ═══════════════════════════════════════════════════════════════
 // CLIENT SYSTEM
