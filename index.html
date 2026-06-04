@@ -2733,24 +2733,22 @@ function buildProgramV(){
         var phLabel={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
         var volStr=exEntry.reps>0?(exEntry.sets+'×'+exEntry.reps):(exEntry.vol||'—');
         h+='<div style="border-top:0.5px solid var(--brd);padding:8px 0">'
-        h+='<div style="display:flex;align-items:center;justify-content:space-between">'
+        h+='<div style="display:flex;align-items:center;gap:8px">'
+        h+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex-shrink:0;align-self:stretch">';
+        if(ei>0)h+='<button onclick="moveBuildEx('+di+','+ei+',-1)" style="width:28px;height:26px;border-radius:6px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">↑</button>';
+        else h+='<span style="width:28px;display:block"></span>';
+        if(ei<day.exercises.length-1)h+='<button onclick="moveBuildEx('+di+','+ei+',1)" style="width:28px;height:26px;border-radius:6px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">↓</button>';
+        else h+='<span style="width:28px;display:block"></span>';
+        h+='</div>';
         h+='<div style="flex:1;min-width:0">'
         h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+exEntry.name+'</div>'
         h+='<div style="font-size:10px;color:var(--mu);margin-top:2px">'+
            (phLabel[exEntry.ph]||'Strength')+' · '+trackSummary+' · '+volStr+' · '+
            (exEntry.rest||60)+'s rest</div>'
         h+='</div>'
-        // Arrow buttons + config + delete
-        h+='<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
-        h+='<div style="display:flex;flex-direction:column;gap:2px;margin-right:2px">';
-        if(ei>0)h+='<button onclick="moveBuildEx('+di+','+ei+',-1)" style="width:32px;height:28px;border-radius:6px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">↑</button>';
-        else h+='<span style="width:32px;height:28px;display:block"></span>';
-        if(ei<day.exercises.length-1)h+='<button onclick="moveBuildEx('+di+','+ei+',1)" style="width:32px;height:28px;border-radius:6px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">↓</button>';
-        else h+='<span style="width:32px;height:28px;display:block"></span>';
-        h+='</div>';
-        h+='<button onclick="openExConfig('+di+','+ei+')" style="background:none;border:none;color:var(--acc);cursor:pointer;font-size:13px;padding:2px 6px;font-weight:700">Edit</button>'
-        h+='<button onclick="removeBuildEx('+di+','+ei+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px">✕</button>'
-        h+='</div></div></div>'
+        h+='<button onclick="openExConfig('+di+','+ei+')" style="background:none;border:none;color:var(--acc);cursor:pointer;font-size:13px;padding:2px 6px;font-weight:700;flex-shrink:0">Edit</button>'
+        h+='<button onclick="removeBuildEx('+di+','+ei+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px;flex-shrink:0">✕</button>'
+        h+='</div></div>'
       });
 
       h+='<button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="openExPicker('+di+')">+ Add Exercise</button>';
@@ -2764,6 +2762,16 @@ function buildProgramV(){
 }
 
 // ─── EXERCISE CONFIG SHEET ───────────────────────────────────────
+function buildStepper(di,ei,field,value,label,suffix,delta,min,max){
+  return '<div style="margin-bottom:14px">'+
+    '<div class="lbl" style="margin-bottom:6px">'+label+'</div>'+
+    '<div style="display:flex;align-items:center;gap:0">'+
+    '<button onclick="adjBuildEx('+di+','+ei+',\''+field+'\',-'+delta+')" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>'+
+    '<div id="bex-'+field+'" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+value+(suffix||'')+'</div>'+
+    '<button onclick="adjBuildEx('+di+','+ei+',\''+field+'\','+delta+')" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>'+
+    '</div></div>';
+}
+
 function openExConfig(di,ei){
   var exEntry=S.customEdit.days[di].exercises[ei];
   var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
@@ -2784,7 +2792,7 @@ function openExConfig(di,ei){
   });
   h+='</div>';
 
-  // Track fields
+  // Track field pills
   h+='<div class="lbl" style="margin-bottom:8px">TRACK FIELDS</div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
   allTrack.forEach(function(t){
@@ -2793,46 +2801,45 @@ function openExConfig(di,ei){
   });
   h+='</div>';
 
-  // Sets stepper
-  h+='<div style="display:flex;gap:12px;margin-bottom:16px">';
-  h+='<div style="flex:1"><div class="lbl" style="margin-bottom:6px">SETS</div>';
-  h+='<div style="display:flex;align-items:center;gap:0">';
-  h+='<button onclick="adjBuildEx('+di+','+ei+',\'sets\',-1)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
-  h+='<div id="bex-sets" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+exEntry.sets+'</div>';
-  h+='<button onclick="adjBuildEx('+di+','+ei+',\'sets\',1)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
-  h+='</div></div>';
+  // ── Divider before steppers ──
+  h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:14px"></div>';
 
-  // Reps stepper (only if reps in track)
-  if(track.indexOf('reps')>=0){
-    h+='<div style="flex:1"><div class="lbl" style="margin-bottom:6px">REPS</div>';
-    h+='<div style="display:flex;align-items:center;gap:0">';
-    h+='<button onclick="adjBuildEx('+di+','+ei+',\'reps\',-1)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
-    h+='<div id="bex-reps" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+exEntry.reps+'</div>';
-    h+='<button onclick="adjBuildEx('+di+','+ei+',\'reps\',1)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
-    h+='</div></div>';
-  }
-  h+='</div>';
+  // Sets — always shown
+  h+=buildStepper(di,ei,'sets',exEntry.sets||3,'SETS','',1,1,20);
 
-  // Vol stepper (if time in track)
+  // Per-track steppers — one for each active field
+  if(track.indexOf('reps')>=0)
+    h+=buildStepper(di,ei,'reps',exEntry.reps||10,'REPS','',1,0,100);
+
+  if(track.indexOf('weight')>=0)
+    h+=buildStepper(di,ei,'weight',exEntry.weight||0,'WEIGHT (kg, 0=BW)','kg',2.5,0,300);
+
   if(track.indexOf('time')>=0){
     var volSecs=parseVolToSecs(exEntry.vol||'45s');
-    h+='<div class="lbl" style="margin-bottom:6px">DURATION</div>';
-    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:16px">';
-    h+='<button onclick="adjBuildEx('+di+','+ei+',\'vol\',-5)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
-    h+='<div id="bex-vol" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+fmtSecs(volSecs)+'</div>';
-    h+='<button onclick="adjBuildEx('+di+','+ei+',\'vol\',5)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
-    h+='</div>';
+    h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">DURATION</div>'+
+       '<div style="display:flex;align-items:center;gap:0">'+
+       '<button onclick="adjBuildEx('+di+','+ei+',\'vol\',-5)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>'+
+       '<div id="bex-vol" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+fmtSecs(volSecs)+'</div>'+
+       '<button onclick="adjBuildEx('+di+','+ei+',\'vol\',5)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>'+
+       '</div></div>';
   }
 
-  // Rest stepper
-  h+='<div class="lbl" style="margin-bottom:6px">REST (seconds)</div>';
-  h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
-  h+='<button onclick="adjBuildEx('+di+','+ei+',\'rest\',-15)" style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
-  h+='<div id="bex-rest" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc)">'+(exEntry.rest||60)+'s</div>';
-  h+='<button onclick="adjBuildEx('+di+','+ei+',\'rest\',15)" style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
-  h+='</div>';
+  if(track.indexOf('distance')>=0)
+    h+=buildStepper(di,ei,'distance',exEntry.distance||20,'DISTANCE (metres)','m',5,0,1000);
 
-  // Cue input
+  if(track.indexOf('calories')>=0)
+    h+=buildStepper(di,ei,'calories',exEntry.calories||10,'CALORIES TARGET','cal',1,0,500);
+
+  if(track.indexOf('rounds')>=0)
+    h+=buildStepper(di,ei,'rounds',exEntry.rounds||3,'ROUNDS','',1,1,20);
+
+  if(track.indexOf('height')>=0)
+    h+=buildStepper(di,ei,'height',exEntry.height||50,'HEIGHT (cm)','cm',5,0,150);
+
+  // Rest — always shown
+  h+=buildStepper(di,ei,'rest',exEntry.rest||60,'REST (seconds)','s',15,0,300);
+
+  // Cue
   h+='<div class="lbl" style="margin-bottom:6px">COACHING CUE (optional)</div>';
   h+='<input type="text" value="'+(exEntry.cue||'')+'" placeholder="e.g. Keep chest up" oninput="S.customEdit.days['+di+'].exercises['+ei+'].cue=this.value;sv()" style="margin-bottom:20px">';
 
@@ -2844,11 +2851,7 @@ function openExConfig(di,ei){
 // ─── Exercise config helpers ──────────────────────────────────────
 function setBuildExPh(di,ei,ph){
   S.customEdit.days[di].exercises[ei].ph=ph;
-  // Recalculate track based on new phase
-  var ex=S.customEdit.days[di].exercises[ei];
-  ex.track=resolveTrack(ex.name,ph,ex.reps,ex.vol);
   sv();
-  // Re-render sheet
   openExConfig(di,ei);
 }
 function toggleBuildExTrack(di,ei,field){
@@ -2876,6 +2879,21 @@ function adjBuildEx(di,ei,field,delta){
     var next=Math.max(5,cur+delta);
     ex.vol=next+'s';
     var el=document.getElementById('bex-vol');if(el)el.textContent=fmtSecs(next);
+  } else if(field==='weight'){
+    ex.weight=Math.max(0,Math.round(((ex.weight||0)+delta)*10)/10);
+    var el=document.getElementById('bex-weight');if(el)el.textContent=ex.weight+'kg';
+  } else if(field==='distance'){
+    ex.distance=Math.max(0,(ex.distance||20)+delta);
+    var el=document.getElementById('bex-distance');if(el)el.textContent=ex.distance+'m';
+  } else if(field==='calories'){
+    ex.calories=Math.max(0,(ex.calories||10)+delta);
+    var el=document.getElementById('bex-calories');if(el)el.textContent=ex.calories+'cal';
+  } else if(field==='rounds'){
+    ex.rounds=Math.max(1,(ex.rounds||3)+delta);
+    var el=document.getElementById('bex-rounds');if(el)el.textContent=ex.rounds;
+  } else if(field==='height'){
+    ex.height=Math.max(0,(ex.height||50)+delta);
+    var el=document.getElementById('bex-height');if(el)el.textContent=ex.height+'cm';
   }
   sv();
 }
@@ -2918,10 +2936,23 @@ function filterExPicker(){
   }
   q=q.toLowerCase();
   var results=EX.filter(function(e){return e.name.toLowerCase().indexOf(q)>=0||(e.tags||[]).join(' ').indexOf(q)>=0;}).slice(0,40);
-  if(results.length===0){el.innerHTML='<div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">No exercises found</div>';return;}
+  if(results.length===0){
+    el.innerHTML='<div style="padding:10px 0">'+
+      '<div style="font-size:12px;color:var(--mu);text-align:center;padding:8px 0 12px">No exercises found in database</div>'+
+      '<div class="prog-item" data-name="'+q+'" onclick="addBuildEx(this.dataset.name)" style="background:var(--acc-bg);border-color:var(--acc-brd)">'+
+      '<div><div style="font-size:13px;font-weight:700;color:var(--acc)">✚ Add \u201c'+q+'\u201d as custom exercise</div>'+
+      '<div class="lbl">Not in database · set track fields manually</div></div>'+
+      '<button class="btn btn-acc btn-pill">Add</button></div>'+
+      '</div>';
+    return;
+  }
+  // Also append custom option below results
+  var customRow='<div class="prog-item" data-name="'+q+'" onclick="addBuildEx(this.dataset.name)" style="margin-top:4px;background:var(--bg3);border-color:var(--brd)">'+
+    '<div><div style="font-size:12px;font-weight:600;color:var(--mu)">✚ Can\'t find it? Add \u201c'+q+'\u201d as custom exercise</div></div>'+
+    '<button class="btn btn-ghost btn-pill">Add</button></div>';
   el.innerHTML=results.map(function(e){
     return '<div class="prog-item" data-name="'+e.name+'" onclick="addBuildEx(this.dataset.name)"><div><div style="font-size:13px;font-weight:600">'+e.name+'</div><div class="lbl">'+e.patterns.join(' · ')+'</div></div><button class="btn btn-acc btn-pill">Add</button></div>';
-  }).join('');
+  }).join('')+customRow;
 }
 function openExBrowser(){
   var patterns=['squat','hinge','push','pull','lunge','carry','core','rotation','explosive','conditioning','locomotion'];
