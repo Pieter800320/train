@@ -1810,7 +1810,7 @@ function openPlanSheet(){
     h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
     h+='<div style="font-size:12px;font-weight:700;color:'+(isCurrent?'var(--acc)':'var(--tx)')+'">Week '+(wi+1)+(isCurrent?' — Current':'')+'</div>';
     var deload=wk.theme==='deload';
-    if(deload)h+='<span style="font-size:9px;font-weight:700;color:var(--teal);background:var(--teal-bg);border:0.5px solid var(--teal-brd);border-radius:8px;padding:1px 6px">DELOAD</span>';
+    if(deload)h+='<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:8px;padding:1px 6px">DELOAD</span>';
     h+='</div>';
     if(wk.label)h+='<div style="font-size:11px;color:var(--tx2);margin-bottom:4px">'+wk.label+'</div>';
     h+='<div style="display:flex;gap:6px">';
@@ -1915,7 +1915,7 @@ function openExWindow(exIdx){
   if(allDone){
     h+='<div style="text-align:center;padding:20px 0">';
     h+='<div style="font-size:36px;margin-bottom:8px">\u2713</div>';
-    h+='<div style="font-size:14px;font-weight:700;color:var(--teal)">All sets complete</div>';
+    h+='<div style="font-size:14px;font-weight:700;color:var(--acc)">All sets complete</div>';
     h+='</div>';
 
   // ── Timed exercise ──
@@ -2069,6 +2069,8 @@ function logSetFromWindow(globalIdx){
 
 function logTimedSet(exIdx){
   var wx=S.wx;if(!wx)return;
+  // Stop any running timer first
+  stopExTimer();
   var exSets=wx.sets.filter(function(s){return s.exIdx===exIdx;});
   var nextSet=exSets.find(function(s){return!s.done;});
   if(nextSet){
@@ -2076,6 +2078,9 @@ function logTimedSet(exIdx){
     if(!wx.exDone)wx.exDone={};
     var allDoneNow=exSets.every(function(s){return s.done;});
     if(allDoneNow)wx.exDone[exIdx]=true;
+    // Reset timedEx so the next tap starts fresh
+    wx.timedEx=null;
+    wx._pendingTime=undefined;
     var restSecs=(wx.exercises[exIdx].rest)||30;
     if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=exIdx;}
     checkPR(nextSet);sv();
