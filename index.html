@@ -221,11 +221,44 @@ function clients(){return Object.keys(S.clients).map(function(k){return S.client
 // ═══════════════════════════════════════════════════════════════
 
 // Helper: exercise entry
+function resolveTrack(name,ph,reps,vol){
+  var n=(name||'').toLowerCase();
+  var p=ph||'strength';
+  // Carries → distance + weight
+  if(n.indexOf('carry')>=0||n.indexOf('march')>=0&&n.indexOf('sled')>=0)
+    return['distance','weight'];
+  // Sled push/drag → distance
+  if(n.indexOf('sled push')>=0||n.indexOf('sled drag')>=0||n.indexOf('sled march')>=0)
+    return['distance'];
+  // Conditioning machines → calories + time
+  if(n.indexOf('assault bike')>=0||n.indexOf('rowing machine')>=0||
+     n.indexOf('ski erg')>=0||n.indexOf('row erg')>=0)
+    return['calories','time'];
+  // Box/broad/depth jumps → reps + height
+  if(n.indexOf('box jump')>=0||n.indexOf('hurdle jump')>=0||n.indexOf('depth jump')>=0)
+    return['reps','height'];
+  // AMRAP → rounds
+  if(n.indexOf('amrap')>=0||n.indexOf('circuit')>=0)
+    return['rounds'];
+  // Timed (vol set, no reps)
+  if(vol&&(!reps||reps===0))return['time'];
+  // Reps + time (tempo work — has both)
+  if(vol&&reps>0)return['reps','time'];
+  // Warmup/mobility/cooldown/core with reps → reps only (no weight)
+  if((p==='warmup'||p==='mobility'||p==='cooldown'||p==='core')&&reps>0)
+    return['reps'];
+  // Strength/accessory with reps → reps + weight
+  if(reps>0)return['reps','weight'];
+  // Fallback
+  return['reps'];
+}
 function ex(name,sets,reps,rest,ph,cue,vol){
-  return {name:name,sets:sets,reps:reps||0,vol:vol||'',rest:rest||60,ph:ph||'strength',cue:cue||''};
+  return {name:name,sets:sets,reps:reps||0,vol:vol||'',rest:rest||60,
+          ph:ph||'strength',cue:cue||'',track:resolveTrack(name,ph||'strength',reps,vol)};
 }
 function exT(name,sets,vol,rest,ph,cue){
-  return {name:name,sets:sets,reps:0,vol:vol||'45s',rest:rest||30,ph:ph||'strength',cue:cue||''};
+  return {name:name,sets:sets,reps:0,vol:vol||'45s',rest:rest||30,
+          ph:ph||'strength',cue:cue||'',track:resolveTrack(name,ph||'strength',0,vol||'45s')};
 }
 
 var PLANS = [
@@ -1859,7 +1892,14 @@ function openExWindow(exIdx){
   var wx=S.wx;
   var exEntry=wx.exercises[exIdx];
   if(!exEntry) return;
-  var isTimed=!!exEntry.vol&&(!exEntry.reps||exEntry.reps===0);
+  var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
+  var isTimed=track.indexOf('time')>=0&&track.indexOf('reps')<0;
+  var isRepsWeight=track.indexOf('reps')>=0&&track.indexOf('weight')>=0;
+  var isRepsOnly=track.indexOf('reps')>=0&&track.indexOf('weight')<0;
+  var isDistance=track.indexOf('distance')>=0;
+  var isCalories=track.indexOf('calories')>=0;
+  var isRounds=track.indexOf('rounds')>=0;
+  var isHeight=track.indexOf('height')>=0;
 
   // Find sets for this exercise
   var exSets=wx.sets.filter(function(s){return s.exIdx===exIdx;});
@@ -1945,7 +1985,84 @@ function openExWindow(exIdx){
     } else {
       h+='<button class="btn btn-acc" onclick="startExTimerPending('+exIdx+')">Start Timer</button>';
     }
-  // ── Reps + weight exercise ──
+  // ── Rounds (AMRAP) ──
+  } else if(isRounds&&nextSet){
+    h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
+    h+='<div class="lbl" style="margin-bottom:8px">ROUNDS COMPLETED</div>';
+    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
+    h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'</div>';
+    h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div>';
+    var gi=wx.sets.indexOf(nextSet);
+    h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+    h+='</div>';
+  // ── Distance ──
+  } else if(isDistance&&nextSet){
+    h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
+    h+='<div class="lbl" style="margin-bottom:8px">DISTANCE (metres)</div>';
+    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:10px">';
+    h+='<button onclick="adjustVal(\'reps\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'m</div>';
+    h+='<button onclick="adjustVal(\'reps\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div>';
+    if(isRepsWeight||track.indexOf('weight')>=0){
+      h+='<div class="lbl" style="margin-bottom:8px">WEIGHT</div>';
+      h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
+      h+='<button onclick="adjustVal(\'kg\',-2.5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+      h+='<div id="val-kg" onclick="editVal(\'kg\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+(wx._pendingKg===0?'BW':wx._pendingKg+'kg')+'</div>';
+      h+='<button onclick="adjustVal(\'kg\',2.5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+      h+='</div>';
+    }
+    var gi=wx.sets.indexOf(nextSet);
+    h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+    h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+gi+')">★ PB</button>';
+    h+='</div>';
+  // ── Calories ──
+  } else if(isCalories&&nextSet){
+    h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
+    h+='<div class="lbl" style="margin-bottom:8px">CALORIES</div>';
+    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:10px">';
+    h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+' cal</div>';
+    h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div>';
+    var gi=wx.sets.indexOf(nextSet);
+    h+='<button class="btn btn-acc" style="margin-bottom:8px" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+  // ── Height (box jumps etc) ──
+  } else if(isHeight&&nextSet){
+    h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
+    h+='<div class="lbl" style="margin-bottom:8px">REPS</div>';
+    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:10px">';
+    h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'</div>';
+    h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div>';
+    h+='<div class="lbl" style="margin-bottom:8px">BOX HEIGHT (cm)</div>';
+    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
+    h+='<button onclick="adjustVal(\'kg\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-kg" onclick="editVal(\'kg\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+(wx._pendingKg||50)+'cm</div>';
+    h+='<button onclick="adjustVal(\'kg\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div>';
+    var gi=wx.sets.indexOf(nextSet);
+    h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+    h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+gi+')">★ PB</button>';
+    h+='</div>';
+  // ── Reps only (no weight) ──
+  } else if(isRepsOnly&&nextSet){
+    h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
+    h+='<div class="lbl" style="margin-bottom:8px">REPS</div>';
+    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
+    h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'</div>';
+    h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div>';
+    var gi=wx.sets.indexOf(nextSet);
+    h+='<button class="btn btn-acc" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+  // ── Reps + weight ──
   } else if(nextSet){
     // Divider
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
