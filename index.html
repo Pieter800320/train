@@ -101,7 +101,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .rest-bar{background:var(--bg2);border:0.5px solid var(--brd);border-radius:10px;padding:10px 12px;margin:6px 14px}
 .rest-progress{height:3px;background:var(--brd);border-radius:2px;margin-top:6px;overflow:hidden}
 .rest-fill{height:100%;background:var(--coral);border-radius:2px;transition:width .5s linear}
-.plan-pill{display:inline-flex;align-items:center;gap:6px;background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:20px;padding:4px 4px 4px 12px;margin-bottom:14px;cursor:pointer}
+.plan-pill{display:inline-flex;align-items:center;gap:6px;background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:20px;padding:4px 4px 4px 12px;cursor:pointer}
 .plan-pill-rpe{background:var(--acc-bg);border:1px solid var(--acc-brd);border-radius:16px;padding:2px 9px;font-size:9px;font-weight:800;color:var(--acc)}
 .streak-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
 .dot-on{background:var(--teal)}.dot-cur{background:var(--acc)}.dot-off{background:var(--brd)}
@@ -1547,11 +1547,18 @@ function openAvatarSheet(){
   h+='<div><div style="font-size:16px;font-weight:700;color:var(--tx)">'+(cl.name||'Athlete')+'</div>';
   h+='<div class="lbl" style="margin-top:2px">'+(cl.tplKey?getTPL(cl.tplKey).name:'No programme set')+'</div></div>';
   h+='</div>';
-  h+='<div onclick="openJournalView()" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd)">';
+  h+='<div onclick="openJournalView()" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd);margin-bottom:8px">';
   h+='<div style="width:38px;height:38px;border-radius:10px;background:var(--acc-bg);border:0.5px solid var(--acc-brd);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
   h+='<i class="ti ti-book" style="color:var(--acc);font-size:20px"></i></div>';
   h+='<div><div style="font-size:14px;font-weight:700;color:var(--tx)">Journal</div>';
   h+='<div class="lbl" style="margin-top:1px">Session history &amp; personal bests</div></div>';
+  h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px;margin-left:auto"></i>';
+  h+='</div>';
+  h+='<div onclick="closeSheet();setTimeout(function(){retakeOB();},350)" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd)">';
+  h+='<div style="width:38px;height:38px;border-radius:10px;background:var(--acc-bg);border:0.5px solid var(--acc-brd);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+  h+='<i class="ti ti-refresh" style="color:var(--acc);font-size:20px"></i></div>';
+  h+='<div><div style="font-size:14px;font-weight:700;color:var(--tx)">Retake Setup</div>';
+  h+='<div class="lbl" style="margin-top:1px">Redo the questionnaire</div></div>';
   h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px;margin-left:auto"></i>';
   h+='</div></div>';
   openSheet(h,'Profile');
@@ -1704,7 +1711,7 @@ function todayV(){
   // Subline
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px">'+day.exercises.length+' exercises · ~'+tpl.duration+' min</div>';
   // Pills row — plan pill + session pill, centred
-  h+='<div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">';
+  h+='<div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;row-gap:6px;margin-bottom:14px">';
   if(banner){
     h+='<div onclick="openPlanSheet()" class="plan-pill">';
     h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">'+banner.planName+' · Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
@@ -1778,26 +1785,6 @@ function openPlanSheet(){
   // Find plan in PLANS or customPlans
   PLANS.forEach(function(p){if(p.key===(cl.plan&&cl.plan.key))plan=p;});
   if(!plan)(cl.customPlans||[]).forEach(function(p){if(p.key===(cl.plan&&cl.plan.key))plan=p;});
-  if(!plan)return;
-
-  var currentWeek=banner.weekIndex;
-  var h='<div style="padding:0 20px 30px">';
-
-  // Week dots row
-  h+='<div style="margin-bottom:16px">';
-  h+='<div class="lbl" style="margin-bottom:8px">WEEK PROGRESS</div>';
-  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">';
-  plan.weeks.forEach(function(wk,wi){
-    var isPast=wi<currentWeek;
-    var isCurrent=wi===currentWeek;
-    var isFuture=wi>currentWeek;
-    var dotCls='wdot '+(isPast?'wdot-done':isCurrent?'wdot-today':'wdot-future');
-    h+='<div style="display:flex;flex-direction:column;align-items:center;gap:3px">';
-    h+='<span class="'+dotCls+'"></span>';
-    h+='<span style="font-size:7px;color:var(--mu);font-weight:600">'+(wi+1)+'</span>';
-    h+='</div>';
-  });
-  h+='</div>';
   h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">Week '+(currentWeek+1)+' of '+plan.weeks.length+(plan.cyclic?' · cyclic':'')+'</div>';
   h+='</div>';
 
@@ -2245,131 +2232,185 @@ function removeRestCircle(){
 // ═══════════════════════════════════════════════════════════════
 function programsV(){
   var cl=C();var h='';
-  h+='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  h+='<div class="h1" style="margin-bottom:4px">Programmes</div>';
-  h+='<div style="font-size:13px;color:var(--mu);margin-bottom:16px">Your training setup</div>';
-  h+='</div>';
-
-  // a. Your Setup card
   var tpl=ACTIVE_TPL();
   var banner=planBannerData();
-  h+='<div style="padding:0 14px">';
-  h+='<div class="card card-acc" style="margin-bottom:8px">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
-  h+='<div><div class="lbl lbl-acc">ACTIVE PROGRAMME</div><div class="h2" style="margin-top:2px">'+tpl.name+'</div></div>';
-  h+='<div style="text-align:right;font-size:11px;color:var(--acc)">'+tpl.days.length+' days/wk<br>~'+tpl.duration+'min</div></div>';
-  h+='<div style="font-size:12px;color:var(--tx2)">'+tpl.desc+'</div>';
+
+  // ── Header ──
+  h+='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
+  h+='<div class="h1" style="margin-bottom:4px">Programs</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Training plans &amp; progression</div>';
+
+  // ── Active pills row ──
+  h+='<div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;row-gap:6px;margin-bottom:14px">';
+  h+='<div onclick="openActiveProgramSheet()" class="plan-pill">';
+  h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">'+tpl.name+'</span>';
+  h+='<div class="plan-pill-rpe">Active Training Plan</div>';
+  h+='<span style="font-size:9px;color:var(--mu);padding:0 4px">▾</span>';
+  h+='</div>';
   if(banner){
-    h+='<div style="margin-top:10px;border-top:0.5px solid var(--acc-brd);padding-top:10px">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center">';
-    h+='<div><div class="lbl lbl-acc">PROGRESSION PLAN</div><div style="font-size:13px;font-weight:700;color:var(--tx);margin-top:2px">'+banner.planName+'</div></div>';
-    h+='<div style="text-align:right"><div style="font-size:11px;color:var(--acc);font-weight:700">Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</div></div></div>';
-    h+='<div style="font-size:11px;color:var(--mu);margin-top:4px">'+banner.weekLabel+'</div>';
-    h+='<div style="display:flex;gap:6px;margin-top:6px">';
-    h+='<span style="font-size:10px;font-weight:700;background:var(--acc-bg);border:1px solid var(--acc-brd);color:var(--acc);border-radius:8px;padding:2px 8px">RPE '+banner.rpe+'</span>';
-    h+='<span style="font-size:10px;font-weight:700;background:var(--acc-bg);color:var(--acc);border:0.5px solid var(--acc-brd);border-radius:8px;padding:2px 8px">'+banner.rir+' RIR</span>';
-    h+='</div>';
-    if(S.admin.active){
-      h+='<div style="display:flex;gap:8px;margin-top:10px">';
-      h+='<button class="btn btn-ghost btn-sm" onclick="advancePlanWeek();draw()">Advance Week</button>';
-      h+='<button class="btn btn-ghost btn-sm" onclick="detachPlan();draw()">Remove Plan</button>';
-      h+='</div>';
-    }
+    h+='<div onclick="openPlanSheet()" class="plan-pill">';
+    h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">'+banner.planName+' · Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
+    h+='<div class="plan-pill-rpe">RPE '+banner.rpe+'</div>';
+    h+='<span style="font-size:9px;color:var(--mu);padding:0 4px">▾</span>';
     h+='</div>';
   }
   h+='</div>';
   h+='</div>';
 
-  // b. Retake
-  h+='<div style="padding:0 14px;margin-top:8px;margin-bottom:4px">';
-  h+='<button class="btn btn-ghost" onclick="retakeOB()" style="margin-bottom:8px">Retake Setup Questionnaire</button>';
-  h+='</div>';
-
-  // c. Custom Programs section
-  var hasCustomProgs=cl.customPrograms&&cl.customPrograms.length>0;
-  var hasCustomPlans=cl.customPlans&&cl.customPlans.length>0;
-  if(hasCustomProgs||hasCustomPlans){
-    h+='<div class="section-head">MY PROGRAMMES & PLANS</div>';
-    if(hasCustomProgs){
-      h+='<div style="padding:0 14px;margin-bottom:8px">';
-      h+='<div class="lbl" style="margin-bottom:6px">TRAINING PROGRAMMES</div>';
-      cl.customPrograms.forEach(function(cp){
-        var isActive=cp.key===cl.tplKey;
-        h+='<div class="prog-item card'+(isActive?' card-acc':'')+'" style="margin-bottom:4px">';
-        h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+cp.name+'</div></div>';
-        if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{h+='<button class="btn btn-acc btn-pill" onclick="switchTPL(\''+cp.key+'\')">Switch</button>';}
-        h+='</div>';
-      });
-      h+='</div>';
-    }
-    if(hasCustomPlans){
-      h+='<div style="padding:0 14px;margin-bottom:8px">';
-      h+='<div class="lbl" style="margin-bottom:6px">PROGRESSION PLANS</div>';
-      cl.customPlans.forEach(function(p){
-        var isActive=cl.plan&&cl.plan.key===p.key;
-        h+='<div class="prog-item card'+(isActive?' card-acc':'')+'" style="margin-bottom:4px">';
-        h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+p.name+'</div>';
-        h+='<div class="lbl">'+p.weeks.length+' weeks'+(p.cyclic?' · cyclic':'')+'</div></div>';
-        if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{h+='<button class="btn btn-acc btn-pill" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Use</button>';}
-        h+='</div>';
-      });
-      h+='</div>';
-    }
-  }
-
-  // d. Pre-built programmes by category
-  var catColors={strength:'var(--acc)',hypertrophy:'var(--teal)',endurance:'var(--acc)',fatloss:'var(--coral)',foundation:'var(--mu)',sport:'var(--teal)',rehab:'var(--coral)'};
+  // ── TRAINING PROGRAMMES ──
+  h+='<div class="section-head">TRAINING PROGRAMMES</div>';
+  h+='<div style="padding:0 14px;margin-bottom:14px">';
+  var catColors={strength:'var(--acc)',hypertrophy:'var(--acc)',endurance:'var(--acc)',fatloss:'var(--acc)',foundation:'var(--acc)',sport:'var(--acc)',rehab:'var(--acc)'};
   var cats=['strength','hypertrophy','endurance','fatloss','foundation','sport','rehab'];
   var catNames={strength:'Strength',hypertrophy:'Hypertrophy',endurance:'Endurance',fatloss:'Fat Loss',foundation:'Foundation',sport:'Sport Specific',rehab:'Rehabilitation'};
-  h+='<div class="section-head">ALL PROGRAMMES</div>';
   cats.forEach(function(cat){
     var inCat=TPL.filter(function(t){return t.cat===cat;});
     if(inCat.length===0)return;
     var isOpen=cl._pgOpen&&cl._pgOpen[cat];
-    h+='<div data-pgcat="'+cat+'" style="padding:0 14px;margin-bottom:3px">';
-    h+='<div class="group-head'+(isOpen?' open':'')+'" onclick="togglePgGroup(\''+cat+'\')">';
-    h+='<span style="font-size:14px;font-weight:700;color:'+catColors[cat]+'">'+catNames[cat]+'</span>';
-    h+='<span style="color:var(--mu);font-size:12px">'+inCat.length+' <span style="font-size:14px">'+(isOpen?'▴':'▾')+'</span></span>';
+    h+='<div data-pgcat="'+cat+'" style="margin-bottom:3px">';
+    var hasActiveInCat=inCat.some(function(t){return t.key===cl.tplKey;});
+    h+='<div class="group-head'+(isOpen?' open':'')+'" data-cat="'+cat+'" onclick="togglePgGroup(this.dataset.cat)">';
+    h+='<span style="font-size:13px;font-weight:700;color:'+catColors[cat]+'">'+catNames[cat]+'</span>';
+    if(hasActiveInCat)h+='<span class="pr-badge" style="margin-right:auto;margin-left:8px;background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';
+    h+='<span style="color:var(--mu);font-size:12px">'+inCat.length+' <span style="font-size:13px">'+(isOpen?'▴':'▾')+'</span></span>';
     h+='</div>';
     if(isOpen){
       h+='<div class="group-body">';
       inCat.forEach(function(t){
         var isActive=t.key===cl.tplKey;
         h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
-        h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">';
-        h+=t.name+'</div>';
+        h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+t.name+'</div>';
         h+='<div class="lbl">'+t.days.length+' days/wk · '+t.duration+'min</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{h+='<button class="btn btn-acc btn-pill" onclick="switchTPL(\''+t.key+'\')">Switch</button>';}
+        else{h+='<button class="btn btn-acc btn-pill" data-key="'+t.key+'" onclick="switchTPL(this.dataset.key)">Select</button>';}
         h+='</div>';
       });
       h+='</div>';
     }
     h+='</div>';
   });
-
-  // Built-in progression plans
-  h+='<div class="section-head">PROGRESSION PLANS</div>';
-  PLANS.forEach(function(p){
-    var isActive=cl.plan&&cl.plan.key===p.key;
-    h+='<div style="padding:0 14px;margin-bottom:6px">';
-    h+='<div class="card'+(isActive?' card-acc':'')+'">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:start">';
-    h+='<div style="flex:1"><div style="font-size:14px;font-weight:700;color:'+(isActive?'var(--acc)':'var(--tx)')+'">'+p.name+'</div>';
-    h+='<div style="font-size:11px;color:var(--mu);margin-top:2px">'+p.desc+'</div>';
-    h+='<div style="font-size:10px;color:var(--mu);margin-top:4px">'+p.weeks.length+' weeks'+(p.cyclic?' · cyclic':'')+'</div></div>';
-    if(isActive){
-      h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc);margin-left:8px">Active</span>';
-    } else {
-      h+='<button class="btn btn-acc btn-pill" style="margin-left:8px" onclick="attachPlan(\''+p.key+'\');sv();draw()">Use</button>';
+  // My Programmes (custom) — shown as a group if any exist
+  var customProgs=cl.customPrograms||[];
+  if(customProgs.length>0){
+    var isOpen=cl._pgOpen&&cl._pgOpen['my_progs'];
+    h+='<div data-pgcat="my_progs" style="margin-bottom:3px">';
+    h+='<div class="group-head'+(isOpen?' open':'')+'" data-cat="my_progs" onclick="togglePgGroup(this.dataset.cat)">';
+    h+='<span style="font-size:13px;font-weight:700;color:var(--acc)">My Programmes</span>';
+    h+='<span style="color:var(--mu);font-size:12px">'+customProgs.length+' <span style="font-size:13px">'+(isOpen?'▴':'▾')+'</span></span>';
+    h+='</div>';
+    if(isOpen){
+      h+='<div class="group-body">';
+      customProgs.forEach(function(cp){
+        var isActive=cp.key===cl.tplKey;
+        h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
+        h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+cp.name+'</div></div>';
+        if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
+        else{h+='<button class="btn btn-acc btn-pill" data-key="'+cp.key+'" onclick="switchTPL(this.dataset.key)">Select</button>';}
+        h+='</div>';
+      });
+      h+='</div>';
     }
-    h+='</div></div></div>';
+    h+='</div>';
+  }
+  h+='</div>';
+
+  // ── PROGRESSION PLANS ──
+  h+='<div class="section-head">PROGRESSION PLANS</div>';
+  h+='<div style="padding:0 14px;margin-bottom:14px">';
+  var planGroups=[
+    {key:'periodisation',label:'Periodisation',keys:['wave_3_1','wave_5_1','peaking']},
+    {key:'linear',      label:'Linear',       keys:['linear','maintenance']},
+    {key:'specialised', label:'Specialised',  keys:['rehab_12','sport_12']}
+  ];
+  planGroups.forEach(function(grp){
+    var grpPlans=PLANS.filter(function(p){return grp.keys.indexOf(p.key)>=0;});
+    if(grpPlans.length===0)return;
+    var isOpen=cl._pgOpen&&cl._pgOpen['plan_'+grp.key];
+    var hasActive=grpPlans.some(function(p){return cl.plan&&cl.plan.key===p.key;});
+    h+='<div data-pgcat="plan_'+grp.key+'" style="margin-bottom:3px">';
+    h+='<div class="group-head'+(isOpen?' open':'')+'" data-cat="plan_'+grp.key+'" onclick="togglePgGroup(this.dataset.cat)">';
+    h+='<span style="font-size:13px;font-weight:700;color:var(--acc)">'+grp.label+'</span>';
+    if(hasActive)h+='<span class="pr-badge" style="margin-right:auto;margin-left:8px;background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';
+    h+='<span style="color:var(--mu);font-size:12px">'+grpPlans.length+' <span style="font-size:13px">'+(isOpen?'▴':'▾')+'</span></span>';
+    h+='</div>';
+    if(isOpen){
+      h+='<div class="group-body">';
+      grpPlans.forEach(function(p){
+        var isActive=cl.plan&&cl.plan.key===p.key;
+        h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
+        h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+p.name+'</div>';
+        h+='<div class="lbl">'+p.weeks.length+' wks'+(p.cyclic?' · cyclic':'')+'</div></div>';
+        if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
+        else{h+='<button class="btn btn-acc btn-pill" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Select</button>';}
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
   });
+  // My Plans (custom) — shown as a group if any exist
+  var customPlans=cl.customPlans||[];
+  if(customPlans.length>0){
+    var isOpen=cl._pgOpen&&cl._pgOpen['my_plans'];
+    var hasActive=customPlans.some(function(p){return cl.plan&&cl.plan.key===p.key;});
+    h+='<div data-pgcat="my_plans" style="margin-bottom:3px">';
+    h+='<div class="group-head'+(isOpen?' open':'')+'" data-cat="my_plans" onclick="togglePgGroup(this.dataset.cat)">';
+    h+='<span style="font-size:13px;font-weight:700;color:var(--acc)">My Plans</span>';
+    if(hasActive)h+='<span class="pr-badge" style="margin-right:auto;margin-left:8px;background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';
+    h+='<span style="color:var(--mu);font-size:12px">'+customPlans.length+' <span style="font-size:13px">'+(isOpen?'▴':'▾')+'</span></span>';
+    h+='</div>';
+    if(isOpen){
+      h+='<div class="group-body">';
+      customPlans.forEach(function(p){
+        var isActive=cl.plan&&cl.plan.key===p.key;
+        h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
+        h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+p.name+'</div>';
+        h+='<div class="lbl">'+p.weeks.length+' wks'+(p.cyclic?' · cyclic':'')+'</div></div>';
+        if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
+        else{h+='<button class="btn btn-acc btn-pill" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Select</button>';}
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+  }
+  h+='</div>';
 
   h+='<div style="height:20px"></div>';
   return h;
+}
+
+
+// ── Active Training Plan sheet ──
+function openActiveProgramSheet(){
+  var cl=C();var tpl=ACTIVE_TPL();
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div class="lbl lbl-acc" style="margin-bottom:4px">ACTIVE TRAINING PLAN</div>';
+  h+='<div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:4px">'+tpl.name+'</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">'+tpl.desc+'</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:8px;padding:2px 9px">'+tpl.days.length+' days/wk</span>';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:8px;padding:2px 9px">~'+tpl.duration+' min</span>';
+  h+='</div>';
+  // Sessions list
+  h+='<div class="lbl" style="margin-bottom:8px">SESSIONS</div>';
+  var dayIdx=cl.day%tpl.days.length;
+  tpl.days.forEach(function(day,i){
+    var isCurrent=i===dayIdx;
+    h+='<div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;border:0.5px solid '+(isCurrent?'var(--acc-brd)':'var(--brd)')+';background:'+(isCurrent?'var(--acc-bg)':'var(--bg3)')+'">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center">';
+    h+='<div style="font-size:13px;font-weight:700;color:'+(isCurrent?'var(--acc)':'var(--tx)')+'">'+day.focus+'</div>';
+    if(isCurrent)h+='<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:1px 7px">NEXT UP</span>';
+    h+='</div>';
+    h+='<div class="lbl" style="margin-top:2px">'+day.label+' · '+day.exercises.length+' exercises</div>';
+    h+='</div>';
+  });
+  if(S.admin.active){
+    h+='<div style="border-top:0.5px solid var(--brd);margin:16px 0"></div>';
+    h+='<button class="btn btn-ghost btn-sm" onclick="retakeOB();closeSheet()">Retake Setup Questionnaire</button>';
+  }
+  h+='</div>';
+  openSheet(h,null);
 }
 
 function catLabel(c){var m={strength:'Strength',hypertrophy:'Hypertrophy',endurance:'Endurance',fatloss:'Fat Loss',foundation:'Foundation',sport:'Sport',rehab:'Rehab'};return m[c]||c;}
@@ -2377,30 +2418,11 @@ function catLabel(c){var m={strength:'Strength',hypertrophy:'Hypertrophy',endura
 function togglePgGroup(cat){
   var cl=C();if(!cl._pgOpen)cl._pgOpen={};
   cl._pgOpen[cat]=!cl._pgOpen[cat];sv();
-  var groupEl=document.querySelector('[data-pgcat="'+cat+'"]');
-  if(groupEl){
-    var isOpen=cl._pgOpen[cat];
-    var head=groupEl.querySelector('.group-head');
-    var body=groupEl.querySelector('.group-body');
-    if(head)head.classList.toggle('open',isOpen);
-    if(body)groupEl.removeChild(body);
-    if(isOpen){
-      var nb=document.createElement('div');nb.className='group-body';
-      var inCat=TPL.filter(function(t){return t.cat===cat;});
-      inCat.forEach(function(t){
-        var isActive=t.key===cl.tplKey;
-        var item=document.createElement('div');
-        item.className='prog-item'+(isActive?' active-prog':'');
-        var nameDiv='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+t.name+'</div>';
-        nameDiv+='<div class="lbl">'+t.days.length+' days/wk · '+t.duration+'min</div></div>';
-        var btn=isActive?'<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>':('<button class="btn btn-acc btn-pill" data-key="'+t.key+'" onclick="switchTPL(this.dataset.key)">Switch</button>');
-        item.innerHTML=nameDiv+btn;
-        nb.appendChild(item);
-      });
-      groupEl.appendChild(nb);
-    }
-    if(head){var arrow=head.querySelector('span:last-child');if(arrow)arrow.innerHTML=inCat.length+' <span style="font-size:14px">'+(isOpen?'▴':'▾')+'</span>';}
-  } else {draw();}
+  // Full redraw for simplicity — preserves scroll via scroll-position save
+  var screen=document.getElementById('screen');
+  var scrollPos=screen?screen.scrollTop:0;
+  draw();
+  if(screen)screen.scrollTop=scrollPos;
 }
 
 function switchTPL(key){
@@ -2413,6 +2435,7 @@ function retakeOB(){
     C().ob={done:false,step:0,ans:{}};sv();draw();
   }
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 // BUILD VIEW
