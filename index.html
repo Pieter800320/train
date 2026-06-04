@@ -86,7 +86,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .ex-row.active-ex{background:var(--acc-bg);border-color:var(--acc-brd);border-left:3px solid var(--acc)}
 .ex-row.done{background:var(--bg3);border-color:var(--brd);opacity:.6}
 .ex-name{font-size:13px;font-weight:600;color:var(--tx)}
-.ex-row.done .ex-name{color:var(--teal)}
+.ex-row.done .ex-name{color:var(--acc)}
 .ex-vol{font-size:11px;color:var(--mu);font-weight:500}
 .phase-head{font-size:8px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--mu);padding:10px 14px 4px}
 .pr-badge{font-size:9px;font-weight:700;color:var(--teal);background:var(--teal-bg);border:0.5px solid var(--teal-brd);border-radius:6px;padding:2px 7px;white-space:nowrap}
@@ -1731,18 +1731,18 @@ function todayV(){
       var isDone=S.wx&&S.wx.exDone&&S.wx.exDone[origIdx];
       var isActive=S.wx&&origIdx===activeExIdx&&!isDone;
       var vol=exEntry.vol||'';
-      var volStr=vol||(exEntry.reps>0?(exEntry.sets+'×'+exEntry.reps):'');
+      var volStr=vol?fmtSecs(parseVolToSecs(vol)):(exEntry.reps>0?(exEntry.sets+'×'+exEntry.reps):'');
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
       h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">';
       h+='<div style="flex:1">';
-      h+='<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+(isDone?'text-decoration:line-through':'')+'">';
+      h+='<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+'">';
       h+=(isDone?'✓ ':'')+(isActive?'▶ ':'')+exEntry.name+'</div>';
       if(exEntry.cue)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+exEntry.cue+'</div>';
       // Set progress if in session
       if(S.wx){
         var exSets=S.wx.sets.filter(function(s){return s.exIdx===origIdx;});
         var doneSets=exSets.filter(function(s){return s.done;}).length;
-        if(doneSets>0)h+='<div style="font-size:9px;color:var(--teal);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
+        if(doneSets>0)h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
       }
       h+='</div>';
       h+='<div style="display:flex;align-items:center;gap:6px">';
@@ -1756,7 +1756,7 @@ function todayV(){
   // Bottom actions
   h+='<div style="padding:14px">';
   if(S.wx){
-    h+='<button class="btn btn-teal" onclick="finishSession()">✓ Finish Session</button>';
+    h+='<button class="btn btn-acc" onclick="finishSession()">✓ Finish Session</button>';
   }
   h+='</div>';
   h+='<div style="height:20px"></div>';
@@ -1921,20 +1921,29 @@ function openExWindow(exIdx){
   // ── Timed exercise ──
   } else if(isTimed){
     var volSecs=parseVolToSecs(exEntry.vol);
+    if(wx._pendingTime===undefined||wx._lastExIdx!==exIdx){wx._pendingTime=volSecs;}
     var wxTimed=wx.timedEx;
     var timedRunning=wxTimed&&wxTimed.exIdx===exIdx&&wxTimed.running;
-    var timedRemaining=timedRunning?Math.max(0,Math.ceil((wxTimed.end-Date.now())/1000)):volSecs;
-    h+='<div style="text-align:center;padding:16px 0 24px">';
-    h+='<div id="ex-win-timer" style="font-size:72px;font-weight:900;letter-spacing:-2px;color:var(--acc);line-height:1">'+timedRemaining+'</div>';
-    h+='<div class="lbl" style="margin-top:6px">seconds</div>';
+    var timedRemaining=timedRunning?Math.max(0,Math.ceil((wxTimed.end-Date.now())/1000)):wx._pendingTime;
+    h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
+    h+='<div style="margin-bottom:16px">';
+    h+='<div class="lbl" style="margin-bottom:8px">DURATION</div>';
+    h+='<div style="display:flex;align-items:center;gap:0">';
+    h+='<button onclick="adjustVal(\'time\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-time" onclick="editVal(\'time\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer;min-width:80px">'+fmtSecs(wx._pendingTime)+'</div>';
+    h+='<button onclick="adjustVal(\'time\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div></div>';
+    h+='<div style="text-align:center;padding:8px 0 20px">';
+    h+='<div id="ex-win-timer" style="font-size:64px;font-weight:900;letter-spacing:-2px;color:var(--acc);line-height:1">'+fmtSecs(timedRemaining)+'</div>';
     h+='</div>';
     if(timedRunning){
-      h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="stopExTimer()">Stop</button>';
-      h+='<button class="btn btn-acc" onclick="logTimedSet('+exIdx+')">Done \u2713</button>';
+      h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+      h+='<button class="btn btn-ghost" style="flex:1" onclick="stopExTimer()">Stop</button>';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="logTimedSet('+exIdx+')">✓ Done</button>';
+      h+='</div>';
     } else {
-      h+='<button class="btn btn-acc" onclick="startExTimer('+exIdx+','+volSecs+')">Start Timer</button>';
+      h+='<button class="btn btn-acc" onclick="startExTimerPending('+exIdx+')">Start Timer</button>';
     }
-
   // ── Reps + weight exercise ──
   } else if(nextSet){
     // Divider
@@ -1980,6 +1989,12 @@ function adjustVal(field,delta){
     S.wx._pendingReps=Math.max(1,Math.round(((S.wx._pendingReps||10)+delta)*10)/10);
     var el=document.getElementById('val-reps');
     if(el)el.textContent=S.wx._pendingReps;
+  } else if(field==='time'){
+    var cur=S.wx._pendingTime||30;
+    var next=Math.max(5,Math.round(cur+delta));
+    S.wx._pendingTime=next;
+    var el=document.getElementById('val-time');
+    if(el)el.textContent=fmtSecs(next);
   } else {
     var cur=S.wx._pendingKg||0;
     var next=Math.max(0,Math.round((cur+delta)*10)/10);
@@ -1990,12 +2005,14 @@ function adjustVal(field,delta){
 }
 function editVal(field){
   if(!S.wx)return;
-  var cur=field==='reps'?S.wx._pendingReps:S.wx._pendingKg;
-  var input=prompt(field==='reps'?'Enter reps:':'Enter weight (kg, 0=BW):',cur===0&&field==='kg'?'0':cur);
+  var cur=field==='reps'?S.wx._pendingReps:field==='time'?S.wx._pendingTime:S.wx._pendingKg;
+  var prompt_text=field==='reps'?'Enter reps:':field==='time'?'Enter duration (seconds):':'Enter weight (kg, 0=BW):';
+  var input=prompt(prompt_text,cur);
   if(input===null)return;
   var val=parseFloat(input);
   if(isNaN(val)||val<0)return;
   if(field==='reps'){S.wx._pendingReps=Math.max(1,Math.round(val));var el=document.getElementById('val-reps');if(el)el.textContent=S.wx._pendingReps;}
+  else if(field==='time'){S.wx._pendingTime=Math.max(5,Math.round(val));var el=document.getElementById('val-time');if(el)el.textContent=fmtSecs(S.wx._pendingTime);}
   else{S.wx._pendingKg=val;var el=document.getElementById('val-kg');if(el)el.textContent=val===0?'BW':val+'kg';}
 }
 
@@ -2004,6 +2021,18 @@ function parseVolToSecs(vol){
   var m=vol.match(/(\d+)m/);if(m)return parseInt(m[1])*60;
   var s=vol.match(/(\d+)s/);if(s)return parseInt(s[1]);
   return 30;
+}
+function fmtSecs(s){
+  if(!s&&s!==0)return '0s';
+  s=Math.round(s);
+  if(s<60)return s+'s';
+  var m=Math.floor(s/60);var r=s%60;
+  return r===0?m+'m':m+'m '+r+'s';
+}
+function startExTimerPending(exIdx){
+  if(!S.wx)return;
+  var t=S.wx._pendingTime||parseVolToSecs(S.wx.exercises[exIdx].vol);
+  startExTimer(exIdx,t);
 }
 function isExDone(exIdx){
   if(!S.wx)return false;
@@ -2075,7 +2104,7 @@ function startExTimer(exIdx,totalSecs){
   _exTimerTick=setInterval(function(){
     var wx=S.wx;if(!wx||!wx.timedEx||!wx.timedEx.running){clearInterval(_exTimerTick);_exTimerTick=null;return;}
     var rem=Math.max(0,Math.ceil((wx.timedEx.end-Date.now())/1000));
-    var el=document.getElementById('ex-win-timer');if(el)el.textContent=rem;
+    var el=document.getElementById('ex-win-timer');if(el)el.textContent=fmtSecs(rem);
     if(rem<=0){
       wx.timedEx.running=false;sv();
       clearInterval(_exTimerTick);_exTimerTick=null;
@@ -2150,9 +2179,11 @@ function renderRestCircle(rem,total){
         ' transform="rotate(-90 '+(SIZE/2)+' '+(SIZE/2)+')"'+
         ' style="transition:stroke-dashoffset .5s linear"/>'+
     '</svg>'+
-    '<div id="rest-circle-secs" style="position:absolute;top:0;left:0;width:100%;height:100%;'+
-      'display:flex;align-items:center;justify-content:center;'+
-      'font-size:18px;font-weight:900;color:var(--acc);pointer-events:none">'+rem+'</div>';
+    '<div style="position:absolute;top:0;left:0;width:100%;height:100%;'+
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;pointer-events:none">'+
+      '<div style="font-size:7px;font-weight:800;letter-spacing:1px;color:var(--acc);opacity:.7;margin-bottom:-2px">REST</div>'+
+      '<div id="rest-circle-secs" style="font-size:17px;font-weight:900;color:var(--acc)">'+rem+'</div>'+
+      '</div>';
 
   // Tap to skip
   el.addEventListener('click',function(e){
