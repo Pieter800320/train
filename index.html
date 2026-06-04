@@ -89,7 +89,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .ex-row.done .ex-name{color:var(--acc)}
 .ex-vol{font-size:11px;color:var(--mu);font-weight:500}
 .phase-head{font-size:8px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--mu);padding:10px 14px 4px}
-.pr-badge{font-size:9px;font-weight:700;color:var(--teal);background:var(--teal-bg);border:0.5px solid var(--teal-brd);border-radius:6px;padding:2px 7px;white-space:nowrap}
+.pr-badge{font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 7px;white-space:nowrap}
 .set-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border:0.5px solid var(--brd);border-radius:10px;margin:0 14px 3px}
 .set-row.set-done{background:var(--teal-bg);border-color:var(--teal-brd)}
 .set-row.set-active{background:var(--acc-bg);border-color:var(--acc-brd)}
@@ -1193,9 +1193,13 @@ function finishSession(){
   if(!S.wx)return;
   var cl=C();
   var banner=planBannerData();
-  cl.hist.push({date:Date.now(),tplKey:S.wx.tplKey,dayIdx:S.wx.dayIdx,label:S.wx.dayLabel,focus:S.wx.focus,sets:S.wx.sets.length,duration:Math.round((Date.now()-S.wx.startTime)/60000),plan:banner?banner.weekLabel:null});
-  cl.day=(cl.day||0)+1;
-  if(cl.hist.length%7===0&&cl.plan)advancePlanWeek();
+  var doneSets=S.wx.sets.filter(function(s){return s.done;}).length;
+  // Only log to history if at least one set was actually completed
+  if(doneSets>0){
+    cl.hist.push({date:Date.now(),tplKey:S.wx.tplKey,dayIdx:S.wx.dayIdx,label:S.wx.dayLabel,focus:S.wx.focus,sets:doneSets,duration:Math.max(1,Math.round((Date.now()-S.wx.startTime)/60000)),plan:banner?banner.weekLabel:null});
+    cl.day=(cl.day||0)+1;
+    if(cl.hist.length%7===0&&cl.plan)advancePlanWeek();
+  }
   S.wx=null;
   sv();S.tab='home';draw();
 }
@@ -1544,10 +1548,10 @@ function openAvatarSheet(){
   h+='<div class="lbl" style="margin-top:2px">'+(cl.tplKey?getTPL(cl.tplKey).name:'No programme set')+'</div></div>';
   h+='</div>';
   h+='<div onclick="openJournalView()" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd)">';
-  h+='<div style="width:38px;height:38px;border-radius:10px;background:var(--teal-bg);border:0.5px solid var(--teal-brd);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
-  h+='<i class="ti ti-book" style="color:var(--teal);font-size:20px"></i></div>';
+  h+='<div style="width:38px;height:38px;border-radius:10px;background:var(--acc-bg);border:0.5px solid var(--acc-brd);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+  h+='<i class="ti ti-book" style="color:var(--acc);font-size:20px"></i></div>';
   h+='<div><div style="font-size:14px;font-weight:700;color:var(--tx)">Journal</div>';
-  h+='<div class="lbl" style="margin-top:1px">Session history &amp; personal records</div></div>';
+  h+='<div class="lbl" style="margin-top:1px">Session history &amp; personal bests</div></div>';
   h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px;margin-left:auto"></i>';
   h+='</div></div>';
   openSheet(h,'Profile');
@@ -1634,7 +1638,7 @@ function openJournalView(){
   var prCount=Object.keys(cl.pr||{}).length;
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px">';
   h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--acc)">'+total+'</div><div class="lbl">Total sessions</div></div>';
-  h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--teal)">'+prCount+'</div><div class="lbl">Personal records</div></div>';
+  h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--acc)">'+prCount+'</div><div class="lbl">Personal Bests</div></div>';
   h+='</div>';
 
   // PR table
@@ -1970,7 +1974,7 @@ function openExWindow(exIdx){
     // Done + PB buttons
     h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
     h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+globalIdx+')">Done \u2713</button>';
-    h+='<button class="btn btn-acc btn-sm" style="padding:0;width:52px;height:52px;border-radius:10px;font-size:13px;font-weight:800;flex-shrink:0" onclick="logPB('+exIdx+','+globalIdx+')">\u2605 PB</button>';
+    h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+globalIdx+')">\u2605 PB</button>';
     h+='</div>';
   }
 
@@ -2092,11 +2096,19 @@ function logTimedSet(exIdx){
 
 function logPB(exIdx,globalIdx){
   var wx=S.wx;if(!wx)return;
-  var set=wx.sets[globalIdx];if(!set)return;
   var kg=wx._pendingKg!==undefined?wx._pendingKg:0;
-  var reps=wx._pendingReps!==undefined?wx._pendingReps:set.reps;
+  var reps=wx._pendingReps!==undefined?wx._pendingReps:(wx.sets[globalIdx]?wx.sets[globalIdx].reps:0);
+  // Store PB — do NOT log the set, do NOT close the sheet
   C().pr[wx.exercises[exIdx].name]={kg:kg,reps:reps,date:Date.now()};
-  logSetFromWindow(globalIdx);
+  sv();
+  // Flash the button to "Logged!" for 2 seconds
+  var btn=document.querySelector('[onclick*="logPB('+exIdx+','+globalIdx+')"]');
+  if(btn){
+    var orig=btn.innerHTML;
+    btn.innerHTML='✓ Logged!';
+    btn.disabled=true;
+    setTimeout(function(){btn.innerHTML=orig;btn.disabled=false;},2000);
+  }
 }
 
 // ─── Timed exercise tick ───
