@@ -1,4 +1,4 @@
-var CACHE = 'falkenburg-v8';
+var CACHE = 'falkenburg-v10';
 var ASSETS = [
   '/train/',
   '/train/index.html',
@@ -32,17 +32,31 @@ self.addEventListener('activate', function(e) {
 
 self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.open(CACHE).then(function(cache) {
-      return cache.match(e.request).then(function(cached) {
-        var networkFetch = fetch(e.request).then(function(response) {
-          if (response && response.status === 200 && response.type === 'basic') {
-            cache.put(e.request, response.clone());
+  var url = e.request.url;
+  // Network-first for HTML — always get the freshest index.html
+  var isHTML = url.endsWith('/train/') || url.endsWith('index.html') || url.endsWith('/train');
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request).then(function(response) {
+        if (response && response.status === 200) {
+          caches.open(CACHE).then(function(c) { c.put(e.request, response.clone()); });
+        }
+        return response;
+      }).catch(function() {
+        return caches.match(e.request);
+      })
+    );
+  } else {
+    // Cache-first for all other assets (icons, manifest)
+    e.respondWith(
+      caches.match(e.request).then(function(cached) {
+        return cached || fetch(e.request).then(function(response) {
+          if (response && response.status === 200) {
+            caches.open(CACHE).then(function(c) { c.put(e.request, response.clone()); });
           }
           return response;
-        }).catch(function() { return cached; });
-        return cached || networkFetch;
-      });
-    })
-  );
+        });
+      })
+    );
+  }
 });
