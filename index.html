@@ -1450,15 +1450,8 @@ function homeV(){
   var inProgress=!!S.wx;
   h+='<div style="padding:14px 16px">';
   h+='<div class="card card-acc" style="padding:18px;cursor:pointer;border-radius:16px" onclick="S.tab=\'today\';sv();draw()">';
-  h+='<div class="lbl lbl-acc" style="font-size:8px;letter-spacing:1.4px;margin-bottom:8px">'+tpl.name.toUpperCase()+' · '+day.label.toUpperCase()+'</div>';
-  h+='<div style="font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.1;color:var(--tx);margin-bottom:6px">'+day.focus+'</div>';
-  h+='<div style="font-size:12px;color:var(--tx2);margin-bottom:12px">'+day.label+' · ~'+tpl.duration+' min</div>';
-  if(banner){
-    h+='<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.2);border:0.5px solid var(--acc-brd);border-radius:20px;padding:4px 4px 4px 10px;margin-bottom:14px">';
-    h+='<span style="font-size:10px;font-weight:600;color:var(--tx2)">'+banner.planName+' · Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
-    h+='<span style="background:var(--acc-bg);border:1px solid var(--acc-brd);border-radius:14px;padding:2px 8px;font-size:9px;font-weight:800;color:var(--acc)">RPE '+banner.rpe+'</span>';
-    h+='</div>';
-  }
+  h+='<div style="font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.1;color:var(--tx);margin-bottom:8px">'+day.focus+'</div>';
+  h+='<div style="font-size:16px;font-weight:600;color:var(--tx2);margin-bottom:14px">'+day.label+' · ~'+tpl.duration+' min</div>';
   if(inProgress){
     h+='<button class="btn btn-acc" style="font-size:14px;font-weight:700" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Continue Session →</button>';
   } else {
@@ -1828,6 +1821,7 @@ function openPlanSheet(){
     if(wk.tip)h+='<div style="font-size:11px;color:var(--mu);margin-top:6px;font-style:italic">'+wk.tip+'</div>';
     h+='</div>';
   });
+  h+='</div>';
   h+='</div>';
   openSheet(h,plan.name);
 }
@@ -2256,25 +2250,10 @@ function programsV(){
   h+='<div class="h1" style="margin-bottom:4px">Programs</div>';
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Training plans &amp; progression</div>';
 
-  // ── Active pills row ──
-  h+='<div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;row-gap:6px;margin-bottom:14px">';
-  h+='<div onclick="openActiveProgramSheet()" class="plan-pill">';
-  h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">'+tpl.name+'</span>';
-  h+='<div class="plan-pill-rpe">Active Training Plan</div>';
-  h+='<span style="font-size:9px;color:var(--mu);padding:0 4px">▾</span>';
-  h+='</div>';
-  if(banner){
-    h+='<div onclick="openPlanSheet()" class="plan-pill">';
-    h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">'+banner.planName+' · Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
-    h+='<div class="plan-pill-rpe">RPE '+banner.rpe+'</div>';
-    h+='<span style="font-size:9px;color:var(--mu);padding:0 4px">▾</span>';
-    h+='</div>';
-  }
-  h+='</div>';
   h+='</div>';
 
   // ── TRAINING PROGRAMMES ──
-  h+='<div class="section-head">TRAINING PROGRAMMES</div>';
+  h+='<div class="section-head">PROGRAMS</div>';
   h+='<div style="padding:0 14px;margin-bottom:14px">';
   var catColors={strength:'var(--acc)',hypertrophy:'var(--acc)',endurance:'var(--acc)',fatloss:'var(--acc)',foundation:'var(--acc)',sport:'var(--acc)',rehab:'var(--acc)'};
   var cats=['strength','hypertrophy','endurance','fatloss','foundation','sport','rehab'];
@@ -2294,39 +2273,34 @@ function programsV(){
       h+='<div class="group-body">';
       inCat.forEach(function(t){
         var isActive=t.key===cl.tplKey;
-        h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
+        h+='<div class="prog-item'+(isActive?' active-prog':'')+'" data-key="'+t.key+'" onclick="openProgPreview(this.dataset.key)" style="cursor:pointer">';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+t.name+'</div>';
         h+='<div class="lbl">'+t.days.length+' days/wk · '+t.duration+'min</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{h+='<button class="btn btn-acc btn-pill" data-key="'+t.key+'" onclick="switchTPL(this.dataset.key)">Select</button>';}
+        else{h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px"></i>';}
         h+='</div>';
       });
       h+='</div>';
     }
     h+='</div>';
   });
-  // My Programmes (custom) — shown as a group if any exist
+  // My Programs (custom) — shown as a group if any exist
   var customProgs=cl.customPrograms||[];
   if(customProgs.length>0){
     var isOpen=cl._pgOpen&&cl._pgOpen['my_progs'];
     h+='<div data-pgcat="my_progs" style="margin-bottom:3px">';
     h+='<div class="group-head'+(isOpen?' open':'')+'" data-cat="my_progs" onclick="togglePgGroup(this.dataset.cat)">';
-    h+='<span style="font-size:13px;font-weight:700;color:var(--acc)">My Programmes</span>';
+    h+='<span style="font-size:13px;font-weight:700;color:var(--acc)">My Programs</span>';
     h+='<span style="color:var(--mu);font-size:12px">'+customProgs.length+' <span style="font-size:13px">'+(isOpen?'▴':'▾')+'</span></span>';
     h+='</div>';
     if(isOpen){
       h+='<div class="group-body">';
       customProgs.forEach(function(cp){
         var isActive=cp.key===cl.tplKey;
-        h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
+        h+='<div class="prog-item'+(isActive?' active-prog':'')+'" data-key="'+cp.key+'" onclick="openProgPreview(this.dataset.key)" style="cursor:pointer">';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+cp.name+'</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{
-          h+='<div style="display:flex;gap:4px">';
-          h+='<button class="btn btn-acc btn-pill" data-key="'+cp.key+'" onclick="switchTPL(this.dataset.key)">Select</button>';
-          h+='<button class="btn btn-ghost btn-pill" data-key="'+cp.key+'" onclick="deleteCustomProg(this.dataset.key)" style="padding:5px 8px">✕</button>';
-          h+='</div>';
-        }
+        else{h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px"></i>';}
         h+='</div>';
       });
       h+='</div>';
@@ -2358,11 +2332,11 @@ function programsV(){
       h+='<div class="group-body">';
       grpPlans.forEach(function(p){
         var isActive=cl.plan&&cl.plan.key===p.key;
-        h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
+        h+='<div class="prog-item'+(isActive?' active-prog':'')+'" data-key="'+p.key+'" onclick="openPlanPreview(this.dataset.key)" style="cursor:pointer">';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+p.name+'</div>';
         h+='<div class="lbl">'+p.weeks.length+' wks'+(p.cyclic?' · cyclic':'')+'</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{h+='<button class="btn btn-acc btn-pill" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Select</button>';}
+        else{h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px"></i>';}
         h+='</div>';
       });
       h+='</div>';
@@ -2384,16 +2358,11 @@ function programsV(){
       h+='<div class="group-body">';
       customPlans.forEach(function(p){
         var isActive=cl.plan&&cl.plan.key===p.key;
-        h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
+        h+='<div class="prog-item'+(isActive?' active-prog':'')+'" data-key="'+p.key+'" onclick="openPlanPreview(this.dataset.key)" style="cursor:pointer">';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+p.name+'</div>';
         h+='<div class="lbl">'+p.weeks.length+' wks'+(p.cyclic?' · cyclic':'')+'</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{
-          h+='<div style="display:flex;gap:4px">';
-          h+='<button class="btn btn-acc btn-pill" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Select</button>';
-          h+='<button class="btn btn-ghost btn-pill" data-key="'+p.key+'" onclick="deleteCustomPlan(this.dataset.key)" style="padding:5px 8px">✕</button>';
-          h+='</div>';
-        }
+        else{h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px"></i>';}
         h+='</div>';
       });
       h+='</div>';
@@ -2406,6 +2375,122 @@ function programsV(){
   return h;
 }
 
+
+// ── Plan preview sheet ──
+function openPlanPreview(key){
+  var cl=C();
+  var plan=null;var isCustom=false;
+  PLANS.forEach(function(p){if(p.key===key)plan=p;});
+  if(!plan){(cl.customPlans||[]).forEach(function(p){if(p.key===key){plan=p;isCustom=true;}});}
+  if(!plan)return;
+  var isActive=cl.plan&&cl.plan.key===key;
+  var h='<div style="padding:0 20px 30px">';
+
+  // Header
+  h+='<div style="margin-bottom:16px">';
+  h+='<div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:4px">'+plan.name+'</div>';
+  if(plan.desc)h+='<div style="font-size:12px;color:var(--mu);margin-bottom:8px">'+plan.desc+'</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 8px">'+plan.weeks.length+' weeks</span>';
+  if(plan.cyclic)h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:2px 8px">Cyclic</span>';
+  h+='</div></div>';
+
+  // Week-by-week breakdown
+  plan.weeks.forEach(function(wk,wi){
+    var isDeload=wk.theme==='deload';
+    h+='<div style="padding:12px;border-radius:10px;margin-bottom:6px;border:0.5px solid var(--brd);background:var(--bg3)">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+    h+='<div style="font-size:13px;font-weight:700;color:var(--tx)">Week '+(wi+1)+(wk.label?' · '+wk.label:'')+'</div>';
+    if(isDeload)h+='<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:1px 7px">DELOAD</span>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:1px 7px">RPE '+wk.rpe+'</span>';
+    h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg2);border:0.5px solid var(--brd);border-radius:6px;padding:1px 7px">'+wk.rir+' RIR</span>';
+    h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg2);border:0.5px solid var(--brd);border-radius:6px;padding:1px 7px">'+Math.round((wk.volMod||1)*100)+'% vol</span>';
+    if(wk.defaultRest)h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg2);border:0.5px solid var(--brd);border-radius:6px;padding:1px 7px">'+wk.defaultRest+'s rest</span>';
+    h+='</div>';
+    if(wk.tip)h+='<div style="font-size:11px;color:var(--mu);margin-top:6px;font-style:italic">'+wk.tip+'</div>';
+    h+='</div>';
+  });
+
+  // Action
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 0 0">';
+  if(isActive){
+    h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:12px 0">✓ Currently active</div>';
+  } else {
+    h+='<button class="btn btn-acc" data-key="'+key+'" onclick="attachPlan(this.dataset.key);sv();draw();closeSheet()">Select this Plan</button>';
+    if(isCustom){
+      h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomPlan(this.dataset.key);closeSheet()">✕ Delete Plan</button>';
+    }
+  }
+  h+='</div>';
+  h+='</div>';
+  openSheet(h,null);
+}
+
+// ── Programme preview sheet ──
+function openProgPreview(key){
+  var cl=C();
+  // Find in TPL or customPrograms
+  var tpl=getTPL(key);
+  if(!tpl){
+    var customs=cl.customPrograms||[];
+    for(var i=0;i<customs.length;i++){if(customs[i].key===key){tpl=customs[i].tpl||customs[i];break;}}
+  }
+  if(!tpl)return;
+  var isActive=cl.tplKey===key;
+  var isCustom=!(function(){for(var i=0;i<TPL.length;i++)if(TPL[i].key===key)return true;return false;})();
+  var h='<div style="padding:0 20px 30px">';
+
+  // Header
+  h+='<div style="margin-bottom:16px">';
+  h+='<div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:4px">'+tpl.name+'</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 8px">'+tpl.days.length+' days/wk</span>';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:2px 8px">~'+tpl.duration+' min</span>';
+  if(tpl.desc)h+='<span style="font-size:10px;color:var(--mu);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:2px 8px">'+tpl.desc+'</span>';
+  h+='</div></div>';
+
+  // Sessions
+  var phases=['warmup','strength','accessory','core','cardio','mobility','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+  var days=tpl.days||[];
+  days.forEach(function(day,di){
+    h+='<div style="margin-bottom:16px">';
+    h+='<div style="font-size:14px;font-weight:800;color:var(--tx);margin-bottom:2px">'+day.focus+'</div>';
+    h+='<div class="lbl" style="margin-bottom:8px">'+day.label+' · '+day.exercises.length+' exercises</div>';
+    phases.forEach(function(ph){
+      var exs=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
+      if(exs.length===0)return;
+      h+='<div class="lbl" style="margin-bottom:4px;margin-top:6px">'+phaseLabels[ph]+'</div>';
+      exs.forEach(function(ex){
+        var vol=ex.vol?fmtSecs(parseVolToSecs(ex.vol)):(ex.reps>0?ex.sets+'×'+ex.reps:'');
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:8px;margin-bottom:2px">';
+        h+='<span style="font-size:12px;font-weight:600;color:var(--tx)">'+ex.name+'</span>';
+        h+='<div style="display:flex;gap:6px;align-items:center">';
+        h+='<span style="font-size:11px;color:var(--tx2)">'+vol+'</span>';
+        if(ex.rest)h+='<span style="font-size:10px;color:var(--mu)">'+ex.rest+'s</span>';
+        h+='</div></div>';
+      });
+    });
+    h+='</div>';
+    if(di<days.length-1)h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
+  });
+
+  // Action buttons
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 0 0">';
+  if(isActive){
+    h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:12px 0">✓ Currently active</div>';
+  } else {
+    h+='<button class="btn btn-acc" data-key="'+key+'" onclick="switchTPL(this.dataset.key);closeSheet()">Select this Program</button>';
+    if(isCustom){
+      h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key);closeSheet()">✕ Delete Program</button>';
+    }
+  }
+  h+='</div>';
+  h+='</div>';
+  openSheet(h,null);
+}
 
 // ── Active Training Plan sheet ──
 function openActiveProgramSheet(){
