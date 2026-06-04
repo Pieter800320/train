@@ -188,7 +188,7 @@ function getEx(n){return EX_MAP[exKey(n)]||null;}
 // DEFAULT STATE
 // ═══════════════════════════════════════════════════════════════
 var DEFAULT_CLIENT={name:'',initials:'',colour:'#D4691E',ob:{done:false,step:0,ans:{}},tplKey:'str_b4',day:0,plan:null,hist:[],pr:{},customPrograms:[],customPlans:[],_pgOpen:{}};
-var DEFAULT_S={activeClient:'default',clients:{default:JSON.parse(JSON.stringify(DEFAULT_CLIENT))},buildMode:'program',customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},wx:null,timer:{mode:'tabata',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:40,tabRest:20,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true},tab:'today',colourTheme:'amber',theme:'dark',admin:{active:false,pin:'',set:false},notice:{title:'Welcome to Falkenburg',body:'Your training starts here. Go to Programs to pick your first programme.',active:true}};
+var DEFAULT_S={activeClient:'default',clients:{default:JSON.parse(JSON.stringify(DEFAULT_CLIENT))},buildMode:'program',customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},wx:null,timer:{mode:'tabata',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:40,tabRest:20,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true},tab:'today',colourTheme:'amber',_browserOpen:{},theme:'dark',admin:{active:false,pin:'',set:false},notice:{title:'Welcome to Falkenburg',body:'Your training starts here. Go to Programs to pick your first programme.',active:true}};
 var S;
 function sv(){try{localStorage.setItem('falken_v1',JSON.stringify(S));}catch(e){}}
 function ld(){
@@ -2742,8 +2742,12 @@ function buildProgramV(){
         h+='</div>'
         // Arrow buttons + config + delete
         h+='<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
-        if(ei>0)h+='<button onclick="moveBuildEx('+di+','+ei+',-1)" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px 4px">↑</button>';
-        if(ei<day.exercises.length-1)h+='<button onclick="moveBuildEx('+di+','+ei+',1)" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px 4px">↓</button>';
+        h+='<div style="display:flex;flex-direction:column;gap:2px;margin-right:2px">';
+        if(ei>0)h+='<button onclick="moveBuildEx('+di+','+ei+',-1)" style="width:32px;height:28px;border-radius:6px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">↑</button>';
+        else h+='<span style="width:32px;height:28px;display:block"></span>';
+        if(ei<day.exercises.length-1)h+='<button onclick="moveBuildEx('+di+','+ei+',1)" style="width:32px;height:28px;border-radius:6px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">↓</button>';
+        else h+='<span style="width:32px;height:28px;display:block"></span>';
+        h+='</div>';
         h+='<button onclick="openExConfig('+di+','+ei+')" style="background:none;border:none;color:var(--acc);cursor:pointer;font-size:13px;padding:2px 6px;font-weight:700">Edit</button>'
         h+='<button onclick="removeBuildEx('+di+','+ei+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:2px 4px">✕</button>'
         h+='</div></div></div>'
@@ -2899,25 +2903,61 @@ function removeBuildEx(di,ei){S.customEdit.days[di].exercises.splice(ei,1);sv();
 function openExPicker(di){
   S.customEdit.activeDay=di;sv();
   var h='<div style="padding:0 20px 20px">';
-  h+='<input type="text" id="ex-search" placeholder="Search exercises…" oninput="filterExPicker()" style="margin-bottom:12px">';
-  h+='<div id="ex-results">';
-  EX.slice(0,30).forEach(function(e){
-    h+='<div class="prog-item" data-name="'+e.name+'" onclick="addBuildEx(this.dataset.name)">';
-    h+='<div><div style="font-size:13px;font-weight:600">'+e.name+'</div>';
-    h+='<div class="lbl">'+e.patterns.join(' · ')+'</div></div>';
-    h+='<button class="btn btn-acc btn-pill">Add</button></div>';
-  });
-  h+='</div></div>';
+  h+='<input type="text" id="ex-search" placeholder="Type to search exercises…" oninput="filterExPicker()" style="margin-bottom:8px" autofocus>';
+  h+='<button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:12px" onclick="openExBrowser()">Browse by movement pattern ›</button>';
+  h+='<div id="ex-results"><div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">Start typing to search…</div></div>';
+  h+='</div>';
   openSheet(h,'Add Exercise');
 }
 function filterExPicker(){
-  var q=(document.getElementById('ex-search')||{}).value||'';q=q.toLowerCase();
-  var results=EX.filter(function(e){return e.name.toLowerCase().indexOf(q)>=0||(e.tags||[]).join(' ').indexOf(q)>=0;}).slice(0,30);
+  var q=(document.getElementById('ex-search')||{}).value||'';
   var el=document.getElementById('ex-results');if(!el)return;
+  if(q.trim().length<2){
+    el.innerHTML='<div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">Start typing to search…</div>';
+    return;
+  }
+  q=q.toLowerCase();
+  var results=EX.filter(function(e){return e.name.toLowerCase().indexOf(q)>=0||(e.tags||[]).join(' ').indexOf(q)>=0;}).slice(0,40);
+  if(results.length===0){el.innerHTML='<div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">No exercises found</div>';return;}
   el.innerHTML=results.map(function(e){
     return '<div class="prog-item" data-name="'+e.name+'" onclick="addBuildEx(this.dataset.name)"><div><div style="font-size:13px;font-weight:600">'+e.name+'</div><div class="lbl">'+e.patterns.join(' · ')+'</div></div><button class="btn btn-acc btn-pill">Add</button></div>';
   }).join('');
 }
+function openExBrowser(){
+  var patterns=['squat','hinge','push','pull','lunge','carry','core','rotation','explosive','conditioning','locomotion'];
+  var patternLabels={squat:'Squat',hinge:'Hinge',push:'Push',pull:'Pull',lunge:'Lunge',
+    carry:'Carry',core:'Core',rotation:'Rotation',explosive:'Explosive',
+    conditioning:'Conditioning',locomotion:'Locomotion'};
+  var di=S.customEdit.activeDay;
+  var h='<div style="padding:0 20px 30px">';
+  patterns.forEach(function(pat){
+    var exs=EX.filter(function(e){return e.patterns&&e.patterns.indexOf(pat)>=0;});
+    if(exs.length===0)return;
+    var isOpen=S._browserOpen&&S._browserOpen[pat];
+    h+='<div style="margin-bottom:3px">';
+    h+='<div class="group-head'+(isOpen?' open':'')+'" data-pat="'+pat+'" onclick="toggleExBrowserGroup(this.dataset.pat)" style="font-size:13px;font-weight:700;color:var(--acc)">'+patternLabels[pat]+'<span style="color:var(--mu);font-size:12px;float:right">'+exs.length+' '+(isOpen?'▴':'▾')+'</span></div>';
+    if(isOpen){
+      h+='<div class="group-body">';
+      exs.forEach(function(e){
+        h+='<div class="prog-item" data-name="'+e.name+'" onclick="addBuildEx(this.dataset.name)">';
+        h+='<div><div style="font-size:13px;font-weight:600">'+e.name+'</div></div>';
+        h+='<button class="btn btn-acc btn-pill">Add</button></div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  h+='</div>';
+  openSheet(h,'Browse Exercises');
+}
+function toggleExBrowserGroup(pat){
+  if(!S._browserOpen)S._browserOpen={};
+  S._browserOpen[pat]=!S._browserOpen[pat];
+  // Redraw sheet in place
+  var di=S.customEdit.activeDay;
+  openExBrowser();
+}
+
 function addBuildEx(name){
   var di=S.customEdit.activeDay;if(di===null||di===undefined)return;
   var defaultEx=EX_MAP[exKey(name)]||{};
@@ -2992,7 +3032,7 @@ function buildPlanV(){
       // Label
       h+='<input type="text" value="'+wk.label+'" placeholder="Week label e.g. Build" oninput="S.planEdit.weeks['+wi+'].label=this.value;sv()" style="margin-bottom:10px;font-size:12px">';
       // RPE / RIR / VOL / REST row
-      h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">';
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
       [
         {label:'RPE',key:'rpe',min:1,max:10,step:1},
         {label:'RIR',key:'rir',min:0,max:5,step:1},
@@ -3001,14 +3041,14 @@ function buildPlanV(){
       ].forEach(function(f){
         var val=f.scale?Math.round((wk[f.key]||1)*f.scale):(wk[f.key]||0);
         var suffix=f.key==='defaultRest'?'s':f.key==='volMod'?'%':'';
-        h+='<div style="text-align:center">';
-        h+='<div class="lbl" style="margin-bottom:4px">'+f.label+'</div>';
+        h+='<div>';
+        h+='<div class="lbl" style="margin-bottom:6px">'+f.label+'</div>';
         h+='<div style="display:flex;align-items:center">';
         h+='<button onclick="adjPlanWeek('+wi+',\''+f.key+'\','+(-f.step)+','+f.min+','+f.max+')"'
-          +' style="width:28px;height:32px;border-radius:6px 0 0 6px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
-        h+='<div id="pw-'+wi+'-'+f.key+'" style="flex:1;height:32px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--acc)">'+val+suffix+'</div>';
+          +' style="width:40px;height:40px;border-radius:8px 0 0 8px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button>';
+        h+='<div id="pw-'+wi+'-'+f.key+'" style="flex:1;height:40px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--acc)">'+val+suffix+'</div>';
         h+='<button onclick="adjPlanWeek('+wi+',\''+f.key+'\','+f.step+','+f.min+','+f.max+')"'
-          +' style="width:28px;height:32px;border-radius:0 6px 6px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
+          +' style="width:40px;height:40px;border-radius:0 8px 8px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>';
         h+='</div></div>';
       });
       h+='</div>';
@@ -3034,6 +3074,16 @@ function adjPlanWeek(wi,key,delta,min,max){
     wk[key]=Math.max(min,Math.min(max,(wk[key]||0)+delta));
     var suffix=key==='defaultRest'?'s':'';
     var el=document.getElementById('pw-'+wi+'-'+key);if(el)el.textContent=wk[key]+suffix;
+    // Sync RPE ↔ RIR: RIR = 10 - RPE
+    if(key==='rpe'){
+      wk.rir=Math.max(0,Math.min(5,10-wk.rpe));
+      var rirEl=document.getElementById('pw-'+wi+'-rir');
+      if(rirEl)rirEl.textContent=wk.rir;
+    } else if(key==='rir'){
+      wk.rpe=Math.max(1,Math.min(10,10-wk.rir));
+      var rpeEl=document.getElementById('pw-'+wi+'-rpe');
+      if(rpeEl)rpeEl.textContent=wk.rpe;
+    }
   }
   sv();
 }
