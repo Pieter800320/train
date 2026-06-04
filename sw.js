@@ -1,4 +1,4 @@
-var CACHE = 'falkenburg-v3';
+var CACHE = 'falkenburg-v4';
 var ASSETS = [
   '/train/',
   '/train/index.html',
