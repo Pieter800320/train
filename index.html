@@ -1499,7 +1499,7 @@ function homeV(){
       h+='<div style="display:flex;align-items:center;justify-content:space-between'+(i>0?';border-top:0.5px solid var(--brd);padding-top:8px;margin-top:8px':'')+'">';
       h+='<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+s.focus+'</div>';
       h+='<div class="lbl" style="margin-top:1px">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+'</div></div>';
-      h+='<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:var(--teal)">'+s.duration+' min</div>';
+      h+='<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:var(--acc)">'+s.duration+' min</div>';
       h+='<div class="lbl">'+s.sets+' sets</div></div>';
       h+='</div>';
     });
@@ -1643,7 +1643,7 @@ function openJournalView(){
       h+='<div class="lbl">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})+'</div>';
       if(s.plan)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+s.plan+'</div>';
       h+='</div>';
-      h+='<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--teal)">'+s.duration+'min</div>';
+      h+='<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--acc)">'+s.duration+'min</div>';
       h+='<div class="lbl">'+s.sets+' sets</div></div>';
       h+='</div>';
     });
