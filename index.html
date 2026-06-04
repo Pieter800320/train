@@ -1850,158 +1850,153 @@ function selectSession(idx){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// EXERCISE WINDOW — opens as bottom sheet when exercise row tapped
+// EXERCISE WINDOW
 // ═══════════════════════════════════════════════════════════════
-var _exWinTick=null;
 
 function openExWindow(exIdx){
-  if(!S.wx){
-    // Auto-start session if not started
-    startSession();
-  }
+  if(!S.wx) startSession();
   var wx=S.wx;
   var exEntry=wx.exercises[exIdx];
-  var isTimed=!!exEntry.vol&&exEntry.reps===0;
-  var restActive=wx.restActive&&wx.restEnd>Date.now()&&wx.waitingFor===exIdx;
+  if(!exEntry) return;
+  var isTimed=!!exEntry.vol&&(!exEntry.reps||exEntry.reps===0);
 
   // Find sets for this exercise
   var exSets=wx.sets.filter(function(s){return s.exIdx===exIdx;});
   var doneSets=exSets.filter(function(s){return s.done;}).length;
-  var allDone=doneSets===exSets.length;
+  var totalSets=exSets.length;
+  var nextSet=exSets.find(function(s){return!s.done;});
+  var globalIdx=nextSet?wx.sets.indexOf(nextSet):-1;
+  var allDone=doneSets===totalSets;
+
+  // Pre-fill last used weight
+  var defaultKg=0;
+  for(var pi=wx.sets.length-1;pi>=0;pi--){
+    if(wx.sets[pi].exIdx===exIdx&&wx.sets[pi].done&&wx.sets[pi].kg>0){defaultKg=wx.sets[pi].kg;break;}
+  }
+  // Default reps from set data
+  var defaultReps=nextSet?nextSet.reps||10:10;
+
+  // Init pending values
+  if(wx._pendingReps===undefined||wx._lastExIdx!==exIdx){wx._pendingReps=defaultReps;}
+  if(wx._pendingKg===undefined||wx._lastExIdx!==exIdx){wx._pendingKg=defaultKg;}
+  wx._lastExIdx=exIdx;
 
   var ph=exEntry.ph||'strength';
-  var phColors={strength:'var(--acc)',warmup:'var(--mu)',accessory:'var(--teal)',core:'var(--teal)',cardio:'var(--teal)',mobility:'var(--mu)',cooldown:'var(--mu)'};
   var phLabel={strength:'Strength',warmup:'Warm-Up',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
 
-  var h='<div style="padding:0 20px 30px" id="ex-win-body">';
+  var h='<div style="padding:0 20px 30px">';
 
-  // Phase eyebrow + name
-  h+='<div class="lbl" style="color:'+phColors[ph]+';margin-bottom:4px">'+phLabel[ph]+'</div>';
-  h+='<div style="font-size:22px;font-weight:800;color:var(--tx);margin-bottom:4px">'+exEntry.name+'</div>';
-  if(exEntry.cue)h+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px">'+exEntry.cue+'</div>';
+  // Phase eyebrow
+  h+='<div class="lbl lbl-acc" style="margin-bottom:6px">'+phLabel[ph]+'</div>';
 
-  // Volume / sets info
-  var totalSets=exSets.length;
-  var volStr=exEntry.vol||(exEntry.reps>0?exEntry.sets+'×'+exEntry.reps:'');
-  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
-  h+='<div style="font-size:14px;font-weight:700;color:var(--tx2)">'+volStr+'</div>';
-  if(doneSets>0)h+='<span class="pr-badge" style="background:var(--teal-bg);border-color:var(--teal-brd);color:var(--teal)">'+doneSets+'/'+totalSets+' done</span>';
-  // Check if this is a PR opportunity
+  // Exercise name
+  h+='<div style="font-size:22px;font-weight:800;color:var(--tx);line-height:1.15;margin-bottom:4px">'+exEntry.name+'</div>';
+  if(exEntry.cue)h+='<div style="font-size:12px;color:var(--mu);font-style:italic;margin-bottom:10px">'+exEntry.cue+'</div>';
+
+  // Volume + set counter + PB badge
+  var volStr=exEntry.vol||(exEntry.reps>0?exEntry.sets+'\xd7'+exEntry.reps:'');
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  if(volStr)h+='<span style="font-size:14px;font-weight:700;color:var(--tx2)">'+volStr+'</span>';
+  if(totalSets>0){
+    h+='<span style="font-size:12px;color:var(--mu)">'+
+       (allDone?'All '+totalSets+' sets done':(nextSet?'Set '+nextSet.setNum+' of '+totalSets:''))+
+       '</span>';
+  }
+  // PB badge
   var cl=C();
   if(cl.pr&&cl.pr[exEntry.name]){
     var pr=cl.pr[exEntry.name];
-    var prStr=typeof pr==='object'?pr.kg+'kg × '+pr.reps:pr+'kg';
-    h+='<span class="pr-badge">PB: '+prStr+'</span>';
+    var prStr=typeof pr==='object'?pr.kg+'kg \xd7 '+pr.reps:pr+'kg';
+    h+='<span class="pr-badge">\u2605 PB '+prStr+'</span>';
   }
   h+='</div>';
 
-  // Rest timer (if waiting for this exercise)
-  if(restActive){
-    var remaining=Math.ceil((wx.restEnd-Date.now())/1000);
-    var restTotal=exEntry.rest||60;
-    var pctRest=Math.round(remaining/restTotal*100);
-    h+='<div id="ex-win-rest" style="background:var(--coral-bg);border:0.5px solid var(--coral-brd);border-radius:10px;padding:12px;margin-bottom:14px">';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
-    h+='<span class="lbl lbl-coral">REST</span>';
-    h+='<span id="ex-win-rest-secs" style="font-size:20px;font-weight:900;color:var(--coral)">'+remaining+'s</span>';
-    h+='<button class="btn-ghost btn-sm" onclick="skipExWinRest('+exIdx+')" style="color:var(--acc)">Skip</button>';
+  // ── All sets done ──
+  if(allDone){
+    h+='<div style="text-align:center;padding:20px 0">';
+    h+='<div style="font-size:36px;margin-bottom:8px">\u2713</div>';
+    h+='<div style="font-size:14px;font-weight:700;color:var(--teal)">All sets complete</div>';
     h+='</div>';
-    h+='<div style="height:3px;background:var(--brd);border-radius:2px;overflow:hidden">';
-    h+='<div id="ex-win-rest-bar" style="height:100%;width:'+pctRest+'%;background:var(--coral);border-radius:2px;transition:width .5s linear"></div>';
-    h+='</div></div>';
-  }
 
-  // Timed exercise: show timer
-  if(isTimed){
+  // ── Timed exercise ──
+  } else if(isTimed){
     var volSecs=parseVolToSecs(exEntry.vol);
     var wxTimed=wx.timedEx;
     var timedRunning=wxTimed&&wxTimed.exIdx===exIdx&&wxTimed.running;
-    var timedRemaining=timedRunning?Math.ceil((wxTimed.end-Date.now())/1000):volSecs;
-    if(timedRemaining<0)timedRemaining=0;
-    h+='<div style="text-align:center;padding:16px 0">';
-    h+='<div id="ex-win-timer" style="font-size:64px;font-weight:900;color:'+(timedRunning?'var(--acc)':'var(--tx)')+'">'+timedRemaining+'</div>';
-    h+='<div class="lbl" style="margin-top:4px">seconds</div>';
+    var timedRemaining=timedRunning?Math.max(0,Math.ceil((wxTimed.end-Date.now())/1000)):volSecs;
+    h+='<div style="text-align:center;padding:16px 0 24px">';
+    h+='<div id="ex-win-timer" style="font-size:72px;font-weight:900;letter-spacing:-2px;color:var(--acc);line-height:1">'+timedRemaining+'</div>';
+    h+='<div class="lbl" style="margin-top:6px">seconds</div>';
     h+='</div>';
-    if(!restActive){
-      if(!timedRunning){
-        h+='<button class="btn btn-acc" style="margin-bottom:8px" onclick="startExTimer('+exIdx+','+volSecs+')">Start Timer</button>';
-      } else {
-        h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="stopExTimer()">Stop Timer</button>';
-      }
+    if(timedRunning){
+      h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="stopExTimer()">Stop</button>';
+      h+='<button class="btn btn-acc" onclick="logTimedSet('+exIdx+')">Done \u2713</button>';
+    } else {
+      h+='<button class="btn btn-acc" onclick="startExTimer('+exIdx+','+volSecs+')">Start Timer</button>';
     }
+
+  // ── Reps + weight exercise ──
+  } else if(nextSet){
+    // Divider
+    h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
+
+    // REPS stepper
+    h+='<div style="margin-bottom:16px">';
+    h+='<div class="lbl" style="margin-bottom:8px">REPS</div>';
+    h+='<div style="display:flex;align-items:center;gap:0">';
+    h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer;min-width:60px">'+wx._pendingReps+'</div>';
+    h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div></div>';
+
+    // WEIGHT stepper
+    h+='<div style="margin-bottom:20px">';
+    h+='<div class="lbl" style="margin-bottom:8px">WEIGHT</div>';
+    h+='<div style="display:flex;align-items:center;gap:0">';
+    h+='<button onclick="adjustVal(\'kg\',-2.5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<div id="val-kg" onclick="editVal(\'kg\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer;min-width:80px">'+(wx._pendingKg===0?'BW':wx._pendingKg+'kg')+'</div>';
+    h+='<button onclick="adjustVal(\'kg\',2.5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div></div>';
+
+    // Done + PB buttons
+    h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+globalIdx+')">Done \u2713</button>';
+    h+='<button class="btn btn-acc btn-sm" style="padding:0;width:52px;height:52px;border-radius:10px;font-size:13px;font-weight:800;flex-shrink:0" onclick="logPB('+exIdx+','+globalIdx+')">\u2605 PB</button>';
+    h+='</div>';
+  }
+
+  h+='<div style="height:10px"></div>';
+  // Choose another
+  h+='<button class="btn btn-ghost" onclick="closeSheet()">Choose another exercise</button>';
+  h+='</div>';
+
+  openSheet(h,null); // no title — exercise name is in the body
+}
+
+// ─── Stepper helpers ───
+function adjustVal(field,delta){
+  if(!S.wx)return;
+  if(field==='reps'){
+    S.wx._pendingReps=Math.max(1,Math.round(((S.wx._pendingReps||10)+delta)*10)/10);
+    var el=document.getElementById('val-reps');
+    if(el)el.textContent=S.wx._pendingReps;
   } else {
-    // Sets/reps/weight exercise — drum pickers
-    if(!restActive){
-      var nextSet=exSets.find(function(s){return!s.done;});
-      if(nextSet){
-        var globalIdx=wx.sets.indexOf(nextSet);
-        var defaultKg=0;
-        // Pre-fill last used weight for this exercise
-        for(var pi=wx.sets.length-1;pi>=0;pi--){
-          if(wx.sets[pi].exIdx===exIdx&&wx.sets[pi].done&&wx.sets[pi].kg>0){defaultKg=wx.sets[pi].kg;break;}
-        }
-        h+='<div class="lbl" style="margin-bottom:8px">Set '+nextSet.setNum+' of '+totalSets+'</div>';
-        // Reps drum
-        var repVals=[];for(var r=1;r<=30;r++)repVals.push({val:r,label:r+' reps'});
-        h+='<div class="lbl" style="margin-bottom:4px">REPS</div>';
-        h+=makeDrum('ex-reps',repVals,nextSet.reps||10,{cls:'compact'});
-        // Weight drum
-        var kgVals=[{val:0,label:'BW'}];
-        var kgSteps=[0.5,1,1.5,2,2.5,5,7.5,10,12.5,15,17.5,20,22.5,25,27.5,30,32.5,35,37.5,40,42.5,45,47.5,50,55,60,65,70,75,80,85,90,95,100,110,120,130,140,150];
-        kgSteps.forEach(function(v){kgVals.push({val:v,label:v+'kg'});});
-        h+='<div class="lbl" style="margin-top:10px;margin-bottom:4px">WEIGHT</div>';
-        h+=makeDrum('ex-kg',kgVals,defaultKg,{cls:'compact'});
-        h+='<div style="display:flex;gap:8px;margin-top:14px">';
-        h+='<button class="btn btn-teal" style="flex:1" data-setidx="'+globalIdx+'" onclick="logSetFromWindow('+globalIdx+')">Done</button>';
-        h+='<button class="btn btn-acc btn-sm" onclick="logPB('+exIdx+','+globalIdx+')">PB ★</button>';
-        h+='</div>';
-      } else {
-        // All sets done for this exercise
-        h+='<div style="text-align:center;padding:16px 0;color:var(--teal);font-size:14px;font-weight:700">✓ All sets complete</div>';
-      }
-    }
+    var cur=S.wx._pendingKg||0;
+    var next=Math.max(0,Math.round((cur+delta)*10)/10);
+    S.wx._pendingKg=next;
+    var el=document.getElementById('val-kg');
+    if(el)el.textContent=next===0?'BW':next+'kg';
   }
-
-  h+='<div style="height:14px"></div>';
-  // Navigation buttons
-  h+='<div style="display:flex;gap:8px">';
-  h+='<button class="btn btn-ghost" style="flex:1" onclick="closeSheet()">Choose another</button>';
-  // Next exercise button (only if not last)
-  var allEx=S.wx.exercises;
-  var nextExIdx=-1;
-  for(var ni=exIdx+1;ni<allEx.length;ni++){if(!isExDone(ni)){nextExIdx=ni;break;}}
-  if(nextExIdx>=0){
-    h+='<button class="btn btn-acc" style="flex:1" onclick="closeSheet();setTimeout(function(){openExWindow('+nextExIdx+')},300)">Next →</button>';
-  }
-  h+='</div>';
-  h+='</div>';
-
-  openSheet(h,exEntry.name);
-
-  // Init drums
-  setTimeout(function(){
-    var repVals=[];for(var r=1;r<=30;r++)repVals.push({val:r,label:r+' reps'});
-    var exSetsN=S.wx.sets.filter(function(s){return s.exIdx===exIdx;});
-    var nextSetN=exSetsN.find(function(s){return!s.done;});
-    if(nextSetN){
-      initDrumScroll('ex-reps',repVals,nextSetN.reps||10,function(v){S.wx._pendingReps=v;});
-      var kgVals2=[{val:0,label:'BW'}];
-      var kgSteps2=[0.5,1,1.5,2,2.5,5,7.5,10,12.5,15,17.5,20,22.5,25,27.5,30,32.5,35,37.5,40,42.5,45,47.5,50,55,60,65,70,75,80,85,90,95,100,110,120,130,140,150];
-      kgSteps2.forEach(function(v){kgVals2.push({val:v,label:v+'kg'});});
-      var defaultKg2=0;
-      for(var pi2=S.wx.sets.length-1;pi2>=0;pi2--){if(S.wx.sets[pi2].exIdx===exIdx&&S.wx.sets[pi2].done&&S.wx.sets[pi2].kg>0){defaultKg2=S.wx.sets[pi2].kg;break;}}
-      initDrumScroll('ex-kg',kgVals2,defaultKg2,function(v){S.wx._pendingKg=v;});
-    }
-    if(isTimed){
-      initDrumScroll('session-sel',[],0,function(){});// dummy, handled separately
-    }
-    // Start rest tick for in-window display
-    if(restActive)startExWinRestTick(exIdx);
-    if(isTimed){
-      var wxTimedN=S.wx.timedEx;
-      if(wxTimedN&&wxTimedN.exIdx===exIdx&&wxTimedN.running)startExTimerTick(exIdx);
-    }
-  },50);
+}
+function editVal(field){
+  if(!S.wx)return;
+  var cur=field==='reps'?S.wx._pendingReps:S.wx._pendingKg;
+  var input=prompt(field==='reps'?'Enter reps:':'Enter weight (kg, 0=BW):',cur===0&&field==='kg'?'0':cur);
+  if(input===null)return;
+  var val=parseFloat(input);
+  if(isNaN(val)||val<0)return;
+  if(field==='reps'){S.wx._pendingReps=Math.max(1,Math.round(val));var el=document.getElementById('val-reps');if(el)el.textContent=S.wx._pendingReps;}
+  else{S.wx._pendingKg=val;var el=document.getElementById('val-kg');if(el)el.textContent=val===0?'BW':val+'kg';}
 }
 
 function parseVolToSecs(vol){
@@ -2010,13 +2005,13 @@ function parseVolToSecs(vol){
   var s=vol.match(/(\d+)s/);if(s)return parseInt(s[1]);
   return 30;
 }
-
 function isExDone(exIdx){
   if(!S.wx)return false;
   var exSets=S.wx.sets.filter(function(s){return s.exIdx===exIdx;});
   return exSets.length>0&&exSets.every(function(s){return s.done;});
 }
 
+// ─── Log set ───
 function logSetFromWindow(globalIdx){
   var wx=S.wx;if(!wx)return;
   var set=wx.sets[globalIdx];if(!set||set.done)return;
@@ -2024,38 +2019,41 @@ function logSetFromWindow(globalIdx){
   var reps=wx._pendingReps!==undefined?wx._pendingReps:set.reps;
   set.done=true;set.kg=kg;set.reps=reps;
   var exIdx=set.exIdx;
-  // Find next undone set for this exercise
-  var nextSet=wx.sets.find(function(s){return s.exIdx===exIdx&&!s.done;});
-  // Set rest timer — next exercise waits
-  var restSecs=wx.exercises[exIdx].rest||60;
-  if(restSecs>0&&!nextSet){
-    // All sets done for this ex — rest before next exercise
-    var nextExIdx=-1;
-    for(var ni=exIdx+1;ni<wx.exercises.length;ni++){if(!isExDone(ni)){nextExIdx=ni;break;}}
-    if(nextExIdx>=0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=nextExIdx;}
-  } else if(restSecs>0&&nextSet){
-    wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=exIdx;
-  }
-  checkPR(set);
-  sv();
-  // Check if all sets done — update done state
-  if(S.wx.exDone===undefined)S.wx.exDone={};
+  // Mark exercise done if all sets complete
+  if(!wx.exDone)wx.exDone={};
   var allDoneNow=wx.sets.filter(function(s){return s.exIdx===exIdx;}).every(function(s){return s.done;});
-  if(allDoneNow)S.wx.exDone[exIdx]=true;
-  // Reopen the window with updated state
+  if(allDoneNow)wx.exDone[exIdx]=true;
+  // Set rest timer
+  var restSecs=(wx.exercises[exIdx].rest)||60;
+  if(restSecs>0){
+    wx.restActive=true;
+    wx.restEnd=Date.now()+restSecs*1000;
+    wx.waitingFor=exIdx;
+  }
+  checkPR(set);sv();
   closeSheet();
-  setTimeout(function(){
-    if(allDoneNow){
-      // Find next undone exercise
-      var nextExIdx2=-1;
-      for(var ni2=exIdx+1;ni2<wx.exercises.length;ni2++){if(!isExDone(ni2)){nextExIdx2=ni2;break;}}
-      if(nextExIdx2>=0)openExWindow(nextExIdx2);
-      // else all done — offer finish
-    } else {
-      openExWindow(exIdx);
-    }
-    draw(); // update background list
-  },300);
+  // Start floating rest circle
+  if(restSecs>0)startRestCircle(restSecs);
+  // Redraw list
+  setTimeout(function(){draw();},300);
+}
+
+function logTimedSet(exIdx){
+  var wx=S.wx;if(!wx)return;
+  var exSets=wx.sets.filter(function(s){return s.exIdx===exIdx;});
+  var nextSet=exSets.find(function(s){return!s.done;});
+  if(nextSet){
+    nextSet.done=true;nextSet.kg=0;nextSet.reps=0;
+    if(!wx.exDone)wx.exDone={};
+    var allDoneNow=exSets.every(function(s){return s.done;});
+    if(allDoneNow)wx.exDone[exIdx]=true;
+    var restSecs=(wx.exercises[exIdx].rest)||30;
+    if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=exIdx;}
+    checkPR(nextSet);sv();
+    closeSheet();
+    if(restSecs>0)startRestCircle(restSecs);
+    setTimeout(function(){draw();},300);
+  }
 }
 
 function logPB(exIdx,globalIdx){
@@ -2063,81 +2061,135 @@ function logPB(exIdx,globalIdx){
   var set=wx.sets[globalIdx];if(!set)return;
   var kg=wx._pendingKg!==undefined?wx._pendingKg:0;
   var reps=wx._pendingReps!==undefined?wx._pendingReps:set.reps;
-  var cl=C();
-  // Store PB with full detail
-  cl.pr[wx.exercises[exIdx].name]={kg:kg,reps:reps,date:Date.now()};
-  sv();
-  // Also log the set
+  C().pr[wx.exercises[exIdx].name]={kg:kg,reps:reps,date:Date.now()};
   logSetFromWindow(globalIdx);
 }
 
-// Rest tick for exercise window
-var _exWinRestTick=null;
-function startExWinRestTick(exIdx){
-  if(_exWinRestTick)clearInterval(_exWinRestTick);
-  _exWinRestTick=setInterval(function(){
-    var wx=S.wx;
-    if(!wx||!wx.restActive){clearInterval(_exWinRestTick);_exWinRestTick=null;return;}
-    var remaining=Math.ceil((wx.restEnd-Date.now())/1000);
-    var exEntry=wx.exercises[exIdx];
-    var restTotal=exEntry?exEntry.rest||60:60;
-    var secsEl=document.getElementById('ex-win-rest-secs');
-    var barEl=document.getElementById('ex-win-rest-bar');
-    if(secsEl)secsEl.textContent=remaining+'s';
-    if(barEl)barEl.style.width=Math.max(0,Math.round(remaining/restTotal*100))+'%';
-    if(remaining<=0||Date.now()>=wx.restEnd){
-      wx.restActive=false;sv();
-      clearInterval(_exWinRestTick);_exWinRestTick=null;
-      // Re-open window now that rest is done
-      closeSheet();
-      setTimeout(function(){openExWindow(exIdx);},300);
-    }
-  },500);
-}
-
-function skipExWinRest(exIdx){
-  if(S.wx){S.wx.restActive=false;sv();}
-  if(_exWinRestTick){clearInterval(_exWinRestTick);_exWinRestTick=null;}
-  closeSheet();
-  setTimeout(function(){openExWindow(exIdx);},300);
-}
-
-// Timed exercise tick
+// ─── Timed exercise tick ───
 var _exTimerTick=null;
 function startExTimer(exIdx,totalSecs){
   if(!S.wx)return;
   S.wx.timedEx={exIdx:exIdx,end:Date.now()+totalSecs*1000,total:totalSecs,running:true};
   sv();
-  startExTimerTick(exIdx);
-  // Refresh sheet content
-  closeSheet();
-  setTimeout(function(){openExWindow(exIdx);},300);
+  if(_exTimerTick)clearInterval(_exTimerTick);
+  _exTimerTick=setInterval(function(){
+    var wx=S.wx;if(!wx||!wx.timedEx||!wx.timedEx.running){clearInterval(_exTimerTick);_exTimerTick=null;return;}
+    var rem=Math.max(0,Math.ceil((wx.timedEx.end-Date.now())/1000));
+    var el=document.getElementById('ex-win-timer');if(el)el.textContent=rem;
+    if(rem<=0){
+      wx.timedEx.running=false;sv();
+      clearInterval(_exTimerTick);_exTimerTick=null;
+    }
+  },500);
+  // Refresh window
+  closeSheet();setTimeout(function(){openExWindow(exIdx);},300);
 }
 function stopExTimer(){
   if(S.wx&&S.wx.timedEx)S.wx.timedEx.running=false;
   if(_exTimerTick){clearInterval(_exTimerTick);_exTimerTick=null;}
   sv();
 }
-function startExTimerTick(exIdx){
-  if(_exTimerTick)clearInterval(_exTimerTick);
-  _exTimerTick=setInterval(function(){
+
+// ═══════════════════════════════════════════════════════════════
+// FLOATING REST CIRCLE — draggable, accent-coloured
+// ═══════════════════════════════════════════════════════════════
+var _restCircleTick=null;
+var _restCirclePos={x:null,y:null}; // null = default position
+
+function startRestCircle(totalSecs){
+  if(_restCircleTick){clearInterval(_restCircleTick);_restCircleTick=null;}
+  renderRestCircle(totalSecs,totalSecs);
+  _restCircleTick=setInterval(function(){
     var wx=S.wx;
-    if(!wx||!wx.timedEx||!wx.timedEx.running){clearInterval(_exTimerTick);_exTimerTick=null;return;}
-    var rem=Math.ceil((wx.timedEx.end-Date.now())/1000);
-    var timerEl=document.getElementById('ex-win-timer');
-    if(timerEl)timerEl.textContent=rem>0?rem:0;
-    if(rem<=0){
-      wx.timedEx.running=false;sv();
-      clearInterval(_exTimerTick);_exTimerTick=null;
-      // Auto-log the timed set
-      var exSets=wx.sets.filter(function(s){return s.exIdx===exIdx;});
-      var nextSet=exSets.find(function(s){return!s.done;});
-      if(nextSet){
-        var gi=wx.sets.indexOf(nextSet);
-        logSetFromWindow(gi);
-      }
+    if(!wx||!wx.restActive){
+      clearInterval(_restCircleTick);_restCircleTick=null;
+      removeRestCircle();return;
+    }
+    var rem=Math.max(0,Math.ceil((wx.restEnd-Date.now())/1000));
+    // Update text
+    var el=document.getElementById('rest-circle-secs');
+    if(el)el.textContent=rem;
+    // Update ring
+    var ring=document.getElementById('rest-circle-ring');
+    if(ring){
+      var pct=rem/totalSecs;
+      var r=28;var circ=2*Math.PI*r;
+      ring.style.strokeDashoffset=circ*(1-pct);
+    }
+    if(rem<=0||Date.now()>=wx.restEnd){
+      wx.restActive=false;sv();
+      clearInterval(_restCircleTick);_restCircleTick=null;
+      removeRestCircle();
+      draw();
     }
   },500);
+}
+
+function renderRestCircle(rem,total){
+  removeRestCircle();
+  var app=document.getElementById('app');if(!app)return;
+  var SIZE=72;var r=28;var circ=2*Math.PI*r;var pct=rem/total;
+  var el=document.createElement('div');
+  el.id='rest-circle';
+  // Position
+  var x=_restCirclePos.x!==null?_restCirclePos.x:(window.innerWidth-SIZE-16);
+  var y=_restCirclePos.y!==null?_restCirclePos.y:(window.innerHeight-SIZE-70);
+  Object.assign(el.style,{
+    position:'fixed',left:x+'px',top:y+'px',
+    width:SIZE+'px',height:SIZE+'px',
+    zIndex:'200',cursor:'grab',userSelect:'none',touchAction:'none'
+  });
+  el.innerHTML=
+    '<svg width="'+SIZE+'" height="'+SIZE+'" viewBox="0 0 '+SIZE+' '+SIZE+'" style="position:absolute;top:0;left:0">'+
+      '<circle cx="'+(SIZE/2)+'" cy="'+(SIZE/2)+'" r="'+r+'" fill="var(--acc-bg)" stroke="var(--acc-brd)" stroke-width="1.5"/>'+
+      '<circle id="rest-circle-ring" cx="'+(SIZE/2)+'" cy="'+(SIZE/2)+'" r="'+r+'"'+
+        ' fill="none" stroke="var(--acc)" stroke-width="3"'+
+        ' stroke-dasharray="'+circ+'"'+
+        ' stroke-dashoffset="'+(circ*(1-pct))+'"'+
+        ' stroke-linecap="round"'+
+        ' transform="rotate(-90 '+(SIZE/2)+' '+(SIZE/2)+')"'+
+        ' style="transition:stroke-dashoffset .5s linear"/>'+
+    '</svg>'+
+    '<div id="rest-circle-secs" style="position:absolute;top:0;left:0;width:100%;height:100%;'+
+      'display:flex;align-items:center;justify-content:center;'+
+      'font-size:18px;font-weight:900;color:var(--acc);pointer-events:none">'+rem+'</div>';
+
+  // Tap to skip
+  el.addEventListener('click',function(e){
+    if(Math.abs(e.clientX-_dragStart.x)<5&&Math.abs(e.clientY-_dragStart.y)<5){
+      if(S.wx){S.wx.restActive=false;sv();}
+      if(_restCircleTick){clearInterval(_restCircleTick);_restCircleTick=null;}
+      removeRestCircle();draw();
+    }
+  });
+
+  // Drag
+  var _dragStart={x:0,y:0};var _elStart={x:0,y:0};var _dragging=false;
+  function onDown(cx,cy){_dragging=true;_dragStart={x:cx,y:cy};_elStart={x:x,y:y};el.style.cursor='grabbing';}
+  function onMove(cx,cy){
+    if(!_dragging)return;
+    x=_elStart.x+(cx-_dragStart.x);
+    y=_elStart.y+(cy-_dragStart.y);
+    // Clamp to viewport
+    x=Math.max(0,Math.min(window.innerWidth-SIZE,x));
+    y=Math.max(0,Math.min(window.innerHeight-SIZE,y));
+    el.style.left=x+'px';el.style.top=y+'px';
+    _restCirclePos={x:x,y:y};
+  }
+  function onUp(){_dragging=false;el.style.cursor='grab';}
+  el.addEventListener('mousedown',function(e){onDown(e.clientX,e.clientY);e.preventDefault();});
+  el.addEventListener('touchstart',function(e){onDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  document.addEventListener('mousemove',function(e){if(_dragging)onMove(e.clientX,e.clientY);});
+  document.addEventListener('touchmove',function(e){if(_dragging)onMove(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  document.addEventListener('mouseup',onUp);
+  document.addEventListener('touchend',onUp);
+
+  app.appendChild(el);
+}
+
+function removeRestCircle(){
+  var el=document.getElementById('rest-circle');
+  if(el&&el.parentNode)el.parentNode.removeChild(el);
 }
 
 // ═══════════════════════════════════════════════════════════════
