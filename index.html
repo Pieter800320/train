@@ -13,18 +13,11 @@
 <title>Falkenburg</title>
 <style>
 :root{
-  --acc:#D4691E;--acc-bg:#1C0E00;--acc-brd:#2E1800;
+  --acc:#E07B2A;--acc-bg:#1A0C00;--acc-brd:#2C1600;
   --teal:#1D9E75;--teal-bg:#001A12;--teal-brd:#003020;
   --coral:#C85030;--coral-bg:#1C0800;--coral-brd:#2E1200;
-  --bg:#0d0d0d;--bg2:#141414;--bg3:#191919;
-  --brd:#1e1e1e;--tx:#f0f0f0;--tx2:#a0a0a0;--mu:#505050;
-}
-.light{
-  --acc:#B85510;--acc-bg:#fdf0e6;--acc-brd:#f0d4b0;
-  --teal:#0F6E56;--teal-bg:#e8f7f2;--teal-brd:#a8dece;
-  --coral:#993C1D;--coral-bg:#fef0ec;--coral-brd:#f5c4b0;
-  --bg:#f5f3f0;--bg2:#ede9e4;--bg3:#e4e0da;
-  --brd:#d0cac3;--tx:#1a1714;--tx2:#6b6560;--mu:#9c958e;
+  --bg:#0e0e10;--bg2:#16161a;--bg3:#1c1c20;
+  --brd:#242428;--tx:#f0f0f2;--tx2:#a0a0a8;--mu:#505058;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,'SF Pro Text',sans-serif;overflow:hidden}
@@ -121,6 +114,35 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .prog-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:0.5px solid var(--brd)}
 .prog-item:first-child{border-top:none}
 .prog-item.active-prog{background:var(--acc-bg)}
+
+/* ─── 7 colour themes ─── */
+.t-amber{--acc:#E07B2A;--acc-bg:#1A0C00;--acc-brd:#2C1600}
+.t-amber.light{--acc:#B85510;--acc-bg:#fdf0e6;--acc-brd:#f0d4b0}
+.t-teal{--acc:#1D9E75;--acc-bg:#001A12;--acc-brd:#003020}
+.t-teal.light{--acc:#0F6E56;--acc-bg:#e8f7f2;--acc-brd:#a8dece}
+.t-blue{--acc:#3B82F6;--acc-bg:#001228;--acc-brd:#0a2248}
+.t-blue.light{--acc:#1D4ED8;--acc-bg:#eff6ff;--acc-brd:#bfdbfe}
+.t-coral{--acc:#E05A3A;--acc-bg:#1C0800;--acc-brd:#2E1000}
+.t-coral.light{--acc:#B83E20;--acc-bg:#fff1ee;--acc-brd:#fdd0c4}
+.t-violet{--acc:#7C6FD4;--acc-bg:#100e28;--acc-brd:#201c44}
+.t-violet.light{--acc:#5548B0;--acc-bg:#f5f3ff;--acc-brd:#ddd6fe}
+.t-forest{--acc:#4A8C5C;--acc-bg:#061408;--acc-brd:#0e2812}
+.t-forest.light{--acc:#2D6B42;--acc-bg:#f0fdf4;--acc-brd:#bbf7d0}
+.t-slate{--acc:#64748B;--acc-bg:#0e1018;--acc-brd:#1a1e2c}
+.t-slate.light{--acc:#475569;--acc-bg:#f8fafc;--acc-brd:#cbd5e1}
+/* light mode base tokens */
+.light{
+  --teal:#0F6E56;--teal-bg:#e8f7f2;--teal-brd:#a8dece;
+  --coral:#993C1D;--coral-bg:#fef0ec;--coral-brd:#f5c4b0;
+  --bg:#f8f9fb;--bg2:#eef0f4;--bg3:#e6e8ed;
+  --brd:#d0d4dc;--tx:#1a1c22;--tx2:#6b6e7a;--mu:#9c9fa8;
+}
+/* weekly session dot states */
+.wdot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.wdot-done{background:var(--acc)}
+.wdot-today{background:transparent;border:2px solid var(--acc)}
+.wdot-past{background:var(--brd)}
+.wdot-future{background:var(--bg3)}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.22.0/dist/tabler-icons.min.css">
 </head>
@@ -135,7 +157,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
     <div class="tb" data-tab="timer"><i class="ti ti-clock"></i>Timer</div>
   </div>
   <div id="sheet-overlay" class="sheet-overlay"></div>
-  <div id="sheet" class="sheet"><div class="sheet-handle"></div><div id="sheet-body"></div></div>
+  <div id="sheet" class="sheet"><div id="sheet-drag-zone" style="padding:16px 0 4px;cursor:grab;touch-action:none"><div class="sheet-handle"></div></div><div id="sheet-body"></div></div>
   <div id="admin-badge">ADMIN</div>
 </div>
 <script>
@@ -148,7 +170,7 @@ function getEx(n){return EX_MAP[exKey(n)]||null;}
 // DEFAULT STATE
 // ═══════════════════════════════════════════════════════════════
 var DEFAULT_CLIENT={name:'',initials:'',colour:'#D4691E',ob:{done:false,step:0,ans:{}},tplKey:'str_b4',day:0,plan:null,hist:[],pr:{},customPrograms:[],customPlans:[],_pgOpen:{}};
-var DEFAULT_S={activeClient:'default',clients:{default:JSON.parse(JSON.stringify(DEFAULT_CLIENT))},buildMode:'program',customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},wx:null,timer:{mode:'tabata',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:40,tabRest:20,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true},tab:'today',theme:'dark',admin:{active:false,pin:'',set:false},notice:{title:'Welcome to Falkenburg',body:'Your training starts here. Go to Programs to pick your first programme.',active:true}};
+var DEFAULT_S={activeClient:'default',clients:{default:JSON.parse(JSON.stringify(DEFAULT_CLIENT))},buildMode:'program',customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},wx:null,timer:{mode:'tabata',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:40,tabRest:20,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true},tab:'today',colourTheme:'amber',theme:'dark',admin:{active:false,pin:'',set:false},notice:{title:'Welcome to Falkenburg',body:'Your training starts here. Go to Programs to pick your first programme.',active:true}};
 var S;
 function sv(){try{localStorage.setItem('falken_v1',JSON.stringify(S));}catch(e){}}
 function ld(){
@@ -163,7 +185,7 @@ function ld(){
   if(S.timer.setup===undefined)S.timer.setup=true;
   if(!S.admin)S.admin={active:false,pin:'',set:false};
   if(!S.notice)S.notice={title:'',body:'',active:false};
-  if(!S.tab)S.tab='home';
+  if(!S.tab)S.tab='home';if(!S.colourTheme)S.colourTheme='amber';
   var cl=S.clients[S.activeClient];
   if(!cl.customPrograms)cl.customPrograms=[];
   if(!cl.customPlans)cl.customPlans=[];
@@ -1264,8 +1286,30 @@ function closeSheet(){
   document.getElementById('sheet-overlay').classList.remove('show');
 }
 function initSheetsBindings(){
-  document.getElementById('sheet-overlay').onclick=closeSheet;
+  var overlay=document.getElementById('sheet-overlay');
+  var sheet=document.getElementById('sheet');
+  overlay.onclick=function(){closeSheet();};
+  var dragZone=document.getElementById('sheet-drag-zone')||sheet;
+  var startY=0,lastY=0,lastT=0,dragging=false;
+  function onStart(y){startY=y;lastY=y;lastT=Date.now();dragging=true;sheet.style.transition='none';}
+  function onMove(y){
+    if(!dragging)return;
+    var dy=y-startY;lastY=y;lastT=Date.now();
+    if(dy>0)sheet.style.transform='translateX(-50%) translateY('+dy+'px)';
+  }
+  function onEnd(y){
+    if(!dragging)return;dragging=false;
+    sheet.style.transition='';sheet.style.transform='';
+    var dy=y-startY;
+    var dt=Date.now()-lastT;
+    var velocity=dt>0?Math.abs(lastY-startY)/dt:0;
+    if(dy>100||velocity>0.4){closeSheet();}
+  }
+  dragZone.addEventListener('touchstart',function(e){onStart(e.touches[0].clientY);},{passive:true});
+  dragZone.addEventListener('touchmove',function(e){onMove(e.touches[0].clientY);},{passive:true});
+  dragZone.addEventListener('touchend',function(e){onEnd(e.changedTouches[0].clientY);});
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 // VIEWS
@@ -1322,138 +1366,239 @@ function obFinish(){
 
 
 // ═══════════════════════════════════════════════════════════════
-// HOME
+// ═══════════════════════════════════════════════════════════════
+// THEME APPLICATION
+// ═══════════════════════════════════════════════════════════════
+var THEMES={
+  amber:{name:'Amber',dark:'#E07B2A',light:'#B85510'},
+  teal: {name:'Teal', dark:'#1D9E75',light:'#0F6E56'},
+  blue: {name:'Blue', dark:'#3B82F6',light:'#1D4ED8'},
+  coral:{name:'Coral',dark:'#E05A3A',light:'#B83E20'},
+  violet:{name:'Violet',dark:'#7C6FD4',light:'#5548B0'},
+  forest:{name:'Forest',dark:'#4A8C5C',light:'#2D6B42'},
+  slate:{name:'Slate',dark:'#64748B',light:'#475569'}
+};
+function applyTheme(){
+  var key=S.colourTheme||'amber';
+  var html=document.documentElement;
+  Object.keys(THEMES).forEach(function(k){html.classList.remove('t-'+k);});
+  html.classList.add('t-'+key);
+  html.classList.toggle('light',S.theme==='light');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HOME VIEW
 // ═══════════════════════════════════════════════════════════════
 function homeV(){
-  var cl=C();var h='';
+  var cl=C();
   var now=new Date();
   var hr=now.getHours();
   var greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
   var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var dateStr=days[now.getDay()]+' · '+now.getDate()+' '+months[now.getMonth()];
+  var h='';
 
   // Top bar
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:max(14px,env(safe-area-inset-top)) 14px 0">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:max(16px,env(safe-area-inset-top)) 16px 0">';
   h+='<div id="wordmark" style="font-size:13px;font-weight:900;letter-spacing:2px;user-select:none;cursor:default">FALKENBURG</div>';
-  h+='<div style="display:flex;gap:8px;align-items:center">';
-  h+='<button class="btn-ghost btn-sm" onclick="toggleTheme()" style="padding:5px 10px;font-size:12px;border-radius:20px">'+(S.theme==='dark'?'☀':'☾')+'</button>';
-  // Client avatar - opens sheet with journal + client switching
-  h+='<div onclick="openAvatarSheet()" style="width:30px;height:30px;border-radius:15px;background:'+(cl.colour||'var(--acc)')+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;cursor:pointer">'+(cl.initials||'?')+'</div>';
+  h+='<div style="display:flex;gap:10px;align-items:center">';
+  h+='<div onclick="openAvatarSheet()" style="width:32px;height:32px;border-radius:16px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0">'+(cl.initials||'?')+'</div>';
+  h+='<button onclick="openSettingsSheet()" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;color:var(--mu)">';
+  h+='<i class="ti ti-settings" style="font-size:20px"></i></button>';
   h+='</div></div>';
 
   // Greeting + date
-  h+='<div style="padding:20px 14px 6px">';
-  h+='<div class="h1">'+(cl.name?greet+', '+cl.name+'.':greet+'.')+'</div>';
+  h+='<div style="padding:18px 16px 4px">';
+  h+='<div style="font-size:24px;font-weight:800;letter-spacing:-.4px;line-height:1.15;color:var(--tx)">';
+  h+=greet+(cl.name?', <span style="color:var(--acc)">'+cl.name+'</span>':'')+'.</div>';
   h+='<div style="font-size:13px;color:var(--mu);margin-top:4px">'+dateStr+'</div>';
   h+='</div>';
 
-  // Stats row: Sessions total / This week / PRs
-  var totalSess=cl.hist?cl.hist.length:0;
-  var weekStart=new Date();weekStart.setHours(0,0,0,0);weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-  var thisWeek=(cl.hist||[]).filter(function(s){return s.date>=weekStart.getTime();}).length;
-  var prCount=Object.keys(cl.pr||{}).length;
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 14px;margin-bottom:16px">';
-  h+='<div class="card" style="text-align:center;padding:10px 8px"><div style="font-size:20px;font-weight:800;color:var(--acc)">'+totalSess+'</div><div class="lbl">Sessions</div></div>';
-  h+='<div class="card" style="text-align:center;padding:10px 8px"><div style="font-size:20px;font-weight:800;color:var(--teal)">'+thisWeek+'</div><div class="lbl">This week</div></div>';
-  h+='<div class="card" style="text-align:center;padding:10px 8px"><div style="font-size:20px;font-weight:800;color:var(--tx)">'+prCount+'</div><div class="lbl">PRs</div></div>';
-  h+='</div>';
-
-  // Weekly streak (7 dots)
-  var streak=getStreak();
-  h+='<div style="padding:0 14px;margin-bottom:16px"><div class="card card-teal" style="padding:12px 14px">';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-  h+='<div class="lbl lbl-teal">WEEKLY STREAK</div>';
-  h+='<div style="font-size:14px;font-weight:800;color:var(--teal)">'+streak.count+' day'+(streak.count!==1?'s':'')+'</div>';
-  h+='</div>';
-  h+='<div style="display:flex;gap:6px;align-items:center">';
-  streak.days.forEach(function(d){h+='<span class="streak-dot dot-'+d+'"></span>';});
-  h+='</div></div></div>';
-
-  // Coach notice — from active plan week tip
-  var banner=planBannerData();
-  if(banner&&banner.tip){
-    h+='<div style="padding:0 14px;margin-bottom:16px">';
-    h+='<div style="border-left:3px solid var(--coral);padding:10px 12px;background:var(--coral-bg);border-radius:0 10px 10px 0">';
-    h+='<div class="lbl lbl-coral" style="margin-bottom:4px">COACH TIP — '+banner.weekLabel+'</div>';
-    h+='<div style="font-size:13px;color:var(--tx);line-height:1.5">'+banner.tip+'</div>';
-    h+='</div></div>';
-  } else if(S.notice&&S.notice.active&&S.notice.body){
-    h+='<div style="padding:0 14px;margin-bottom:16px">';
-    h+='<div style="border-left:3px solid var(--coral);padding:10px 12px;background:var(--coral-bg);border-radius:0 10px 10px 0">';
-    h+='<div class="lbl lbl-coral" style="margin-bottom:4px">NOTICE</div>';
-    if(S.notice.title)h+='<div style="font-weight:700;color:var(--tx);font-size:14px;margin-bottom:2px">'+S.notice.title+'</div>';
-    h+='<div style="font-size:13px;color:var(--tx2);line-height:1.5">'+S.notice.body+'</div>';
-    h+='</div></div>';
-  }
-
-  // Today card (amber, taps to Today)
+  // Today card (dominant)
   var tpl=ACTIVE_TPL();
   var dayIdx=cl.day%tpl.days.length;
   var day=tpl.days[dayIdx];
-  var kpiCount=day.exercises.filter(function(e){return e.ph==='strength';}).length;
-  h+='<div class="section-head">TODAY\'S SESSION</div>';
-  h+='<div style="padding:0 14px">';
-  h+='<div class="card card-acc" style="cursor:pointer;margin-bottom:16px" onclick="S.tab=\'today\';sv();draw()">';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
-  h+='<div><div class="lbl lbl-acc">'+tpl.name+'</div><div class="h2" style="margin-top:2px">'+day.focus+'</div></div>';
-  h+='<div style="text-align:right;font-size:11px;color:var(--acc)">'+day.label+'<br>~'+tpl.duration+'min</div></div>';
-  h+='<div style="font-size:12px;color:var(--tx2);margin-bottom:10px">'+kpiCount+' strength exercises</div>';
-  h+='<button class="btn btn-acc" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Start Training →</button>';
-  h+='</div></div>';
-
-  // Recent sessions
-  if(cl.hist&&cl.hist.length>0){
-    h+='<div class="section-head">RECENT</div>';
-    h+='<div style="padding:0 14px">';
-    var recent=cl.hist.slice(-3).reverse();
-    recent.forEach(function(s){
-      var d=new Date(s.date);
-      h+='<div class="card" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">';
-      h+='<div><div style="font-size:13px;font-weight:600">'+s.focus+'</div>';
-      h+='<div class="lbl">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+'</div></div>';
-      h+='<div style="text-align:right"><div style="font-size:12px;color:var(--teal)">'+s.duration+'min</div>';
-      h+='<div class="lbl">'+s.sets+' sets</div></div></div>';
-    });
+  var banner=planBannerData();
+  var inProgress=!!S.wx;
+  h+='<div style="padding:14px 16px">';
+  h+='<div class="card card-acc" style="padding:18px;cursor:pointer;border-radius:16px" onclick="S.tab=\'today\';sv();draw()">';
+  h+='<div class="lbl lbl-acc" style="font-size:8px;letter-spacing:1.4px;margin-bottom:8px">'+tpl.name.toUpperCase()+' · '+day.label.toUpperCase()+'</div>';
+  h+='<div style="font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.1;color:var(--tx);margin-bottom:6px">'+day.focus+'</div>';
+  h+='<div style="font-size:12px;color:var(--tx2);margin-bottom:12px">'+day.label+' · ~'+tpl.duration+' min</div>';
+  if(banner){
+    h+='<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.2);border:0.5px solid var(--acc-brd);border-radius:20px;padding:4px 4px 4px 10px;margin-bottom:14px">';
+    h+='<span style="font-size:10px;font-weight:600;color:var(--tx2)">'+banner.planName+' · Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
+    h+='<span style="background:var(--acc);border-radius:14px;padding:2px 8px;font-size:9px;font-weight:800;color:#fff">RPE '+banner.rpe+'</span>';
     h+='</div>';
   }
+  if(inProgress){
+    h+='<button class="btn btn-teal" style="font-size:14px;font-weight:700" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Continue Session →</button>';
+  } else {
+    h+='<button class="btn" style="font-size:14px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:#fff" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Start Training →</button>';
+  }
+  h+='</div></div>';
 
+  // Coach notice (always visible)
+  h+='<div style="padding:0 16px 14px">';
+  var hasNotice=S.notice&&S.notice.active&&S.notice.body;
+  var noticeTip=banner&&banner.tip?banner.tip:null;
+  h+='<div style="border-left:3px solid var(--acc);border-radius:0 10px 10px 0;background:var(--acc-bg);padding:11px 13px;position:relative">';
+  h+='<div class="lbl lbl-acc" style="margin-bottom:3px">NOTICE</div>';
+  if(hasNotice){
+    if(S.notice.title)h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px">'+S.notice.title+'</div>';
+    h+='<div style="font-size:12px;color:var(--tx2);line-height:1.5">'+S.notice.body+'</div>';
+  } else if(noticeTip){
+    h+='<div style="font-size:12px;color:var(--tx2);line-height:1.5">'+noticeTip+'</div>';
+  } else {
+    h+='<div style="font-size:12px;color:var(--mu);line-height:1.5;font-style:italic">No current notices.</div>';
+  }
+  if(S.admin.active){
+    h+='<button onclick="editNotice()" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--mu);padding:2px">';
+    h+='<i class="ti ti-pencil" style="font-size:14px"></i></button>';
+  }
+  h+='</div></div>';
+
+  // Weekly Sessions + Recent (combined card)
+  h+='<div style="padding:0 16px 14px"><div class="card">';
+  h+='<div class="lbl" style="margin-bottom:10px">THIS WEEK</div>';
+  var todayDow=now.getDay();
+  var mondayOffset=todayDow===0?-6:1-todayDow;
+  var weekStart=new Date(now);weekStart.setHours(0,0,0,0);weekStart.setDate(now.getDate()+mondayOffset);
+  var weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+7);
+  var sessionDays={};
+  (cl.hist||[]).forEach(function(s){
+    var d=new Date(s.date);
+    if(d>=weekStart&&d<weekEnd){var dow=d.getDay()===0?6:d.getDay()-1;sessionDays[dow]=true;}
+  });
+  var dayLabels=['M','T','W','T','F','S','S'];
+  var todayDowMon=todayDow===0?6:todayDow-1;
+  h+='<div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:6px">';
+  for(var di=0;di<7;di++){
+    var dotCls='wdot ';
+    if(sessionDays[di])dotCls+='wdot-done';
+    else if(di===todayDowMon)dotCls+='wdot-today';
+    else if(di<todayDowMon)dotCls+='wdot-past';
+    else dotCls+='wdot-future';
+    h+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px">';
+    h+='<span class="'+dotCls+'"></span>';
+    h+='<span style="font-size:8px;font-weight:600;color:var(--mu)">'+dayLabels[di]+'</span>';
+    h+='</div>';
+  }
+  h+='</div>';
+  var wkCount=Object.keys(sessionDays).length;
+  h+='<div style="font-size:11px;color:var(--mu)">'+wkCount+' session'+(wkCount!==1?'s':'')+' this week</div>';
+  h+='<div style="border-top:0.5px solid var(--brd);margin:12px 0"></div>';
+  h+='<div class="lbl" style="margin-bottom:8px">RECENT</div>';
+  var hist=cl.hist||[];
+  if(!hist.length){
+    h+='<div style="font-size:12px;color:var(--mu);font-style:italic">No sessions logged yet.</div>';
+  } else {
+    hist.slice(-3).reverse().forEach(function(s,i){
+      var d=new Date(s.date);
+      h+='<div style="display:flex;align-items:center;justify-content:space-between'+(i>0?';border-top:0.5px solid var(--brd);padding-top:8px;margin-top:8px':'')+'">';
+      h+='<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+s.focus+'</div>';
+      h+='<div class="lbl" style="margin-top:1px">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+'</div></div>';
+      h+='<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:var(--teal)">'+s.duration+' min</div>';
+      h+='<div class="lbl">'+s.sets+' sets</div></div>';
+      h+='</div>';
+    });
+  }
+  h+='</div></div>';
   h+='<div style="height:20px"></div>';
   return h;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AVATAR SHEET — client switcher + journal access
+// AVATAR SHEET — profile + journal
 // ═══════════════════════════════════════════════════════════════
 function openAvatarSheet(){
-  var h='<div style="padding:0 20px 20px">';
-  // Journal button
-  h+='<div onclick="openJournalView()" style="display:flex;align-items:center;gap:12px;padding:14px 0;cursor:pointer;border-bottom:0.5px solid var(--brd)">';
-  h+='<div style="width:38px;height:38px;border-radius:10px;background:var(--teal-bg);border:0.5px solid var(--teal-brd);display:flex;align-items:center;justify-content:center"><i class="ti ti-book" style="color:var(--teal);font-size:20px"></i></div>';
+  var cl=C();
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">';
+  h+='<div style="width:52px;height:52px;border-radius:26px;background:'+(cl.colour||'var(--acc)')+';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0">'+(cl.initials||'?')+'</div>';
+  h+='<div><div style="font-size:16px;font-weight:700;color:var(--tx)">'+(cl.name||'Athlete')+'</div>';
+  h+='<div class="lbl" style="margin-top:2px">'+(cl.tplKey?getTPL(cl.tplKey).name:'No programme set')+'</div></div>';
+  h+='</div>';
+  h+='<div onclick="openJournalView()" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd)">';
+  h+='<div style="width:38px;height:38px;border-radius:10px;background:var(--teal-bg);border:0.5px solid var(--teal-brd);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+  h+='<i class="ti ti-book" style="color:var(--teal);font-size:20px"></i></div>';
   h+='<div><div style="font-size:14px;font-weight:700;color:var(--tx)">Journal</div>';
-  h+='<div class="lbl">Session history & PRs</div></div>';
+  h+='<div class="lbl" style="margin-top:1px">Session history &amp; personal records</div></div>';
   h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px;margin-left:auto"></i>';
-  h+='</div>';
-  // Clients
-  var allClients=Object.keys(S.clients);
-  allClients.forEach(function(k){
-    var c=S.clients[k];
-    var isActive=k===S.activeClient;
-    h+='<div onclick="switchClient(\''+k+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer;border-bottom:0.5px solid var(--brd)">';
-    h+='<div style="width:38px;height:38px;border-radius:19px;background:'+(isActive?'var(--acc)':(c.colour||'var(--brd)'))+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff">'+(c.initials||'?')+'</div>';
-    h+='<div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--tx)">'+(c.name||'New Client')+'</div>';
-    h+='<div class="lbl">'+(isActive?'Active · ':'')+(c.tplKey?getTPL(c.tplKey).name:'No programme')+'</div></div>';
-    if(isActive)h+='<i class="ti ti-check" style="color:var(--acc);font-size:18px"></i>';
-    h+='</div>';
-  });
-  if(S.admin.active){
-    h+='<button class="btn btn-acc" style="margin-top:16px" onclick="addClient()">+ Add Client</button>';
-  }
-  h+='</div>';
-  openSheet(h,'My Clients');
+  h+='</div></div>';
+  openSheet(h,'Profile');
 }
 
 // ═══════════════════════════════════════════════════════════════
+// SETTINGS SHEET
+// ═══════════════════════════════════════════════════════════════
+function openSettingsSheet(){
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div class="lbl" style="margin-bottom:12px">APPEARANCE</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px">';
+  ['amber','teal','blue','coral','violet','forest','slate'].forEach(function(key){
+    var t=THEMES[key];
+    var isActive=(S.colourTheme||'amber')===key;
+    var colour=S.theme==='light'?t.light:t.dark;
+    h+='<div data-key="'+key+'" onclick="setColourTheme(this.dataset.key)" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px">';
+    h+='<div style="width:36px;height:36px;border-radius:18px;background:'+colour+';border:'+(isActive?'3px solid var(--tx)':'2.5px solid var(--brd)')+';box-sizing:border-box"></div>';
+    h+='<div style="font-size:8px;font-weight:600;color:'+(isActive?'var(--tx)':'var(--mu)')+'">'+t.name+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);border-radius:10px;border:0.5px solid var(--brd);margin-bottom:20px">';
+  h+='<div style="font-size:14px;font-weight:600;color:var(--tx)">'+(S.theme==='light'?'Light mode':'Dark mode')+'</div>';
+  h+='<button class="toggle '+(S.theme==='light'?'toggle-off':'toggle-on')+'" onclick="toggleThemeInSheet()"><div class="toggle-knob"></div></button>';
+  h+='</div>';
+  h+='<div class="lbl" style="margin-bottom:8px">MORE SETTINGS</div>';
+  ['Units (kg / lb)','Notifications','About Falkenburg'].forEach(function(label){
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:0.5px solid var(--brd)">';
+    h+='<span style="font-size:14px;color:var(--mu)">'+label+'</span>';
+    h+='<span style="font-size:10px;color:var(--mu);font-weight:600;letter-spacing:.5px">SOON</span>';
+    h+='</div>';
+  });
+  h+='</div>';
+  openSheet(h,'Settings');
+}
+function setColourTheme(key){
+  S.colourTheme=key;sv();applyTheme();
+  // Re-render settings sheet body in place
+  var sb=document.getElementById('sheet-body');
+  if(sb){
+    var h='<div style="padding:0 20px 30px">';
+    h+='<div class="lbl" style="margin-bottom:12px">APPEARANCE</div>';
+    h+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px">';
+    ['amber','teal','blue','coral','violet','forest','slate'].forEach(function(k){
+      var t=THEMES[k];var isActive=key===k;
+      var colour=S.theme==='light'?t.light:t.dark;
+      h+='<div data-key="'+k+'" onclick="setColourTheme(this.dataset.key)" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px">';
+      h+='<div style="width:36px;height:36px;border-radius:18px;background:'+colour+';border:'+(isActive?'3px solid var(--tx)':'2.5px solid var(--brd)')+';box-sizing:border-box"></div>';
+      h+='<div style="font-size:8px;font-weight:600;color:'+(isActive?'var(--tx)':'var(--mu)')+'">'+t.name+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);border-radius:10px;border:0.5px solid var(--brd);margin-bottom:20px">';
+    h+='<div style="font-size:14px;font-weight:600;color:var(--tx)">'+(S.theme==='light'?'Light mode':'Dark mode')+'</div>';
+    h+='<button class="toggle '+(S.theme==='light'?'toggle-off':'toggle-on')+'" onclick="toggleThemeInSheet()"><div class="toggle-knob"></div></button>';
+    h+='</div>';
+    h+='<div class="lbl" style="margin-bottom:8px">MORE SETTINGS</div>';
+    ['Units (kg / lb)','Notifications','About Falkenburg'].forEach(function(label){
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:0.5px solid var(--brd)">';
+      h+='<span style="font-size:14px;color:var(--mu)">'+label+'</span>';
+      h+='<span style="font-size:10px;color:var(--mu);font-weight:600;letter-spacing:.5px">SOON</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+    sb.innerHTML=h;
+  }
+}
+function toggleThemeInSheet(){
+  S.theme=S.theme==='dark'?'light':'dark';sv();applyTheme();
+  setColourTheme(S.colourTheme||'amber');// re-render sheet
+  draw();// re-render background
+}
+
 // JOURNAL VIEW — opened from avatar sheet
 // ═══════════════════════════════════════════════════════════════
 function openJournalView(){
@@ -2437,12 +2582,13 @@ function saveNotice(){S.notice.title=document.getElementById('n-title').value;S.
 // ═══════════════════════════════════════════════════════════════
 // THEME
 // ═══════════════════════════════════════════════════════════════
-function toggleTheme(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.classList.toggle('light',S.theme==='light');sv();draw();}
+function toggleTheme(){S.theme=S.theme==='dark'?'light':'dark';sv();applyTheme();draw();}
 
 // ═══════════════════════════════════════════════════════════════
 // DRAW — MAIN RENDER
 // ═══════════════════════════════════════════════════════════════
 function draw(){
+  applyTheme();
   var screen=document.getElementById('screen');
   var cl=C();
 
