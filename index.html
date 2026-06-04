@@ -37,12 +37,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 .card-acc{background:var(--acc-bg);border-color:var(--acc-brd)}
 .card-teal{background:var(--teal-bg);border-color:var(--teal-brd)}
 .card-coral{background:var(--coral-bg);border-color:var(--coral-brd)}
-.btn{display:block;width:100%;padding:14px;border:1px solid var(--acc-brd);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;transition:opacity .15s;background:var(--acc-bg);color:var(--acc)}
-.btn:active{opacity:.7}
-.btn-acc{background:var(--acc-bg);border-color:var(--acc-brd);color:var(--acc)}
+.btn{display:block;width:100%;padding:14px;border:1px solid rgba(255,255,255,.25);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;transition:opacity .15s;background:var(--acc);color:var(--tx)}
+.btn:active{opacity:.75}
+.btn-acc{background:var(--acc);border-color:rgba(255,255,255,.25);color:var(--tx)}
 .btn-ghost{background:var(--bg3);border:1px solid var(--brd);color:var(--tx2)}
-.btn-teal{background:var(--teal-bg);border:1px solid var(--teal-brd);color:var(--teal)}
-.btn-coral{background:var(--coral-bg);border:1px solid var(--coral-brd);color:var(--coral)}
+.btn-teal{background:var(--teal);border:1px solid rgba(255,255,255,.25);color:var(--tx)}
+.btn-coral{background:var(--coral);border:1px solid rgba(255,255,255,.25);color:var(--tx)}
 .btn-sm{padding:7px 14px;font-size:12px;border-radius:9px;width:auto;display:inline-block}
 .btn-pill{padding:5px 14px;font-size:11px;font-weight:700;border-radius:20px;width:auto;display:inline-block}
 .pad{padding:0 14px}
@@ -143,6 +143,11 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .wdot-today{background:transparent;border:2px solid var(--acc)}
 .wdot-past{background:var(--brd)}
 .wdot-future{background:var(--bg3)}
+.light .btn,.light .btn-acc{border-color:rgba(0,0,0,.2);color:#fff}
+.light .btn-teal{border-color:rgba(0,0,0,.2);color:#fff}
+.light .btn-coral{border-color:rgba(0,0,0,.2);color:#fff}
+.light .btn-teal{border-color:rgba(0,0,0,.2)}
+.light .btn-coral{border-color:rgba(0,0,0,.2)}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.22.0/dist/tabler-icons.min.css">
 </head>
