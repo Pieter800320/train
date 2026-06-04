@@ -37,12 +37,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 .card-acc{background:var(--acc-bg);border-color:var(--acc-brd)}
 .card-teal{background:var(--teal-bg);border-color:var(--teal-brd)}
 .card-coral{background:var(--coral-bg);border-color:var(--coral-brd)}
-.btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;transition:opacity .1s}
-.btn:active{opacity:.8}
-.btn-acc{background:var(--acc);color:#fff}
-.btn-ghost{background:transparent;border:0.5px solid var(--brd);color:var(--mu)}
-.btn-teal{background:var(--teal);color:#fff}
-.btn-coral{background:var(--coral);color:#fff}
+.btn{display:block;width:100%;padding:14px;border:1px solid var(--acc-brd);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;transition:opacity .15s;background:var(--acc-bg);color:var(--acc)}
+.btn:active{opacity:.7}
+.btn-acc{background:var(--acc-bg);border-color:var(--acc-brd);color:var(--acc)}
+.btn-ghost{background:var(--bg3);border:1px solid var(--brd);color:var(--tx2)}
+.btn-teal{background:var(--teal-bg);border:1px solid var(--teal-brd);color:var(--teal)}
+.btn-coral{background:var(--coral-bg);border:1px solid var(--coral-brd);color:var(--coral)}
 .btn-sm{padding:7px 14px;font-size:12px;border-radius:9px;width:auto;display:inline-block}
 .btn-pill{padding:5px 14px;font-size:11px;font-weight:700;border-radius:20px;width:auto;display:inline-block}
 .pad{padding:0 14px}
@@ -1433,9 +1433,9 @@ function homeV(){
     h+='</div>';
   }
   if(inProgress){
-    h+='<button class="btn btn-teal" style="font-size:14px;font-weight:700" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Continue Session →</button>';
+    h+='<button class="btn btn-acc" style="font-size:14px;font-weight:700" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Continue Session →</button>';
   } else {
-    h+='<button class="btn" style="font-size:14px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:#fff" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Start Training →</button>';
+    h+='<button class="btn btn-acc" style="font-size:14px;font-weight:700" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Start Training →</button>';
   }
   h+='</div></div>';
 
