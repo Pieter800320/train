@@ -1782,13 +1782,30 @@ function openPlanSheet(){
   var banner=planBannerData();
   if(!banner)return;
   var plan=null;
-  // Find plan in PLANS or customPlans
+  var isCustom=false;
   PLANS.forEach(function(p){if(p.key===(cl.plan&&cl.plan.key))plan=p;});
-  if(!plan)(cl.customPlans||[]).forEach(function(p){if(p.key===(cl.plan&&cl.plan.key))plan=p;});
+  if(!plan){(cl.customPlans||[]).forEach(function(p){if(p.key===(cl.plan&&cl.plan.key)){plan=p;isCustom=true;}});}
+  if(!plan)return;
+  var currentWeek=banner.weekIndex;
+  var h='<div style="padding:0 20px 30px">';
+
+  // Week dots
+  h+='<div style="margin-bottom:16px">';
+  h+='<div class="lbl" style="margin-bottom:8px">WEEK PROGRESS</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">';
+  plan.weeks.forEach(function(wk,wi){
+    var isPast=wi<currentWeek;var isCur=wi===currentWeek;
+    var dotCls='wdot '+(isPast?'wdot-done':isCur?'wdot-today':'wdot-future');
+    h+='<div style="display:flex;flex-direction:column;align-items:center;gap:3px">';
+    h+='<span class="'+dotCls+'"></span>';
+    h+='<span style="font-size:7px;color:var(--mu);font-weight:600">'+(wi+1)+'</span>';
+    h+='</div>';
+  });
+  h+='</div>';
   h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">Week '+(currentWeek+1)+' of '+plan.weeks.length+(plan.cyclic?' · cyclic':'')+'</div>';
   h+='</div>';
 
-  // Plan name + description
+  // Name + desc
   h+='<div style="margin-bottom:16px">';
   h+='<div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:2px">'+plan.name+'</div>';
   if(plan.desc)h+='<div style="font-size:12px;color:var(--mu)">'+plan.desc+'</div>';
@@ -1796,12 +1813,11 @@ function openPlanSheet(){
 
   // Week list
   plan.weeks.forEach(function(wk,wi){
-    var isCurrent=wi===currentWeek;
-    h+='<div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;border:0.5px solid '+(isCurrent?'var(--acc-brd)':'var(--brd)')+';background:'+(isCurrent?'var(--acc-bg)':'var(--bg3)')+'">';
+    var isCur=wi===currentWeek;
+    h+='<div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;border:0.5px solid '+(isCur?'var(--acc-brd)':'var(--brd)')+';background:'+(isCur?'var(--acc-bg)':'var(--bg3)')+'">';
     h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
-    h+='<div style="font-size:12px;font-weight:700;color:'+(isCurrent?'var(--acc)':'var(--tx)')+'">Week '+(wi+1)+(isCurrent?' — Current':'')+'</div>';
-    var deload=wk.theme==='deload';
-    if(deload)h+='<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:8px;padding:1px 6px">DELOAD</span>';
+    h+='<div style="font-size:12px;font-weight:700;color:'+(isCur?'var(--acc)':'var(--tx)')+'">Week '+(wi+1)+(isCur?' — Current':'')+'</div>';
+    if(wk.theme==='deload')h+='<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:8px;padding:1px 6px">DELOAD</span>';
     h+='</div>';
     if(wk.label)h+='<div style="font-size:11px;color:var(--tx2);margin-bottom:4px">'+wk.label+'</div>';
     h+='<div style="display:flex;gap:6px">';
@@ -2305,7 +2321,12 @@ function programsV(){
         h+='<div class="prog-item'+(isActive?' active-prog':'')+'">';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+cp.name+'</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{h+='<button class="btn btn-acc btn-pill" data-key="'+cp.key+'" onclick="switchTPL(this.dataset.key)">Select</button>';}
+        else{
+          h+='<div style="display:flex;gap:4px">';
+          h+='<button class="btn btn-acc btn-pill" data-key="'+cp.key+'" onclick="switchTPL(this.dataset.key)">Select</button>';
+          h+='<button class="btn btn-ghost btn-pill" data-key="'+cp.key+'" onclick="deleteCustomProg(this.dataset.key)" style="padding:5px 8px">✕</button>';
+          h+='</div>';
+        }
         h+='</div>';
       });
       h+='</div>';
@@ -2367,7 +2388,12 @@ function programsV(){
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+p.name+'</div>';
         h+='<div class="lbl">'+p.weeks.length+' wks'+(p.cyclic?' · cyclic':'')+'</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
-        else{h+='<button class="btn btn-acc btn-pill" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Select</button>';}
+        else{
+          h+='<div style="display:flex;gap:4px">';
+          h+='<button class="btn btn-acc btn-pill" data-key="'+p.key+'" onclick="attachPlan(this.dataset.key);sv();draw()">Select</button>';
+          h+='<button class="btn btn-ghost btn-pill" data-key="'+p.key+'" onclick="deleteCustomPlan(this.dataset.key)" style="padding:5px 8px">✕</button>';
+          h+='</div>';
+        }
         h+='</div>';
       });
       h+='</div>';
@@ -2428,6 +2454,22 @@ function togglePgGroup(cat){
 function switchTPL(key){
   if(confirm('Switch to this programme? Your current day progress will reset.')){
     C().tplKey=key;C().day=0;sv();draw();
+  }
+}
+function deleteCustomProg(key){
+  if(confirm('Delete this programme? This cannot be undone.')){
+    var cl=C();
+    cl.customPrograms=(cl.customPrograms||[]).filter(function(p){return p.key!==key;});
+    if(cl.tplKey===key){cl.tplKey=TPL[0].key;cl.day=0;}
+    sv();draw();
+  }
+}
+function deleteCustomPlan(key){
+  if(confirm('Delete this plan? This cannot be undone.')){
+    var cl=C();
+    cl.customPlans=(cl.customPlans||[]).filter(function(p){return p.key!==key;});
+    if(cl.plan&&cl.plan.key===key){cl.plan=null;}
+    sv();draw();
   }
 }
 function retakeOB(){
