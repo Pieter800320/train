@@ -1399,10 +1399,15 @@ var THEMES={
 };
 function applyTheme(){
   var key=S.colourTheme||'amber';
+  var isDark=S.theme!=='light';
   var html=document.documentElement;
   Object.keys(THEMES).forEach(function(k){html.classList.remove('t-'+k);});
   html.classList.add('t-'+key);
-  html.classList.toggle('light',S.theme==='light');
+  html.classList.toggle('light',!isDark);
+  // Update browser/PWA status bar colour
+  var colour=isDark?THEMES[key].dark:THEMES[key].light;
+  var meta=document.querySelector('meta[name="theme-color"]');
+  if(meta)meta.setAttribute('content',colour);
 }
 
 // ═══════════════════════════════════════════════════════════════
