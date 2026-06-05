@@ -1237,19 +1237,55 @@ function checkPR(set){
   }
   return false;
 }
+var CONGRATS=[
+  'You are on fire! 🔥',
+  'Beast mode: activated. 💪',
+  'That’s how champions are made!',
+  'Your future self thanks you. 🙏',
+  'Another one in the books. Keep going!',
+  'Sweat now, shine later. ✨',
+  'The iron doesn’t lie — neither do you.',
+  'Consistency is the superpower. You’ve got it.',
+  'One session closer to the best version of you.',
+  'Legendary effort today. Seriously.',
+  'You showed up. That’s already winning.',
+  'Recovery starts now — you’ve earned it.',
+  'Hard work? Check. Done. ✅',
+  'That session won’t forget you.',
+  'The only bad workout is the one that didn’t happen — yours happened!',
+  'You just made yesterday’s you proud.',
+  'Rest up. Tomorrow you go again. 🎯',
+  'Pain is temporary, progress is permanent.',
+  'Discipline is freedom. Today you were free.',
+  'Another brick in the wall of gains. 🧱'
+];
 function finishSession(){
   if(!S.wx)return;
   var cl=C();
   var banner=planBannerData();
   var doneSets=S.wx.sets.filter(function(s){return s.done;}).length;
-  // Only log to history if at least one set was actually completed
+  var duration=Math.max(1,Math.round((Date.now()-S.wx.startTime)/60000));
+  var focus=S.wx.focus||'Session';
+  // Save to history
   if(doneSets>0){
-    cl.hist.push({date:Date.now(),tplKey:S.wx.tplKey,dayIdx:S.wx.dayIdx,label:S.wx.dayLabel,focus:S.wx.focus,sets:doneSets,duration:Math.max(1,Math.round((Date.now()-S.wx.startTime)/60000)),plan:banner?banner.weekLabel:null});
+    cl.hist.push({date:Date.now(),tplKey:S.wx.tplKey,dayIdx:S.wx.dayIdx,label:S.wx.dayLabel,
+      focus:focus,sets:doneSets,duration:duration,plan:banner?banner.weekLabel:null});
     cl.day=(cl.day||0)+1;
     if(cl.hist.length%7===0&&cl.plan)advancePlanWeek();
+    sv();
   }
-  S.wx=null;
-  sv();S.tab='home';draw();
+  S.wx=null;sv();
+  // Show celebration sheet
+  var msg=CONGRATS[Math.floor(Math.random()*CONGRATS.length)];
+  var h='<div style="padding:0 20px 30px;text-align:center">';
+  h+='<div style="font-size:52px;margin-bottom:8px">✅</div>';
+  h+='<div style="font-size:22px;font-weight:800;color:var(--tx);margin-bottom:8px">Session Complete!</div>';
+  h+='<div style="font-size:14px;font-weight:600;color:var(--acc);margin-bottom:6px">'+focus+'</div>';
+  h+='<div style="font-size:13px;color:var(--tx2);margin-bottom:16px">'+doneSets+' sets · '+duration+' min</div>';
+  h+='<div style="font-size:16px;color:var(--tx);font-style:italic;margin-bottom:24px;line-height:1.5">“'+msg+'”</div>';
+  h+='<button class="btn btn-acc" onclick="closeSheet();S.tab=\'home\';sv();draw()">Back to Home</button>';
+  h+='</div>';
+  openSheet(h,null);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1824,7 +1860,7 @@ function todayV(){
   // Bottom actions
   h+='<div style="padding:14px">';
   if(S.wx){
-    h+='<button class="btn btn-acc" onclick="finishSession()">✓ Finish Session</button>';
+    h+='<button class="btn btn-acc" onclick="finishSession()">Finish Session</button>';
   }
   h+='</div>';
   h+='<div style="height:80px"></div>';
@@ -2011,7 +2047,7 @@ function openExWindow(exIdx){
     if(timedRunning){
       h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
       h+='<button class="btn btn-ghost" style="flex:1" onclick="stopExTimer()">Stop</button>';
-      h+='<button class="btn btn-acc" style="flex:1" onclick="logTimedSet('+exIdx+')">✓ Done</button>';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="logTimedSet('+exIdx+')">Done</button>';
       h+='</div>';
     } else {
       h+='<button class="btn btn-acc" onclick="startExTimerPending('+exIdx+')">Start Timer</button>';
@@ -2027,7 +2063,7 @@ function openExWindow(exIdx){
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
     h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
     h+='</div>';
   // ── Distance ──
   } else if(isDistance&&nextSet){
@@ -2048,7 +2084,7 @@ function openExWindow(exIdx){
     }
     var gi=wx.sets.indexOf(nextSet);
     h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
     h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+gi+')">★ PB</button>';
     h+='</div>';
   // ── Calories ──
@@ -2061,7 +2097,7 @@ function openExWindow(exIdx){
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
-    h+='<button class="btn btn-acc" style="margin-bottom:8px" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+    h+='<button class="btn btn-acc" style="margin-bottom:8px" onclick="logSetFromWindow('+gi+')">Done</button>';
   // ── Height (box jumps etc) ──
   } else if(isHeight&&nextSet){
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
@@ -2079,7 +2115,7 @@ function openExWindow(exIdx){
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
     h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
     h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+gi+')">★ PB</button>';
     h+='</div>';
   // ── Reps only (no weight) ──
@@ -2092,7 +2128,7 @@ function openExWindow(exIdx){
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
-    h+='<button class="btn btn-acc" onclick="logSetFromWindow('+gi+')">Done ✓</button>';
+    h+='<button class="btn btn-acc" onclick="logSetFromWindow('+gi+')">Done</button>';
   // ── Reps + weight ──
   } else if(nextSet){
     // Divider
@@ -2193,6 +2229,18 @@ function isExDone(exIdx){
 function logSetFromWindow(globalIdx){
   var wx=S.wx;if(!wx)return;
   var set=wx.sets[globalIdx];if(!set||set.done)return;
+  // Flash Done! ✓ on the button for 2s before closing
+  var btn=document.querySelector('[onclick*="logSetFromWindow('+globalIdx+')"]');
+  if(btn){
+    btn.textContent='Done! ✓';btn.disabled=true;
+    setTimeout(function(){doLogSet(globalIdx);},1200);
+    return;
+  }
+  doLogSet(globalIdx);
+}
+function doLogSet(globalIdx){
+  var wx=S.wx;if(!wx)return;
+  var set=wx.sets[globalIdx];if(!set||set.done)return;
   var kg=wx._pendingKg!==undefined?wx._pendingKg:0;
   var reps=wx._pendingReps!==undefined?wx._pendingReps:set.reps;
   set.done=true;set.kg=kg;set.reps=reps;
@@ -2214,7 +2262,7 @@ function logSetFromWindow(globalIdx){
   if(restSecs>0)startRestCircle(restSecs);
   // Redraw list
   setTimeout(function(){draw();},300);
-}
+} // end doLogSet
 
 function logTimedSet(exIdx){
   var wx=S.wx;if(!wx)return;
@@ -2355,6 +2403,7 @@ function renderRestCircle(rem,total){
       if(S.wx){S.wx.restActive=false;sv();}
       if(_restCircleTick){clearInterval(_restCircleTick);_restCircleTick=null;}
       removeRestCircle();draw();
+      setTimeout(function(){autoOpenNextEx();},350);
     }
   });
 
@@ -3303,8 +3352,8 @@ function draw(){
   if(S.tab==='today'&&!S.wx){
     var fab=document.createElement('div');
     fab.id='fab-start';
-    var fabX=S._fabX!==null&&S._fabX!==undefined?S._fabX:(window.innerWidth/2-44);
-    var fabY=S._fabY!==null&&S._fabY!==undefined?S._fabY:(window.innerHeight-160);
+    var fabX=S._fabX!==null&&S._fabX!==undefined?S._fabX:(window.innerWidth-88-16);
+    var fabY=S._fabY!==null&&S._fabY!==undefined?S._fabY:(window.innerHeight-88-80);
     Object.assign(fab.style,{
       position:'fixed',left:fabX+'px',top:fabY+'px',
       width:'88px',height:'88px',borderRadius:'44px',
