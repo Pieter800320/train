@@ -1252,9 +1252,9 @@ var CONGRATS=[
   'Recovery starts now — you’ve earned it.',
   'Hard work? Check. Done. ✅',
   'That session won’t forget you.',
-  'The only bad workout is the one that didn’t happen — yours happened!',
+  'The only bad workout is the one that didn’t happen — yours happened.',
   'You just made yesterday’s you proud.',
-  'Rest up. Tomorrow you go again. 🎯',
+  'Rest up. Tomorrow you go again. ',
   'Pain is temporary, progress is permanent.',
   'Discipline is freedom. Today you were free.',
   'Another brick in the wall of gains. 🧱'
@@ -1274,18 +1274,45 @@ function finishSession(){
     if(cl.hist.length%7===0&&cl.plan)advancePlanWeek();
     sv();
   }
+  window._cancelWx=S.wx; // store globally for cancel restore
   S.wx=null;sv();
   // Show celebration sheet
   var msg=CONGRATS[Math.floor(Math.random()*CONGRATS.length)];
   var h='<div style="padding:0 20px 30px;text-align:center">';
-  h+='<div style="font-size:52px;margin-bottom:8px">✅</div>';
+  h+='<div style="font-size:72px;font-weight:900;color:var(--acc);line-height:1;margin-bottom:8px">✓</div>';
   h+='<div style="font-size:22px;font-weight:800;color:var(--tx);margin-bottom:8px">Session Complete!</div>';
   h+='<div style="font-size:14px;font-weight:600;color:var(--acc);margin-bottom:6px">'+focus+'</div>';
   h+='<div style="font-size:13px;color:var(--tx2);margin-bottom:16px">'+doneSets+' sets · '+duration+' min</div>';
   h+='<div style="font-size:16px;color:var(--tx);font-style:italic;margin-bottom:24px;line-height:1.5">“'+msg+'”</div>';
-  h+='<button class="btn btn-acc" onclick="closeSheet();S.tab=\'home\';sv();draw()">Back to Home</button>';
+  h+='<button class="btn btn-acc" onclick="window._cancelWx=null;closeSheet();S.tab=\'home\';sv();draw()">Back to Home</button>';
+  h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="cancelFinishSession()">Cancel</button>';
   h+='</div>';
+  var sheet=document.getElementById('sheet');
+  var ov=document.getElementById('sheet-overlay');
   openSheet(h,null);
+  // Prevent swipe-to-dismiss on this sheet
+  if(ov)ov.onclick=null;
+  if(sheet){sheet._noSwipe=true;}
+}
+
+function cancelFinishSession(){
+  // Force close the sheet (bypass _noSwipe)
+  var sheet=document.getElementById('sheet');
+  var ov=document.getElementById('sheet-overlay');
+  if(sheet){sheet._noSwipe=false;sheet.classList.remove('show');}
+  if(ov)ov.classList.remove('show');
+  // Undo the history save
+  var cl=C();
+  if(cl.hist&&cl.hist.length>0){
+    cl.hist.pop();
+    cl.day=Math.max(0,(cl.day||1)-1);
+  }
+  // Restore the session exactly as it was
+  if(window._cancelWx){
+    S.wx=window._cancelWx;
+    window._cancelWx=null;
+  }
+  sv();S.tab='today';draw();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1388,13 +1415,15 @@ function openSheet(html,title){
   initSheetsBindings();
 }
 function closeSheet(){
-  document.getElementById('sheet').classList.remove('show');
+  var sheet=document.getElementById('sheet');
+  if(sheet)sheet._noSwipe=false;
+  sheet.classList.remove('show');
   document.getElementById('sheet-overlay').classList.remove('show');
 }
 function initSheetsBindings(){
   var overlay=document.getElementById('sheet-overlay');
   var sheet=document.getElementById('sheet');
-  overlay.onclick=function(){closeSheet();};
+  overlay.onclick=function(){if(sheet._noSwipe)return;closeSheet();};
   var dragZone=document.getElementById('sheet-drag-zone')||sheet;
   var startY=0,lastY=0,lastT=0,dragging=false;
   function onStart(y){startY=y;lastY=y;lastT=Date.now();dragging=true;sheet.style.transition='none';}
@@ -1409,7 +1438,7 @@ function initSheetsBindings(){
     var dy=y-startY;
     var dt=Date.now()-lastT;
     var velocity=dt>0?Math.abs(lastY-startY)/dt:0;
-    if(dy>100||velocity>0.4){closeSheet();}
+    if((dy>100||velocity>0.4)&&!sheet._noSwipe){closeSheet();}
   }
   dragZone.addEventListener('touchstart',function(e){onStart(e.touches[0].clientY);},{passive:true});
   dragZone.addEventListener('touchmove',function(e){onMove(e.touches[0].clientY);},{passive:true});
@@ -2154,7 +2183,7 @@ function openExWindow(exIdx){
 
     // Done + PB buttons
     h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+globalIdx+')">Done \u2713</button>';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+globalIdx+')">Done</button>';
     h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+globalIdx+')">\u2605 PB</button>';
     h+='</div>';
   }
