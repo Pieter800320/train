@@ -1502,6 +1502,18 @@ function obFinish(){
 
 // ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════════
+// LINKIFY — convert URLs in text to clickable links
+// ═══════════════════════════════════════════════════════════════
+function linkify(text){
+  if(!text)return '';
+  return text.replace(/(https?:\/\/[^\s<]+)/g,function(url){
+    var label=url.replace(/^https?:\/\//,'').replace(/\/$/,'');
+    if(label.length>40)label=label.substring(0,40)+'…';
+    return '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--acc);text-decoration:underline;word-break:break-all">'+label+'</a>';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
 // THEME APPLICATION
 // ═══════════════════════════════════════════════════════════════
 var THEMES={
@@ -1580,9 +1592,9 @@ function homeV(){
   h+='<div class="lbl lbl-acc" style="margin-bottom:3px">NOTICE</div>';
   if(hasNotice){
     if(S.notice.title)h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px">'+S.notice.title+'</div>';
-    h+='<div style="font-size:12px;color:var(--tx2);line-height:1.5">'+S.notice.body+'</div>';
+    h+='<div style="font-size:12px;color:var(--tx2);line-height:1.5">'+linkify(S.notice.body)+'</div>';
   } else if(noticeTip){
-    h+='<div style="font-size:12px;color:var(--tx2);line-height:1.5">'+noticeTip+'</div>';
+    h+='<div style="font-size:12px;color:var(--tx2);line-height:1.5">'+linkify(noticeTip)+'</div>';
   } else {
     h+='<div style="font-size:12px;color:var(--mu);line-height:1.5;font-style:italic">No current notices.</div>';
   }
@@ -1753,6 +1765,7 @@ function openJournalView(){
   h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--acc)">'+total+'</div><div class="lbl">Total sessions</div></div>';
   h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--acc)">'+prCount+'</div><div class="lbl">Personal Bests</div></div>';
   h+='</div>';
+  h+='<button class="btn btn-ghost" style="margin-bottom:20px;font-size:12px" onclick="exportClientData()">⤓ Download my data</button>';
 
   // PR table
   var prs=Object.keys(cl.pr||{});
@@ -1806,6 +1819,106 @@ function clearAllHistory(){
 function clearHistoryItem(idx){
   var cl=C();
   cl.hist.splice(idx,1);sv();openJournalView();
+}
+
+function exportClientData(){
+  var cl=C();
+  var tpl=ACTIVE_TPL();
+  var banner=planBannerData();
+  var date=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+
+  // Build HTML export
+  var h='<!DOCTYPE html><html><head><meta charset="UTF-8">';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">';
+  h+='<title>Falkenburg — '+(cl.name||'Athlete')+' — '+date+'</title>';
+  h+='<style>';
+  h+='body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1a1a1a;background:#f8f9fb}';
+  h+='h1{font-size:24px;font-weight:900;margin-bottom:4px}';
+  h+='h2{font-size:16px;font-weight:700;margin:24px 0 8px;color:#555;text-transform:uppercase;letter-spacing:1px}';
+  h+='h3{font-size:14px;font-weight:700;margin:12px 0 4px}';
+  h+='.card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px;margin-bottom:8px}';
+  h+='.lbl{font-size:11px;color:#888;margin-top:2px}';
+  h+='.badge{display:inline-block;font-size:10px;font-weight:700;background:#f0f0f0;border-radius:6px;padding:2px 8px;margin-right:4px}';
+  h+='.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0}';
+  h+='.row:last-child{border-bottom:none}';
+  h+='</style></head><body>';
+
+  // Header
+  h+='<h1>'+( cl.name||'Athlete')+'</h1>';
+  h+='<div class="lbl">Exported from Falkenburg • '+date+'</div>';
+
+  // Active programme
+  h+='<h2>Active Programme</h2>';
+  h+='<div class="card">';
+  h+='<h3>'+tpl.name+'</h3>';
+  h+='<div class="lbl">'+tpl.days.length+' days/week • ~'+tpl.duration+' min</div>';
+  if(banner){
+    h+='<div style="margin-top:8px">';
+    h+='<span class="badge">'+banner.planName+'</span>';
+    h+='<span class="badge">Week '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
+    h+='<span class="badge">RPE '+banner.rpe+'</span>';
+    h+='</div>';
+  }
+  h+='</div>';
+
+  // Sessions
+  tpl.days.forEach(function(day){
+    h+='<div class="card">';
+    h+='<h3>'+day.focus+'</h3>';
+    h+='<div class="lbl">'+day.label+'</div>';
+    var phases=['warmup','strength','accessory','core','cardio','mobility','cooldown'];
+    var phaseLabels={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+    phases.forEach(function(ph){
+      var exs=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
+      if(!exs.length)return;
+      h+='<div style="font-size:10px;font-weight:700;color:#888;margin:8px 0 4px;text-transform:uppercase">'+phaseLabels[ph]+'</div>';
+      exs.forEach(function(ex){
+        var vol=ex.vol||(ex.reps>0?ex.sets+'×'+ex.reps:'');
+        h+='<div class="row"><span style="font-size:13px">'+ex.name+'</span><span style="font-size:12px;color:#555">'+vol+(ex.rest?' • '+ex.rest+'s':'')+'</span></div>';
+      });
+    });
+    h+='</div>';
+  });
+
+  // Personal Bests
+  var prs=Object.keys(cl.pr||{});
+  if(prs.length>0){
+    h+='<h2>Personal Bests</h2>';
+    h+='<div class="card">';
+    prs.forEach(function(name){
+      var pr=cl.pr[name];
+      var val=typeof pr==='object'?pr.kg+'kg × '+pr.reps+(pr.date?' • '+new Date(pr.date).toLocaleDateString():''):pr+'kg';
+      h+='<div class="row"><span style="font-size:13px;font-weight:600">'+name+'</span><span style="font-size:12px;color:#555">'+val+'</span></div>';
+    });
+    h+='</div>';
+  }
+
+  // Session history
+  var hist=cl.hist||[];
+  if(hist.length>0){
+    h+='<h2>Session History ('+hist.length+' sessions)</h2>';
+    h+='<div class="card">';
+    hist.slice().reverse().forEach(function(s){
+      var d=new Date(s.date).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+      h+='<div class="row"><div><div style="font-size:13px;font-weight:600">'+s.focus+'</div><div class="lbl">'+d+'</div></div>';
+      h+='<div style="text-align:right"><div style="font-size:13px;font-weight:700">'+s.duration+' min</div><div class="lbl">'+s.sets+' sets</div></div></div>';
+    });
+    h+='</div>';
+  }
+
+  h+='<div style="text-align:center;margin-top:24px;font-size:11px;color:#aaa">Generated by Falkenburg • '+date+'</div>';
+  h+='</body></html>';
+
+  // Trigger download
+  var blob=new Blob([h],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='Falkenburg_'+(cl.name||'Athlete').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ═══════════════════════════════════════════════════════════════
