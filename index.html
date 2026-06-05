@@ -6,7 +6,22 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Falkenburg">
-<meta name="theme-color" content="#D4691E">
+<meta name="theme-color" content="#D4691E" id="theme-meta">
+<script>
+// Set theme-color immediately from stored state before first paint
+(function(){
+  try{
+    var s=JSON.parse(localStorage.getItem('falken_v1')||'{}');
+    var themes={amber:{dark:'#E07B2A',light:'#B85510'},teal:{dark:'#1D9E75',light:'#0F6E56'},
+      blue:{dark:'#3B82F6',light:'#1D4ED8'},coral:{dark:'#E05A3A',light:'#B83E20'},
+      violet:{dark:'#7C6FD4',light:'#5548B0'},forest:{dark:'#4A8C5C',light:'#2D6B42'},
+      slate:{dark:'#64748B',light:'#475569'}};
+    var key=s.colourTheme||'amber';var isDark=s.theme!=='light';
+    var colour=(themes[key]||themes.amber)[isDark?'dark':'light'];
+    document.getElementById('theme-meta').setAttribute('content',colour);
+  }catch(e){}
+})();
+</script>
 
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -1569,7 +1584,7 @@ function openAvatarSheet(){
   var cl=C();
   var h='<div style="padding:0 20px 30px">';
   h+='<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">';
-  h+='<div style="width:52px;height:52px;border-radius:26px;background:'+(cl.colour||'var(--acc)')+';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0">'+(cl.initials||'?')+'</div>';
+  h+='<div style="width:52px;height:52px;border-radius:26px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0">'+(cl.initials||'?')+'</div>';
   h+='<div><div style="font-size:16px;font-weight:700;color:var(--tx)">'+(cl.name||'Athlete')+'</div>';
   h+='<div class="lbl" style="margin-top:2px">'+(cl.tplKey?getTPL(cl.tplKey).name:'No programme set')+'</div></div>';
   h+='</div>';
@@ -1691,25 +1706,41 @@ function openJournalView(){
   }
 
   // Session history — last 30
-  h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--acc);margin-bottom:8px">SESSION HISTORY</div>';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+  h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--acc)">SESSION HISTORY</div>';
+  if(cl.hist&&cl.hist.length>0){
+    h+='<button class="btn btn-ghost btn-sm" style="font-size:10px;color:var(--mu)" onclick="clearAllHistory()">Clear All</button>';
+  }
+  h+='</div>';
   if(!cl.hist||cl.hist.length===0){
     h+='<div class="card"><div style="color:var(--mu);text-align:center;padding:20px 0;font-size:13px">No sessions yet. Start your first one from the Today tab.</div></div>';
   } else {
     var sessions=cl.hist.slice(-30).reverse();
     sessions.forEach(function(s,i){
+      var actualIdx=cl.hist.length-1-i;
       var d=new Date(s.date);
       h+='<div class="card" style="margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">';
-      h+='<div><div style="font-size:13px;font-weight:600">'+s.focus+'</div>';
+      h+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+s.focus+'</div>';
       h+='<div class="lbl">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})+'</div>';
       if(s.plan)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+s.plan+'</div>';
       h+='</div>';
-      h+='<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--acc)">'+s.duration+'min</div>';
+      h+='<div style="text-align:right;margin-right:8px"><div style="font-size:14px;font-weight:700;color:var(--acc)">'+s.duration+'min</div>';
       h+='<div class="lbl">'+s.sets+' sets</div></div>';
+      h+='<button onclick="clearHistoryItem('+actualIdx+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:4px;flex-shrink:0">✕</button>';
       h+='</div>';
     });
   }
   h+='</div>';
   openSheet(h,'Journal — '+(cl.name||'Athlete'));
+}
+function clearAllHistory(){
+  if(confirm('Clear all session history? This cannot be undone.')){
+    C().hist=[];sv();openJournalView();
+  }
+}
+function clearHistoryItem(idx){
+  var cl=C();
+  cl.hist.splice(idx,1);sv();openJournalView();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1796,7 +1827,7 @@ function todayV(){
     h+='<button class="btn btn-acc" onclick="finishSession()">✓ Finish Session</button>';
   }
   h+='</div>';
-  h+='<div style="height:20px"></div>';
+  h+='<div style="height:80px"></div>';
   return h;
 }
 
@@ -2281,6 +2312,8 @@ function startRestCircle(totalSecs){
       clearInterval(_restCircleTick);_restCircleTick=null;
       removeRestCircle();
       draw();
+      // Auto-open next exercise window
+      setTimeout(function(){autoOpenNextEx();},350);
     }
   },500);
 }
@@ -2352,6 +2385,18 @@ function renderRestCircle(rem,total){
 function removeRestCircle(){
   var el=document.getElementById('rest-circle');
   if(el&&el.parentNode)el.parentNode.removeChild(el);
+}
+function autoOpenNextEx(){
+  var wx=S.wx;if(!wx)return;
+  // Find first incomplete exercise
+  var nextIdx=-1;
+  for(var i=0;i<wx.exercises.length;i++){
+    var exSets=wx.sets.filter(function(s){return s.exIdx===i;});
+    var done=exSets.filter(function(s){return s.done;}).length;
+    if(done<exSets.length){nextIdx=i;break;}
+  }
+  if(nextIdx>=0)openExWindow(nextIdx);
+  else draw(); // all done
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -3251,6 +3296,55 @@ function draw(){
   document.querySelectorAll('.tb').forEach(function(tb){
     tb.classList.toggle('on',tb.dataset.tab===S.tab);
   });
+
+  // Floating Start Session button (TODAY only, no active session)
+  var existingFab=document.getElementById('fab-start');
+  if(existingFab)existingFab.parentNode.removeChild(existingFab);
+  if(S.tab==='today'&&!S.wx){
+    var fab=document.createElement('div');
+    fab.id='fab-start';
+    var fabX=S._fabX!==null&&S._fabX!==undefined?S._fabX:(window.innerWidth/2-44);
+    var fabY=S._fabY!==null&&S._fabY!==undefined?S._fabY:(window.innerHeight-160);
+    Object.assign(fab.style,{
+      position:'fixed',left:fabX+'px',top:fabY+'px',
+      width:'88px',height:'88px',borderRadius:'44px',
+      background:'var(--acc-bg)',border:'1px solid var(--acc-brd)',
+      color:'var(--acc)',display:'flex',alignItems:'center',justifyContent:'center',
+      flexDirection:'column',gap:'2px',
+      fontSize:'10px',fontWeight:'800',letterSpacing:'.5px',
+      cursor:'pointer',zIndex:'150',
+      boxShadow:'0 4px 20px rgba(0,0,0,.4)',userSelect:'none',touchAction:'none'
+    });
+    fab.innerHTML='<span style="font-size:20px">▶</span><span>START</span>';
+    // Tap to start
+    var _fabDragStart={x:0,y:0};var _fabDragging=false;var _fabMoved=false;
+    var _fabElStart={x:fabX,y:fabY};
+    function fabDown(cx,cy){_fabDragging=true;_fabMoved=false;_fabDragStart={x:cx,y:cy};_fabElStart={x:parseInt(fab.style.left),y:parseInt(fab.style.top)};fab.style.transition='none';}
+    function fabMove(cx,cy){
+      if(!_fabDragging)return;
+      var dx=cx-_fabDragStart.x;var dy=cy-_fabDragStart.y;
+      if(Math.abs(dx)>5||Math.abs(dy)>5)_fabMoved=true;
+      var nx=Math.max(0,Math.min(window.innerWidth-88,_fabElStart.x+dx));
+      var ny=Math.max(0,Math.min(window.innerHeight-88,_fabElStart.y+dy));
+      fab.style.left=nx+'px';fab.style.top=ny+'px';
+      S._fabX=nx;S._fabY=ny;
+    }
+    function fabUp(cx,cy){
+      if(!_fabDragging)return;_fabDragging=false;fab.style.transition='';
+      if(!_fabMoved){
+        // Tap — start session + open first exercise
+        startSession();draw();
+        setTimeout(function(){autoOpenNextEx();},300);
+      }
+    }
+    fab.addEventListener('touchstart',function(e){fabDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+    fab.addEventListener('touchmove',function(e){fabMove(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();},{passive:false});
+    fab.addEventListener('touchend',function(e){fabUp(e.changedTouches[0].clientX,e.changedTouches[0].clientY);});
+    fab.addEventListener('mousedown',function(e){fabDown(e.clientX,e.clientY);});
+    document.addEventListener('mousemove',function(e){if(_fabDragging)fabMove(e.clientX,e.clientY);});
+    document.addEventListener('mouseup',function(e){if(_fabDragging)fabUp(e.clientX,e.clientY);});
+    document.getElementById('app').appendChild(fab);
+  }
 
   bindScreen();initAdminLongPress();
 
