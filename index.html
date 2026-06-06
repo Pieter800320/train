@@ -344,6 +344,20 @@ var PLANS = [
     {label:'Power — Peak',theme:'peak',rpe:9,rir:1,weightPct:95,volMod:1.0,tip:'Near-maximal power. Trust everything you have built.'},
     {label:'Taper',theme:'deload',rpe:6,rir:4,weightPct:90,volMod:0.5,tip:'Back off. Arrive at your sport sharp and fresh.'}
   ]}
+  ,{key:'pull_12',name:'Pull-Up Progression 12-week',desc:'Skill-specific programme — stuck clients to unassisted pull-ups and beyond',cyclic:false,weeks:[
+    {label:'Phase 1 — Activate',theme:'learn',rpe:6,rir:4,weightPct:60,volMod:0.7,tip:'Build the foundation. Scapular control and eccentric strength before anything else. No ego.'},
+    {label:'Phase 1 — Activate',theme:'learn',rpe:6,rir:4,weightPct:65,volMod:0.7,tip:'Negatives should feel controlled. 3-4 seconds on the way down, every rep.'},
+    {label:'Phase 1 — Groove',theme:'learn',rpe:7,rir:3,weightPct:70,volMod:0.8,tip:'You should feel the lats now. If your arms are doing all the work, go back to scapular pull-ups first.'},
+    {label:'Phase 2 — Build',theme:'build',rpe:7,rir:3,weightPct:75,volMod:0.9,tip:'Assisted or banded reps. Use the minimum assistance that lets you complete the set with good form.'},
+    {label:'Phase 2 — Build',theme:'build',rpe:7,rir:3,weightPct:80,volMod:0.9,tip:'Reduce band tension by one level this week if you hit all reps cleanly last week.'},
+    {label:'Phase 2 — Build',theme:'build',rpe:8,rir:2,weightPct:85,volMod:1.0,tip:'You should be close to unassisted now. Test one clean rep at the start of each session before the working sets.'},
+    {label:'Phase 2 — Strengthen',theme:'build',rpe:8,rir:2,weightPct:88,volMod:1.0,tip:'Full unassisted reps if possible. If not, use the lightest band. Quality over quantity.'},
+    {label:'Phase 2 — Deload',theme:'deload',rpe:5,rir:5,weightPct:70,volMod:0.4,tip:'Active rest. Light dead hangs and scapular work only. Let the tendons recover.'},
+    {label:'Phase 3 — Consolidate',theme:'progress',rpe:8,rir:2,weightPct:90,volMod:1.0,tip:'Unassisted only now. If you can\'t complete a rep cleanly, finish the set with a 3-second negative.'},
+    {label:'Phase 3 — Consolidate',theme:'progress',rpe:8,rir:2,weightPct:92,volMod:1.0,tip:'Add one rep per set versus last week if form is solid.'},
+    {label:'Phase 3 — Load',theme:'progress',rpe:9,rir:1,weightPct:95,volMod:1.0,tip:'Weighted pull-ups if you can do 8+ unassisted. A 2.5kg plate is enough to feel a difference.'},
+    {label:'Phase 3 — Peak',theme:'peak',rpe:9,rir:1,weightPct:100,volMod:1.0,tip:'Test your max set. Record it. You\'ve earned it.'}
+  ]}
 ];
 
 function getPlanByKey(k){
@@ -1104,6 +1118,140 @@ var TPL = [
   ]}
 ]}
 
+
+,
+// ── STRENGTH (DUMBBELL) ─────────────────────────────────────────
+
+{key:'str_db3',name:'Dumbbell Strength 3-day',cat:'strength',desc:'Push / Pull+Hinge / Legs — barbell-free, dumbbells and cables only',duration:55,defaultPlan:'wave_3_1',compatiblePlans:['wave_3_1','linear','peaking'],days:[
+  {label:'Session A',focus:'Push',exercises:[
+    ex('Band Pull-Apart',2,15,30,'warmup'),ex('Arm Circles',2,20,30,'warmup'),ex('Push-Up',2,10,45,'warmup'),
+    ex('Dumbbell Bench Press (Flat)',4,8,90,'strength','Keep shoulder blades pinched. Lower to chest level.'),
+    ex('Dumbbell Overhead Press (Standing)',3,8,90,'strength','Brace your core. Press in a straight line overhead.'),
+    ex('Dumbbell Bench Press (Incline)',3,10,75,'strength'),
+    ex('Cable Tricep Pushdown (Rope)',3,12,60,'accessory'),
+    ex('Dumbbell Lateral Raise',3,15,60,'accessory'),
+    ex('Doorway Pec Stretch',2,0,0,'cooldown','Hold 30 seconds each side.','30s')
+  ]},
+  {label:'Session B',focus:'Pull + Hinge',exercises:[
+    ex('Cat-Cow',2,10,30,'warmup'),ex('Hip Hinge (Wall Drill)',2,10,45,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Romanian Deadlift (Dumbbell)',4,8,90,'strength','Push hips back toward the wall. Soft knee. Weight follows.'),
+    ex('Dumbbell Row (Single-Arm)',4,8,90,'strength','Chest parallel to floor. Pull elbow to hip.'),
+    ex('Lat Pulldown (Wide Grip)',3,10,90,'strength'),
+    ex('Face Pull',3,15,60,'accessory'),
+    ex('Dumbbell Bicep Curl',3,12,60,'accessory'),
+    ex('Child\'s Pose',2,0,0,'cooldown','Hold 30 to 45 seconds.','45s')
+  ]},
+  {label:'Session C',focus:'Legs + Core',exercises:[
+    ex('Leg Swing (Forward)',2,10,30,'warmup'),ex('Glute Bridge (Bodyweight)',2,15,45,'warmup'),ex('Goblet Squat (Dumbbell)',2,8,45,'warmup','Primer sets only.'),
+    ex('Goblet Squat (Dumbbell)',4,8,90,'strength','Sit into your hips. Chest tall. Drive knees out.'),
+    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
+    ex('Bulgarian Split Squat (Dumbbell)',3,8,90,'strength','Front shin stays vertical. Control the descent.'),
+    ex('Plank',3,0,60,'core','Squeeze glutes. Do not let hips sag.','40s'),
+    ex('Dead Bug',3,8,60,'core'),
+    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s')
+  ]}
+]},
+
+// ── FOUNDATION HOME ─────────────────────────────────────────────
+
+{key:'fnd_home_db',name:'Beginner Home Dumbbells',cat:'foundation',desc:'Complete beginner — home training, dumbbells only, 3 days per week',duration:40,defaultPlan:'linear',compatiblePlans:['linear','maintenance'],days:[
+  {label:'Session A',focus:'Full Body — Push Pattern',exercises:[
+    exT('High Knees','1','90s',0,'warmup'),ex('Arm Circles',2,20,20,'warmup'),ex('Hip Circle',2,10,20,'warmup'),
+    ex('Goblet Squat (Dumbbell)',3,12,90,'strength','Sit into your hips. Chest tall. Heels flat.'),
+    ex('Dumbbell Bench Press (Flat)',3,10,90,'strength','Lie on the floor — a bench is not needed.'),
+    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength','Push hips back, not down. Feel the hamstrings load.'),
+    ex('Dumbbell Overhead Press (Seated)',3,12,90,'strength','Sit tall. Press straight up.'),
+    exT('Plank','3','25s',60,'core'),
+    exT('Walking','1','15min',0,'cardio'),
+    exT('Child\'s Pose','1','5min',0,'cooldown')
+  ]},
+  {label:'Session B',focus:'Full Body — Pull Pattern',exercises:[
+    exT('High Knees','1','90s',0,'warmup'),ex('Arm Circles',2,20,20,'warmup'),ex('Glute Bridge (Bodyweight)',2,12,20,'warmup'),
+    ex('Reverse Lunge (Dumbbell)',3,10,90,'strength','Step back, not forward. Keep chest tall.'),
+    ex('Dumbbell Row (Single-Arm)',3,12,90,'strength','Support on your knee. Pull elbow to hip.'),
+    ex('Hip Thrust (Dumbbell)',3,12,90,'strength','Rest upper back on sofa or bench. Drive hips up.'),
+    ex('Dumbbell Bicep Curl',3,12,75,'accessory'),
+    ex('Bird Dog',3,8,60,'core','Slow and controlled. Opposite arm and leg together.'),
+    exT('Walking','1','15min',0,'cardio'),
+    exT('Standing Hamstring Stretch','2','30s',15,'cooldown')
+  ]},
+  {label:'Session C',focus:'Full Body — Variety',exercises:[
+    exT('High Knees','1','90s',0,'warmup'),ex('Lateral Band Walk',2,12,20,'warmup'),ex('Hip Circle',2,10,20,'warmup'),
+    ex('Step-Up (Dumbbell)',3,10,90,'strength','Use a sturdy chair or step. Drive through the heel.'),
+    ex('Push-Up',3,8,90,'strength','Full range. Body in a straight line throughout.'),
+    ex('Single-Leg RDL (Dumbbell)',3,8,90,'strength','Light weight. Focus on balance and hip hinge.'),
+    ex('Dumbbell Lateral Raise',3,12,75,'accessory'),
+    ex('Dead Bug',3,8,60,'core'),
+    exT('Walking','1','15min',0,'cardio'),
+    exT('Kneeling Hip Flexor Stretch','2','30s',15,'cooldown'),
+    exT('Standing Calf Stretch','2','30s',15,'cooldown')
+  ]}
+]}
+
+
+,
+// ── PULL-UP PROGRESSION ─────────────────────────────────────────
+
+{key:'spt_pullup',name:'Pull-Up Progression',cat:'sport',desc:'Stuck on the same reps for months? 12-week skill programme — 2 sessions per week',duration:40,defaultPlan:'pull_12',compatiblePlans:['pull_12'],days:[
+  {label:'Session A',focus:'Pull-Up Skill + Volume',exercises:[
+    ex('Dead Hang',2,0,45,'warmup','Hang fully. Breathe. Feel the lats load.','20s'),
+    ex('Scapular Pull-Up',3,8,60,'activation','No arm bend. Just depress and retract the shoulder blades. This is the foundation of every pull-up.'),
+    ex('Band Pull-Apart',2,15,30,'activation'),
+    ex('Assisted Pull-Up',4,6,120,'strength','Use the minimum assistance to complete 6 clean reps. Dead hang at the bottom every rep. Chin clears bar at the top.'),
+    ex('Pull-Up',4,0,120,'strength','Unassisted if possible. If not, finish remaining reps as slow negatives — 3-4 seconds down.','max'),
+    ex('Seated Cable Row',3,12,75,'accessory','Reinforce the pulling pattern. Squeeze shoulder blades at the end of each rep.'),
+    ex('Push-Up',3,12,75,'strength','Antagonist work. Healthy shoulders need pushing as much as pulling.'),
+    ex('Face Pull',3,15,60,'accessory'),
+    ex('Kneeling Lat Stretch',2,0,0,'cooldown',null,'30s'),
+    exT('Dead Hang','1','30s',0,'cooldown','Passive hang. Decompress the spine.')
+  ]},
+  {label:'Session B',focus:'Hang Endurance + Negatives',exercises:[
+    ex('Dead Hang',3,0,60,'warmup','Accumulate 30 seconds each set. Build to 60 seconds over the programme.','30s'),
+    ex('Scapular Pull-Up',2,10,45,'activation'),
+    ex('Dead Hang (Hangboard)',3,0,120,'strength','Open hand, shoulder-width. 20 to 30 seconds. Rest 2 minutes between sets.','25s'),
+    ex('Pull-Up',5,0,150,'strength','Slow negatives — 4 seconds down, every rep. Use assistance only if you cannot control the descent. Volume day: more sets, fewer reps is fine.','neg'),
+    ex('Lat Pulldown (Wide Grip)',3,10,90,'accessory','Full stretch at the top. Pull elbows to pockets, not behind the body.'),
+    ex('Straight-Arm Pulldown',3,12,60,'accessory','Isolates the lats without the biceps taking over. Keep a slight elbow bend throughout.'),
+    ex('Rear Delt Fly (Dumbbell)',3,15,60,'accessory'),
+    ex('External Rotation (Cable)',2,15,45,'activation','Rotator cuff health. Light weight, full range.'),
+    exT('Dead Hang','2','20s',30,'cooldown','End every session here. Shoulders love it.')
+  ]}
+]}
+
+,
+// ── FOUNDATION 2-DAY ────────────────────────────────────────────
+
+{key:'fnd_2day',name:'Full Body 2-day',cat:'foundation',desc:'Two full-body sessions per week — all patterns, every session, gym based',duration:60,defaultPlan:'linear',compatiblePlans:['linear','maintenance'],days:[
+  {label:'Session A',focus:'Full Body A',exercises:[
+    exT('High Knees','1','2min',0,'warmup'),ex('Arm Circles',2,20,20,'warmup'),
+    ex('Hip Hinge (Wall Drill)',2,10,30,'warmup'),ex('Leg Swing (Forward)',2,10,30,'warmup'),
+    ex('Back Squat',4,8,120,'strength','Sit between your knees. Drive the floor away. Keep chest tall.'),
+    ex('Romanian Deadlift (Barbell)',4,8,120,'strength','Push hips back first. Bar stays close to legs. Squeeze glutes at the top.'),
+    ex('Barbell Bench Press (Flat)',4,8,120,'strength','Tuck elbows 45 degrees. Full range. Control the descent.'),
+    ex('Barbell Row (Overhand)',4,8,120,'strength','Hinge to 45 degrees. Pull bar to lower chest.'),
+    ex('Dumbbell Lateral Raise',3,15,60,'accessory'),
+    ex('Plank',3,0,60,'core','Squeeze every muscle. This is not a rest.','40s'),
+    ex('Dead Bug',3,8,60,'core'),
+    exT('Walking','1','10min',0,'cardio'),
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Child\'s Pose',2,0,0,'cooldown',null,'45s')
+  ]},
+  {label:'Session B',focus:'Full Body B',exercises:[
+    exT('High Knees','1','2min',0,'warmup'),ex('Glute Bridge (Bodyweight)',2,15,20,'warmup'),
+    ex('Goblet Squat (Dumbbell)',2,10,30,'warmup','Primer sets only.'),
+    ex('Conventional Deadlift',4,6,150,'strength','Lat engagement first. Brace hard. Drive through the floor.'),
+    ex('Leg Press',3,12,90,'strength'),
+    ex('Dumbbell Bench Press (Incline)',4,10,90,'strength'),
+    ex('Pull-Up',4,8,120,'strength','Full hang at the bottom. Chin over bar at the top. Use assistance if needed.'),
+    ex('Dumbbell Overhead Press (Seated)',3,10,90,'strength'),
+    ex('Face Pull',3,15,60,'accessory'),
+    ex('Bird Dog',3,10,60,'core'),
+    exT('Walking','1','10min',0,'cardio'),
+    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Kneeling Lat Stretch',2,0,0,'cooldown',null,'30s')
+  ]}
+]}
 ]; // end TPL
 
 // TPL lookup map
@@ -2588,7 +2736,7 @@ function startRestCircle(totalSecs){
 function renderRestCircle(rem,total){
   removeRestCircle();
   var app=document.getElementById('app');if(!app)return;
-  var SIZE=72;var r=28;var circ=2*Math.PI*r;var pct=rem/total;
+  var SIZE=88;var r=36;var circ=2*Math.PI*r;var pct=rem/total;
   var el=document.createElement('div');
   el.id='rest-circle';
   // Position
@@ -2603,7 +2751,7 @@ function renderRestCircle(rem,total){
     '<svg width="'+SIZE+'" height="'+SIZE+'" viewBox="0 0 '+SIZE+' '+SIZE+'" style="position:absolute;top:0;left:0">'+
       '<circle cx="'+(SIZE/2)+'" cy="'+(SIZE/2)+'" r="'+r+'" fill="var(--acc-bg)" stroke="var(--acc-brd)" stroke-width="1.5"/>'+
       '<circle id="rest-circle-ring" cx="'+(SIZE/2)+'" cy="'+(SIZE/2)+'" r="'+r+'"'+
-        ' fill="none" stroke="var(--acc)" stroke-width="3"'+
+        ' fill="none" stroke="var(--acc)" stroke-width="3.5"'+
         ' stroke-dasharray="'+circ+'"'+
         ' stroke-dashoffset="'+(circ*(1-pct))+'"'+
         ' stroke-linecap="round"'+
@@ -2611,9 +2759,9 @@ function renderRestCircle(rem,total){
         ' style="transition:stroke-dashoffset .5s linear"/>'+
     '</svg>'+
     '<div style="position:absolute;top:0;left:0;width:100%;height:100%;'+
-      'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;pointer-events:none">'+
-      '<div style="font-size:7px;font-weight:800;letter-spacing:1px;color:var(--acc);opacity:.7;margin-bottom:-2px">REST</div>'+
-      '<div id="rest-circle-secs" style="font-size:17px;font-weight:900;color:var(--acc)">'+rem+'</div>'+
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:none">'+
+      '<div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--acc);opacity:.8">REST</div>'+
+      '<div id="rest-circle-secs" style="font-size:22px;font-weight:900;color:var(--acc);line-height:1">'+rem+'</div>'+
       '</div>';
 
   // Tap to skip
@@ -2763,7 +2911,7 @@ function programsV(){
   var planGroups=[
     {key:'periodisation',label:'Periodisation',keys:['wave_3_1','wave_5_1','peaking']},
     {key:'linear',      label:'Linear',       keys:['linear','maintenance']},
-    {key:'specialised', label:'Specialised',  keys:['rehab_12','sport_12']}
+    {key:'specialised', label:'Specialised',  keys:['rehab_12','sport_12','pull_12']}
   ];
   planGroups.forEach(function(grp){
     var grpPlans=PLANS.filter(function(p){return grp.keys.indexOf(p.key)>=0;});
@@ -3606,25 +3754,25 @@ function draw(){
   if(S.tab==='today'&&!S.wx){
     var fab=document.createElement('div');
     fab.id='fab-start';
-    var fabX=S._fabX!==null&&S._fabX!==undefined?S._fabX:(window.innerWidth-72-16);
-    var fabY=S._fabY!==null&&S._fabY!==undefined?S._fabY:(window.innerHeight-72-80);
+    var fabX=S._fabX!==null&&S._fabX!==undefined?S._fabX:(window.innerWidth-88-16);
+    var fabY=S._fabY!==null&&S._fabY!==undefined?S._fabY:(window.innerHeight-88-80);
     Object.assign(fab.style,{
       position:'fixed',left:fabX+'px',top:fabY+'px',
-      width:'72px',height:'72px',
+      width:'88px',height:'88px',
       zIndex:'150',cursor:'pointer',userSelect:'none',touchAction:'none'
     });
-    var _fabR=28;var _fabCirc=2*Math.PI*_fabR;
+    var _fabR=36;var _fabCirc=2*Math.PI*_fabR;
     fab.innerHTML=
-      '<svg width="72" height="72" viewBox="0 0 72 72" style="position:absolute;top:0;left:0">'+
-        '<circle cx="36" cy="36" r="'+_fabR+'" fill="var(--acc-bg)" stroke="var(--acc-brd)" stroke-width="1.5"/>'+
-        '<circle cx="36" cy="36" r="'+_fabR+'" fill="none" stroke="var(--acc)" stroke-width="3"'+
+      '<svg width="88" height="88" viewBox="0 0 88 88" style="position:absolute;top:0;left:0">'+
+        '<circle cx="44" cy="44" r="'+_fabR+'" fill="var(--acc-bg)" stroke="var(--acc-brd)" stroke-width="1.5"/>'+
+        '<circle cx="44" cy="44" r="'+_fabR+'" fill="none" stroke="var(--acc)" stroke-width="3.5"'+
           ' stroke-dasharray="'+_fabCirc+'" stroke-dashoffset="0"'+
-          ' stroke-linecap="round" transform="rotate(-90 36 36)"/>'+
+          ' stroke-linecap="round" transform="rotate(-90 44 44)"/>'+
       '</svg>'+
       '<div style="position:absolute;top:0;left:0;width:100%;height:100%;'+
-        'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;pointer-events:none">'+
-        '<div style="font-size:20px;color:var(--acc);line-height:1;margin-bottom:-1px">▶</div>'+
-        '<div style="font-size:7px;font-weight:800;letter-spacing:1px;color:var(--acc);opacity:.7">START</div>'+
+        'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:none">'+
+        '<div style="font-size:26px;color:var(--acc);line-height:1">▶</div>'+
+        '<div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--acc);opacity:.8">START</div>'+
       '</div>';
     // Tap to start
     var _fabDragStart={x:0,y:0};var _fabDragging=false;var _fabMoved=false;
@@ -3634,8 +3782,8 @@ function draw(){
       if(!_fabDragging)return;
       var dx=cx-_fabDragStart.x;var dy=cy-_fabDragStart.y;
       if(Math.abs(dx)>5||Math.abs(dy)>5)_fabMoved=true;
-      var nx=Math.max(0,Math.min(window.innerWidth-88,_fabElStart.x+dx));
-      var ny=Math.max(0,Math.min(window.innerHeight-88,_fabElStart.y+dy));
+      var nx=Math.max(0,Math.min(window.innerWidth-100,_fabElStart.x+dx));
+      var ny=Math.max(0,Math.min(window.innerHeight-100,_fabElStart.y+dy));
       fab.style.left=nx+'px';fab.style.top=ny+'px';
       S._fabX=nx;S._fabY=ny;
     }
