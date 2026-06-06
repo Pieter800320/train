@@ -1753,16 +1753,17 @@ function obRecommendTPL(ans){
   var isHome=equip.indexOf('Dumbbells only')>=0||equip.indexOf('Dumbbells +')>=0||equip.indexOf('Bodyweight')>=0||equip.indexOf('Kettlebells')>=0;
   var isFullGym=equip.indexOf('Full gym')>=0;
 
-  // Context overrides first
-  if(ctx.indexOf('over 60')>=0||ctx.indexOf('joint')>=0)return'fnd_senior';
-  if(ctx.indexOf('returning')>=0||ctx.indexOf('long break')>=0)return'fnd_return';
-  if(ctx.indexOf('30 min')>=0)return'fnd_30min';
-
+  // Rehab goal takes absolute priority — must not be overridden by context
   if(goal.indexOf('Rehab')>=0){
     if(ans.injuries&&ans.injuries.indexOf('Lower back')>=0)return'rhb_back';
     if(ans.injuries&&ans.injuries.indexOf('Knee')>=0)return'rhb_knee';
     return'rhb_sho';
   }
+
+  // Context overrides (only for non-rehab goals)
+  if(ctx.indexOf('over 60')>=0||ctx.indexOf('joint')>=0)return'fnd_senior';
+  if(ctx.indexOf('returning')>=0||ctx.indexOf('long break')>=0)return'fnd_return';
+  if(ctx.indexOf('30 min')>=0)return'fnd_30min';
   if(goal.indexOf('sport')>=0||goal.indexOf('Sport')>=0){
     if(equip.indexOf('Climbing')>=0)return'spt_climb';
     if(days<=2)return'spt_run';
@@ -2220,7 +2221,10 @@ function openJournalView(){
       var val=typeof rec==='object'?rec.kg+'kg × '+rec.reps+(rec.date?' · '+new Date(rec.date).toLocaleDateString(undefined,{month:'short',day:'numeric'}):''):rec+'kg';
       h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px'+(i>0?';border-top:0.5px solid var(--brd)':'')+'">';
       h+='<span style="font-size:13px;font-weight:600">'+name+'</span>';
+      h+='<div style="display:flex;align-items:center;gap:8px">';
       h+='<span class="pr-badge">'+val+'</span>';
+      h+='<button onclick="deletePB(\''+name.replace(/\'/g,"\\\'")+'\'" style="background:none;border:none;color:var(--mu);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1" title="Delete PB">✕</button>';
+      h+='</div>';
       h+='</div>';
     });
     h+='</div>';
@@ -2472,16 +2476,17 @@ function todayV(){
   }
   h+='</div>';
 
-  // Exercise list — all phases
+  // Exercise list — custom programmes respect insertion order; pre-built use phase grouping
   var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
   var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+  var _isCustomTpl=!!(cl.customPrograms&&cl.customPrograms.some(function(cp){return cp.key===cl.tplKey;}));
 
-  phases.forEach(function(ph){
-    var exsInPhase=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
-    if(exsInPhase.length===0)return;
-    h+='<div class="phase-head">'+phaseLabels[ph]+'</div>';
-    exsInPhase.forEach(function(exEntry){
-      var origIdx=day.exercises.indexOf(exEntry);
+  if(_isCustomTpl){
+    // Custom programme: render in builder insertion order, phase label changes inline
+    var _lastPh=null;
+    day.exercises.forEach(function(exEntry,origIdx){
+      var _curPh=exEntry.ph||'strength';
+      if(_curPh!==_lastPh){h+='<div class="phase-head">'+phaseLabels[_curPh]+'</div>';_lastPh=_curPh;}
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
       var isActive=isPlaying&&origIdx===activeExIdx&&!isDone;
       var vol=exEntry.vol||'';
@@ -2490,28 +2495,62 @@ function todayV(){
       var _dispReps=_adj?_adj.reps:exEntry.reps;
       var _dispKg=_adj?_adj.kg:null;
       var volStr=vol?fmtSecs(parseVolToSecs(vol)):(_dispReps>0?(exEntry.sets+'\xd7'+_dispReps):(''));
-      // Append weight if we have a view adjustment and it's not bodyweight
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
-      h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">';
-      h+='<div style="flex:1">';
-      h+='<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+'">'+
+      h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">'+
+         '<div style="flex:1">'+
+         '<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+'">'+
          (isDone?'\u2713 ':'')+(isActive?'\u25b6 ':'')+exEntry.name+'</div>';
       if(exEntry.cue)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+exEntry.cue+'</div>';
-      // Set progress only in PLAY mode
       if(isPlaying){
         var exSets=S.wx.sets.filter(function(s){return s.exIdx===origIdx;});
         var doneSets=exSets.filter(function(s){return s.done;}).length;
         if(doneSets>0)h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
-      }      h+='</div>';
-      h+='<div style="display:flex;align-items:center;gap:6px">';
+      }
+      h+='</div><div style="display:flex;align-items:center;gap:6px">';
       h+='<div class="ex-vol" style="'+(isActive?'color:var(--acc)':'')+'">';
       h+=volStr+'</div>';
-      var _ph=exEntry.ph||'';
-      if(exEntry.rest&&_ph!=='warmup'&&_ph!=='cooldown'&&_ph!=='mobility')h+='<div style="font-size:9px;color:var(--mu);font-weight:500">'+exEntry.rest+'s</div>';
+      var _phRow=exEntry.ph||'';
+      if(exEntry.rest&&_phRow!=='warmup'&&_phRow!=='cooldown'&&_phRow!=='mobility')h+='<div style="font-size:9px;color:var(--mu);font-weight:500">'+exEntry.rest+'s</div>';
       h+='</div></div>';
     });
-  });
+  } else {
+    // Pre-built programme: group by phase in fixed order
+    phases.forEach(function(ph){
+      var exsInPhase=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
+      if(exsInPhase.length===0)return;
+      h+='<div class="phase-head">'+phaseLabels[ph]+'</div>';
+      exsInPhase.forEach(function(exEntry){
+        var origIdx=day.exercises.indexOf(exEntry);
+      var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
+      var isActive=isPlaying&&origIdx===activeExIdx&&!isDone;
+      var vol=exEntry.vol||'';
+      // In VIEW mode, show saved adjustments on the line if they exist
+      var _adj=(!isPlaying&&S.wx&&S.wx.viewAdj)?S.wx.viewAdj[origIdx]:null;
+      var _dispReps=_adj?_adj.reps:exEntry.reps;
+      var _dispKg=_adj?_adj.kg:null;
+      var volStr=vol?fmtSecs(parseVolToSecs(vol)):(_dispReps>0?(exEntry.sets+'\xd7'+_dispReps):(''));
+      if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
+      var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
+      h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">'+
+         '<div style="flex:1">'+
+         '<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+'">'+
+         (isDone?'\u2713 ':'')+(isActive?'\u25b6 ':'')+exEntry.name+'</div>';
+      if(exEntry.cue)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+exEntry.cue+'</div>';
+      if(isPlaying){
+        var exSets=S.wx.sets.filter(function(s){return s.exIdx===origIdx;});
+        var doneSets=exSets.filter(function(s){return s.done;}).length;
+        if(doneSets>0)h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
+      }
+      h+='</div><div style="display:flex;align-items:center;gap:6px">';
+      h+='<div class="ex-vol" style="'+(isActive?'color:var(--acc)':'')+'">';
+      h+=volStr+'</div>';
+      var _phRow=exEntry.ph||'';
+      if(exEntry.rest&&_phRow!=='warmup'&&_phRow!=='cooldown'&&_phRow!=='mobility')h+='<div style="font-size:9px;color:var(--mu);font-weight:500">'+exEntry.rest+'s</div>';
+      h+='</div></div>';
+      });
+    });
+  }
 
   // Bottom actions — only Finish Session in PLAY mode
   if(isPlaying){
@@ -2673,6 +2712,8 @@ function openExWindow(exIdx){
   }
   var _lw=C().lastWeights;var _lwEntry=_lw&&_lw[exEntry.name];
   if(defaultKg===0&&_lwEntry&&_lwEntry.kg>0)defaultKg=_lwEntry.kg;
+  // Final fallback: weight set in BUILD tab for custom programmes
+  if(defaultKg===0&&exEntry.weight>0)defaultKg=exEntry.weight;
   // Default reps: viewAdj → done sets → lastWeights → programme default
   var defaultReps=_adj?_adj.reps:(nextSet?nextSet.reps||10:10);
   if(!_adj&&_lwEntry&&_lwEntry.reps>0&&nextSet&&(nextSet.reps===0||nextSet.reps===exEntry.reps)){
@@ -3347,7 +3388,7 @@ function programsV(){
     var grpPlans=PLANS.filter(function(p){return grp.keys.indexOf(p.key)>=0;});
     if(grpPlans.length===0)return;
     var isOpen=cl._pgOpen&&cl._pgOpen['plan_'+grp.key];
-    var hasActive=grpPlans.some(function(p){return cl.plan&&cl.plan.key===p.key;});
+    var hasActive=!!(cl.plan&&grpPlans.some(function(p){return p.key===cl.plan.key;}));
     h+='<div data-pgcat="plan_'+grp.key+'" style="margin-bottom:3px">';
     h+='<div class="group-head'+(isOpen?' open':'')+'" data-cat="plan_'+grp.key+'" onclick="togglePgGroup(this.dataset.cat)">';
     h+='<span style="font-size:13px;font-weight:700;color:var(--acc)">'+grp.label+'</span>';
@@ -3376,7 +3417,7 @@ function programsV(){
   var customPlans=cl.customPlans||[];
   if(customPlans.length>0){
     var isOpen=cl._pgOpen&&cl._pgOpen['my_plans'];
-    var hasActive=customPlans.some(function(p){return cl.plan&&cl.plan.key===p.key;});
+    var hasActive=!!(cl.plan&&customPlans.some(function(p){return p.key===cl.plan.key;}));
     h+='<div data-pgcat="my_plans" style="margin-bottom:3px">';
     h+='<div class="group-head'+(isOpen?' open':'')+'" data-cat="my_plans" onclick="togglePgGroup(this.dataset.cat)">';
     h+='<span style="font-size:13px;font-weight:700;color:var(--acc)">My Plans</span>';
@@ -3533,9 +3574,9 @@ function openProgPreview(key){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:12px 0">✓ Currently active</div>';
   } else {
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="switchTPL(this.dataset.key);closeSheet()">Select this Program</button>';
-    if(isCustom){
-      h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key);closeSheet()">✕ Delete Program</button>';
-    }
+  }
+  if(isCustom){
+    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key);closeSheet()">✕ Delete Program</button>';
   }
   h+='</div>';
   h+='</div>';
@@ -3589,6 +3630,12 @@ function togglePgGroup(cat){
 function switchTPL(key){
   if(confirm('Switch to this programme? Your current day progress will reset.')){
     C().tplKey=key;C().day=0;sv();draw();
+  }
+}
+function deletePB(name){
+  if(confirm('Delete PB for '+name+'?')){
+    var cl=C();
+    if(cl.pr&&cl.pr[name]){delete cl.pr[name];sv();draw();}
   }
 }
 function deleteCustomProg(key){
