@@ -1434,7 +1434,7 @@ var TPL = [
     ex('Single-Leg Glute Bridge',3,10,75,'strength','Push through the heel. This improves balance and hip strength together.'),
     ex('Wall Slide',2,12,45,'activation','Slow and deliberate. Arms stay in contact with the wall.'),
     ex('Dead Bug',3,8,60,'core'),
-    ex('Standing Calf Raise (Machine)',3,15,45,'accessory'),
+    ex('Calf Raise (Standing, Machine)',3,15,45,'accessory'),
     exT('Standing Hamstring Stretch','2','30s',15,'cooldown'),
     exT('Hip 90/90 Stretch','2','40s',15,'cooldown')
   ]},
@@ -1486,7 +1486,7 @@ var TPL = [
     ex('Bird Dog',3,8,60,'core'),
     exT('Plank','2','20s',60,'core','Build this duration week by week.')
   ]},
-  {label:'Session C',focus:'Full Body — Progress',exercises:[
+  {label:'Session C',focus:'Full Body — Progress',minSessions:4,exercises:[
     ex('Hip Hinge (Wall Drill)',2,10,20,'warmup'),ex('Goblet Squat (Dumbbell)',2,8,30,'warmup','Primer only.'),
     ex('Back Squat',3,8,120,'strength','Reintroduce the barbell when Session A Goblet Squat feels solid. Lighter than you remember.'),
     ex('Barbell Row (Overhand)',3,8,120,'strength'),
@@ -1584,6 +1584,13 @@ function getStreak(){
 function startSession(){
   var tpl=ACTIVE_TPL();
   var cl=C();
+  // Skip any locked sessions when auto-advancing
+  var _maxSkip=tpl.days.length;
+  while(_maxSkip-->0){
+    var _checkIdx=(cl.day||0)%tpl.days.length;
+    if(!isSessionLocked(tpl.days[_checkIdx]))break;
+    cl.day=(cl.day||0)+1;
+  }
   var dayIdx=cl.day%tpl.days.length;
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
@@ -2406,6 +2413,13 @@ function todayV(){
     }
   }
 
+  // If auto-selected session is locked, skip to first unlocked session
+  if(!S.wx&&isSessionLocked(day)){
+    var _fb=tpl.days.findIndex(function(d){return !isSessionLocked(d);});
+    if(_fb>=0){dayIdx=_fb;day=tpl.days[_fb];}
+  }
+  var _sessionLocked=!S.wx&&isSessionLocked(day);
+
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
   // Eyebrow
   h+='<div class="lbl lbl-acc" style="margin-bottom:4px">'+tpl.name+' · '+day.label+'</div>';
@@ -2540,18 +2554,40 @@ function openPlanSheet(){
 // ═══════════════════════════════════════════════════════════════
 // SESSION PICKER SHEET
 // ═══════════════════════════════════════════════════════════════
+function sessionsOnProg(){
+  // Count how many sessions the client has logged for the current programme
+  var cl=C();
+  if(!cl.hist||!cl.tplKey)return 0;
+  return cl.hist.filter(function(s){return s.tplKey===cl.tplKey;}).length;
+}
+function isSessionLocked(day){
+  // A session is locked if it defines minSessions and the client hasn't reached that count yet
+  return day&&day.minSessions&&sessionsOnProg()<day.minSessions;
+}
 function openSessionPicker(){
   var cl=C();var tpl=ACTIVE_TPL();
   var dayIdx=cl.day%tpl.days.length;
   var h='<div style="padding:0 20px 30px">';
+  var _doneSoFar=sessionsOnProg();
   tpl.days.forEach(function(day,i){
     var isActive=i===dayIdx;
-    h+='<div onclick="selectSession('+i+')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:10px;margin-bottom:6px;border:0.5px solid '+(isActive?'var(--acc-brd)':'var(--brd)')+';background:'+(isActive?'var(--acc-bg)':'var(--bg3)')+';cursor:pointer">';
+    var locked=isSessionLocked(day);
+    var remaining=locked?(day.minSessions-_doneSoFar):0;
+    var clickHandler=locked?'':'selectSession('+i+')';
+    var bg=locked?'var(--bg2)':(isActive?'var(--acc-bg)':'var(--bg3)');
+    var borderColor=locked?'var(--brd)':(isActive?'var(--acc-brd)':'var(--brd)');
+    var opacity=locked?'0.5':'1';
+    h+='<div onclick="'+clickHandler+'" style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:10px;margin-bottom:6px;border:0.5px solid '+borderColor+';background:'+bg+';cursor:'+(locked?'default':'pointer')+';opacity:'+opacity+'">';
     h+='<div>';
-    h+='<div style="font-size:13px;font-weight:700;color:'+(isActive?'var(--acc)':'var(--tx)')+'">'+day.focus+'</div>';
-    h+='<div class="lbl" style="margin-top:2px">'+day.label+' · '+day.exercises.length+' exercises</div>';
+    h+='<div style="font-size:13px;font-weight:700;color:'+(locked?'var(--mu)':(isActive?'var(--acc)':'var(--tx)'))+'">'+day.focus+'</div>';
+    if(locked){
+      h+='<div class="lbl" style="margin-top:2px;color:var(--mu)">'+day.label+' · Unlocks after '+remaining+' more session'+(remaining===1?'':'s')+'</div>';
+    } else {
+      h+='<div class="lbl" style="margin-top:2px">'+day.label+' · '+day.exercises.length+' exercises</div>';
+    }
     h+='</div>';
-    if(isActive)h+='<i class="ti ti-check" style="color:var(--acc);font-size:18px"></i>';
+    if(locked){h+='<i class="ti ti-lock" style="color:var(--mu);font-size:16px"></i>';}
+    else if(isActive){h+='<i class="ti ti-check" style="color:var(--acc);font-size:18px"></i>';}
     h+='</div>';
   });
   h+='</div>';
