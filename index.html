@@ -1603,8 +1603,17 @@ function startSession(){
     }
   });
   _restCirclePos={x:null,y:null}; // reset to default position for each new session
-  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:day.exercises,sets:setsData,currentSet:0,startTime:Date.now(),restActive:false,restEnd:0,exDone:{}};
+  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:day.exercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},playing:false};
   sv();draw();
+}
+function enterPlayMode(){
+  if(!S.wx)return;
+  if(S.wx.playing)return; // already playing
+  S.wx.playing=true;
+  S.wx.startTime=Date.now(); // start timing from first press of PLAY
+  sv();draw();
+  // Auto-open first incomplete exercise
+  setTimeout(function(){autoOpenNextEx();},300);
 }
 function logSet(si,kg){
   if(!S.wx)return;
@@ -1648,7 +1657,7 @@ var CONGRATS=[
   'Another brick in the wall of gains. 🧱'
 ];
 function finishSession(){
-  if(!S.wx)return;
+  if(!S.wx||!S.wx.playing)return;
   var cl=C();
   var banner=planBannerData();
   var doneSets=S.wx.sets.filter(function(s){return s.done;}).length;
@@ -1710,9 +1719,11 @@ function cancelFinishSession(){
   // Restore the session exactly as it was
   if(window._cancelWx){
     S.wx=window._cancelWx;
+    S.wx.playing=true; // restore to PLAY mode
     window._cancelWx=null;
   }
   sv();S.tab='today';draw();
+  setTimeout(function(){if(S.wx&&S.wx.playing)autoOpenNextEx();},350);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2405,9 +2416,10 @@ function todayV(){
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
 
-  // Find active exercise index — first incomplete set's exercise
+  // Find active exercise index — only meaningful in PLAY mode
   var activeExIdx=-1;
-  if(S.wx&&S.wx.sets){
+  var isPlaying=S.wx&&S.wx.playing;
+  if(isPlaying&&S.wx.sets){
     for(var si=0;si<S.wx.sets.length;si++){
       if(!S.wx.sets[si].done){activeExIdx=S.wx.sets[si].exIdx;break;}
     }
@@ -2421,29 +2433,37 @@ function todayV(){
   var _sessionLocked=!S.wx&&isSessionLocked(day);
 
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  // Eyebrow
-  h+='<div class="lbl lbl-acc" style="margin-bottom:4px">'+tpl.name+' · '+day.label+'</div>';
-  // Hero
-  h+='<div class="h1" style="margin-bottom:4px">'+day.focus+'</div>';
-  // Subline
-  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px">'+day.exercises.length+' exercises · ~'+tpl.duration+' min</div>';
-  // Pills row — plan pill + session pill, centred
-  h+='<div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;row-gap:6px;margin-bottom:14px">';
-  if(banner){
-    h+='<div onclick="openPlanSheet()" class="plan-pill">';
-    h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">'+banner.planName+' · Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
-    h+='<div class="plan-pill-rpe">RPE '+banner.rpe+'</div>';
-    h+='<span style="font-size:9px;color:var(--mu);padding:0 4px">▾</span>';
+  // Eyebrow — with VIEW/PLAY mode indicator
+  var _modeTag=isPlaying?'<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:1px 7px;margin-left:6px">▶ PLAY</span>':
+               (S.wx?'<span style="font-size:9px;font-weight:700;color:var(--mu);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:1px 7px;margin-left:6px">VIEW</span>':'');
+  h+='<div class="lbl lbl-acc" style="margin-bottom:4px;display:flex;align-items:center">'+tpl.name+' · '+day.label+_modeTag+'</div>';
+  // Hero — heading is the session switcher (only when not in PLAY)
+  var _canSwitchSession=(!S.wx||!S.wx.playing)&&tpl.days.length>1;
+  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">';
+  if(_canSwitchSession){
+    h+='<div onclick="openSessionPicker()" style="cursor:pointer;display:flex;align-items:baseline;gap:6px">';
+    h+='<div class="h1" style="margin-bottom:0">'+day.focus+'</div>';
+    h+='<span style="font-size:16px;color:var(--acc);line-height:1.2">▾</span>';
     h+='</div>';
-  }
-  // Session pill — same style, only when no active session
-  if(!S.wx){
-    h+='<div onclick="openSessionPicker()" class="plan-pill">';
-    h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">Change session</span>';
-    h+='<span style="font-size:9px;color:var(--mu);padding:0 4px">▾</span>';
-    h+='</div>';
+  } else {
+    h+='<div class="h1" style="margin-bottom:0">'+day.focus+'</div>';
   }
   h+='</div>';
+  // Subline
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:10px">'+day.exercises.length+' exercises · ~'+tpl.duration+' min</div>';
+  // Plan strip — left-aligned, richer info, tappable
+  if(banner){
+    h+='<div onclick="openPlanSheet()" style="display:inline-flex;align-items:center;gap:0;margin-bottom:14px;cursor:pointer;background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:20px;padding:4px 10px 4px 12px">';
+    h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">'+banner.planName+'</span>';
+    h+='<span style="font-size:10px;color:var(--mu);margin:0 5px">·</span>';
+    h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
+    h+='<span style="font-size:10px;color:var(--mu);margin:0 5px">·</span>';
+    h+='<span style="font-size:11px;font-weight:700;color:var(--acc)">RPE '+banner.rpe+'</span>';
+    h+='<span style="font-size:10px;color:var(--mu);margin:0 5px">·</span>';
+    h+='<span style="font-size:11px;font-weight:600;color:var(--tx2)">'+banner.rir+' RIR</span>';
+    h+='<span style="font-size:9px;color:var(--mu);padding-left:6px">▾</span>';
+    h+='</div>';
+  }
   h+='</div>';
 
   // Exercise list — all phases
@@ -2456,23 +2476,22 @@ function todayV(){
     h+='<div class="phase-head">'+phaseLabels[ph]+'</div>';
     exsInPhase.forEach(function(exEntry){
       var origIdx=day.exercises.indexOf(exEntry);
-      var isDone=S.wx&&S.wx.exDone&&S.wx.exDone[origIdx];
-      var isActive=S.wx&&origIdx===activeExIdx&&!isDone;
+      var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
+      var isActive=isPlaying&&origIdx===activeExIdx&&!isDone;
       var vol=exEntry.vol||'';
-      var volStr=vol?fmtSecs(parseVolToSecs(vol)):(exEntry.reps>0?(exEntry.sets+'×'+exEntry.reps):'');
+      var volStr=vol?fmtSecs(parseVolToSecs(vol)):(exEntry.reps>0?(exEntry.sets+'\xd7'+exEntry.reps):'');
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
       h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">';
       h+='<div style="flex:1">';
-      h+='<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+'">';
-      h+=(isDone?'✓ ':'')+(isActive?'▶ ':'')+exEntry.name+'</div>';
+      h+='<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+'">'+
+         (isDone?'\u2713 ':'')+(isActive?'\u25b6 ':'')+exEntry.name+'</div>';
       if(exEntry.cue)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+exEntry.cue+'</div>';
-      // Set progress if in session
-      if(S.wx){
+      // Set progress only in PLAY mode
+      if(isPlaying){
         var exSets=S.wx.sets.filter(function(s){return s.exIdx===origIdx;});
         var doneSets=exSets.filter(function(s){return s.done;}).length;
         if(doneSets>0)h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
-      }
-      h+='</div>';
+      }      h+='</div>';
       h+='<div style="display:flex;align-items:center;gap:6px">';
       h+='<div class="ex-vol" style="'+(isActive?'color:var(--acc)':'')+'">';
       h+=volStr+'</div>';
@@ -2482,12 +2501,12 @@ function todayV(){
     });
   });
 
-  // Bottom actions
-  h+='<div style="padding:14px">';
-  if(S.wx){
+  // Bottom actions — only Finish Session in PLAY mode
+  if(isPlaying){
+    h+='<div style="padding:14px">';
     h+='<button class="btn btn-acc" onclick="finishSession()">Finish Session</button>';
+    h+='</div>';
   }
-  h+='</div>';
   h+='<div style="height:80px"></div>';
   return h;
 }
@@ -2612,6 +2631,7 @@ function selectSession(idx){
 function openExWindow(exIdx){
   if(!S.wx) startSession();
   var wx=S.wx;
+  var _playing=wx&&wx.playing; // PLAY mode gate
   var exEntry=wx.exercises[exIdx];
   if(!exEntry) return;
   var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
@@ -2679,6 +2699,12 @@ function openExWindow(exIdx){
   }
   h+='</div>';
 
+  // VIEW mode banner
+  if(!_playing){
+    h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--mu);line-height:1.5">';
+    h+='<span style="font-weight:700;color:var(--tx2)">VIEW</span> — adjust weight &amp; reps, then tap Save. Press <span style="font-weight:700;color:var(--acc)">▶</span> to start the session.';
+    h+='</div>';
+  }
   // Last session hint — show previous weight/reps if available and different from PB
   if(_lwEntry&&(_lwEntry.kg>0||_lwEntry.reps>0)){
     var _lwStr='';
@@ -2688,8 +2714,8 @@ function openExWindow(exIdx){
     if(_lwStr)h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Last session: '+_lwStr+'</div>';
   }
 
-  // ── All sets done ──
-  if(allDone){
+  // ── All sets done (only in PLAY mode) ──
+  if(allDone&&_playing){
     h+='<div style="text-align:center;padding:20px 0">';
     h+='<div style="font-size:36px;margin-bottom:8px">\u2713</div>';
     h+='<div style="font-size:14px;font-weight:700;color:var(--acc)">All sets complete</div>';
@@ -2700,7 +2726,7 @@ function openExWindow(exIdx){
     var volSecs=parseVolToSecs(exEntry.vol);
     if(wx._pendingTime===undefined||wx._lastExIdx!==exIdx){wx._pendingTime=volSecs;}
     var wxTimed=wx.timedEx;
-    var timedRunning=wxTimed&&wxTimed.exIdx===exIdx&&wxTimed.running;
+    var timedRunning=_playing&&wxTimed&&wxTimed.exIdx===exIdx&&wxTimed.running;
     var timedRemaining=timedRunning?Math.max(0,Math.ceil((wxTimed.end-Date.now())/1000)):wx._pendingTime;
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
     h+='<div style="margin-bottom:16px">';
@@ -2718,8 +2744,10 @@ function openExWindow(exIdx){
       h+='<button class="btn btn-ghost" style="flex:1" onclick="stopExTimer()">Stop</button>';
       h+='<button class="btn btn-acc" style="flex:1" onclick="logTimedSet('+exIdx+')">Done</button>';
       h+='</div>';
-    } else {
+    } else if(_playing) {
       h+='<button class="btn btn-acc" onclick="startExTimerPending('+exIdx+')">Start Timer</button>';
+    } else {
+      h+='<button class="btn btn-ghost" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';
     }
   // ── Rounds (AMRAP) ──
   } else if(isRounds&&nextSet){
@@ -2731,9 +2759,13 @@ function openExWindow(exIdx){
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
-    h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
-    h+='</div>';
+    if(_playing){
+      h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
+      h+='</div>';
+    } else {
+      h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';
+    }
   // ── Distance ──
   } else if(isDistance&&nextSet){
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
@@ -2752,10 +2784,14 @@ function openExWindow(exIdx){
       h+='</div>';
     }
     var gi=wx.sets.indexOf(nextSet);
-    h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
-    h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+gi+')">★ PB</button>';
-    h+='</div>';
+    if(_playing){
+      h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
+      h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+gi+')">\u2605 PB</button>';
+      h+='</div>';
+    } else {
+      h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';
+    }
   // ── Calories ──
   } else if(isCalories&&nextSet){
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
@@ -2766,7 +2802,8 @@ function openExWindow(exIdx){
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
-    h+='<button class="btn btn-acc" style="margin-bottom:8px" onclick="logSetFromWindow('+gi+')">Done</button>';
+    if(_playing){h+='<button class="btn btn-acc" style="margin-bottom:8px" onclick="logSetFromWindow('+gi+')">Done</button>';}
+    else{h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';}
   // ── Height (box jumps etc) ──
   } else if(isHeight&&nextSet){
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
@@ -2783,10 +2820,14 @@ function openExWindow(exIdx){
     h+='<button onclick="adjustVal(\'kg\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
-    h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
-    h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+gi+')">★ PB</button>';
-    h+='</div>';
+    if(_playing){
+      h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+gi+')">Done</button>';
+      h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+gi+')">\u2605 PB</button>';
+      h+='</div>';
+    } else {
+      h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';
+    }
   // ── Reps only (no weight) ──
   } else if(isRepsOnly&&nextSet){
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
@@ -2797,7 +2838,8 @@ function openExWindow(exIdx){
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
-    h+='<button class="btn btn-acc" onclick="logSetFromWindow('+gi+')">Done</button>';
+    if(_playing){h+='<button class="btn btn-acc" onclick="logSetFromWindow('+gi+')">Done</button>';}
+    else{h+='<button class="btn btn-ghost" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';}
   // ── Reps + weight ──
   } else if(nextSet){
     // Divider
@@ -2821,22 +2863,36 @@ function openExWindow(exIdx){
     h+='<button onclick="adjustVal(\'kg\',2.5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div></div>';
 
-    // Done + PB buttons
-    h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-    h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+globalIdx+')">Done</button>';
-    h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+globalIdx+')">\u2605 PB</button>';
-    h+='</div>';
+    // Done + PB — only in PLAY mode
+    if(_playing){
+      h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="logSetFromWindow('+globalIdx+')">Done</button>';
+      h+='<button class="btn btn-acc btn-sm" style="min-width:86px;height:52px;border-radius:10px;font-size:12px;font-weight:800;flex-shrink:0;white-space:nowrap" onclick="logPB('+exIdx+','+globalIdx+')">\u2605 PB</button>';
+      h+='</div>';
+    } else {
+      h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';
+    }
   }
 
   h+='<div style="height:10px"></div>';
-  // Choose another
-  h+='<button class="btn btn-ghost" onclick="closeSheet();var s=document.getElementById(\'screen\');if(s)setTimeout(function(){s.scrollTop=0;},100)">Choose another exercise</button>';
+
   h+='</div>';
 
   openSheet(h,null); // no title — exercise name is in the body
 }
 
 // ─── Stepper helpers ───
+function saveViewAdjust(exIdx){
+  var wx=S.wx;if(!wx)return;
+  var exEntry=wx.exercises[exIdx];if(!exEntry)return;
+  var kg=wx._pendingKg!==undefined?wx._pendingKg:0;
+  var reps=wx._pendingReps!==undefined?wx._pendingReps:(exEntry.reps||10);
+  var _lw=C().lastWeights;if(!_lw)_lw=C().lastWeights={};
+  _lw[exEntry.name]={kg:kg,reps:reps,vol:exEntry.vol||''};
+  sv();
+  // Redraw exercise line to reflect updated defaults
+  draw();
+}
 function adjustVal(field,delta){
   if(!S.wx)return;
   if(field==='reps'){
@@ -2908,7 +2964,7 @@ function logSetFromWindow(globalIdx){
   doLogSet(globalIdx);
 }
 function doLogSet(globalIdx){
-  var wx=S.wx;if(!wx)return;
+  var wx=S.wx;if(!wx||!wx.playing)return;
   var set=wx.sets[globalIdx];if(!set||set.done)return;
   var kg=wx._pendingKg!==undefined?wx._pendingKg:0;
   var reps=wx._pendingReps!==undefined?wx._pendingReps:set.reps;
@@ -2964,7 +3020,7 @@ function doLogSet(globalIdx){
 } // end doLogSet
 
 function logTimedSet(exIdx){
-  var wx=S.wx;if(!wx)return;
+  var wx=S.wx;if(!wx||!wx.playing)return;
   // Stop any running timer first
   stopExTimer();
   var exSets=wx.sets.filter(function(s){return s.exIdx===exIdx;});
@@ -2990,7 +3046,7 @@ function logTimedSet(exIdx){
 }
 
 function logPB(exIdx,globalIdx){
-  var wx=S.wx;if(!wx)return;
+  var wx=S.wx;if(!wx||!wx.playing)return;
   var kg=wx._pendingKg!==undefined?wx._pendingKg:0;
   var reps=wx._pendingReps!==undefined?wx._pendingReps:(wx.sets[globalIdx]?wx.sets[globalIdx].reps:0);
   // Store PB — do NOT log the set, do NOT close the sheet
@@ -3038,6 +3094,7 @@ var _restCircleTick=null;
 var _restCirclePos={x:null,y:null}; // null = default position
 
 function startRestCircle(totalSecs){
+  if(!S.wx||!S.wx.playing)return; // no REST circle in VIEW mode
   if(_restCircleTick){clearInterval(_restCircleTick);_restCircleTick=null;}
   renderRestCircle(totalSecs,totalSecs);
   _restCircleTick=setInterval(function(){
@@ -3776,6 +3833,50 @@ function addBuildDay(){
 }
 function removeBuildDay(di){S.customEdit.days.splice(di,1);S.customEdit.numDays=S.customEdit.days.length;sv();draw();}
 function removeBuildEx(di,ei){S.customEdit.days[di].exercises.splice(ei,1);sv();draw();}
+function openExSwapPicker(swapExIdx){
+  // Open a simplified exercise picker for mid-session swaps
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:12px">Choose another exercise</div>';
+  h+='<input id="swap-search" type="search" placeholder="Search exercises..." '+
+     'oninput="filterSwapPicker('+swapExIdx+')" '+
+     'style="margin-bottom:12px;font-size:14px">';
+  h+='<div id="swap-results">';
+  // Default: show first 30 exercises
+  EX.slice(0,30).forEach(function(e){
+    h+='<div class="prog-item" data-name="'+e.name+'" onclick="swapExInSession('+swapExIdx+',this.dataset.name)">';
+    h+='<div><div style="font-size:13px;font-weight:600">'+e.name+'</div>';
+    h+='<div class="lbl">'+e.patterns.join(' · ')+'</div></div>';
+    h+='<button class="btn btn-acc btn-pill">Swap</button></div>';
+  });
+  h+='</div></div>';
+  openSheet(h,'Choose another exercise');
+  setTimeout(function(){var el=document.getElementById('swap-search');if(el)el.focus();},300);
+}
+function filterSwapPicker(swapExIdx){
+  var q=(document.getElementById('swap-search')||{}).value||'';
+  var results=document.getElementById('swap-results');if(!results)return;
+  var filtered=q.length<2?EX.slice(0,30):EX.filter(function(e){return e.name.toLowerCase().indexOf(q.toLowerCase())>=0;}).slice(0,40);
+  results.innerHTML=filtered.map(function(e){
+    return '<div class="prog-item" data-name="'+e.name+'" onclick="swapExInSession('+swapExIdx+',this.dataset.name)">'+
+           '<div><div style="font-size:13px;font-weight:600">'+e.name+'</div>'+
+           '<div class="lbl">'+e.patterns.join(' · ')+'</div></div>'+
+           '<button class="btn btn-acc btn-pill">Swap</button></div>';
+  }).join('');
+}
+function swapExInSession(exIdx,newName){
+  var wx=S.wx;if(!wx)return;
+  var oldEntry=wx.exercises[exIdx];if(!oldEntry)return;
+  var exData=EX_MAP[exKey(newName)]||{};
+  var track=resolveTrack(newName,oldEntry.ph||'strength',oldEntry.reps,oldEntry.vol);
+  // Replace in exercises list, preserve sets/reps/kg structure
+  wx.exercises[exIdx]=Object.assign({},oldEntry,{name:newName,track:track});
+  // Reset pending values so new exercise pre-fills correctly
+  wx._pendingKg=0;wx._pendingReps=oldEntry.reps||10;wx._lastExIdx=null;
+  // Reset done state for this exercise's sets
+  wx.sets.forEach(function(s){if(s.exIdx===exIdx)s.done=false;});
+  if(wx.exDone)delete wx.exDone[exIdx];
+  sv();closeSheet();draw();
+}
 function openExPicker(di){
   S.customEdit.activeDay=di;sv();
   var h='<div style="padding:0 20px 20px">';
@@ -4113,7 +4214,7 @@ function draw(){
   // Floating Start Session button (TODAY only, no active session)
   var existingFab=document.getElementById('fab-start');
   if(existingFab)existingFab.parentNode.removeChild(existingFab);
-  if(S.tab==='today'&&!S.wx){
+  if(S.tab==='today'&&(!S.wx||(S.wx&&!S.wx.playing))){
     var fab=document.createElement('div');
     fab.id='fab-start';
     var fabX=S._fabX!==null&&S._fabX!==undefined?S._fabX:(window.innerWidth-88-16);
@@ -4130,9 +4231,7 @@ function draw(){
         '<circle cx="44" cy="44" r="'+_fabR+'" fill="none" stroke="var(--acc)" stroke-width="3.5"'+
           ' stroke-dasharray="'+_fabCirc+'" stroke-dashoffset="0"'+
           ' stroke-linecap="round" transform="rotate(-90 44 44)"/>'+
-        '<!-- Play triangle: optically centred, shifted 1px right to account for visual weight -->'+
         '<polygon points="37,30 37,58 59,44" fill="var(--acc)" opacity="0.9"/>'+
-
       '</svg>';
     // Tap to start
     var _fabDragStart={x:0,y:0};var _fabDragging=false;var _fabMoved=false;
@@ -4150,9 +4249,9 @@ function draw(){
     function fabUp(cx,cy){
       if(!_fabDragging)return;_fabDragging=false;fab.style.transition='';
       if(!_fabMoved){
-        // Tap — start session + open first exercise
-        startSession();draw();
-        setTimeout(function(){autoOpenNextEx();},300);
+        // Tap
+        if(!S.wx){startSession();draw();} // enters VIEW mode
+        else{enterPlayMode();}           // S.wx exists but not playing → start PLAY
       }
     }
     fab.addEventListener('touchstart',function(e){fabDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
