@@ -2138,7 +2138,15 @@ function openSessionPicker(){
   openSheet(h,'Choose Session');
 }
 function selectSession(idx){
-  C().day=idx;sv();closeSheet();draw();
+  var cl=C();
+  var tpl=ACTIVE_TPL();
+  if(!tpl||!tpl.days||!tpl.days.length){cl.day=idx;sv();closeSheet();draw();return;}
+  var len=tpl.days.length;
+  // Anchor to the start of the current cycle, then offset to the chosen session.
+  // Preserves the cycle counter so plan-week advancement stays accurate.
+  var cycleStart=Math.floor((cl.day||0)/len)*len;
+  cl.day=cycleStart+idx;
+  sv();closeSheet();draw();
 }
 
 // ═══════════════════════════════════════════════════════════════
