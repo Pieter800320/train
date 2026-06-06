@@ -202,7 +202,7 @@ function getEx(n){return EX_MAP[exKey(n)]||null;}
 // ═══════════════════════════════════════════════════════════════
 // DEFAULT STATE
 // ═══════════════════════════════════════════════════════════════
-var DEFAULT_CLIENT={name:'',initials:'',colour:'#D4691E',ob:{done:false,step:0,ans:{}},tplKey:'str_b4',day:0,plan:null,hist:[],pr:{},customPrograms:[],customPlans:[],_pgOpen:{}};
+var DEFAULT_CLIENT={name:'',initials:'',colour:'#D4691E',ob:{done:false,step:0,ans:{}},tplKey:'str_b4',day:0,plan:null,hist:[],pr:{},lastWeights:{},customPrograms:[],customPlans:[],_pgOpen:{}};
 var DEFAULT_S={activeClient:'default',clients:{default:JSON.parse(JSON.stringify(DEFAULT_CLIENT))},buildMode:'program',customEdit:{name:'My Program',numDays:3,days:[],activeDay:null,newEx:null},planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},wx:null,timer:{mode:'tabata',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:40,tabRest:20,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true},tab:'today',colourTheme:'amber',_browserOpen:{},theme:'dark',admin:{active:false,pin:'',set:false},notice:{title:'Welcome to Falkenburg',body:'Your training starts here. Go to Programs to pick your first programme.',active:true}};
 var S;
 function sv(){try{localStorage.setItem('falken_v1',JSON.stringify(S));}catch(e){}}
@@ -227,6 +227,7 @@ function ld(){
   if(!cl.pr)cl.pr={};
   if(cl.plan===undefined)cl.plan=null;
   if(!cl.ob)cl.ob={done:false,step:0,ans:{}};
+  if(!cl.lastWeights)cl.lastWeights={};
 }
 function C(){return S.clients[S.activeClient];}
 function clients(){return Object.keys(S.clients).map(function(k){return S.clients[k];});}
@@ -1215,7 +1216,6 @@ function logSet(si,kg){
   S.wx.currentSet=next>=0?next:si;
   var restSecs=S.wx.exercises[set.exIdx].rest||60;
   if(restSecs>0){S.wx.restActive=true;S.wx.restEnd=Date.now()+restSecs*1000;}
-  checkPR(set);
   sv();
   // Preserve scroll position - redraw without scrolling to top
   var scrollPos=document.getElementById('screen').scrollTop;
@@ -1224,19 +1224,7 @@ function logSet(si,kg){
   // Start rest timer and show pill
   if(S.wx.restActive){startRestTick();updateRestPill();}
 }
-function checkPR(set){
-  var ex=S.wx.exercises[set.exIdx];
-  if(!set.kg||set.kg<=0)return false;
-  var key=ex.name;
-  var cl=C();
-  var existing=cl.pr[key];
-  var existingKg=existing?(typeof existing==='object'?existing.kg:existing):0;
-  if(!existing||set.kg>existingKg){
-    cl.pr[key]={kg:set.kg,reps:set.reps||0,date:Date.now()};
-    return true;
-  }
-  return false;
-}
+// PR recording is intentional only — client presses ★ PB button (logPB)
 var CONGRATS=[
   'You are on fire! 🔥',
   'Beast mode: activated. 💪',
@@ -1361,7 +1349,8 @@ function obRecommendTPL(ans){
   }
   // strength / general
   if(equip.indexOf('Bodyweight')>=0)return'fnd_beg';
-  if(days<=3){return isAdv?'str_b3':'fnd_beg';}
+  if(days<=2){return isAdv?'str_b3':'fnd_beg';} // 2-day: use lightest 3-day option
+  if(days===3){return isAdv?'str_b3':'fnd_beg';}
   if(days===4)return'str_b4';
   return'str_b5';
 }
@@ -2127,13 +2116,18 @@ function openExWindow(exIdx){
   var globalIdx=nextSet?wx.sets.indexOf(nextSet):-1;
   var allDone=doneSets===totalSets;
 
-  // Pre-fill last used weight
+  // Pre-fill: check current session first, then lastWeights from previous sessions
   var defaultKg=0;
   for(var pi=wx.sets.length-1;pi>=0;pi--){
     if(wx.sets[pi].exIdx===exIdx&&wx.sets[pi].done&&wx.sets[pi].kg>0){defaultKg=wx.sets[pi].kg;break;}
   }
-  // Default reps from set data
+  var _lw=C().lastWeights;var _lwEntry=_lw&&_lw[exEntry.name];
+  if(defaultKg===0&&_lwEntry&&_lwEntry.kg>0)defaultKg=_lwEntry.kg;
+  // Default reps: current session → lastWeights → programme default
   var defaultReps=nextSet?nextSet.reps||10:10;
+  if(_lwEntry&&_lwEntry.reps>0&&nextSet&&(nextSet.reps===0||nextSet.reps===exEntry.reps)){
+    defaultReps=_lwEntry.reps;
+  }
 
   // Init pending values
   if(wx._pendingReps===undefined||wx._lastExIdx!==exIdx){wx._pendingReps=defaultReps;}
@@ -2169,6 +2163,15 @@ function openExWindow(exIdx){
     h+='<span class="pr-badge">\u2605 PB '+prStr+'</span>';
   }
   h+='</div>';
+
+  // Last session hint — show previous weight/reps if available and different from PB
+  if(_lwEntry&&(_lwEntry.kg>0||_lwEntry.reps>0)){
+    var _lwStr='';
+    if(_lwEntry.kg>0)_lwStr=_lwEntry.kg+'kg'+((_lwEntry.reps>0)?' × '+_lwEntry.reps:'');
+    else if(_lwEntry.vol)_lwStr=_lwEntry.vol;
+    else if(_lwEntry.reps>0)_lwStr=_lwEntry.reps+' reps';
+    if(_lwStr)h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Last session: '+_lwStr+'</div>';
+  }
 
   // ── All sets done ──
   if(allDone){
@@ -2322,7 +2325,7 @@ function openExWindow(exIdx){
 function adjustVal(field,delta){
   if(!S.wx)return;
   if(field==='reps'){
-    S.wx._pendingReps=Math.max(1,Math.round(((S.wx._pendingReps||10)+delta)*10)/10);
+    S.wx._pendingReps=Math.max(1,Math.round((S.wx._pendingReps||10)+delta));
     var el=document.getElementById('val-reps');
     if(el)el.textContent=S.wx._pendingReps;
   } else if(field==='time'){
@@ -2347,7 +2350,7 @@ function editVal(field){
   if(input===null)return;
   var val=parseFloat(input);
   if(isNaN(val)||val<0)return;
-  if(field==='reps'){S.wx._pendingReps=Math.max(1,Math.round(val));var el=document.getElementById('val-reps');if(el)el.textContent=S.wx._pendingReps;}
+  if(field==='reps'){S.wx._pendingReps=Math.max(1,Math.floor(val));var el=document.getElementById('val-reps');if(el)el.textContent=S.wx._pendingReps;}
   else if(field==='time'){S.wx._pendingTime=Math.max(5,Math.round(val));var el=document.getElementById('val-time');if(el)el.textContent=fmtSecs(S.wx._pendingTime);}
   else{S.wx._pendingKg=val;var el=document.getElementById('val-kg');if(el)el.textContent=val===0?'BW':val+'kg';}
 }
@@ -2396,6 +2399,9 @@ function doLogSet(globalIdx){
   var reps=wx._pendingReps!==undefined?wx._pendingReps:set.reps;
   set.done=true;set.kg=kg;set.reps=reps;
   var exIdx=set.exIdx;
+  // Persist last-used weight and reps for pre-fill on next session
+  var _lw=C().lastWeights;if(!_lw)_lw=C().lastWeights={};
+  _lw[wx.exercises[exIdx].name]={kg:kg,reps:reps,vol:wx.exercises[exIdx].vol||''};
   // Mark exercise done if all sets complete
   if(!wx.exDone)wx.exDone={};
   var allDoneNow=wx.sets.filter(function(s){return s.exIdx===exIdx;}).every(function(s){return s.done;});
@@ -2407,7 +2413,7 @@ function doLogSet(globalIdx){
     wx.restEnd=Date.now()+restSecs*1000;
     wx.waitingFor=exIdx;
   }
-  checkPR(set);sv();
+  sv();
   closeSheet();
   // Start floating rest circle
   if(restSecs>0)startRestCircle(restSecs);
@@ -2423,6 +2429,9 @@ function logTimedSet(exIdx){
   var nextSet=exSets.find(function(s){return!s.done;});
   if(nextSet){
     nextSet.done=true;nextSet.kg=0;nextSet.reps=0;
+    // Persist timed set completion
+    var _lw2=C().lastWeights;if(!_lw2)_lw2=C().lastWeights={};
+    _lw2[wx.exercises[exIdx].name]={kg:0,reps:0,vol:wx.exercises[exIdx].vol||''};
     if(!wx.exDone)wx.exDone={};
     var allDoneNow=exSets.every(function(s){return s.done;});
     if(allDoneNow)wx.exDone[exIdx]=true;
@@ -2431,7 +2440,7 @@ function logTimedSet(exIdx){
     wx._pendingTime=undefined;
     var restSecs=(wx.exercises[exIdx].rest)||30;
     if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=exIdx;}
-    checkPR(nextSet);sv();
+    sv();
     closeSheet();
     if(restSecs>0)startRestCircle(restSecs);
     setTimeout(function(){draw();},300);
@@ -2529,7 +2538,7 @@ function renderRestCircle(rem,total){
   Object.assign(el.style,{
     position:'fixed',left:x+'px',top:y+'px',
     width:SIZE+'px',height:SIZE+'px',
-    zIndex:'200',cursor:'grab',userSelect:'none',touchAction:'none'
+    zIndex:'210',cursor:'grab',userSelect:'none',touchAction:'none'
   });
   el.innerHTML=
     '<svg width="'+SIZE+'" height="'+SIZE+'" viewBox="0 0 '+SIZE+' '+SIZE+'" style="position:absolute;top:0;left:0">'+
@@ -3503,19 +3512,26 @@ function draw(){
   if(S.tab==='today'&&!S.wx){
     var fab=document.createElement('div');
     fab.id='fab-start';
-    var fabX=S._fabX!==null&&S._fabX!==undefined?S._fabX:(window.innerWidth-88-16);
-    var fabY=S._fabY!==null&&S._fabY!==undefined?S._fabY:(window.innerHeight-88-80);
+    var fabX=S._fabX!==null&&S._fabX!==undefined?S._fabX:(window.innerWidth-72-16);
+    var fabY=S._fabY!==null&&S._fabY!==undefined?S._fabY:(window.innerHeight-72-80);
     Object.assign(fab.style,{
       position:'fixed',left:fabX+'px',top:fabY+'px',
-      width:'88px',height:'88px',borderRadius:'44px',
-      background:'var(--acc-bg)',border:'1px solid var(--acc-brd)',
-      color:'var(--acc)',display:'flex',alignItems:'center',justifyContent:'center',
-      flexDirection:'column',gap:'2px',
-      fontSize:'10px',fontWeight:'800',letterSpacing:'.5px',
-      cursor:'pointer',zIndex:'150',
-      boxShadow:'0 4px 20px rgba(0,0,0,.4)',userSelect:'none',touchAction:'none'
+      width:'72px',height:'72px',
+      zIndex:'150',cursor:'pointer',userSelect:'none',touchAction:'none'
     });
-    fab.innerHTML='<span style="font-size:20px">▶</span><span>START</span>';
+    var _fabR=28;var _fabCirc=2*Math.PI*_fabR;
+    fab.innerHTML=
+      '<svg width="72" height="72" viewBox="0 0 72 72" style="position:absolute;top:0;left:0">'+
+        '<circle cx="36" cy="36" r="'+_fabR+'" fill="var(--acc-bg)" stroke="var(--acc-brd)" stroke-width="1.5"/>'+
+        '<circle cx="36" cy="36" r="'+_fabR+'" fill="none" stroke="var(--acc)" stroke-width="3"'+
+          ' stroke-dasharray="'+_fabCirc+'" stroke-dashoffset="0"'+
+          ' stroke-linecap="round" transform="rotate(-90 36 36)"/>'+
+      '</svg>'+
+      '<div style="position:absolute;top:0;left:0;width:100%;height:100%;'+
+        'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;pointer-events:none">'+
+        '<div style="font-size:20px;color:var(--acc);line-height:1;margin-bottom:-1px">▶</div>'+
+        '<div style="font-size:7px;font-weight:800;letter-spacing:1px;color:var(--acc);opacity:.7">START</div>'+
+      '</div>';
     // Tap to start
     var _fabDragStart={x:0,y:0};var _fabDragging=false;var _fabMoved=false;
     var _fabElStart={x:fabX,y:fabY};
