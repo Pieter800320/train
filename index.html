@@ -282,7 +282,7 @@ var PLANS = [
     {label:'Week 1 — Learn & Groove',theme:'learn',rpe:7,rir:3,weightPct:90,volMod:1.0,tip:'Focus on movement quality. Leave 3 reps in the tank every set.'},
     {label:'Week 2 — Build',theme:'build',rpe:8,rir:2,weightPct:95,volMod:1.0,tip:'Start pushing. Form should still feel solid at the end of each set.'},
     {label:'Week 3 — Progress',theme:'progress',rpe:9,rir:1,weightPct:100,volMod:1.0,tip:'This should feel hard. You are supposed to earn it.'},
-    {label:'Week 4 — Deload',theme:'deload',rpe:7,rir:3,weightPct:105,volMod:0.5,tip:'Half the sets, slightly heavier. Let your body absorb the work. No heroics.'}
+    {label:'Week 4 — Deload',theme:'deload',rpe:6,rir:4,weightPct:90,volMod:0.5,tip:'Half the sets, back off the weight. This is recovery, not performance. Next cycle starts stronger.'}
   ]},
   {key:'linear',name:'Linear Progression',desc:'6-week steady build — ideal for beginners',cyclic:false,weeks:[
     {label:'Week 1 — Foundation',theme:'learn',rpe:6,rir:4,weightPct:80,volMod:1.0,tip:'Technique first. Go lighter than you think you need to.'},
@@ -298,7 +298,7 @@ var PLANS = [
     {label:'Week 3 — Intensity',theme:'build',rpe:8,rir:2,weightPct:92,volMod:1.0,tip:'More weight, same quality. Do not rush.'},
     {label:'Week 4 — Overreach',theme:'progress',rpe:9,rir:1,weightPct:97,volMod:1.0,tip:'Deliberately hard week. You are supposed to feel it.'},
     {label:'Week 5 — Peak',theme:'peak',rpe:9,rir:1,weightPct:100,volMod:1.0,tip:'Test week. Give it everything.'},
-    {label:'Week 6 — Deload',theme:'deload',rpe:6,rir:4,weightPct:105,volMod:0.5,tip:'Cut the volume. Keep the weight. Recover fully.'}
+    {label:'Week 6 — Deload',theme:'deload',rpe:6,rir:4,weightPct:90,volMod:0.5,tip:'Cut the volume, cut the weight. Recover fully. Next cycle starts stronger.'}
   ]},
   {key:'maintenance',name:'Maintenance',desc:'4-week steady state — off-season or returning',cyclic:true,weeks:[
     {label:'Week 1 — Maintain',theme:'none',rpe:7,rir:3,weightPct:90,volMod:1.0,tip:'Show up. Do the work. Nothing heroic required.'},
@@ -324,7 +324,7 @@ var PLANS = [
     {label:'Phase 2 — Build',theme:'build',rpe:7,rir:3,weightPct:80,volMod:0.9,tip:'Small weight increases only. Form first, always.'},
     {label:'Phase 2 — Build',theme:'build',rpe:7,rir:3,weightPct:82,volMod:0.9,tip:'Strength improving. Notice the difference?'},
     {label:'Phase 2 — Strengthen',theme:'build',rpe:7,rir:3,weightPct:85,volMod:1.0,tip:'Full volume now. Keep pulling more than pushing.'},
-    {label:'Phase 2 — Deload',theme:'deload',rpe:5,rir:5,weightPct:80,volMod:0.5,tip:'Mid-programme reset. Do not skip this.'},
+    {label:'Phase 2 — Deload',theme:'deload',rpe:5,rir:5,weightPct:75,volMod:0.4,tip:'Mid-programme reset. This is deliberate recovery, not regression — you are stronger than Phase 1. Half the sets, notice how the movements feel compared to week 1.'},
     {label:'Phase 3 — Function',theme:'progress',rpe:7,rir:3,weightPct:87,volMod:1.0,tip:'Functional movements introduced. Control everything.'},
     {label:'Phase 3 — Function',theme:'progress',rpe:8,rir:2,weightPct:90,volMod:1.0,tip:'Getting strong. Respect the process.'},
     {label:'Phase 3 — Integrate',theme:'progress',rpe:8,rir:2,weightPct:92,volMod:1.0,tip:'Full integration. How does it feel compared to week 1?'},
@@ -360,7 +360,7 @@ var TPL = [
 
 // ── STRENGTH ────────────────────────────────────────────────────
 
-{key:'str_b3',name:'Strength 3-day',cat:'strength',desc:'Push / Pull+Hinge / Legs — 3 sessions per week',duration:55,defaultPlan:'wave_3_1',days:[
+{key:'str_b3',name:'Strength 3-day',cat:'strength',desc:'Push / Pull+Hinge / Legs — 3 sessions per week',duration:55,defaultPlan:'wave_3_1',compatiblePlans:['wave_3_1','linear','peaking'],days:[
   {label:'Session A',focus:'Push',exercises:[
     ex('Arm Circles',2,20,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),ex('Push-Up',2,10,45,'warmup'),
     ex('Dumbbell Bench Press (Flat)',3,10,90,'strength','Slow down. 2 seconds down, 1 up.'),
@@ -378,8 +378,8 @@ var TPL = [
     ex('Child\'s Pose',2,0,0,'cooldown','Hold 30–45 seconds.','45s')
   ]},
   {label:'Session C',focus:'Legs + Core',exercises:[
-    ex('Leg Swing (Forward)',2,10,30,'warmup'),ex('Glute Bridge (Bodyweight)',2,15,45,'warmup'),ex('Bodyweight Squat',2,10,45,'warmup'),
-    ex('Goblet Squat (Dumbbell)',3,10,90,'strength','Sit into your hips. Keep chest tall.'),
+    ex('Leg Swing (Forward)',2,10,30,'warmup'),ex('Glute Bridge (Bodyweight)',2,15,45,'warmup'),ex('Goblet Squat (Dumbbell)',2,8,45,'warmup','Primer only. Wake up the hips.'),
+    ex('Back Squat',3,8,120,'strength','Drive knees out. Chest stays tall. Bar on mid-traps.'),
     ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
     ex('Reverse Lunge (Dumbbell)',3,10,90,'strength'),
     ex('Plank',3,0,60,'core','Squeeze glutes. Don\'t let hips sag.','30s'),
@@ -389,7 +389,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'str_b4',name:'Strength 4-day',cat:'strength',desc:'Push / Pull / Legs / Hinge+Core — 4 sessions per week',duration:55,defaultPlan:'wave_3_1',days:[
+{key:'str_b4',name:'Strength 4-day',cat:'strength',desc:'Push / Pull / Legs / Hinge+Core — 4 sessions per week',duration:55,defaultPlan:'wave_3_1',compatiblePlans:['wave_3_1','linear','peaking'],days:[
   {label:'Session A',focus:'Push',exercises:[
     ex('Band Pull-Apart',2,15,30,'warmup'),ex('Arm Circles',2,20,30,'warmup'),ex('Push-Up',2,10,45,'warmup'),
     ex('Barbell Bench Press (Flat)',4,8,120,'strength','Tuck elbows 45°. Full range of motion.'),
@@ -432,7 +432,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'str_b5',name:'Strength 5-day',cat:'strength',desc:'Push / Pull / Legs / Hinge / Full — 5 sessions per week',duration:60,defaultPlan:'wave_5_1',days:[
+{key:'str_b5',name:'Strength 5-day',cat:'strength',desc:'Push / Pull / Legs / Hinge / Full — 5 sessions per week',duration:60,defaultPlan:'wave_5_1',compatiblePlans:['wave_5_1','wave_3_1','peaking'],days:[
   {label:'Session A',focus:'Push',exercises:[
     ex('Band Pull-Apart',2,15,30,'warmup'),ex('Push-Up',2,10,45,'warmup'),
     ex('Barbell Bench Press (Flat)',4,8,120,'strength'),ex('Barbell Overhead Press',3,8,90,'strength'),
@@ -468,14 +468,15 @@ var TPL = [
 
 // ── HYPERTROPHY ─────────────────────────────────────────────────
 
-{key:'hyp_b3',name:'Hypertrophy 3-day',cat:'hypertrophy',desc:'Push / Pull / Legs+Shoulders — 3 sessions per week',duration:60,defaultPlan:'wave_3_1',days:[
-  {label:'Session A',focus:'Push + Chest',exercises:[
+{key:'hyp_b3',name:'Hypertrophy 3-day',cat:'hypertrophy',desc:'Push+Shoulders / Pull+Back / Legs — 3 sessions per week',duration:60,defaultPlan:'wave_3_1',compatiblePlans:['wave_3_1','wave_5_1'],days:[
+  {label:'Session A',focus:'Push + Chest + Shoulders',exercises:[
     ex('Band Pull-Apart',2,15,30,'warmup'),ex('Push-Up',2,15,45,'warmup'),
     ex('Barbell Bench Press (Flat)',4,10,90,'strength','Control the descent. 3 seconds down.'),
     ex('Dumbbell Bench Press (Incline)',4,12,75,'strength'),
     ex('Cable Fly (Low to High)',3,15,60,'accessory'),
     ex('Barbell Overhead Press',3,12,75,'strength'),
     ex('Dumbbell Lateral Raise',4,15,60,'accessory'),
+    ex('Rear Delt Fly (Dumbbell)',3,15,60,'accessory','Supinate at the top. Elbows lead.'),
     ex('Cable Tricep Pushdown (Rope)',4,15,60,'accessory'),
     ex('Overhead Tricep Extension (Dumbbell)',3,15,60,'accessory')
   ]},
@@ -489,18 +490,17 @@ var TPL = [
     ex('Dumbbell Bicep Curl',4,12,60,'accessory'),
     ex('Incline Dumbbell Curl',3,15,60,'accessory')
   ]},
-  {label:'Session C',focus:'Legs + Shoulders',exercises:[
+  {label:'Session C',focus:'Legs',exercises:[
     ex('Leg Swing (Forward)',2,10,30,'warmup'),ex('Glute Bridge (Bodyweight)',2,15,45,'warmup'),
     ex('Back Squat',4,10,90,'strength'),ex('Leg Press',4,12,75,'strength'),
     ex('Romanian Deadlift (Barbell)',3,12,75,'strength'),
-    ex('Leg Curl (Machine, Prone)',3,15,60,'accessory'),
-    ex('Dumbbell Lateral Raise',4,15,60,'accessory'),
-    ex('Rear Delt Fly (Dumbbell)',3,15,60,'accessory'),
+    ex('Leg Curl (Machine, Prone)',4,15,60,'accessory'),
+    ex('Hip Thrust (Dumbbell)',3,15,75,'accessory','Full hip extension at top. Chin to chest.'),
     ex('Calf Raise (Standing, Machine)',4,20,45,'accessory')
   ]}
 ]},
 
-{key:'hyp_b4',name:'Hypertrophy 4-day',cat:'hypertrophy',desc:'Upper Strength / Lower Strength / Upper Hyp / Lower Hyp',duration:65,defaultPlan:'wave_3_1',days:[
+{key:'hyp_b4',name:'Hypertrophy 4-day',cat:'hypertrophy',desc:'Upper Strength / Lower Strength / Upper Hyp / Lower Hyp',duration:65,defaultPlan:'wave_3_1',compatiblePlans:['wave_3_1','wave_5_1'],days:[
   {label:'Session A',focus:'Upper Strength',exercises:[
     ex('Band Pull-Apart',2,15,30,'warmup'),ex('Push-Up',2,15,45,'warmup'),
     ex('Barbell Bench Press (Flat)',4,8,120,'strength'),ex('Barbell Row (Overhand)',4,8,120,'strength'),
@@ -530,7 +530,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'hyp_b5',name:'Hypertrophy 5-day (PPL)',cat:'hypertrophy',desc:'Push / Pull / Legs × 2 cycles per week',duration:60,defaultPlan:'wave_5_1',days:[
+{key:'hyp_b5',name:'Hypertrophy 5-day (PPL)',cat:'hypertrophy',desc:'Push / Pull / Legs × 2 cycles per week',duration:60,defaultPlan:'wave_5_1',compatiblePlans:['wave_5_1','wave_3_1'],days:[
   {label:'Session A',focus:'Push (Strength)',exercises:[
     ex('Band Pull-Apart',2,15,30,'warmup'),ex('Push-Up',2,15,45,'warmup'),
     ex('Barbell Bench Press (Flat)',5,8,90,'strength'),ex('Dumbbell Bench Press (Incline)',4,12,75,'strength'),
@@ -566,7 +566,7 @@ var TPL = [
 
 // ── ENDURANCE ───────────────────────────────────────────────────
 
-{key:'end_b3',name:'Endurance 3-day',cat:'endurance',desc:'Circuit training 3 days per week',duration:50,defaultPlan:'maintenance',days:[
+{key:'end_b3',name:'Endurance 3-day',cat:'endurance',desc:'Circuit training 3 days per week',duration:50,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Body Circuit A',exercises:[
     exT('Jump Rope','1','3min',0,'warmup'),ex('Arm Circles',2,20,30,'warmup'),ex('Leg Swing (Forward)',2,10,30,'warmup'),
     exT('Goblet Squat (Dumbbell)','4','45s',30,'strength'),exT('Push-Up','4','45s',30,'strength'),
@@ -577,7 +577,7 @@ var TPL = [
   ]},
   {label:'Session B',focus:'Full Body Circuit B',exercises:[
     exT('High Knees','2','30s',30,'warmup'),ex('Hip Circle',2,10,30,'warmup'),
-    exT('Back Squat','4','45s',30,'strength'),exT('Walking Lunge (Dumbbell)','4','45s',30,'strength'),
+    exT('Goblet Squat (Dumbbell)','4','45s',30,'strength'),exT('Walking Lunge (Dumbbell)','4','45s',30,'strength'),
     exT('Dumbbell Overhead Press (Standing)','4','45s',30,'strength'),exT('Dumbbell Row (Single-Arm)','4','45s',30,'strength'),
     exT('Dead Bug','3','45s',30,'core'),exT('Side Plank','3','30s',30,'core'),
     exT('Jump Squat','3','30s',30,'cardio'),
@@ -592,7 +592,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'end_b4',name:'Endurance 4-day',cat:'endurance',desc:'Circuit A/B + HIIT + Cardio+Mobility',duration:50,defaultPlan:'maintenance',days:[
+{key:'end_b4',name:'Endurance 4-day',cat:'endurance',desc:'Circuit A/B + HIIT + Cardio+Mobility',duration:50,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Body Circuit A',exercises:[
     exT('Jump Rope','1','3min',0,'warmup'),ex('Arm Circles',2,20,30,'warmup'),
     exT('Goblet Squat (Dumbbell)','4','45s',30,'strength'),exT('Push-Up','4','45s',30,'strength'),
@@ -621,7 +621,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'end_b5',name:'Endurance 5-day',cat:'endurance',desc:'Circuit training 5 days including active recovery',duration:45,defaultPlan:'maintenance',days:[
+{key:'end_b5',name:'Endurance 5-day',cat:'endurance',desc:'Circuit training 5 days including active recovery',duration:45,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Body Circuit A',exercises:[
     exT('Jump Rope','1','3min',0,'warmup'),
     exT('Goblet Squat (Dumbbell)','4','45s',30,'strength'),exT('Push-Up','4','45s',30,'strength'),
@@ -655,7 +655,7 @@ var TPL = [
 
 // ── FAT LOSS ────────────────────────────────────────────────────
 
-{key:'fat_gym',name:'Fat Loss Gym 4-day',cat:'fatloss',desc:'Full Body A/B alternating — gym based',duration:55,defaultPlan:'linear',days:[
+{key:'fat_gym',name:'Fat Loss Gym 4-day',cat:'fatloss',desc:'Full Body A/B alternating — gym based',duration:55,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Body A',exercises:[
     exT('Jump Rope','1','3min',0,'warmup'),ex('Arm Circles',2,20,30,'warmup'),ex('Leg Swing (Forward)',2,10,30,'warmup'),
     ex('Back Squat',4,10,75,'strength'),ex('Barbell Bench Press (Flat)',4,10,75,'strength'),
@@ -682,7 +682,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'fat_home_bw',name:'Fat Loss Home No Equipment',cat:'fatloss',desc:'HIIT circuit — bodyweight only, 5 days per week',duration:35,defaultPlan:'linear',days:[
+{key:'fat_home_bw',name:'Fat Loss Home No Equipment',cat:'fatloss',desc:'HIIT circuit — bodyweight only, 5 days per week',duration:35,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'HIIT Circuit',exercises:[
     exT('High Knees','1','2min',0,'warmup'),ex('Arm Circles',2,20,20,'warmup'),
     exT('Burpee','3','50s',10,'cardio'),exT('Jump Squat','3','50s',10,'cardio'),
@@ -720,7 +720,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'fat_home_db',name:'Fat Loss Home Dumbbells',cat:'fatloss',desc:'Full body dumbbell circuit 4 days per week',duration:45,defaultPlan:'linear',days:[
+{key:'fat_home_db',name:'Fat Loss Home Dumbbells',cat:'fatloss',desc:'Full body dumbbell circuit 4 days per week',duration:45,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Body Dumbbell Circuit',exercises:[
     exT('Jump Rope','1','3min',0,'warmup'),ex('Hip Circle',2,10,30,'warmup'),
     exT('Goblet Squat (Dumbbell)','3','50s',10,'strength'),exT('Dumbbell Front Raise','3','50s',10,'strength'),
@@ -761,7 +761,7 @@ var TPL = [
 
 // ── FOUNDATION ──────────────────────────────────────────────────
 
-{key:'fnd_beg',name:'Beginner Full Body Gym',cat:'foundation',desc:'Complete beginner — 3 days per week, non-consecutive',duration:45,defaultPlan:'linear',days:[
+{key:'fnd_beg',name:'Beginner Full Body Gym',cat:'foundation',desc:'Complete beginner — 3 days per week, non-consecutive',duration:45,defaultPlan:'linear',compatiblePlans:['linear','maintenance'],days:[
   {label:'Session A',focus:'Full Body Beginner',exercises:[
     exT('High Knees','1','2min',0,'warmup'),ex('Arm Circles',2,20,20,'warmup'),
     ex('Leg Swing (Forward)',2,10,30,'warmup'),ex('Walking Lunge (Dumbbell)',2,10,45,'warmup'),
@@ -788,19 +788,19 @@ var TPL = [
   ]},
   {label:'Session C',focus:'Full Body Beginner',exercises:[
     exT('High Knees','1','2min',0,'warmup'),ex('Arm Circles',2,20,20,'warmup'),
-    ex('Leg Swing (Forward)',2,10,30,'warmup'),ex('Walking Lunge (Dumbbell)',2,10,45,'warmup'),
-    ex('Goblet Squat (Dumbbell)',3,12,90,'strength'),
-    ex('Push-Up',3,10,90,'strength'),
-    ex('Dumbbell Row (Single-Arm)',3,12,90,'strength'),
-    ex('Dumbbell Overhead Press (Seated)',3,12,90,'strength'),
-    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
-    exT('Plank','3','30s',60,'core'),
+    ex('Lateral Band Walk',2,12,30,'warmup'),ex('Glute Bridge (Bodyweight)',2,12,30,'warmup'),
+    ex('Reverse Lunge (Bodyweight)',3,10,90,'strength','Step back, not forward. Keep chest tall.'),
+    ex('Incline Push-Up',3,10,90,'strength','Progress toward flat push-up as you get stronger.'),
+    ex('Lat Pulldown (Wide Grip)',3,12,90,'strength','Pull elbows to pockets. Chest stays up.'),
+    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength','Push hips back, not down. Feel the hamstrings load.'),
+    ex('Bird Dog',3,8,60,'core','Slow and controlled. Opposite arm and leg.'),
     exT('Walking','1','20min',0,'cardio'),
-    exT('Child\'s Pose','1','8min',0,'cooldown')
+    exT('Standing Hamstring Stretch','2','30s',15,'cooldown'),
+    exT('Kneeling Hip Flexor Stretch','2','30s',15,'cooldown')
   ]}
 ]},
 
-{key:'fnd_mob',name:'Mobility Programme',cat:'foundation',desc:'Daily pre-session warm-up routine — 12 minutes',duration:12,defaultPlan:'maintenance',days:[
+{key:'fnd_mob',name:'Mobility Programme',cat:'foundation',desc:'Daily pre-session warm-up routine — 12 minutes',duration:12,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Mobility',exercises:[
     exT('Jump Rope','1','2min',0,'warmup'),
     ex('Arm Circles',1,20,15,'mobility'),ex('Shoulder CARs',1,5,20,'mobility'),
@@ -853,7 +853,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'fnd_cool',name:'Cooldown Programme',cat:'foundation',desc:'Post-session cooldown and breathing — 12 minutes',duration:12,defaultPlan:'maintenance',days:[
+{key:'fnd_cool',name:'Cooldown Programme',cat:'foundation',desc:'Post-session cooldown and breathing — 12 minutes',duration:12,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Cooldown',exercises:[
     exT('Walking','1','2min',0,'cooldown'),
     exT('Standing Calf Stretch','2','30s',15,'cooldown'),exT('Standing Hamstring Stretch','2','30s',15,'cooldown'),
@@ -898,10 +898,10 @@ var TPL = [
 
 // ── SPORT ───────────────────────────────────────────────────────
 
-{key:'spt_run',name:'Runners Strength',cat:'sport',desc:'2 sessions per week — do after easy runs only',duration:50,defaultPlan:'sport_12',days:[
+{key:'spt_run',name:'Runners Strength',cat:'sport',desc:'2 sessions per week — do after easy runs only',duration:50,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
   {label:'Session A',focus:'Lower + Core',exercises:[
     exT('High Knees','1','5min',0,'warmup'),ex('Leg Swing (Forward)',2,10,30,'warmup'),
-    ex('Back Squat',4,10,150,'strength','Wks 5–8: 5–8 reps. Wks 9–12: 5–6 reps heavy.'),
+    ex('Back Squat',4,10,150,'strength','Drive knees out. Bar over mid-foot. Brace hard before each rep.'),
     ex('Romanian Deadlift (Barbell)',3,10,150,'strength'),
     ex('Step-Up (Dumbbell)',3,10,90,'strength'),
     ex('Calf Raise (Standing, Machine)',3,18,60,'accessory'),
@@ -920,7 +920,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'spt_jump',name:'Jump Sports Strength',cat:'sport',desc:'Soccer / Volleyball / Basketball — 3 sessions per week',duration:65,defaultPlan:'sport_12',days:[
+{key:'spt_jump',name:'Jump Sports Strength',cat:'sport',desc:'Soccer / Volleyball / Basketball — 3 sessions per week',duration:65,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
   {label:'Session A',focus:'Lower Power + Strength',exercises:[
     exT('Jump Rope','3','30s',30,'warmup'),exT('High Knees','1','5min',0,'warmup'),
     ex('Glute Bridge (Bodyweight)',2,10,30,'activation'),
@@ -952,10 +952,10 @@ var TPL = [
   ]}
 ]},
 
-{key:'spt_climb',name:'Rock Climbing Strength',cat:'sport',desc:'Intermediate+ climbers only — 2 sessions per week',duration:60,defaultPlan:'sport_12',days:[
+{key:'spt_climb',name:'Rock Climbing Strength',cat:'sport',desc:'Intermediate+ climbers only — 2 sessions per week',duration:60,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
   {label:'Session A',focus:'Finger + Pull Strength',exercises:[
     ex('Arm Circles',1,0,0,'warmup',null,'5min'),
-    exT('Dead Hang','1','5min',0,'warmup','Light activation only. Easy climbing warm-up.'),
+    exT('Dead Hang','1','5min',0,'warmup','Thorough warm-up required. 3-4 easy sets open-hand before this session.'),
     ex('Dead Hang (Hangboard)',3,0,180,'strength','Open hand, 20–25mm. 10s hang, 3 min rest.','10s'),
     ex('Half Crimp Hang',3,0,180,'strength','10s hang, 3 min rest.','10s'),
     ex('Pull-Up',3,5,180,'strength'),
@@ -967,7 +967,7 @@ var TPL = [
   {label:'Session B',focus:'One-Arm + Antagonist',exercises:[
     ex('Arm Circles',1,0,0,'warmup',null,'5min'),
     exT('Dead Hang','1','5min',0,'warmup'),
-    ex('One-Arm Hang',3,0,180,'strength','Assisted. 5s each side, 3 min rest.','5s'),
+    ex('One-Arm Hang',3,0,180,'strength','Assisted only — use a band or foot support. Prerequisite: solid 10s dead hang. 5s each side.','5s'),
     ex('Barbell Overhead Press',3,10,90,'strength','Antagonist. Keep rotator cuff strong.'),
     ex('Plank',3,0,60,'core',null,'45s'),
     ex('Hanging Knee Raise',3,12,90,'core'),
@@ -977,7 +977,7 @@ var TPL = [
 
 // ── REHAB ───────────────────────────────────────────────────────
 
-{key:'rhb_sho',name:'Shoulder Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10. Three phases over 12 weeks.',duration:35,defaultPlan:'rehab_12',days:[
+{key:'rhb_sho',name:'Shoulder Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10. Three phases over 12 weeks.',duration:35,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
   {label:'Phase 1 — Daily',focus:'Activate + Restore',exercises:[
     ex('Foam Roller Thoracic Extension',2,10,30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
     ex('Open Book',2,8,30,'mobility'),
@@ -987,6 +987,14 @@ var TPL = [
     ex('Push-Up',2,10,45,'strength','Pain-free range only. Stop immediately if pain.'),
     exT('Plank','2','30s',45,'core')
   ]},
+  {label:'Phase 1B — Daily',focus:'Activate + Restore',exercises:[
+    ex('Foam Roller Thoracic Extension',2,10,30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
+    ex('Open Book',2,8,30,'mobility'),
+    ex('Scapular Push-Up',2,12,45,'activation'),ex('Wall Slide',2,12,45,'activation'),
+    ex('Band Pull-Apart',2,15,45,'activation'),ex('External Rotation (Cable)',2,15,45,'activation'),
+    exT('Doorway Pec Stretch','2','30s',20,'mobility'),exT('Kneeling Lat Stretch','2','30s',20,'mobility'),
+    ex('Push-Up',2,10,45,'strength'),exT('Plank','2','30s',45,'core')
+  ]},
   {label:'Phase 2 — Workout A',focus:'Progressive Load',exercises:[
     ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
     ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),ex('Face Pull',3,15,60,'activation'),
@@ -994,6 +1002,13 @@ var TPL = [
     ex('Push-Up',3,12,60,'strength'),ex('Lat Pulldown (Wide Grip)',3,15,60,'strength'),
     ex('Seated Cable Row',3,15,60,'strength'),
     exT('Plank','3','30s',60,'core'),ex('Shoulder Taps',3,8,60,'core')
+  ]},
+  {label:'Phase 2B — Workout B',focus:'Progressive Load',exercises:[
+    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),ex('Face Pull',3,15,60,'activation'),
+    ex('Landmine Shoulder Press',3,12,60,'strength'),
+    ex('Seated Cable Row',3,15,60,'strength'),ex('Lat Pulldown (Wide Grip)',3,15,60,'strength'),
+    exT('Plank','3','30s',60,'core')
   ]},
   {label:'Phase 3 — Workout A',focus:'Full Strength Integration',exercises:[
     ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
@@ -1003,25 +1018,10 @@ var TPL = [
     ex('Barbell Row (Overhand)',3,12,75,'strength'),
     ex('Pull-Up',3,8,90,'strength'),ex('Lat Pulldown (Wide Grip)',3,12,75,'strength'),
     ex('Push-Up',3,10,75,'strength'),exT('Plank','3','45s',60,'core')
-  ]},
-  {label:'Phase 1B — Daily',focus:'Activate + Restore',exercises:[
-    ex('Foam Roller Thoracic Extension',2,10,30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
-    ex('Open Book',2,8,30,'mobility'),
-    ex('Scapular Push-Up',2,12,45,'activation'),ex('Wall Slide',2,12,45,'activation'),
-    ex('Band Pull-Apart',2,15,45,'activation'),ex('External Rotation (Cable)',2,15,45,'activation'),
-    exT('Doorway Pec Stretch','2','30s',20,'mobility'),exT('Kneeling Lat Stretch','2','30s',20,'mobility'),
-    ex('Push-Up',2,10,45,'strength'),exT('Plank','2','30s',45,'core')
-  ]},
-  {label:'Phase 2B — Workout B',focus:'Progressive Load',exercises:[
-    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
-    ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),ex('Face Pull',3,15,60,'activation'),
-    ex('Landmine Shoulder Press',3,12,60,'strength'),
-    ex('Seated Cable Row',3,15,60,'strength'),ex('Lat Pulldown (Wide Grip)',3,15,60,'strength'),
-    exT('Plank','3','30s',60,'core')
   ]}
 ]},
 
-{key:'rhb_knee',name:'Knee Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10 or swelling increases.',duration:35,defaultPlan:'rehab_12',days:[
+{key:'rhb_knee',name:'Knee Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10 or swelling increases.',duration:35,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
   {label:'Phase 1 — Daily',focus:'Activate + Restore',exercises:[
     exT('Assault Bike (Steady State)','1','8min',0,'warmup'),ex('High Knees',2,20,20,'warmup'),
     exT('Standing Calf Stretch','2','30s',20,'mobility'),exT('Standing Hamstring Stretch','2','30s',20,'mobility'),
@@ -1062,7 +1062,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'rhb_back',name:'Lower Back Rehab 12-week',cat:'rehab',desc:'No deadlifts, sit-ups or toe touches until Phase 3.',duration:35,defaultPlan:'rehab_12',days:[
+{key:'rhb_back',name:'Lower Back Rehab 12-week',cat:'rehab',desc:'No deadlifts, sit-ups or toe touches until Phase 3.',duration:35,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
   {label:'Phase 1 — Daily',focus:'Restore + Activate',exercises:[
     ex('Cat-Cow',3,10,30,'mobility','Gentle. Never push into pain.'),
     exT('Child\'s Pose','2','30s',20,'mobility'),exT('Hip 90/90 Stretch','2','30s',20,'mobility'),
@@ -2737,6 +2737,21 @@ function programsV(){
   // ── PROGRESSION PLANS ──
   h+='<div class="section-head">PROGRESSION PLANS</div>';
   h+='<div style="padding:0 14px;margin-bottom:14px">';
+
+  // Compatibility context
+  var activeTpl=cl.tplKey?getTPL(cl.tplKey):null;
+  var compatList=activeTpl&&activeTpl.compatiblePlans?activeTpl.compatiblePlans:null;
+  function isPlanCompatible(planKey){
+    if(!compatList)return true;
+    return compatList.indexOf(planKey)>=0;
+  }
+  if(compatList){
+    h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px;padding:8px 10px;background:var(--bg3);border-radius:8px;border:0.5px solid var(--brd)">';
+    h+='<span style="font-weight:700;color:var(--tx2)">'+activeTpl.name+'</span> works with: ';
+    h+=compatList.map(function(k){var p=getPlanByKey(k);return p?p.name:'';}).filter(Boolean).join(' · ')+'. Other plans are locked.';
+    h+='</div>';
+  }
+
   var planGroups=[
     {key:'periodisation',label:'Periodisation',keys:['wave_3_1','wave_5_1','peaking']},
     {key:'linear',      label:'Linear',       keys:['linear','maintenance']},
@@ -2757,10 +2772,13 @@ function programsV(){
       h+='<div class="group-body">';
       grpPlans.forEach(function(p){
         var isActive=cl.plan&&cl.plan.key===p.key;
-        h+='<div class="prog-item'+(isActive?' active-prog':'')+'" data-key="'+p.key+'" onclick="openPlanPreview(this.dataset.key)" style="cursor:pointer">';
+        var isLocked=!isPlanCompatible(p.key)&&!isActive;
+        var itemStyle='cursor:'+(isLocked?'default':'pointer')+(isLocked?';opacity:0.4':'');
+        h+='<div class="prog-item'+(isActive?' active-prog':'')+'" data-key="'+p.key+'" onclick="'+(isLocked?'':'openPlanPreview(this.dataset.key)')+'" style="'+itemStyle+'">';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+p.name+'</div>';
         h+='<div class="lbl">'+p.weeks.length+' wks'+(p.cyclic?' · cyclic':'')+'</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
+        else if(isLocked){h+='<i class="ti ti-lock" style="color:var(--mu);font-size:15px"></i>';}
         else{h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px"></i>';}
         h+='</div>';
       });
@@ -2809,7 +2827,19 @@ function openPlanPreview(key){
   if(!plan){(cl.customPlans||[]).forEach(function(p){if(p.key===key){plan=p;isCustom=true;}});}
   if(!plan)return;
   var isActive=cl.plan&&cl.plan.key===key;
+  var activeTplPrev=cl.tplKey?getTPL(cl.tplKey):null;
+  var compatListPrev=activeTplPrev&&activeTplPrev.compatiblePlans?activeTplPrev.compatiblePlans:null;
+  var isIncompatible=!!(compatListPrev&&compatListPrev.indexOf(key)<0&&!isActive);
   var h='<div style="padding:0 20px 30px">';
+  if(isIncompatible){
+    h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;background:rgba(220,50,50,0.08);border:0.5px solid rgba(220,50,50,0.3);margin-bottom:16px">';
+    h+='<i class="ti ti-lock" style="color:var(--coral);font-size:18px;flex-shrink:0;margin-top:1px"></i>';
+    h+='<div><div style="font-size:12px;font-weight:700;color:var(--coral);margin-bottom:3px">Incompatible with current programme</div>';
+    h+='<div style="font-size:11px;color:var(--mu)"><strong>'+activeTplPrev.name+'</strong> is designed to run with: ';
+    h+=compatListPrev.map(function(k){var p=getPlanByKey(k);return p?'<strong>'+p.name+'</strong>':'';}).filter(Boolean).join(', ')+'. ';
+    h+='Attaching a mismatched plan will give misleading intensity targets.</div>';
+    h+='</div></div>';
+  }
 
   // Header
   h+='<div style="margin-bottom:16px">';
@@ -2842,6 +2872,8 @@ function openPlanPreview(key){
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 0 0">';
   if(isActive){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:12px 0">✓ Currently active</div>';
+  } else if(isIncompatible){
+    h+='<button class="btn" disabled style="opacity:0.4;cursor:not-allowed;background:var(--bg3);color:var(--mu);border-color:var(--brd);pointer-events:none">Locked — not compatible with '+activeTplPrev.name+'</button>';
   } else {
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="attachPlan(this.dataset.key);sv();draw();closeSheet()">Select this Plan</button>';
     if(isCustom){
