@@ -160,10 +160,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .light .btn,.light .btn-acc{border-color:var(--acc-brd);color:var(--acc)}
 .light .btn-teal{border-color:var(--teal-brd);color:var(--teal)}
 .light .btn-coral{border-color:var(--coral-brd);color:var(--coral)}
-.light .btn-teal{border-color:rgba(0,0,0,.2);color:#fff}
-.light .btn-coral{border-color:rgba(0,0,0,.2);color:#fff}
-.light .btn-teal{border-color:rgba(0,0,0,.2)}
-.light .btn-coral{border-color:rgba(0,0,0,.2)}
 
 /* Pull-to-refresh */
 #ptr-indicator{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-48px);z-index:300;width:36px;height:36px;border-radius:18px;background:var(--acc);display:flex;align-items:center;justify-content:center;transition:transform .2s;pointer-events:none}
@@ -615,7 +611,7 @@ var TPL = [
   ]},
   {label:'Session B',focus:'Full Body Circuit B',exercises:[
     exT('High Knees','2','30s',30,'warmup'),ex('Hip Circle',2,10,30,'warmup'),
-    exT('Back Squat','4','45s',30,'strength'),exT('Walking Lunge (Dumbbell)','4','45s',30,'strength'),
+    exT('Goblet Squat (Dumbbell)','4','45s',30,'strength'),exT('Walking Lunge (Dumbbell)','4','45s',30,'strength'),
     exT('Dumbbell Overhead Press (Standing)','4','45s',30,'strength'),exT('Dumbbell Row (Single-Arm)','4','45s',30,'strength'),
     exT('Dead Bug','3','45s',30,'core'),exT('Side Plank','3','30s',30,'core'),exT('Jump Squat','3','30s',30,'cardio')
   ]},
@@ -644,7 +640,7 @@ var TPL = [
   ]},
   {label:'Session B',focus:'Full Body Circuit B',exercises:[
     exT('High Knees','2','30s',30,'warmup'),
-    exT('Back Squat','4','45s',30,'strength'),exT('Walking Lunge (Dumbbell)','4','45s',30,'strength'),
+    exT('Goblet Squat (Dumbbell)','4','45s',30,'strength'),exT('Walking Lunge (Dumbbell)','4','45s',30,'strength'),
     exT('Dumbbell Overhead Press (Standing)','4','45s',30,'strength'),exT('Dumbbell Row (Single-Arm)','4','45s',30,'strength'),
     exT('Dead Bug','3','45s',30,'core'),exT('Jump Squat','3','30s',30,'cardio')
   ]},
@@ -1351,6 +1347,7 @@ function startSession(){
       setsData.push({exIdx:ei,setNum:s+1,totalSets:sets,done:false,kg:0,reps:exEntry.reps||0,vol:exEntry.vol||''});
     }
   });
+  _restCirclePos={x:null,y:null}; // reset to default position for each new session
   S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:day.exercises,sets:setsData,currentSet:0,startTime:Date.now(),restActive:false,restEnd:0,exDone:{}};
   sv();draw();
 }
@@ -1412,7 +1409,10 @@ function finishSession(){
       var _tpl=ACTIVE_TPL();
       var _cycleLen=_tpl&&_tpl.days&&_tpl.days.length>0?_tpl.days.length:7;
       var _plan=getPlanByKey(cl.plan.key);
-      if(_plan){
+      // Rehab and pull-up programmes: disable auto-advance.
+      // Phase progression requires clinical/trainer judgement.
+      var _autoAdvanceOk=!(_tpl&&(_tpl.cat==='rehab'||_tpl.key==='spt_pullup'));
+      if(_plan&&_autoAdvanceOk){
         var _sessionsOnPlan=cl.hist.filter(function(s){return s.date>=(cl.plan.startDate||0);}).length;
         if(_sessionsOnPlan>0&&_sessionsOnPlan%_cycleLen===0)advancePlanWeek();
       }
@@ -2191,7 +2191,8 @@ function todayV(){
       h+='<div style="display:flex;align-items:center;gap:6px">';
       h+='<div class="ex-vol" style="'+(isActive?'color:var(--acc)':'')+'">';
       h+=volStr+'</div>';
-      if(exEntry.rest)h+='<div style="font-size:9px;color:var(--mu);font-weight:500">'+exEntry.rest+'s</div>';
+      var _ph=exEntry.ph||'';
+      if(exEntry.rest&&_ph!=='warmup'&&_ph!=='cooldown'&&_ph!=='mobility')h+='<div style="font-size:9px;color:var(--mu);font-weight:500">'+exEntry.rest+'s</div>';
       h+='</div></div>';
     });
   });
@@ -2522,7 +2523,7 @@ function openExWindow(exIdx){
 
   h+='<div style="height:10px"></div>';
   // Choose another
-  h+='<button class="btn btn-ghost" onclick="closeSheet()">Choose another exercise</button>';
+  h+='<button class="btn btn-ghost" onclick="closeSheet();var s=document.getElementById(\'screen\');if(s)setTimeout(function(){s.scrollTop=0;},100)">Choose another exercise</button>';
   h+='</div>';
 
   openSheet(h,null); // no title — exercise name is in the body
@@ -2613,6 +2614,33 @@ function doLogSet(globalIdx){
   if(!wx.exDone)wx.exDone={};
   var allDoneNow=wx.sets.filter(function(s){return s.exIdx===exIdx;}).every(function(s){return s.done;});
   if(allDoneNow)wx.exDone[exIdx]=true;
+  // Auto-PR check
+  // Weighted: new PR if kg×reps volume beats previous best at same or higher weight
+  // Bodyweight (kg=0): new PR if reps beat previous best
+  // Timed: no auto-PR (time is not always better — user can log manually)
+  var _cl=C();if(!_cl.pr)_cl.pr={};
+  var _exName=wx.exercises[exIdx].name;
+  var _existing=_cl.pr[_exName];
+  var _isNewPR=false;
+  if(kg>0){
+    // Weighted: beat it if higher weight, or same weight with more reps
+    if(!_existing||_existing.kg===undefined){
+      _isNewPR=true;
+    } else {
+      var _prevKg=_existing.kg||0;var _prevReps=_existing.reps||0;
+      if(kg>_prevKg||(kg===_prevKg&&reps>_prevReps))_isNewPR=true;
+    }
+  } else if(reps>0){
+    // Bodyweight: beat it if more reps
+    if(!_existing){
+      _isNewPR=true;
+    } else {
+      var _prevReps2=_existing.reps||0;
+      if(reps>_prevReps2)_isNewPR=true;
+    }
+  }
+  if(_isNewPR)_cl.pr[_exName]={kg:kg,reps:reps,date:Date.now()};
+
   // Set rest timer
   var restSecs=(wx.exercises[exIdx].rest)||60;
   if(restSecs>0){
@@ -2855,8 +2883,28 @@ function programsV(){
       inCat.forEach(function(t){
         var isActive=t.key===cl.tplKey;
         h+='<div class="prog-item'+(isActive?' active-prog':'')+'" data-key="'+t.key+'" onclick="openProgPreview(this.dataset.key)" style="cursor:pointer">';
+        // Collect equipment from all exercises across all sessions
+        var _eqSet={};
+        (t.days||[]).forEach(function(d){
+          (d.exercises||[]).forEach(function(e){
+            var _ex=EX_MAP[e.name];
+            if(_ex&&_ex.equipment)_ex.equipment.forEach(function(eq){_eqSet[eq]=true;});
+          });
+        });
+        var _eqList=Object.keys(_eqSet).filter(function(e){return e!=='bodyweight';});
+        if(_eqList.length===0&&_eqSet['bodyweight'])_eqList=['bodyweight'];
+        var _eqLabels={barbell:'Barbell',dumbbell:'Dumbbell',cable:'Cable',machine:'Machine',
+          kettlebell:'Kettlebell',band:'Band',pull_up_bar:'Pull-Up Bar',bodyweight:'Bodyweight',
+          assault_bike:'Assault Bike',hangboard:'Hangboard',landmine:'Landmine',
+          foam_roller:'Foam Roller',sled:'Sled',battle_ropes:'Battle Ropes'};
+        var _shown=_eqList.slice(0,3).map(function(e){return _eqLabels[e]||e;});
+        var _overflow=_eqList.length>3?(' +'+(_eqList.length-3)):'';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+t.name+'</div>';
-        h+='<div class="lbl">'+t.days.length+' days/wk · '+t.duration+'min</div></div>';
+        h+='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin-top:2px">';
+        h+='<span class="lbl" style="margin-right:2px">'+t.days.length+' days/wk · '+t.duration+'min</span>';
+        _shown.forEach(function(eq){h+='<span style="font-size:9px;font-weight:600;color:var(--mu);background:var(--bg2);border:0.5px solid var(--brd);border-radius:4px;padding:1px 5px">'+eq+'</span>';});
+        if(_overflow)h+='<span style="font-size:9px;color:var(--mu)">'+_overflow+'</span>';
+        h+='</div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
         else{h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px"></i>';}
         h+='</div>';
@@ -3061,6 +3109,13 @@ function openProgPreview(key){
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
   h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 8px">'+tpl.days.length+' days/wk</span>';
   h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:2px 8px">~'+tpl.duration+' min</span>';
+  // Equipment tags in preview header
+  var _pvEqSet={};
+  (tpl.days||[]).forEach(function(d){(d.exercises||[]).forEach(function(e){var _x=EX_MAP[e.name];if(_x&&_x.equipment)_x.equipment.forEach(function(eq){_pvEqSet[eq]=true;});});});
+  var _pvEq=Object.keys(_pvEqSet).filter(function(e){return e!=='bodyweight';});
+  if(_pvEq.length===0&&_pvEqSet['bodyweight'])_pvEq=['bodyweight'];
+  var _pvLabels={barbell:'Barbell',dumbbell:'Dumbbell',cable:'Cable',machine:'Machine',kettlebell:'Kettlebell',band:'Band',pull_up_bar:'Pull-Up Bar',bodyweight:'Bodyweight',assault_bike:'Assault Bike',hangboard:'Hangboard',landmine:'Landmine',foam_roller:'Foam Roller',sled:'Sled',battle_ropes:'Battle Ropes'};
+  _pvEq.forEach(function(eq){h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:2px 8px">'+ (_pvLabels[eq]||eq)+'</span>';});
   if(tpl.desc)h+='<span style="font-size:10px;color:var(--mu);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:2px 8px">'+tpl.desc+'</span>';
   h+='</div></div>';
 
@@ -3768,12 +3823,10 @@ function draw(){
         '<circle cx="44" cy="44" r="'+_fabR+'" fill="none" stroke="var(--acc)" stroke-width="3.5"'+
           ' stroke-dasharray="'+_fabCirc+'" stroke-dashoffset="0"'+
           ' stroke-linecap="round" transform="rotate(-90 44 44)"/>'+
-      '</svg>'+
-      '<div style="position:absolute;top:0;left:0;width:100%;height:100%;'+
-        'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:none">'+
-        '<div style="font-size:26px;color:var(--acc);line-height:1">▶</div>'+
-        '<div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--acc);opacity:.8">START</div>'+
-      '</div>';
+        '<!-- Play triangle: optically centred, shifted 1px right to account for visual weight -->'+
+        '<polygon points="37,30 37,58 59,44" fill="var(--acc)" opacity="0.9"/>'+
+
+      '</svg>';
     // Tap to start
     var _fabDragStart={x:0,y:0};var _fabDragging=false;var _fabMoved=false;
     var _fabElStart={x:fabX,y:fabY};
