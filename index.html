@@ -1610,9 +1610,17 @@ function enterPlayMode(){
   if(!S.wx)return;
   if(S.wx.playing)return; // already playing
   S.wx.playing=true;
-  S.wx.startTime=Date.now(); // start timing from first press of PLAY
+  S.wx.startTime=Date.now();
+  // Clear pending stepper state from VIEW so PLAY always recalculates
+  // from viewAdj / lastWeights / programme default for the correct exercise
+  S.wx._lastExIdx=undefined;
+  S.wx._pendingKg=undefined;
+  S.wx._pendingReps=undefined;
+  S.wx._pendingTime=undefined;
+  // Ensure no sets or exercises are accidentally marked done from VIEW browsing
+  S.wx.sets.forEach(function(s){s.done=false;});
+  S.wx.exDone={};
   sv();draw();
-  // Auto-open first incomplete exercise
   setTimeout(function(){autoOpenNextEx();},300);
 }
 function logSet(si,kg){
@@ -2434,8 +2442,7 @@ function todayV(){
 
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
   // Eyebrow — with VIEW/PLAY mode indicator
-  var _modeTag=isPlaying?'<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:1px 7px;margin-left:6px">▶ PLAY</span>':'';
-  h+='<div class="lbl lbl-acc" style="margin-bottom:4px;display:flex;align-items:center">'+tpl.name+' · '+day.label+_modeTag+'</div>';
+  h+='<div class="lbl lbl-acc" style="margin-bottom:4px">'+tpl.name+' · '+day.label+'</div>';
   // Hero — heading is the session switcher (only when not in PLAY)
   var _canSwitchSession=(!S.wx||!S.wx.playing)&&tpl.days.length>1;
   h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">';
