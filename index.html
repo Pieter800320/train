@@ -2223,7 +2223,7 @@ function openJournalView(){
       h+='<span style="font-size:13px;font-weight:600">'+name+'</span>';
       h+='<div style="display:flex;align-items:center;gap:8px">';
       h+='<span class="pr-badge">'+val+'</span>';
-      h+='<button onclick="deletePB(\''+name.replace(/\'/g,"\\\'")+'\'" style="background:none;border:none;color:var(--mu);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1" title="Delete PB">✕</button>';
+      h+='<button data-pbname="'+name.replace(/"/g,'&quot;')+'" onclick="deletePB(this.dataset.pbname)" style="background:none;border:none;color:var(--mu);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1" title="Delete PB">✕</button>';
       h+='</div>';
       h+='</div>';
     });
@@ -2259,8 +2259,8 @@ function openJournalView(){
   openSheet(h,'Journal — '+(cl.name||'Athlete'));
 }
 function clearAllHistory(){
-  if(confirm('Clear all session history? This cannot be undone.')){
-    C().hist=[];sv();openJournalView();
+  if(confirm('Clear all sessions and PBs? This cannot be undone.')){
+    var cl=C();cl.hist=[];cl.pr={};sv();openJournalView();
   }
 }
 function clearHistoryItem(idx){
@@ -3629,7 +3629,9 @@ function togglePgGroup(cat){
 
 function switchTPL(key){
   if(confirm('Switch to this programme? Your current day progress will reset.')){
-    C().tplKey=key;C().day=0;sv();draw();
+    C().tplKey=key;C().day=0;
+    S.wx=null; // clear any stale session — stale exercises would show wrong content
+    sv();draw();
   }
 }
 function deletePB(name){
