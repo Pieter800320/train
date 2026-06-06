@@ -1763,7 +1763,7 @@ function openJournalView(){
   h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--acc)">'+total+'</div><div class="lbl">Total sessions</div></div>';
   h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--acc)">'+prCount+'</div><div class="lbl">Personal Bests</div></div>';
   h+='</div>';
-  h+='<button class="btn btn-ghost" style="margin-bottom:20px;font-size:12px" onclick="exportClientData()">⤓ Download my data</button>';
+  h+='<button class="btn btn-ghost" style="margin-bottom:20px;font-size:12px" onclick="exportJournal()">⤓ Download journal & PBs</button>';
 
   // PR table
   var prs=Object.keys(cl.pr||{});
@@ -1819,73 +1819,51 @@ function clearHistoryItem(idx){
   cl.hist.splice(idx,1);sv();openJournalView();
 }
 
-function exportClientData(){
-  var cl=C();
-  var tpl=ACTIVE_TPL();
-  var banner=planBannerData();
-  var date=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+function _exportDownload(html, filename){
+  var blob=new Blob([html],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
 
-  // Build HTML export
+function _exportStyles(){
+  return '<style>'+
+    'body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:640px;margin:0 auto;padding:20px;color:#1a1a1a;background:#f8f9fb}'+
+    'h1{font-size:22px;font-weight:900;margin-bottom:4px}'+
+    'h2{font-size:13px;font-weight:700;margin:22px 0 8px;color:#777;text-transform:uppercase;letter-spacing:1px}'+
+    'h3{font-size:14px;font-weight:700;margin:10px 0 3px}'+
+    '.card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px;margin-bottom:8px}'+
+    '.lbl{font-size:11px;color:#888;margin-top:2px}'+
+    '.badge{display:inline-block;font-size:10px;font-weight:700;background:#f0f0f0;border-radius:6px;padding:2px 8px;margin-right:4px}'+
+    '.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0}'+
+    '.row:last-child{border-bottom:none}'+
+    '.ph{font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;margin:8px 0 4px;letter-spacing:.5px}'+
+    '</style>';
+}
+
+// ── Journal export: PBs + session history ──
+function exportJournal(){
+  var cl=C();
+  var date=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
   var h='<!DOCTYPE html><html><head><meta charset="UTF-8">';
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">';
-  h+='<title>Falkenburg — '+(cl.name||'Athlete')+' — '+date+'</title>';
-  h+='<style>';
-  h+='body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1a1a1a;background:#f8f9fb}';
-  h+='h1{font-size:24px;font-weight:900;margin-bottom:4px}';
-  h+='h2{font-size:16px;font-weight:700;margin:24px 0 8px;color:#555;text-transform:uppercase;letter-spacing:1px}';
-  h+='h3{font-size:14px;font-weight:700;margin:12px 0 4px}';
-  h+='.card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px;margin-bottom:8px}';
-  h+='.lbl{font-size:11px;color:#888;margin-top:2px}';
-  h+='.badge{display:inline-block;font-size:10px;font-weight:700;background:#f0f0f0;border-radius:6px;padding:2px 8px;margin-right:4px}';
-  h+='.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0}';
-  h+='.row:last-child{border-bottom:none}';
-  h+='</style></head><body>';
+  h+='<title>Falkenburg Journal — '+(cl.name||'Athlete')+' — '+date+'</title>';
+  h+=_exportStyles()+'</head><body>';
 
-  // Header
-  h+='<h1>'+( cl.name||'Athlete')+'</h1>';
-  h+='<div class="lbl">Exported from Falkenburg • '+date+'</div>';
-
-  // Active programme
-  h+='<h2>Active Programme</h2>';
-  h+='<div class="card">';
-  h+='<h3>'+tpl.name+'</h3>';
-  h+='<div class="lbl">'+tpl.days.length+' days/week • ~'+tpl.duration+' min</div>';
-  if(banner){
-    h+='<div style="margin-top:8px">';
-    h+='<span class="badge">'+banner.planName+'</span>';
-    h+='<span class="badge">Week '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
-    h+='<span class="badge">RPE '+banner.rpe+'</span>';
-    h+='</div>';
-  }
-  h+='</div>';
-
-  // Sessions
-  tpl.days.forEach(function(day){
-    h+='<div class="card">';
-    h+='<h3>'+day.focus+'</h3>';
-    h+='<div class="lbl">'+day.label+'</div>';
-    var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
-    var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
-    phases.forEach(function(ph){
-      var exs=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
-      if(!exs.length)return;
-      h+='<div style="font-size:10px;font-weight:700;color:#888;margin:8px 0 4px;text-transform:uppercase">'+phaseLabels[ph]+'</div>';
-      exs.forEach(function(ex){
-        var vol=ex.vol||(ex.reps>0?ex.sets+'×'+ex.reps:'');
-        h+='<div class="row"><span style="font-size:13px">'+ex.name+'</span><span style="font-size:12px;color:#555">'+vol+(ex.rest?' • '+ex.rest+'s':'')+'</span></div>';
-      });
-    });
-    h+='</div>';
-  });
+  h+='<h1>'+(cl.name||'Athlete')+'</h1>';
+  h+='<div class="lbl">Journal export • '+date+'</div>';
 
   // Personal Bests
   var prs=Object.keys(cl.pr||{});
   if(prs.length>0){
-    h+='<h2>Personal Bests</h2>';
-    h+='<div class="card">';
+    h+='<h2>Personal Bests</h2><div class="card">';
     prs.forEach(function(name){
       var pr=cl.pr[name];
-      var val=typeof pr==='object'?pr.kg+'kg × '+pr.reps+(pr.date?' • '+new Date(pr.date).toLocaleDateString():''):pr+'kg';
+      var val=typeof pr==='object'
+        ?(pr.kg>0?pr.kg+'kg × '+pr.reps+(pr.date?' • '+new Date(pr.date).toLocaleDateString():''):pr.reps+' reps'+(pr.date?' • '+new Date(pr.date).toLocaleDateString():''))
+        :pr+'kg';
       h+='<div class="row"><span style="font-size:13px;font-weight:600">'+name+'</span><span style="font-size:12px;color:#555">'+val+'</span></div>';
     });
     h+='</div>';
@@ -1894,29 +1872,102 @@ function exportClientData(){
   // Session history
   var hist=cl.hist||[];
   if(hist.length>0){
-    h+='<h2>Session History ('+hist.length+' sessions)</h2>';
-    h+='<div class="card">';
+    h+='<h2>Session History ('+hist.length+' sessions)</h2><div class="card">';
     hist.slice().reverse().forEach(function(s){
       var d=new Date(s.date).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-      h+='<div class="row"><div><div style="font-size:13px;font-weight:600">'+s.focus+'</div><div class="lbl">'+d+'</div></div>';
-      h+='<div style="text-align:right"><div style="font-size:13px;font-weight:700">'+s.duration+' min</div><div class="lbl">'+s.sets+' sets</div></div></div>';
+      h+='<div class="row"><div><div style="font-size:13px;font-weight:600">'+s.focus+'</div>';
+      h+='<div class="lbl">'+d+(s.plan?' · '+s.plan:'')+'</div></div>';
+      h+='<div style="text-align:right"><div style="font-size:13px;font-weight:700">'+s.duration+' min</div>';
+      h+='<div class="lbl">'+s.sets+' sets</div></div></div>';
     });
     h+='</div>';
+  } else {
+    h+='<h2>Session History</h2><div class="card"><div style="color:#aaa;padding:12px 0;text-align:center">No sessions logged yet.</div></div>';
   }
 
   h+='<div style="text-align:center;margin-top:24px;font-size:11px;color:#aaa">Generated by Falkenburg • '+date+'</div>';
   h+='</body></html>';
+  _exportDownload(h,'Falkenburg_Journal_'+(cl.name||'Athlete').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.html');
+}
 
-  // Trigger download
-  var blob=new Blob([h],{type:'text/html'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='Falkenburg_'+(cl.name||'Athlete').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+// ── Programme export: training plan + progression plan ──
+function exportProgramme(){
+  var cl=C();var tpl=ACTIVE_TPL();var banner=planBannerData();
+  var date=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+  var h='<!DOCTYPE html><html><head><meta charset="UTF-8">';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">';
+  h+='<title>Falkenburg Programme — '+(cl.name||'Athlete')+' — '+date+'</title>';
+  h+=_exportStyles()+'</head><body>';
+
+  h+='<h1>'+(cl.name||'Athlete')+'</h1>';
+  h+='<div class="lbl">Programme export • '+date+'</div>';
+
+  // Active training programme
+  h+='<h2>Training Programme</h2>';
+  h+='<div class="card">';
+  h+='<h3>'+tpl.name+'</h3>';
+  h+='<div class="lbl">'+tpl.days.length+' days / week · ~'+tpl.duration+' min · '+tpl.desc+'</div>';
+  h+='</div>';
+
+  var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+  tpl.days.forEach(function(day,di){
+    h+='<div class="card">';
+    h+='<h3>'+day.focus+'</h3>';
+    h+='<div class="lbl">'+day.label+'</div>';
+    phases.forEach(function(ph){
+      var exs=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
+      if(!exs.length)return;
+      h+='<div class="ph">'+phaseLabels[ph]+'</div>';
+      exs.forEach(function(ex){
+        var vol=ex.vol||(ex.reps>0?ex.sets+'\u00d7'+ex.reps:'');
+        h+='<div class="row">';
+        h+='<span style="font-size:13px">'+ex.name+'</span>';
+        h+='<span style="font-size:12px;color:#555">'+vol+(ex.rest?' · '+ex.rest+'s':'')+'</span>';
+        h+='</div>';
+        if(ex.cue)h+='<div style="font-size:11px;color:#aaa;padding:0 0 4px 0;font-style:italic">'+ex.cue+'</div>';
+      });
+    });
+    h+='</div>';
+    if(di<tpl.days.length-1)h+='<div style="margin-bottom:4px"></div>';
+  });
+
+  // Progression plan
+  if(banner){
+    var plan=getPlanByKey(cl.plan.key);
+    if(plan){
+      h+='<h2>Progression Plan</h2>';
+      h+='<div class="card">';
+      h+='<h3>'+plan.name+'</h3>';
+      h+='<div class="lbl">'+(plan.desc||'')+(plan.cyclic?' · Cyclic':'')+'</div>';
+      h+='<div style="margin-top:8px">';
+      h+='<span class="badge">Week '+(banner.weekIndex+1)+' of '+banner.totalWeeks+'</span>';
+      h+='<span class="badge">RPE '+banner.rpe+'</span>';
+      h+='<span class="badge">'+banner.rir+' RIR</span>';
+      h+='</div></div>';
+      plan.weeks.forEach(function(wk,wi){
+        var isCur=wi===banner.weekIndex;
+        h+='<div class="card" style="'+(isCur?'border-color:#999;':'')+'background:'+(isCur?'#f0f0f0':'#fff')+'">';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center">';
+        h+='<strong style="font-size:13px">Week '+(wi+1)+(wk.label?' · '+wk.label:'')+(isCur?' ← current':'')+' </strong>';
+        if(wk.theme==='deload')h+='<span class="badge">DELOAD</span>';
+        h+='</div>';
+        h+='<div style="margin-top:4px">';
+        h+='<span class="badge">RPE '+wk.rpe+'</span>';
+        h+='<span class="badge">'+wk.rir+' RIR</span>';
+        h+='<span class="badge">'+Math.round((wk.volMod||1)*100)+'% vol</span>';
+        h+='</div>';
+        if(wk.tip)h+='<div style="font-size:12px;color:#777;margin-top:4px;font-style:italic">'+wk.tip+'</div>';
+        h+='</div>';
+      });
+    }
+  } else {
+    h+='<h2>Progression Plan</h2><div class="card"><div style="color:#aaa;padding:12px 0;text-align:center">No progression plan attached.</div></div>';
+  }
+
+  h+='<div style="text-align:center;margin-top:24px;font-size:11px;color:#aaa">Generated by Falkenburg • '+date+'</div>';
+  h+='</body></html>';
+  _exportDownload(h,'Falkenburg_Programme_'+(cl.name||'Athlete').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.html');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2618,8 +2669,11 @@ function programsV(){
 
   // ── Header ──
   h+='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  h+='<div class="h1" style="margin-bottom:4px">Programs</div>';
-  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Training plans &amp; progression</div>';
+  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between">';
+  h+='<div><div class="h1" style="margin-bottom:4px">Programs</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Training plans &amp; progression</div></div>';
+  h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-top:4px;flex-shrink:0" onclick="exportProgramme()">⤓ Export</button>';
+  h+='</div>';
 
   h+='</div>';
 
