@@ -4091,7 +4091,7 @@ function buildStep2(){
        'display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;'+
        'border:1.5px solid '+(active?'var(--acc-brd)':'var(--brd)')+';'+
        'background:'+(active?'var(--acc-bg)':'var(--bg3)')+';cursor:pointer">';
-    h+='<div style="font-size:18px;width:24px;text-align:center;color:var(--acc);flex-shrink:0">'+ph.icon+'</div>';
+
     h+='<div style="flex:1">';
     h+='<div style="font-size:14px;font-weight:700;color:'+(active?'var(--acc)':'var(--tx)')+'">'+(active?'✓ ':'')+ph.label+'</div>';
     h+='<div style="font-size:11px;color:var(--mu)">';
@@ -4149,11 +4149,11 @@ function buildStep3(){
   var sortedPhases=phases.slice().sort(function(a,b){return phOrder.indexOf(a)-phOrder.indexOf(b);});
 
   sortedPhases.forEach(function(phKey){
-    var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey,icon:'◇'};
+    var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey};
     var phExs=(day.exercises||[]).filter(function(ex){return ex.ph===phKey;});
     h+='<div style="margin-bottom:16px">';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-    h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--acc)">'+phConf.icon+' '+phConf.label.toUpperCase()+'</div>';
+    h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--acc)">'+phConf.label.toUpperCase()+'</div>';
     h+='<span style="font-size:10px;color:var(--mu)">'+phExs.length+' exercise'+(phExs.length!==1?'s':'')+'</span>';
     h+='</div>';
 
@@ -4161,19 +4161,19 @@ function buildStep3(){
     phExs.forEach(function(ex){
       var globalEi=day.exercises.indexOf(ex);
       var volStr=ex.vol?ex.vol:(ex.reps>0?ex.sets+'×'+ex.reps:'');
-      h+='<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px">';
+      h+='<div style="display:flex;align-items:center;gap:0;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px">';
+      // Reorder arrows LEFT — large touch target
+      h+='<div style="display:flex;flex-direction:column;align-items:center;gap:0;margin-right:10px;flex-shrink:0">';
+      if(globalEi>0)h+='<button onclick="event.stopPropagation();buildMoveEx('+di+','+globalEi+',-1)" style="background:none;border:none;color:var(--tx2);cursor:pointer;font-size:18px;line-height:1;padding:6px 10px">↑</button>';
+      else h+='<span style="display:block;width:38px;height:32px"></span>';
+      if(globalEi<day.exercises.length-1)h+='<button onclick="event.stopPropagation();buildMoveEx('+di+','+globalEi+',1)" style="background:none;border:none;color:var(--tx2);cursor:pointer;font-size:18px;line-height:1;padding:6px 10px">↓</button>';
+      else h+='<span style="display:block;width:38px;height:32px"></span>';
+      h+='</div>';
       h+='<div style="flex:1;min-width:0">';
       h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
       h+='<div style="font-size:11px;color:var(--mu)">'+volStr+(ex.rest?' · '+ex.rest+'s':'')+'</div>';
       h+='</div>';
-      // Reorder buttons
-      h+='<div style="display:flex;flex-direction:column;gap:2px">';
-      if(globalEi>0)h+='<button onclick="buildMoveEx('+di+','+globalEi+',-1)" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;line-height:1;padding:1px 4px">↑</button>';
-      else h+='<span style="width:22px;display:block"></span>';
-      if(globalEi<day.exercises.length-1)h+='<button onclick="buildMoveEx('+di+','+globalEi+',1)" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;line-height:1;padding:1px 4px">↓</button>';
-      else h+='<span style="width:22px;display:block"></span>';
-      h+='</div>';
-      h+='<button onclick="buildRemoveEx('+di+','+globalEi+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:15px;padding:4px;flex-shrink:0">✕</button>';
+      h+='<button onclick="buildRemoveEx('+di+','+globalEi+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:8px;flex-shrink:0">✕</button>';
       h+='</div>';
     });
 
@@ -4374,10 +4374,10 @@ function buildStep4(){
   var sortedPhases=phases.slice().sort(function(a,b){return phOrder.indexOf(a)-phOrder.indexOf(b);});
 
   sortedPhases.forEach(function(phKey){
-    var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey,icon:'◇'};
+    var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey};
     var phExs=(day.exercises||[]).filter(function(ex){return ex.ph===phKey;});
     if(phExs.length===0)return;
-    h+='<div class="phase-head">'+phConf.icon+' '+phConf.label+'</div>';
+    h+='<div class="phase-head">'+phConf.label+'</div>';
     phExs.forEach(function(ex){
       var globalEi=day.exercises.indexOf(ex);
       var volStr=ex.vol?ex.vol:(ex.reps>0?ex.sets+'×'+ex.reps:ex.sets+'×—');
@@ -4413,7 +4413,8 @@ function buildConfigEx(di,ei){
   h+='<div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:16px">'+exEntry.name+'</div>';
 
   // Phase selector
-  h+='<div class="lbl" style="margin-bottom:8px">PHASE</div>';
+  h+='<div class="lbl" style="margin-bottom:8px">MOVE TO PHASE</div>';
+  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:8px">Tap to reassign this exercise to a different phase.</div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
   phases.forEach(function(ph){
     var isActive=(exEntry.ph||'strength')===ph;
@@ -4568,13 +4569,17 @@ function buildDayDropdown(activeDi,step){
   var e=S.customEdit;
   if(e.days.length<=1)return '';
   var h='<div style="margin-bottom:16px">';
+  h+='<div style="position:relative">';
   h+='<select onchange="S.customEdit.activeDay=parseInt(this.value);sv();draw()" '+
-     'style="width:100%;padding:10px 14px;font-size:14px;font-weight:700;border-radius:10px;'+
-     'border:1px solid var(--acc-brd);background:var(--acc-bg);color:var(--acc);cursor:pointer">';
+     'style="width:100%;padding:10px 40px 10px 14px;font-size:14px;font-weight:700;border-radius:10px;'+
+     'border:1px solid var(--acc-brd);background:var(--acc-bg);color:var(--acc);cursor:pointer;'+
+     'appearance:none;-webkit-appearance:none">';
   e.days.forEach(function(d,i){
     h+='<option value="'+i+'"'+(i===activeDi?' selected':'')+'>'+d.label+(d.focus?' — '+d.focus:'')+'</option>';
   });
-  h+='</select></div>';
+  h+='</select>';
+  h+='<div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--acc);font-size:13px;font-weight:700">▾</div>';
+  h+='</div></div>';
   return h;
 }
 
@@ -4585,7 +4590,7 @@ function buildWizardNav(backStep,nextStep,canNext,hint){
     h+='<button class="btn btn-ghost" style="flex:1" onclick="buildGoto('+backStep+')">← Back</button>';
   }
   if(nextStep!==null){
-    h+='<button class="btn btn-acc" style="flex:'+(backStep>=0?'2':'1')+'" '+
+    h+='<button class="btn btn-acc" style="flex:1" '+
        (canNext?'':'disabled title="'+hint+'"')+
        ' onclick="buildGoto('+nextStep+')">Next →</button>';
   }
