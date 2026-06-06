@@ -970,7 +970,7 @@ var TPL = [
     ex('Barbell Overhead Press',3,10,90,'strength','Antagonist. Keep rotator cuff strong.'),
     ex('Plank',3,0,60,'core',null,'45s'),
     ex('Hanging Knee Raise',3,12,90,'core'),
-    exT('Wrist CARs','2','30s',20,'cooldown'),exT('Shoulder CARs','2','5rep',20,'cooldown')
+    exT('Wrist CARs','2','30s',20,'cooldown'),ex('Shoulder CARs',2,5,20,'cooldown')
   ]}
 ]},
 
@@ -978,8 +978,8 @@ var TPL = [
 
 {key:'rhb_sho',name:'Shoulder Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10. Three phases over 12 weeks.',duration:35,defaultPlan:'rehab_12',days:[
   {label:'Phase 1 — Daily',focus:'Activate + Restore',exercises:[
-    exT('Foam Roller Thoracic Extension','2','10rep',30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
-    exT('Open Book','2','8rep',30,'mobility'),
+    ex('Foam Roller Thoracic Extension',2,10,30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
+    ex('Open Book',2,8,30,'mobility'),
     ex('Scapular Push-Up',2,12,45,'activation'),ex('Wall Slide',2,12,45,'activation'),
     ex('Band Pull-Apart',2,15,45,'activation'),ex('External Rotation (Cable)',2,15,45,'activation'),
     exT('Doorway Pec Stretch','2','30s',20,'mobility'),exT('Kneeling Lat Stretch','2','30s',20,'mobility'),
@@ -987,7 +987,7 @@ var TPL = [
     exT('Plank','2','30s',45,'core')
   ]},
   {label:'Phase 2 — Workout A',focus:'Progressive Load',exercises:[
-    exT('Foam Roller Thoracic Extension','2','10rep',30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
     ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),ex('Face Pull',3,15,60,'activation'),
     ex('Prone Cobra',3,12,60,'activation'),
     ex('Push-Up',3,12,60,'strength'),ex('Lat Pulldown (Wide Grip)',3,15,60,'strength'),
@@ -995,7 +995,7 @@ var TPL = [
     exT('Plank','3','30s',60,'core'),ex('Shoulder Taps',3,8,60,'core')
   ]},
   {label:'Phase 3 — Workout A',focus:'Full Strength Integration',exercises:[
-    exT('Foam Roller Thoracic Extension','2','10rep',30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
     ex('Dumbbell Overhead Press (Seated)',3,10,90,'strength','Scapular plane — 30° forward. Check pain before adding weight.'),
     ex('Landmine Shoulder Press',3,10,90,'strength'),
     ex('Rear Delt Fly (Dumbbell)',3,15,60,'activation'),ex('Face Pull',3,15,60,'activation'),
@@ -1004,15 +1004,15 @@ var TPL = [
     ex('Push-Up',3,10,75,'strength'),exT('Plank','3','45s',60,'core')
   ]},
   {label:'Phase 1B — Daily',focus:'Activate + Restore',exercises:[
-    exT('Foam Roller Thoracic Extension','2','10rep',30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
-    exT('Open Book','2','8rep',30,'mobility'),
+    ex('Foam Roller Thoracic Extension',2,10,30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
+    ex('Open Book',2,8,30,'mobility'),
     ex('Scapular Push-Up',2,12,45,'activation'),ex('Wall Slide',2,12,45,'activation'),
     ex('Band Pull-Apart',2,15,45,'activation'),ex('External Rotation (Cable)',2,15,45,'activation'),
     exT('Doorway Pec Stretch','2','30s',20,'mobility'),exT('Kneeling Lat Stretch','2','30s',20,'mobility'),
     ex('Push-Up',2,10,45,'strength'),exT('Plank','2','30s',45,'core')
   ]},
   {label:'Phase 2B — Workout B',focus:'Progressive Load',exercises:[
-    exT('Foam Roller Thoracic Extension','2','10rep',30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
     ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),ex('Face Pull',3,15,60,'activation'),
     ex('Landmine Shoulder Press',3,12,60,'strength'),
     ex('Seated Cable Row',3,15,60,'strength'),ex('Lat Pulldown (Wide Grip)',3,15,60,'strength'),
@@ -1022,7 +1022,7 @@ var TPL = [
 
 {key:'rhb_knee',name:'Knee Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10 or swelling increases.',duration:35,defaultPlan:'rehab_12',days:[
   {label:'Phase 1 — Daily',focus:'Activate + Restore',exercises:[
-    exT('Assault Bike (Steady State)','1','8min',0,'warmup'),exT('High Knees','2','20rep',20,'warmup'),
+    exT('Assault Bike (Steady State)','1','8min',0,'warmup'),ex('High Knees',2,20,20,'warmup'),
     exT('Standing Calf Stretch','2','30s',20,'mobility'),exT('Standing Hamstring Stretch','2','30s',20,'mobility'),
     ex('Glute Bridge (Bodyweight)',2,10,45,'activation'),
     ex('Clamshell',2,15,45,'activation'),ex('Single-Leg Glute Bridge',2,10,45,'activation'),
@@ -1875,8 +1875,8 @@ function exportClientData(){
     h+='<div class="card">';
     h+='<h3>'+day.focus+'</h3>';
     h+='<div class="lbl">'+day.label+'</div>';
-    var phases=['warmup','strength','accessory','core','cardio','mobility','cooldown'];
-    var phaseLabels={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+    var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
+    var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
     phases.forEach(function(ph){
       var exs=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
       if(!exs.length)return;
@@ -1974,8 +1974,8 @@ function todayV(){
   h+='</div>';
 
   // Exercise list — all phases
-  var phases=['warmup','strength','accessory','core','cardio','mobility','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
 
   phases.forEach(function(ph){
     var exsInPhase=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
@@ -2141,12 +2141,12 @@ function openExWindow(exIdx){
   wx._lastExIdx=exIdx;
 
   var ph=exEntry.ph||'strength';
-  var phLabel={strength:'Strength',warmup:'Warm-Up',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+  var phLabel={strength:'Strength',warmup:'Warm-Up',activation:'Activation',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
 
   var h='<div style="padding:0 20px 30px">';
 
   // Phase eyebrow
-  h+='<div class="lbl lbl-acc" style="margin-bottom:6px">'+phLabel[ph]+'</div>';
+  h+='<div class="lbl lbl-acc" style="margin-bottom:6px">'+(phLabel[ph]||ph.charAt(0).toUpperCase()+ph.slice(1))+'</div>';
 
   // Exercise name
   h+='<div style="font-size:22px;font-weight:800;color:var(--tx);line-height:1.15;margin-bottom:4px">'+exEntry.name+'</div>';
@@ -2814,8 +2814,8 @@ function openProgPreview(key){
   h+='</div></div>';
 
   // Sessions
-  var phases=['warmup','strength','accessory','core','cardio','mobility','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
   var days=tpl.days||[];
   days.forEach(function(day,di){
     h+='<div style="margin-bottom:16px">';
@@ -3020,8 +3020,8 @@ function buildStepper(di,ei,field,value,label,suffix,delta,min,max){
 function openExConfig(di,ei){
   var exEntry=S.customEdit.days[di].exercises[ei];
   var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
-  var phases=['warmup','strength','accessory','core','cardio','mobility','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
   var allTrack=['reps','weight','time','distance','calories','rounds','height'];
   var trackLabels={reps:'Reps',weight:'Weight',time:'Time',distance:'Distance',calories:'Calories',rounds:'Rounds',height:'Height'};
 
