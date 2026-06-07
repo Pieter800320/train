@@ -5267,168 +5267,597 @@ function draw(){
   // Re-attach timer tick if running
   if(S.tab==='timer'&&S.timer.running&&!S.timer.setup){
     setTimeout(startTimerTick,0);
+  } else if(S.tab!=='timer'){
+    timerUnmountCanvas();
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
 // TIMER VIEW
 // ═══════════════════════════════════════════════════════════════
-// ── Timer ring renderer ────────────────────────────────────────
-function timerRingHTML(label, sub, timeStr, pct, colour, ringTotal){
-  // pct: 0–1, how much of the ring is filled (1=full, 0=empty)
-  // For stopwatch pct counts up; for countdown pct counts down
-  var S2=260; // SVG size
-  var cx=130,cy=130,r=112;
-  var circ=2*Math.PI*r;
-  var offset=circ*(1-pct);
-  return '<svg id="timer-ring-svg" width="'+S2+'" height="'+S2+'" viewBox="0 0 '+S2+' '+S2+'" style="overflow:visible">'+
-    // Track ring (dim background)
-    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>'+
-    // Progress ring
-    '<circle id="timer-ring" cx="'+cx+'" cy="'+cy+'" r="'+r+'"'+
-      ' fill="none" stroke="'+colour+'" stroke-width="14"'+
-      ' stroke-dasharray="'+circ+'"'+
-      ' stroke-dashoffset="'+offset+'"'+
-      ' stroke-linecap="round"'+
-      ' transform="rotate(-90 '+cx+' '+cy+')"'+
-      ' style="transition:stroke-dashoffset 0.8s linear;filter:drop-shadow(0 0 8px '+colour+'66)"/>'+
-    // Label above time
-    (label?'<text x="'+cx+'" y="'+(cy-32)+'" text-anchor="middle" font-size="13" font-weight="800" letter-spacing="2" fill="'+colour+'" opacity="0.8" font-family="system-ui,sans-serif">'+label+'</text>':'')+
-    // Main time display
-    '<text id="timer-big" x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="54" font-weight="900" fill="'+colour+'" font-family="system-ui,-apple-system,sans-serif" letter-spacing="-1">'+timeStr+'</text>'+
-    // Sub label below time
-    (sub?'<text id="timer-sub" x="'+cx+'" y="'+(cy+42)+'" text-anchor="middle" font-size="12" font-weight="600" fill="rgba(255,255,255,0.45)" font-family="system-ui,sans-serif">'+sub+'</text>':'')+
-    '</svg>';
+// ═══════════════════════════════════════════════════════════════
+// FALKENBURG TIMER — Canvas-based, full-screen, gesture-driven
+// ═══════════════════════════════════════════════════════════════
+
+// ── Audio: beep synthesiser ──────────────────────────────────
+var _timerAudioCtx = null;
+function _getAudioCtx(){
+  if(!_timerAudioCtx){
+    try{_timerAudioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  }
+  return _timerAudioCtx;
+}
+function timerBeep(freq, dur, vol, delay){
+  var ctx=_getAudioCtx(); if(!ctx)return;
+  try{
+    var osc=ctx.createOscillator();
+    var gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type='sine';
+    osc.frequency.setValueAtTime(freq||880, ctx.currentTime+(delay||0));
+    gain.gain.setValueAtTime(vol||0.3, ctx.currentTime+(delay||0));
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+(delay||0)+(dur||0.12));
+    osc.start(ctx.currentTime+(delay||0));
+    osc.stop(ctx.currentTime+(delay||0)+(dur||0.12)+0.01);
+  }catch(e){}
+}
+function timerBeepDouble(freq){ timerBeep(freq,0.1,0.28,0); timerBeep(freq*1.25,0.1,0.28,0.15); }
+function timerBeepTriple(freq){ timerBeep(freq,0.07,0.22,0); timerBeep(freq,0.07,0.22,0.12); timerBeep(freq*1.5,0.12,0.32,0.24); }
+function timerBeepEnd(){ timerBeep(660,0.15,0.3,0); timerBeep(880,0.15,0.3,0.18); timerBeep(1100,0.25,0.35,0.36); }
+
+// ── Canvas timer RAF loop ────────────────────────────────────
+var _timerRAF = null;
+var _timerCanvas = null;
+var _timerFlash = null; // {colour, alpha, startTime, duration}
+
+function timerGetAccColour(){
+  // Read the current --acc CSS variable at runtime
+  return getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#E07B2A';
+}
+function timerGetBg(){
+  return getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0e0e10';
 }
 
-function timerControls(t, startLabel){
-  var h='<div style="display:flex;gap:10px;margin-top:28px">';
-  h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1;font-size:16px;font-weight:800;height:56px">'+(t.running?'Pause':startLabel)+'</button>';
-  h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1;font-size:16px;height:56px">Reset</button>';
-  h+='</div>';
-  return h;
+// Colour utilities
+function timerColourAlpha(hex, alpha){
+  // hex = '#E07B2A', returns rgba string
+  var r=parseInt(hex.slice(1,3),16);
+  var g=parseInt(hex.slice(3,5),16);
+  var b=parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+alpha+')';
+}
+function timerColourDim(hex, factor){
+  // Darken/dim a colour by factor (0-1)
+  var r=Math.round(parseInt(hex.slice(1,3),16)*factor);
+  var g=Math.round(parseInt(hex.slice(3,5),16)*factor);
+  var b=Math.round(parseInt(hex.slice(5,7),16)*factor);
+  return '#'+[r,g,b].map(function(v){return ('0'+Math.min(255,v).toString(16)).slice(-2);}).join('');
+}
+function timerColourMix(hex, amount){
+  // Mix hex with white by amount (0=original, 1=white)
+  var r=parseInt(hex.slice(1,3),16);
+  var g=parseInt(hex.slice(3,5),16);
+  var b=parseInt(hex.slice(5,7),16);
+  r=Math.round(r+(255-r)*amount);
+  g=Math.round(g+(255-g)*amount);
+  b=Math.round(b+(255-b)*amount);
+  return '#'+[r,g,b].map(function(v){return ('0'+Math.min(255,v).toString(16)).slice(-2);}).join('');
 }
 
+function timerDrawFrame(){
+  var canvas=_timerCanvas; if(!canvas)return;
+  var ctx=canvas.getContext('2d'); if(!ctx)return;
+  var t=S.timer;
+  var W=canvas.width; var H=canvas.height;
+  var acc=timerGetAccColour();
+  var bg=timerGetBg();
+
+  ctx.clearRect(0,0,W,H);
+
+  // ── Flash overlay ──
+  if(_timerFlash){
+    var elapsed=Date.now()-_timerFlash.startTime;
+    var frac=elapsed/_timerFlash.duration;
+    if(frac>=1){ _timerFlash=null; }
+    else{
+      var fa=_timerFlash.alpha*(1-Math.pow(frac,0.5));
+      ctx.fillStyle=timerColourAlpha(_timerFlash.colour, fa);
+      ctx.fillRect(0,0,W,H);
+    }
+  }
+
+  if(t.setup){ timerDrawSetup(ctx,W,H,acc,bg,t); return; }
+
+  // ── Running / paused ──
+  var cx=W/2, cy;
+
+  // Layout: mode pill at top, ring in centre, controls at bottom
+  var pillH=32; var ctrlH=120; var ringMargin=20;
+  var ringArea=H-pillH-20-ctrlH-ringMargin;
+  var ringR=Math.min(ringArea/2,W/2-40)*0.86;
+  cy=pillH+20+ringArea/2;
+
+  timerDrawRunning(ctx,W,H,cx,cy,ringR,acc,bg,t);
+}
+
+function timerDrawSetup(ctx,W,H,acc,bg,t){
+  // Setup is rendered as HTML — canvas just shows a minimal background
+  // Actually we let HTML handle setup and only use canvas for running
+  // So this is a no-op — draw() handles setup via HTML
+}
+
+function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
+  var strokeW=Math.max(14, R*0.115);
+
+  // Compute display values per mode
+  var pct=0, mainText='', label='', sub='', ringCol=acc;
+  var outerPct=-1; // dual ring outer: -1 means don't draw
+  var isWarning=false;
+
+  if(t.mode==='stopwatch'){
+    var m=Math.floor(t.elapsed/60); var s=t.elapsed%60;
+    mainText=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    label='STOPWATCH';
+    pct=Math.min(1,t.elapsed/(60*60));
+    ringCol=acc;
+  } else if(t.mode==='countdown'){
+    var m=Math.floor(t.remaining/60); var s=t.remaining%60;
+    mainText=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    label='COUNTDOWN';
+    pct=t.totalSecs>0?t.remaining/t.totalSecs:0;
+    isWarning=t.remaining<=5&&t.remaining>0;
+    // Warning: shift colour toward a brighter mix of acc
+    ringCol=isWarning?timerColourMix(acc,0.5):acc;
+  } else if(t.mode==='tabata'){
+    mainText=String(t.remaining);
+    var isWork=t.tabPhase==='work';
+    label=isWork?'WORK':'REST';
+    var phTotal=isWork?t.tabWork:t.tabRest;
+    pct=phTotal>0?t.remaining/phTotal:0;
+    isWarning=t.remaining<=3&&t.remaining>0;
+    // Work: acc full brightness; Rest: acc dimmed to 55%
+    ringCol=isWork?acc:timerColourDim(acc,0.55);
+    // Outer ring = round progress
+    outerPct=t.tabRounds>0?t.tabCurrent/t.tabRounds:0;
+    sub='Round '+(t.tabCurrent+1)+' of '+t.tabRounds;
+  } else if(t.mode==='emom'){
+    var secInMin=t.elapsed%60; var emRem=60-secInMin;
+    mainText=String(emRem);
+    label='EMOM';
+    pct=emRem/60;
+    isWarning=emRem<=5&&emRem>0;
+    ringCol=acc;
+    sub='Minute '+(t.emomRound+1)+' of '+t.emomMins;
+    // Outer ring = minute progress
+    outerPct=t.emomMins>0?t.emomRound/t.emomMins:0;
+  }
+
+  // ── Outer ring (dual: rounds/minutes progress) ──
+  if(outerPct>=0){
+    var outerR=R+strokeW*1.5;
+    var outerW=Math.max(4,strokeW*0.3);
+    // Track
+    ctx.beginPath();
+    ctx.arc(cx,cy,outerR,0,Math.PI*2);
+    ctx.strokeStyle=timerColourAlpha(ringCol,0.1);
+    ctx.lineWidth=outerW;
+    ctx.stroke();
+    // Progress dots or arc
+    if(outerPct>0){
+      ctx.beginPath();
+      ctx.arc(cx,cy,outerR,-Math.PI/2,-Math.PI/2+outerPct*Math.PI*2);
+      ctx.strokeStyle=timerColourAlpha(ringCol,0.45);
+      ctx.lineWidth=outerW;
+      ctx.lineCap='round';
+      ctx.stroke();
+    }
+  }
+
+  // ── Inner ring glow ──
+  if(!t.setup){
+    var glowR=R+strokeW/2;
+    var glowGrad=ctx.createRadialGradient(cx,cy,R-strokeW,cx,cy,glowR+8);
+    glowGrad.addColorStop(0,timerColourAlpha(ringCol,0));
+    glowGrad.addColorStop(0.5,timerColourAlpha(ringCol,isWarning?0.18:0.10));
+    glowGrad.addColorStop(1,timerColourAlpha(ringCol,0));
+    ctx.beginPath();
+    ctx.arc(cx,cy,glowR,0,Math.PI*2);
+    ctx.lineWidth=strokeW+16;
+    ctx.strokeStyle=glowGrad;
+    ctx.stroke();
+  }
+
+  // ── Track ring ──
+  ctx.beginPath();
+  ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.strokeStyle=timerColourAlpha(ringCol,0.10);
+  ctx.lineWidth=strokeW;
+  ctx.lineCap='round';
+  ctx.stroke();
+
+  // ── Progress arc ──
+  if(pct>0){
+    var startA=-Math.PI/2;
+    var endA=-Math.PI/2+pct*Math.PI*2;
+    ctx.beginPath();
+    ctx.arc(cx,cy,R,startA,endA);
+    ctx.strokeStyle=ringCol;
+    ctx.lineWidth=strokeW;
+    ctx.lineCap='round';
+    ctx.stroke();
+
+    // Arc end cap glow dot
+    var dotX=cx+R*Math.cos(endA);
+    var dotY=cy+R*Math.sin(endA);
+    var dotGrad=ctx.createRadialGradient(dotX,dotY,0,dotX,dotY,strokeW*1.2);
+    dotGrad.addColorStop(0,timerColourAlpha(ringCol,0.6));
+    dotGrad.addColorStop(1,timerColourAlpha(ringCol,0));
+    ctx.beginPath();
+    ctx.arc(dotX,dotY,strokeW*1.2,0,Math.PI*2);
+    ctx.fillStyle=dotGrad;
+    ctx.fill();
+  }
+
+  // ── Text inside ring ──
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+
+  // Calculate text group height for centering
+  var timeFontSize=Math.round(R*0.58);
+  var labelFontSize=Math.round(R*0.115);
+  var subFontSize=Math.round(R*0.10);
+  var lineGap=Math.round(R*0.08);
+
+  var hasLabel=!!label; var hasSub=!!sub;
+  var groupH=timeFontSize;
+  if(hasLabel) groupH+=labelFontSize+lineGap;
+  if(hasSub)   groupH+=subFontSize+lineGap;
+  var groupTop=cy-groupH/2;
+
+  var yPos=groupTop;
+
+  // Label
+  if(hasLabel){
+    yPos+=labelFontSize/2;
+    ctx.font='800 '+labelFontSize+'px system-ui,-apple-system,sans-serif';
+    ctx.letterSpacing='2px';
+    ctx.fillStyle=timerColourAlpha(ringCol,0.65);
+    ctx.fillText(label,cx,yPos);
+    yPos+=labelFontSize/2+lineGap;
+  }
+
+  // Main time number
+  yPos+=timeFontSize/2;
+  ctx.font='900 '+timeFontSize+'px system-ui,-apple-system,sans-serif';
+  ctx.letterSpacing='-2px';
+  // Warning pulse: alternate full and 70% brightness
+  var warnAlpha=isWarning?(0.7+0.3*Math.abs(Math.sin(Date.now()/200))):1.0;
+  ctx.fillStyle=timerColourAlpha(ringCol,warnAlpha);
+  ctx.fillText(mainText,cx,yPos);
+  yPos+=timeFontSize/2;
+
+  // Sub text
+  if(hasSub){
+    yPos+=lineGap+subFontSize/2;
+    ctx.font='600 '+subFontSize+'px system-ui,-apple-system,sans-serif';
+    ctx.letterSpacing='0px';
+    ctx.fillStyle=timerColourAlpha('#ffffff',0.35);
+    ctx.fillText(sub,cx,yPos);
+  }
+
+  // ── Pause indicator ──
+  if(!t.running&&!t.setup){
+    var piFontSize=Math.round(R*0.085);
+    ctx.font='700 '+piFontSize+'px system-ui,sans-serif';
+    ctx.fillStyle=timerColourAlpha('#ffffff',0.3);
+    ctx.letterSpacing='2px';
+    ctx.fillText('PAUSED — TAP TO RESUME',cx,cy+R*0.75);
+  }
+}
+
+// ── Mount/unmount canvas ──────────────────────────────────────
+function timerMountCanvas(){
+  var screen=document.getElementById('screen');
+  if(!screen)return;
+  var existing=document.getElementById('timer-canvas-wrap');
+  if(existing)return; // already mounted
+
+  var t=S.timer;
+  if(t.setup){return;} // don't mount during setup
+
+  var wrap=document.createElement('div');
+  wrap.id='timer-canvas-wrap';
+  wrap.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%);'+
+    'width:100%;max-width:430px;height:100%;z-index:90;background:var(--bg);'+
+    'display:flex;flex-direction:column;touch-action:none;';
+
+  // Canvas
+  var canvas=document.createElement('canvas');
+  canvas.id='timer-canvas';
+  var W=Math.min(window.innerWidth,430);
+  var H=window.innerHeight;
+  canvas.width=W; canvas.height=H;
+  canvas.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;';
+  wrap.appendChild(canvas);
+  _timerCanvas=canvas;
+
+  // Controls overlay (HTML over canvas)
+  var ctrl=document.createElement('div');
+  ctrl.id='timer-ctrl-overlay';
+  ctrl.style.cssText='position:absolute;bottom:max(90px,env(safe-area-inset-bottom)+80px);'+
+    'left:0;right:0;padding:0 20px;display:flex;flex-direction:column;gap:12px;z-index:2;pointer-events:none;';
+
+  // Mode pills row
+  var pillRow=document.createElement('div');
+  pillRow.id='timer-mode-pills';
+  pillRow.style.cssText='display:flex;gap:6px;justify-content:center;pointer-events:auto;margin-bottom:4px;';
+  var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
+  modes.forEach(function(m){
+    var btn=document.createElement('button');
+    btn.textContent=m.l;
+    btn.className='btn btn-pill '+(t.mode===m.k?'btn-acc':'btn-ghost');
+    btn.style.cssText='flex:none;pointer-events:auto;';
+    btn.onclick=function(){setTimerMode(m.k);};
+    pillRow.appendChild(btn);
+  });
+  ctrl.appendChild(pillRow);
+
+  // Pause/Resume + Reset buttons
+  var btnRow=document.createElement('div');
+  btnRow.id='timer-btn-row';
+  btnRow.style.cssText='display:flex;gap:10px;pointer-events:auto;';
+
+  var btnPause=document.createElement('button');
+  btnPause.id='timer-btn-pause';
+  btnPause.className='btn btn-acc';
+  btnPause.style.cssText='flex:1;font-size:17px;font-weight:800;height:58px;pointer-events:auto;';
+  btnPause.textContent=t.running?'Pause':'Resume';
+  btnPause.onclick=function(){timerToggle();};
+  btnRow.appendChild(btnPause);
+
+  var btnReset=document.createElement('button');
+  btnReset.className='btn btn-ghost';
+  btnReset.style.cssText='flex:1;font-size:17px;height:58px;pointer-events:auto;';
+  btnReset.textContent='Reset';
+  btnReset.onclick=function(){timerReset();};
+  btnRow.appendChild(btnReset);
+
+  ctrl.appendChild(btnRow);
+  wrap.appendChild(ctrl);
+
+  // Tap anywhere on canvas to pause/resume
+  canvas.addEventListener('touchstart',function(e){
+    e.preventDefault();
+    _timerTapStart={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()};
+  },{passive:false});
+  canvas.addEventListener('touchend',function(e){
+    if(!_timerTapStart)return;
+    var dx=e.changedTouches[0].clientX-_timerTapStart.x;
+    var dy=e.changedTouches[0].clientY-_timerTapStart.y;
+    var dt=Date.now()-_timerTapStart.t;
+    _timerTapStart=null;
+    if(Math.abs(dx)<12&&Math.abs(dy)<12&&dt<400){
+      // Tap — pause/resume
+      timerToggle();
+    } else if(dy<-60&&dt<500){
+      // Swipe up — skip phase (Tabata/EMOM)
+      timerSkipPhase();
+    }
+  });
+
+  // Click for desktop
+  canvas.addEventListener('click',function(){ timerToggle(); });
+
+  document.getElementById('app').appendChild(wrap);
+
+  // RAF loop
+  function rafLoop(){
+    _timerRAF=requestAnimationFrame(rafLoop);
+    timerDrawFrame();
+    // Update pause button text
+    var pb=document.getElementById('timer-btn-pause');
+    if(pb)pb.textContent=S.timer.running?'Pause':'Resume';
+  }
+  _timerRAF=requestAnimationFrame(rafLoop);
+}
+
+var _timerTapStart=null;
+
+function timerUnmountCanvas(){
+  if(_timerRAF){cancelAnimationFrame(_timerRAF);_timerRAF=null;}
+  var wrap=document.getElementById('timer-canvas-wrap');
+  if(wrap&&wrap.parentNode)wrap.parentNode.removeChild(wrap);
+  _timerCanvas=null;
+}
+
+function timerSkipPhase(){
+  var t=S.timer;
+  if(t.mode==='tabata'&&!t.setup){
+    if(t.tabPhase==='work'){t.tabPhase='rest';t.remaining=t.tabRest;}
+    else{
+      t.tabCurrent++;
+      if(t.tabCurrent>=t.tabRounds){timerReset();return;}
+      t.tabPhase='work';t.remaining=t.tabWork;
+    }
+    _timerFlash={colour:timerGetAccColour(),alpha:0.35,startTime:Date.now(),duration:400};
+    sv();
+  }
+}
+
+// ── Canvas-aware timer controls ──────────────────────────────
+// Override timerV to use canvas when running
 function timerV(){
   var t=S.timer;
-  var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
 
-  // Mode selector — only shown in setup or when paused
-  if(t.setup||!t.running){
-    var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
-    h+='<div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">';
-    modes.forEach(function(m){
-      h+='<button class="btn btn-pill'+(t.mode===m.k?' btn-acc':' btn-ghost')+'" data-mode="'+m.k+'" onclick="setTimerMode(this.dataset.mode)">'+m.l+'</button>';
-    });
-    h+='</div>';
+  // If running (or paused mid-session), mount canvas and return minimal HTML
+  if(!t.setup){
+    // Schedule canvas mount after draw
+    setTimeout(timerMountCanvas, 0);
+    // Return empty placeholder — canvas covers the screen
+    return '<div style="height:100%"></div>';
   }
 
-  // ── Stopwatch ──
+  // Setup: unmount canvas, show HTML setup
+  timerUnmountCanvas();
+
+  var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
+  h+='<div class="h1" style="margin-bottom:16px">Timer</div>';
+
+  var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
+  h+='<div style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap">';
+  modes.forEach(function(m){
+    h+='<button class="btn btn-pill'+(t.mode===m.k?' btn-acc':' btn-ghost')+'" data-mode="'+m.k+'" onclick="setTimerMode(this.dataset.mode)">'+m.l+'</button>';
+  });
+  h+='</div>';
+
   if(t.mode==='stopwatch'){
-    var m=Math.floor(t.elapsed/60);var s=t.elapsed%60;
-    var timeStr=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-    // Ring fills up as time passes — caps visually at 60 min
-    var pct=Math.min(1,t.elapsed/(60*60));
-    h+='<div style="display:flex;justify-content:center;margin:10px 0 0">';
-    h+=timerRingHTML('STOPWATCH',null,timeStr,pct,'var(--acc)',3600);
-    h+='</div>';
-    h+=timerControls(t,t.elapsed>0?'Resume':'Start');
+    h+='<div style="text-align:center;padding:40px 0;font-size:72px;font-weight:900;letter-spacing:-2px;color:var(--acc)">00:00</div>';
+    h+='<button class="btn btn-acc" style="height:58px;font-size:17px;font-weight:800" onclick="timerStartStopwatch()">Start</button>';
 
-  // ── Countdown ──
   } else if(t.mode==='countdown'){
-    if(t.setup){
-      var mins=Math.floor(t.totalSecs/60);var secs=t.totalSecs%60;
-      h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">MINUTES</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'cdMins\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-cd-mins" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+mins+'m'+'</div><button onclick="adjTimer(\'cdMins\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">SECONDS</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'cdSecs\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-cd-secs" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+secs+'s'+'</div><button onclick="adjTimer(\'cdSecs\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<button class="btn btn-acc" style="height:56px;font-size:16px" onclick="startCountdown()">Start</button>';
-    } else {
-      var rem=t.remaining;var rm=Math.floor(rem/60);var rs=rem%60;
-      var timeStr=(rm<10?'0':'')+rm+':'+(rs<10?'0':'')+rs;
-      var pct=t.totalSecs>0?rem/t.totalSecs:0;
-      var ringCol=rem<=10?'#ff6b6b':'var(--acc)';
-      h+='<div style="display:flex;justify-content:center;margin:10px 0 0">';
-      h+=timerRingHTML('COUNTDOWN',null,timeStr,pct,ringCol,t.totalSecs);
-      h+='</div>';
-      h+=timerControls(t,'Resume');
-    }
+    var mins=Math.floor(t.totalSecs/60);var secs=t.totalSecs%60;
+    h+=timerSetupStepper('MINUTES','cdMins',mins,'m',1);
+    h+=timerSetupStepper('SECONDS','cdSecs',secs,'s',5);
+    h+='<button class="btn btn-acc" style="height:58px;font-size:17px;font-weight:800;margin-top:8px" onclick="startCountdown()">Start</button>';
 
-  // ── Tabata ──
   } else if(t.mode==='tabata'){
-    if(t.setup){
-      h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">WORK (seconds)</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'tabWork\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-tab-work" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+t.tabWork+'s'+'</div><button onclick="adjTimer(\'tabWork\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">REST (seconds)</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'tabRest\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-tab-rest" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+t.tabRest+'s'+'</div><button onclick="adjTimer(\'tabRest\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">ROUNDS</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'tabRounds\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-tab-rounds" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+t.tabRounds+'</div><button onclick="adjTimer(\'tabRounds\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<button class="btn btn-acc" style="height:56px;font-size:16px" onclick="startTabata()">Start</button>';
-    } else {
-      var phase=t.tabPhase;var rd=t.tabCurrent;
-      var isWork=phase==='work';
-      var phaseTotal=isWork?t.tabWork:t.tabRest;
-      var pct=phaseTotal>0?t.remaining/phaseTotal:0;
-      var ringCol=isWork?'var(--acc)':'var(--teal)';
-      var label=isWork?'WORK':'REST';
-      var sub='Round '+(rd+1)+' of '+t.tabRounds;
-      h+='<div style="display:flex;justify-content:center;margin:10px 0 0">';
-      h+=timerRingHTML(label,sub,String(t.remaining),pct,ringCol,phaseTotal);
-      h+='</div>';
-      h+=timerControls(t,'Resume');
-    }
+    h+=timerSetupStepper('WORK (seconds)','tabWork',t.tabWork,'s',5);
+    h+=timerSetupStepper('REST (seconds)','tabRest',t.tabRest,'s',5);
+    h+=timerSetupStepper('ROUNDS','tabRounds',t.tabRounds,'',1);
+    h+='<button class="btn btn-acc" style="height:58px;font-size:17px;font-weight:800;margin-top:8px" onclick="startTabata()">Start</button>';
 
-  // ── EMOM ──
   } else if(t.mode==='emom'){
-    if(t.setup){
-      h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">TOTAL MINUTES</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'emomMins\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-emom-mins" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+t.emomMins+' min'+'</div><button onclick="adjTimer(\'emomMins\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<button class="btn btn-acc" style="height:56px;font-size:16px" onclick="startEMOM()">Start</button>';
-    } else {
-      var secInMin=t.elapsed%60;var emRem=60-secInMin;var emRd=t.emomRound;
-      var pct=emRem/60;
-      var sub='Minute '+(emRd+1)+' of '+t.emomMins;
-      h+='<div style="display:flex;justify-content:center;margin:10px 0 0">';
-      h+=timerRingHTML('EMOM',sub,String(emRem),pct,'var(--acc)',60);
-      h+='</div>';
-      h+=timerControls(t,'Resume');
-    }
+    h+=timerSetupStepper('TOTAL MINUTES','emomMins',t.emomMins,' min',1);
+    h+='<button class="btn btn-acc" style="height:58px;font-size:17px;font-weight:800;margin-top:8px" onclick="startEMOM()">Start</button>';
   }
 
   h+='</div>';
   return h;
 }
 
-// ── Timer stepper adjustments ──
+function timerSetupStepper(label,field,value,suffix,delta){
+  return '<div style="margin-bottom:14px">'+
+    '<div class="lbl" style="margin-bottom:6px">'+label+'</div>'+
+    '<div style="display:flex;align-items:center;gap:0">'+
+    '<button onclick="adjTimer(\''+field+'\',-'+delta+')" style="width:56px;height:56px;border-radius:12px 0 0 12px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>'+
+    '<div id="t-'+field+'" style="flex:1;height:56px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc)">'+value+suffix+'</div>'+
+    '<button onclick="adjTimer(\''+field+'\','+delta+')" style="width:56px;height:56px;border-radius:0 12px 12px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>'+
+    '</div></div>';
+}
+
+function timerStartStopwatch(){
+  var t=S.timer; t.elapsed=0; t.setup=false; t.running=true;
+  sv(); draw(); startTimerTick();
+}
+
+// ── Sound triggers in tick ────────────────────────────────────
+function timerCheckSound(t, prevRemaining, phaseTotal){
+  var rem=prevRemaining;
+  // 3-beep warning at last 3 seconds of any phase
+  if(rem===3){ timerBeepTriple(timerGetAccColour()==='#E07B2A'?880:1047); }
+  // Double-beep at 50% of phase
+  var half=Math.round(phaseTotal/2);
+  if(half>3&&rem===half){ timerBeepDouble(timerGetAccColour()==='#E07B2A'?660:784); }
+}
+
+// ── Override startTimerTick for canvas + sound ────────────────
+var _timerTick=null;
+function startTimerTick(){
+  if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
+  _timerTick=setInterval(function(){
+    var t=S.timer;
+    if(!t.running){clearInterval(_timerTick);_timerTick=null;return;}
+
+    if(t.mode==='stopwatch'){
+      t.elapsed++;
+      sv();
+      // No sound triggers for stopwatch — open-ended
+
+    } else if(t.mode==='countdown'){
+      var prev=t.remaining;
+      if(t.remaining>0){t.remaining--;sv();}
+      else{
+        timerBeepEnd();
+        _timerFlash={colour:timerGetAccColour(),alpha:0.5,startTime:Date.now(),duration:600};
+        t.running=false;sv();timerUnmountCanvas();draw();return;
+      }
+      timerCheckSound(t,prev,t.totalSecs);
+
+    } else if(t.mode==='tabata'){
+      var prev2=t.remaining;
+      var isWork=t.tabPhase==='work';
+      var phTotal=isWork?t.tabWork:t.tabRest;
+      if(t.remaining>0){t.remaining--;sv();}
+      else{
+        // Phase transition
+        timerBeepEnd();
+        _timerFlash={colour:timerGetAccColour(),alpha:0.4,startTime:Date.now(),duration:500};
+        if(isWork){t.tabPhase='rest';t.remaining=t.tabRest;}
+        else{
+          t.tabCurrent++;
+          if(t.tabCurrent>=t.tabRounds){
+            timerBeepEnd();setTimeout(function(){timerBeepEnd();},300);
+            t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();return;
+          }
+          t.tabPhase='work';t.remaining=t.tabWork;
+        }
+        sv();return;
+      }
+      timerCheckSound(t,prev2,phTotal);
+
+    } else if(t.mode==='emom'){
+      t.elapsed++;sv();
+      var secInMin=t.elapsed%60;
+      var emRem=60-secInMin;
+      var newRound=Math.floor(t.elapsed/60);
+      if(newRound!==t.emomRound){
+        t.emomRound=newRound;
+        if(newRound>=t.emomMins){
+          timerBeepEnd();setTimeout(function(){timerBeepEnd();},300);
+          t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();return;
+        }
+        timerBeepEnd();
+        _timerFlash={colour:timerGetAccColour(),alpha:0.25,startTime:Date.now(),duration:400};
+        sv();return;
+      }
+      timerCheckSound(t,emRem,60);
+    }
+  },1000);
+}
+
 function adjTimer(field,delta){
   var t=S.timer;
   if(field==='cdMins'){
     var mins=Math.max(0,Math.min(99,Math.floor(t.totalSecs/60)+delta));
     t.totalSecs=mins*60+(t.totalSecs%60);
-    var el=document.getElementById('t-cd-mins');if(el)el.textContent=mins+'m';
+    var el=document.getElementById('t-cdMins');if(el)el.textContent=mins+'m';
   } else if(field==='cdSecs'){
     var secs=Math.max(0,Math.min(55,(t.totalSecs%60)+delta));
     t.totalSecs=Math.floor(t.totalSecs/60)*60+secs;
-    var el=document.getElementById('t-cd-secs');if(el)el.textContent=secs+'s';
+    var el=document.getElementById('t-cdSecs');if(el)el.textContent=secs+'s';
   } else if(field==='tabWork'){
     t.tabWork=Math.max(5,Math.min(300,t.tabWork+delta));
-    var el=document.getElementById('t-tab-work');if(el)el.textContent=t.tabWork+'s';
+    var el=document.getElementById('t-tabWork');if(el)el.textContent=t.tabWork+'s';
   } else if(field==='tabRest'){
     t.tabRest=Math.max(0,Math.min(300,t.tabRest+delta));
-    var el=document.getElementById('t-tab-rest');if(el)el.textContent=t.tabRest+'s';
+    var el=document.getElementById('t-tabRest');if(el)el.textContent=t.tabRest+'s';
   } else if(field==='tabRounds'){
     t.tabRounds=Math.max(1,Math.min(50,t.tabRounds+delta));
-    var el=document.getElementById('t-tab-rounds');if(el)el.textContent=t.tabRounds;
+    var el=document.getElementById('t-tabRounds');if(el)el.textContent=t.tabRounds;
   } else if(field==='emomMins'){
     t.emomMins=Math.max(1,Math.min(60,t.emomMins+delta));
-    var el=document.getElementById('t-emom-mins');if(el)el.textContent=t.emomMins+' min';
+    var el=document.getElementById('t-emomMins');if(el)el.textContent=t.emomMins+' min';
   }
   sv();
 }
-
-// ── Timer controls ──
 function setTimerMode(m){
   S.timer.mode=m;S.timer.setup=true;S.timer.running=false;
   if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
+  timerUnmountCanvas();
   sv();draw();
 }
 function startCountdown(){
-  var t=S.timer;
-  if(t.totalSecs<=0)return;
+  var t=S.timer;if(t.totalSecs<=0)return;
   t.remaining=t.totalSecs;t.setup=false;t.running=true;
   sv();draw();startTimerTick();
 }
@@ -5445,89 +5874,25 @@ function startEMOM(){
   sv();draw();startTimerTick();
 }
 function timerToggle(){
+  var ctx=_getAudioCtx();if(ctx&&ctx.state==='suspended')ctx.resume();
   S.timer.running=!S.timer.running;sv();
   if(S.timer.running)startTimerTick();
   else{if(_timerTick){clearInterval(_timerTick);_timerTick=null;}}
-  draw();
+  var pb=document.getElementById('timer-btn-pause');
+  if(pb)pb.textContent=S.timer.running?'Pause':'Resume';
+  if(S.timer.setup)draw();
 }
 function timerReset(){
   S.timer.running=false;S.timer.setup=true;S.timer.elapsed=0;
   S.timer.remaining=S.timer.totalSecs;
   if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
+  timerUnmountCanvas();
   sv();draw();
 }
 
-// ── Timer tick ──
-var _timerTick=null;
-function startTimerTick(){
-  if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
-  _timerTick=setInterval(function(){
-    var t=S.timer;
-    if(!t.running){clearInterval(_timerTick);_timerTick=null;return;}
-    if(t.mode==='stopwatch'){
-      t.elapsed++;sv();
-      if(S.tab==='timer'){
-        var big=document.getElementById('timer-big');
-        if(big){var m=Math.floor(t.elapsed/60);var s=t.elapsed%60;
-          big.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
-        var ring=document.getElementById('timer-ring');
-        if(ring){var r=112;var circ=2*Math.PI*r;var pct=Math.min(1,t.elapsed/3600);
-          ring.style.strokeDashoffset=circ*(1-pct);}
-      }
-    } else if(t.mode==='countdown'){
-      if(t.remaining>0){t.remaining--;sv();}
-      else{t.running=false;sv();draw();return;}
-      if(S.tab==='timer'){
-        var big=document.getElementById('timer-big');
-        if(big){var m=Math.floor(t.remaining/60);var s=t.remaining%60;
-          big.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-          big.setAttribute('fill',t.remaining<=10?'#ff6b6b':'var(--acc)');}
-        var ring=document.getElementById('timer-ring');
-        if(ring){var r=112;var circ=2*Math.PI*r;var pct=t.totalSecs>0?t.remaining/t.totalSecs:0;
-          ring.style.strokeDashoffset=circ*(1-pct);
-          ring.setAttribute('stroke',t.remaining<=10?'#ff6b6b':'var(--acc)');}
-      }
-    } else if(t.mode==='tabata'){
-      if(t.remaining>0){t.remaining--;sv();}
-      else{
-        if(t.tabPhase==='work'){t.tabPhase='rest';t.remaining=t.tabRest;}
-        else{
-          t.tabCurrent++;
-          if(t.tabCurrent>=t.tabRounds){t.running=false;t.setup=true;sv();draw();return;}
-          t.tabPhase='work';t.remaining=t.tabWork;
-        }
-        sv();draw();return;
-      }
-      if(S.tab==='timer'){
-        var big=document.getElementById('timer-big');if(big)big.textContent=t.remaining;
-        var ring=document.getElementById('timer-ring');
-        var isWork=t.tabPhase==='work';var phTotal=isWork?t.tabWork:t.tabRest;
-        var tabCol=isWork?'var(--acc)':'var(--teal)';
-        if(ring){var r=112;var circ=2*Math.PI*r;var pct=phTotal>0?t.remaining/phTotal:0;
-          ring.style.strokeDashoffset=circ*(1-pct);
-          ring.setAttribute('stroke',tabCol);}
-        if(big)big.setAttribute('fill',tabCol);
-      }
-    } else if(t.mode==='emom'){
-      t.elapsed++;sv();
-      var newRound=Math.floor(t.elapsed/60);
-      if(newRound!==t.emomRound){
-        t.emomRound=newRound;
-        if(newRound>=t.emomMins){t.running=false;t.setup=true;sv();draw();return;}
-        draw();return;
-      }
-      if(S.tab==='timer'){
-        var secInMin=t.elapsed%60;var emRem=60-secInMin;
-        var big=document.getElementById('timer-big');if(big)big.textContent=emRem;
-        var sub=document.getElementById('timer-sub');
-        if(sub)sub.textContent='Minute '+(t.emomRound+1)+' of '+t.emomMins;
-        var ring=document.getElementById('timer-ring');
-        if(ring){var r=112;var circ=2*Math.PI*r;var pct=emRem/60;
-          ring.style.strokeDashoffset=circ*(1-pct);}
-      }
-    }
-  },1000);
-}
+// Ensure canvas is cleaned up when leaving timer tab
+var _origDraw=null;
+
 
 
 function bindScreen(){
@@ -5535,6 +5900,7 @@ function bindScreen(){
     tb.onclick=function(){
       var newTab=this.dataset.tab;
       var tabChanged=newTab!==S.tab;
+      if(tabChanged&&S.tab==='timer')timerUnmountCanvas();
       S.tab=newTab;sv();draw();
       if(tabChanged)document.getElementById('screen').scrollTop=0;
     };
