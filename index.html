@@ -1952,7 +1952,7 @@ function obShowRecommendation(recKey,ans){
       h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px">';
       h+='<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+t.name+'</div>';
       h+='<div style="font-size:11px;color:var(--mu)">'+t.days.length+' days · '+t.duration+'min</div></div>';
-      h+='<button class="btn btn-ghost btn-sm" onclick="switchTPL(\''+t.key+'\');closeSheet()">Load</button>';
+      h+='<button class="btn btn-ghost btn-sm" onclick="switchTPL(\''+t.key+'\')">Load</button>';
       h+='</div>';
     });
     h+='<div style="height:8px"></div>';
@@ -3597,7 +3597,7 @@ function openProgPreview(key){
   if(isActive){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:12px 0">✓ Currently active</div>';
   } else {
-    h+='<button class="btn btn-acc" data-key="'+key+'" onclick="switchTPL(this.dataset.key);closeSheet()">Select this Program</button>';
+    h+='<button class="btn btn-acc" data-key="'+key+'" onclick="switchTPL(this.dataset.key)">Select this Program</button>';
   }
   if(isCustom){
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key);closeSheet()">✕ Delete Program</button>';
@@ -3652,7 +3652,10 @@ function togglePgGroup(cat){
 }
 
 function switchTPL(key){
-  appConfirm('Switch to this programme? Your current day progress will reset.',function(){C().tplKey=key;C().day=0;S.wx=null;sv();draw();});
+  closeSheet();
+  setTimeout(function(){
+    appConfirm('Switch to this programme? Your current day progress will reset.',function(){C().tplKey=key;C().day=0;S.wx=null;sv();draw();});
+  },350);
 }
 function deletePB(name){
   var cl=C();
