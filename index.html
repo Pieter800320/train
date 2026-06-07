@@ -1943,6 +1943,48 @@ function obFinish(){
   var tplDef=getTPL(rec);
   if(tplDef&&tplDef.defaultPlan)attachPlan(tplDef.defaultPlan);
   sv();draw();
+  // Show recommendation popup
+  setTimeout(function(){obShowRecommendation(rec,cl.ob.ans);},400);
+}
+function obShowRecommendation(recKey,ans){
+  var cl=C();
+  var tpl=getTPL(recKey);
+  if(!tpl)return;
+  // Find other compatible programmes (same category or close)
+  var others=TPL.filter(function(t){
+    return t.key!==recKey&&t.cat===tpl.cat&&t.days&&t.days.length>0;
+  }).slice(0,3);
+  var h='<div style="padding:0 20px 30px">';
+  // Recommendation
+  h+='<div style="text-align:center;margin-bottom:20px">';
+  h+='<div style="font-size:40px;margin-bottom:8px">🎯</div>';
+  h+='<div style="font-size:18px;font-weight:800;color:var(--tx);margin-bottom:4px">Your programme is ready</div>';
+  h+='<div style="font-size:13px;color:var(--mu)">Based on your answers, we recommend:</div>';
+  h+='</div>';
+  h+='<div style="background:var(--acc-bg);border:1px solid var(--acc-brd);border-radius:12px;padding:14px 16px;margin-bottom:16px">';
+  h+='<div style="font-size:15px;font-weight:800;color:var(--acc);margin-bottom:4px">'+tpl.name+'</div>';
+  h+='<div style="font-size:12px;color:var(--mu)">'+tpl.desc+'</div>';
+  h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">'+tpl.days.length+' sessions/week · ~'+tpl.duration+' min per session</div>';
+  h+='</div>';
+  if(others.length>0){
+    h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--mu);margin-bottom:8px">OTHER GOOD FITS</div>';
+    others.forEach(function(t){
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px">';
+      h+='<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+t.name+'</div>';
+      h+='<div style="font-size:11px;color:var(--mu)">'+t.days.length+' days · '+t.duration+'min</div></div>';
+      h+='<button class="btn btn-ghost btn-sm" onclick="switchTPL(\''+t.key+'\');closeSheet()">Load</button>';
+      h+='</div>';
+    });
+    h+='<div style="height:8px"></div>';
+  }
+  h+='<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">';
+  h+='<button class="btn btn-acc" onclick="closeSheet();S.tab=\'today\';sv();draw()">Start training ›</button>';
+  h+='<button class="btn btn-ghost" onclick="closeSheet();S.tab=\'programs\';sv();draw()">Browse all programmes</button>';
+  h+='<button class="btn btn-ghost" onclick="closeSheet();S.tab=\'build\';sv();draw()">Build my own programme</button>';
+  h+='<button class="btn btn-ghost" style="font-size:12px;color:var(--mu)" onclick="closeSheet();retakeOB()">Retake questionnaire</button>';
+  h+='</div>';
+  h+='</div>';
+  openSheet(h,'Welcome, '+(cl.name||'Athlete')+'!');
 }
 
 
@@ -1982,6 +2024,8 @@ function applyTheme(){
   var colour=isDark?THEMES[key].dark:THEMES[key].light;
   var meta=document.querySelector('meta[name="theme-color"]');
   if(meta)meta.setAttribute('content',colour);
+  // Clear timer canvas colour cache so ring updates to new theme
+  timerClearAccCache();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2204,14 +2248,18 @@ function openJournalView(){
   var cl=C();
   var h='<div style="padding:0 20px 30px">';
 
-  // Stats header
+  // Action buttons — top
+  h+='<div style="display:flex;gap:8px;margin-bottom:16px">';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="exportJournal()">⤓ Download</button>';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--coral)" onclick="clearAllHistory()">✕ Clear All</button>';
+  h+='</div>';
+  // Stats
   var total=cl.hist?cl.hist.length:0;
   var prCount=Object.keys(cl.pr||{}).length;
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px">';
   h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--acc)">'+total+'</div><div class="lbl">Total sessions</div></div>';
   h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:24px;font-weight:800;color:var(--acc)">'+prCount+'</div><div class="lbl">Personal Bests</div></div>';
   h+='</div>';
-  h+='<button class="btn btn-ghost" style="margin-bottom:20px;font-size:12px" onclick="exportJournal()">⤓ Download journal & PBs</button>';
 
   // PR table
   var prs=Object.keys(cl.pr||{});
@@ -2235,9 +2283,7 @@ function openJournalView(){
   // Session history — last 30
   h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
   h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--acc)">SESSION HISTORY</div>';
-  if(cl.hist&&cl.hist.length>0){
-    h+='<button class="btn btn-ghost btn-sm" style="font-size:10px;color:var(--mu)" onclick="clearAllHistory()">Clear All</button>';
-  }
+
   h+='</div>';
   if(!cl.hist||cl.hist.length===0){
     h+='<div class="card"><div style="color:var(--mu);text-align:center;padding:20px 0;font-size:13px">No sessions yet. Start your first one from the Today tab.</div></div>';
@@ -3343,8 +3389,10 @@ function programsV(){
   if(customProgs.length>0){
     var isOpen=cl._pgOpen&&cl._pgOpen['my_progs'];
     h+='<div data-pgcat="my_progs" style="margin-bottom:3px">';
+    var hasActiveMyProg=customProgs.some(function(cp){return cp.key===cl.tplKey;});
     h+='<div class="group-head'+(isOpen?' open':'')+'" data-cat="my_progs" onclick="togglePgGroup(this.dataset.cat)">';
     h+='<span style="font-size:13px;font-weight:700;color:var(--acc)">My Programs</span>';
+    if(hasActiveMyProg)h+='<span class="pr-badge" style="margin-right:auto;margin-left:8px;background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';
     h+='<span style="color:var(--mu);font-size:12px">'+customProgs.length+' <span style="font-size:13px">'+(isOpen?'▴':'▾')+'</span></span>';
     h+='</div>';
     if(isOpen){
@@ -3372,6 +3420,10 @@ function programsV(){
   var compatList=activeTpl&&activeTpl.compatiblePlans?activeTpl.compatiblePlans:null;
   function isPlanCompatible(planKey){
     if(!compatList)return true;
+    // Custom plans are always compatible with custom programmes
+    var cl2=C();
+    var isCustomPlan=(cl2.customPlans||[]).some(function(p){return p.key===planKey;});
+    if(isCustomPlan)return true;
     return compatList.indexOf(planKey)>=0;
   }
   if(compatList){
@@ -3458,7 +3510,8 @@ function openPlanPreview(key){
   var isActive=cl.plan&&cl.plan.key===key;
   var activeTplPrev=cl.tplKey?getTPL(cl.tplKey):null;
   var compatListPrev=activeTplPrev&&activeTplPrev.compatiblePlans?activeTplPrev.compatiblePlans:null;
-  var isIncompatible=!!(compatListPrev&&compatListPrev.indexOf(key)<0&&!isActive);
+  var _isCustomPlan=(cl.customPlans||[]).some(function(p){return p.key===key;});
+  var isIncompatible=!!(compatListPrev&&compatListPrev.indexOf(key)<0&&!isActive&&!_isCustomPlan);
   var h='<div style="padding:0 20px 30px">';
   if(isIncompatible){
     h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;background:rgba(220,50,50,0.08);border:0.5px solid rgba(220,50,50,0.3);margin-bottom:16px">';
@@ -4408,13 +4461,14 @@ function buildPickerResults(suggested,other,phKey,di){
 }
 
 function buildPickerRow(e,phKey,di){
-  // Show a tick if already in this session (but always allow adding again)
+  // Same toggle behaviour as library — Add button stays open, shows ✓ Added when added
   var alreadyAdded=S.customEdit.days[di]&&S.customEdit.days[di].exercises.some(function(ex){return ex.name===e.name;});
-  return '<div class="prog-item" onclick="buildAddExercise(\''+e.key+'\')">' +
-    '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+
-    (alreadyAdded?' <span style="font-size:10px;color:var(--acc)">✓ added</span>':'')+
-    '</div><div class="lbl">'+(e.patterns||[]).join(' · ')+'</div></div>' +
-    '<button class="btn btn-pill btn-acc">Add</button></div>';
+  return '<div class="prog-item">' +
+    '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>' +
+    '<div class="lbl">'+(e.patterns||[]).join(' · ')+'</div></div>' +
+    '<button class="btn btn-pill '+(alreadyAdded?'btn-ghost':'btn-acc')+'" '+
+    'onclick="buildLibraryAddEx(this,\''+e.key+'\')">'+
+    (alreadyAdded?'✓ Added':'Add')+'</button></div>';
 }
 
 function buildFilterPicker(){
@@ -4756,8 +4810,10 @@ function buildSave(){
   cl.customPrograms.push({
     key:key,name:e.name,cat:'custom',desc:e.days.length+' sessions/week',
     days:tplDays.length,duration:totalDuration,defaultPlan:'linear',
+    compatiblePlans:['linear','return_training'],
     tpl:{key:key,name:e.name,cat:'custom',desc:e.days.length+' sessions/week',
-         days:tplDays,duration:totalDuration}
+         days:tplDays,duration:totalDuration,
+         compatiblePlans:['linear','return_training']}
   });
   S.customEdit={step:0,name:'',days:[],activeDay:0,activePhase:null};
   sv();
@@ -5379,10 +5435,10 @@ function timerDrawFrame(){
   // ── Running / paused ──
   var cx=W/2, cy;
 
-  // Ring fills canvas — account for outer ring stroke on each side
+  // Ring fills canvas — shift slightly upward (closer to controls)
   var outerStrokeClear=Math.max(8,W*0.04);
   var ringR=Math.min(H/2, W/2)*0.82-outerStrokeClear;
-  cy=H/2;
+  cy=H/2-H*0.06; // shift up 6% of canvas height
 
   timerDrawRunning(ctx,W,H,cx,cy,ringR,acc,bg,t);
 }
