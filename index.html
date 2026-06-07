@@ -2401,8 +2401,17 @@ function exportProgramme(){
       h+='<div class="ph">'+phaseLabels[ph]+'</div>';
       exs.forEach(function(ex){
         var vol=ex.vol||(ex.reps>0?ex.sets+'\u00d7'+ex.reps:'');
+        var exEntry=getEx(ex.name);
+        var vidUrl=getExVideo(exEntry||{name:ex.name});
+        var isCurated=exEntry&&exEntry.video;
+        var playBtn=vidUrl?('<a href="'+vidUrl+'" target="_blank" rel="noopener" style="'
+          +'display:inline-flex;align-items:center;justify-content:center;'
+          +'width:22px;height:22px;border-radius:50%;background:'+(isCurated?'#E07B2A':'#444')+';'
+          +'color:#fff;text-decoration:none;font-size:10px;flex-shrink:0;margin-left:6px'
+          +'" title="Watch: '+ex.name+'">&#9654;</a>'):'';
         h+='<div class="row">';
-        h+='<span style="font-size:13px">'+ex.name+'</span>';
+        h+='<span style="font-size:13px;display:flex;align-items:center;gap:4px">'
+          +ex.name+playBtn+'</span>';
         h+='<span style="font-size:12px;color:#555">'+vol+(ex.rest?' · '+ex.rest+'s':'')+'</span>';
         h+='</div>';
         if(ex.cue)h+='<div style="font-size:11px;color:#aaa;padding:0 0 4px 0;font-style:italic">'+ex.cue+'</div>';
