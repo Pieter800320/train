@@ -5371,11 +5371,10 @@ function timerDrawFrame(){
   // ── Running / paused ──
   var cx=W/2, cy;
 
-  // Layout: pills at top (~54px), buttons at bottom (~140px), ring centred between
-  var safeTop=54; var btmH=140; var padding=16;
-  var availH=H-safeTop-btmH;
-  var ringR=Math.min(availH/2-padding, W/2-padding)*0.88;
-  cy=safeTop+availH/2;
+  // Canvas IS the ring area — ring fills it
+  var padding=16;
+  var ringR=Math.min(H/2-padding, W/2-padding)*0.88;
+  cy=H/2;
 
   timerDrawRunning(ctx,W,H,cx,cy,ringR,acc,bg,t);
 }
@@ -5446,7 +5445,7 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
     if(outerPct>0){
       ctx.beginPath();
       ctx.arc(cx,cy,outerR,-Math.PI/2,-Math.PI/2+outerPct*Math.PI*2);
-      ctx.strokeStyle=timerColourAlpha(ringCol,0.45);
+      ctx.strokeStyle=timerColourAlpha(ringCol,0.35);
       ctx.lineWidth=outerW;
       ctx.lineCap='round';
       ctx.stroke();
@@ -5456,7 +5455,7 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
   // ── Track ring ──
   ctx.beginPath();
   ctx.arc(cx,cy,R,0,Math.PI*2);
-  ctx.strokeStyle=timerColourAlpha(ringCol,0.10);
+  ctx.strokeStyle=timerColourAlpha(ringCol,0.12);
   ctx.lineWidth=strokeW;
   ctx.lineCap='round';
   ctx.stroke();
@@ -5465,16 +5464,12 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
   if(pct>0){
     var startA=-Math.PI/2;
     var endA=-Math.PI/2+pct*Math.PI*2;
-    ctx.save();
-    ctx.shadowColor=timerColourAlpha(ringCol,0.5);
-    ctx.shadowBlur=isWarning?18:10;
     ctx.beginPath();
     ctx.arc(cx,cy,R,startA,endA);
     ctx.strokeStyle=ringCol;
     ctx.lineWidth=strokeW;
     ctx.lineCap='round';
     ctx.stroke();
-    ctx.restore();
 
 
   }
@@ -5526,14 +5521,15 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
     ctx.fillText(sub,cx,yPos);
   }
 
-  // ── Pause indicator ──
-  if(!t.running&&!t.setup){
-    var piFontSize=Math.round(R*0.085);
-    ctx.font='700 '+piFontSize+'px system-ui,sans-serif';
-    ctx.fillStyle=timerColourAlpha('#ffffff',0.3);
-    ctx.letterSpacing='2px';
-    ctx.fillText('PAUSED — TAP TO RESUME',cx,cy+R*0.75);
-  }
+  // ── Pause / play indicator below ring ──
+  var iconY=cy+R+strokeW+Math.round(R*0.18);
+  var iconSize=Math.round(R*0.22);
+  ctx.font=iconSize+'px system-ui,sans-serif';
+  ctx.letterSpacing='0px';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillStyle=timerColourAlpha(ringCol, t.running?0.55:0.80);
+  ctx.fillText(t.running?'⏸':'▶',cx,iconY);
 }
 
 // ── Mount/unmount canvas ──────────────────────────────────────
@@ -5552,54 +5548,59 @@ function timerMountCanvas(){
     'width:100%;max-width:430px;height:100%;z-index:90;background:var(--bg);'+
     'display:flex;flex-direction:column;touch-action:none;';
 
-  // Canvas
-  var canvas=document.createElement('canvas');
-  canvas.id='timer-canvas';
-  var W=Math.min(window.innerWidth,430);
-  var H=window.innerHeight;
-  canvas.width=W; canvas.height=H;
-  canvas.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;';
-  wrap.appendChild(canvas);
-  _timerCanvas=canvas;
-
-  // Pills row — fixed at TOP of canvas
+  // ── Row 1: Mode pills ──
   var pillRow=document.createElement('div');
   pillRow.id='timer-mode-pills';
-  pillRow.style.cssText='position:absolute;top:max(14px,env(safe-area-inset-top));'+
-    'left:0;right:0;display:flex;gap:6px;justify-content:center;z-index:2;pointer-events:auto;padding:0 14px;';
+  pillRow.style.cssText='flex:none;display:flex;gap:6px;justify-content:center;'+
+    'padding:max(14px,env(safe-area-inset-top)) 14px 12px;pointer-events:auto;';
   var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
   modes.forEach(function(m){
     var btn=document.createElement('button');
     btn.textContent=m.l;
     btn.className='btn btn-pill '+(t.mode===m.k?'btn-acc':'btn-ghost');
-    btn.style.cssText='flex:none;pointer-events:auto;';
+    btn.style.cssText='flex:none;';
     btn.onclick=function(){setTimerMode(m.k);};
     pillRow.appendChild(btn);
   });
   wrap.appendChild(pillRow);
 
-  // Pause/Resume + Reset buttons — fixed at BOTTOM
+  // ── Row 2: Canvas (flex:1) ──
+  var canvasWrap=document.createElement('div');
+  canvasWrap.style.cssText='flex:1;position:relative;min-height:0;';
+  var canvas=document.createElement('canvas');
+  canvas.id='timer-canvas';
+  canvas.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;display:block;';
+  canvasWrap.appendChild(canvas);
+  wrap.appendChild(canvasWrap);
+  _timerCanvas=canvas;
+
+  // ── Row 3: Controls ──
+  var ctrlRow=document.createElement('div');
+  ctrlRow.style.cssText='flex:none;padding:12px 20px max(20px,env(safe-area-inset-bottom));'+
+    'display:flex;flex-direction:column;gap:10px;pointer-events:auto;';
+
+  // Pause/Reset buttons
   var btnRow=document.createElement('div');
   btnRow.id='timer-btn-row';
-  btnRow.style.cssText='position:absolute;bottom:max(90px,env(safe-area-inset-bottom)+76px);'+
-    'left:20px;right:20px;display:flex;gap:10px;pointer-events:auto;z-index:2;';
+  btnRow.style.cssText='display:flex;gap:10px;';
 
   var btnPause=document.createElement('button');
   btnPause.id='timer-btn-pause';
   btnPause.className='btn btn-acc';
-  btnPause.style.cssText='flex:1;font-size:17px;font-weight:800;height:58px;pointer-events:auto;';
+  btnPause.style.cssText='flex:1;font-size:17px;font-weight:800;height:56px;';
   btnPause.textContent=t.running?'Pause':'Resume';
   btnPause.onclick=function(){timerToggle();};
   btnRow.appendChild(btnPause);
 
   var btnReset=document.createElement('button');
   btnReset.className='btn btn-ghost';
-  btnReset.style.cssText='flex:1;font-size:17px;height:58px;pointer-events:auto;';
+  btnReset.style.cssText='flex:1;font-size:17px;height:56px;';
   btnReset.textContent='Reset';
   btnReset.onclick=function(){timerReset();};
   btnRow.appendChild(btnReset);
 
-  wrap.appendChild(btnRow);
+  ctrlRow.appendChild(btnRow);
+  wrap.appendChild(ctrlRow);
 
   // Tap anywhere on canvas to pause/resume
   canvas.addEventListener('touchstart',function(e){
@@ -5626,11 +5627,17 @@ function timerMountCanvas(){
 
   document.getElementById('app').appendChild(wrap);
 
-  // RAF loop
+  // RAF loop — resize canvas to match its container each frame
   function rafLoop(){
     _timerRAF=requestAnimationFrame(rafLoop);
+    var cw=canvas.parentElement;
+    if(cw){
+      var pw=cw.offsetWidth, ph=cw.offsetHeight;
+      if(pw>0&&ph>0&&(canvas.width!==pw||canvas.height!==ph)){
+        canvas.width=pw; canvas.height=ph;
+      }
+    }
     timerDrawFrame();
-    // Update pause button text
     var pb=document.getElementById('timer-btn-pause');
     if(pb)pb.textContent=S.timer.running?'Pause':'Resume';
   }
