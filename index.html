@@ -5348,10 +5348,14 @@ function timerDrawFrame(){
   var canvas=_timerCanvas; if(!canvas)return;
   var ctx=canvas.getContext('2d'); if(!ctx)return;
   var t=S.timer;
-  var W=canvas.width; var H=canvas.height;
+  var dpr=window.devicePixelRatio||1;
+  // Logical dimensions (CSS pixels) — all drawing uses these
+  var W=canvas.width/dpr; var H=canvas.height/dpr;
   var acc=timerGetAccColour();
   var bg=timerGetBg();
 
+  ctx.save();
+  ctx.scale(dpr,dpr);
   ctx.clearRect(0,0,W,H);
 
   // ── Flash overlay ──
@@ -5371,12 +5375,13 @@ function timerDrawFrame(){
   // ── Running / paused ──
   var cx=W/2, cy;
 
-  // Canvas IS the ring area — ring fills it
-  var padding=16;
-  var ringR=Math.min(H/2-padding, W/2-padding)*0.88;
+  // Ring fills canvas — account for outer ring stroke on each side
+  var outerStrokeClear=Math.max(8,W*0.04);
+  var ringR=Math.min(H/2, W/2)*0.82-outerStrokeClear;
   cy=H/2;
 
   timerDrawRunning(ctx,W,H,cx,cy,ringR,acc,bg,t);
+  ctx.restore();
 }
 
 function timerDrawSetup(ctx,W,H,acc,bg,t){
@@ -5399,12 +5404,14 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
     label='STOPWATCH';
     pct=Math.min(1,t.elapsed/(60*60));
     ringCol=acc;
+    outerPct=0; // outer ring decorative only
   } else if(t.mode==='countdown'){
     var m=Math.floor(t.remaining/60); var s=t.remaining%60;
     mainText=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
     label='COUNTDOWN';
     pct=t.totalSecs>0?t.remaining/t.totalSecs:0;
     isWarning=t.remaining<=5&&t.remaining>0;
+    outerPct=0; // outer ring decorative only
     // Warning: shift colour toward a brighter mix of acc
     ringCol=isWarning?timerColourMix(acc,0.5):acc;
   } else if(t.mode==='tabata'){
@@ -5431,25 +5438,23 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
     outerPct=t.emomMins>0?t.emomRound/t.emomMins:0;
   }
 
-  // ── Outer ring (dual: rounds/minutes progress) ──
-  if(outerPct>=0){
-    var outerR=R+strokeW*1.5;
-    var outerW=Math.max(4,strokeW*0.3);
-    // Track
+  // ── Outer decorative ring — always present, thin ──
+  var outerR=R+strokeW*1.4;
+  var outerW=Math.max(3,Math.round(strokeW*0.22));
+  ctx.beginPath();
+  ctx.arc(cx,cy,outerR,0,Math.PI*2);
+  ctx.strokeStyle=timerColourAlpha(ringCol,0.13);
+  ctx.lineWidth=outerW;
+  ctx.lineCap='butt';
+  ctx.stroke();
+  // Progress arc on outer ring (Tabata=rounds, EMOM=minutes, others=none)
+  if(outerPct>0){
     ctx.beginPath();
-    ctx.arc(cx,cy,outerR,0,Math.PI*2);
-    ctx.strokeStyle=timerColourAlpha(ringCol,0.1);
+    ctx.arc(cx,cy,outerR,-Math.PI/2,-Math.PI/2+outerPct*Math.PI*2);
+    ctx.strokeStyle=timerColourAlpha(ringCol,0.4);
     ctx.lineWidth=outerW;
+    ctx.lineCap='round';
     ctx.stroke();
-    // Progress dots or arc
-    if(outerPct>0){
-      ctx.beginPath();
-      ctx.arc(cx,cy,outerR,-Math.PI/2,-Math.PI/2+outerPct*Math.PI*2);
-      ctx.strokeStyle=timerColourAlpha(ringCol,0.35);
-      ctx.lineWidth=outerW;
-      ctx.lineCap='round';
-      ctx.stroke();
-    }
   }
 
   // ── Track ring ──
@@ -5521,15 +5526,7 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
     ctx.fillText(sub,cx,yPos);
   }
 
-  // ── Pause / play indicator below ring ──
-  var iconY=cy+R+strokeW+Math.round(R*0.18);
-  var iconSize=Math.round(R*0.22);
-  ctx.font=iconSize+'px system-ui,sans-serif';
-  ctx.letterSpacing='0px';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-  ctx.fillStyle=timerColourAlpha(ringCol, t.running?0.55:0.80);
-  ctx.fillText(t.running?'⏸':'▶',cx,iconY);
+
 }
 
 // ── Mount/unmount canvas ──────────────────────────────────────
@@ -5576,7 +5573,7 @@ function timerMountCanvas(){
 
   // ── Row 3: Controls ──
   var ctrlRow=document.createElement('div');
-  ctrlRow.style.cssText='flex:none;padding:12px 20px max(20px,env(safe-area-inset-bottom));'+
+  ctrlRow.style.cssText='flex:none;padding:12px 20px;margin-bottom:max(76px,calc(env(safe-area-inset-bottom)+76px));'+
     'display:flex;flex-direction:column;gap:10px;pointer-events:auto;';
 
   // Pause/Reset buttons
@@ -5627,14 +5624,19 @@ function timerMountCanvas(){
 
   document.getElementById('app').appendChild(wrap);
 
-  // RAF loop — resize canvas to match its container each frame
+  // RAF loop — size canvas at physical pixels (DPR-aware)
   function rafLoop(){
     _timerRAF=requestAnimationFrame(rafLoop);
     var cw=canvas.parentElement;
     if(cw){
-      var pw=cw.offsetWidth, ph=cw.offsetHeight;
+      var dpr=window.devicePixelRatio||1;
+      var pw=Math.round(cw.offsetWidth*dpr);
+      var ph=Math.round(cw.offsetHeight*dpr);
       if(pw>0&&ph>0&&(canvas.width!==pw||canvas.height!==ph)){
         canvas.width=pw; canvas.height=ph;
+        // CSS size stays at logical pixels
+        canvas.style.width=cw.offsetWidth+'px';
+        canvas.style.height=cw.offsetHeight+'px';
       }
     }
     timerDrawFrame();
