@@ -3672,7 +3672,6 @@ function retakeOB(){
 
 // ── Template definitions ──────────────────────────────────────
 var BUILD_TEMPLATES = [
-  {key:'blank', label:'Blank', icon:'✦', desc:'Start from scratch'},
   {key:'fullbody', label:'Full Body', icon:'◎', desc:'2–3 days · all patterns each session'},
   {key:'upperlower', label:'Upper / Lower', icon:'◑', desc:'4 days · upper & lower split'},
   {key:'ppl', label:'Push / Pull / Legs', icon:'▲', desc:'3–6 days · classic PPL split'},
@@ -3783,6 +3782,46 @@ var BUILD_PATTERNS={
   lunge:'Lunge',carry:'Carry',core:'Core',explosive:'Explosive',
   conditioning:'Conditioning',rotation:'Rotation',locomotion:'Locomotion'
 };
+// Pattern → muscle group focus for auto-fill
+var BUILD_PATTERN_FOCUS={
+  squat:'Quads & Glutes',
+  hinge:'Hamstrings & Glutes',
+  push:'Chest, Shoulders & Triceps',
+  pull:'Back & Biceps',
+  lunge:'Quads, Glutes & Balance',
+  carry:'Full Body Stability',
+  core:'Core & Abs',
+  explosive:'Power & Athleticism',
+  conditioning:'Cardio & Conditioning',
+  rotation:'Rotational Power',
+  locomotion:'Mobility & Movement'
+};
+// Combo mappings — common pattern combos get a richer label
+var BUILD_PATTERN_COMBOS={
+  'push+pull':'Upper Body',
+  'push+pull+core':'Upper Body & Core',
+  'squat+hinge':'Posterior Chain',
+  'squat+hinge+lunge':'Lower Body',
+  'squat+hinge+lunge+core':'Lower Body & Core',
+  'squat+core':'Quads & Core',
+  'hinge+core':'Posterior Chain & Core',
+  'push+pull+squat+hinge':'Full Body',
+  'push+pull+squat+hinge+core':'Full Body',
+  'push+pull+squat+hinge+lunge+core':'Full Body'
+};
+function buildAutoFocus(split){
+  if(!split||!split.length)return'';
+  var key=split.slice().sort().join('+');
+  if(BUILD_PATTERN_COMBOS[key])return BUILD_PATTERN_COMBOS[key];
+  if(split.length===1)return BUILD_PATTERN_FOCUS[split[0]]||split[0];
+  // Fallback: join muscle groups, deduplicated
+  var groups=[];
+  split.forEach(function(p){
+    var g=BUILD_PATTERN_FOCUS[p]||BUILD_PATTERNS[p]||p;
+    if(groups.indexOf(g)<0)groups.push(g);
+  });
+  return groups.slice(0,2).join(' & ');
+}
 
 // ── Utility: build an exercise object from EX key ─────────────
 function buildExFromKey(exKey, phaseKey){
@@ -3899,26 +3938,16 @@ function buildWizardV(){
   });
   h+='</div>';
 
-  // Nav bar immediately below step graphic — always visible
-  var _backStep=[null,0,1,2,3][step];
-  var _nextStep=[null,null,null,null,null]; // step-specific, set in each step fn via S._wizNav
-  // We compute canNext per step below then inject nav
-  var stepContent='';
-  if(step===0)stepContent=buildStep0();
-  else if(step===1)stepContent=buildStep1();
-  else if(step===2)stepContent=buildStep2();
-  else if(step===3)stepContent=buildStep3();
-  else if(step===4)stepContent=buildStep4();
-  // S._wizNav is set by each step function: {back,next,canNext,hint}
-  var nav=S._wizNav||{back:_backStep,next:null,canNext:true,hint:''};
-  h+=buildWizardNav(nav.back,nav.next,nav.canNext,nav.hint);
+  // Each step function returns {html, nav:{back,next,canNext,hint}}
+  var result={html:'',nav:{back:null,next:null,canNext:true,hint:''}};
+  if(step===0)result=buildStep0();
+  else if(step===1)result=buildStep1();
+  else if(step===2)result=buildStep2();
+  else if(step===3)result=buildStep3();
+  else if(step===4)result=buildStep4();
+  h+=buildWizardNav(result.nav.back,result.nav.next,result.nav.canNext,result.nav.hint);
   h+='<div style="height:16px"></div>';
-  h+=stepContent;
-  // Repeat nav at bottom for long steps
-  if(step===3||step===4){
-    h+='<div style="height:8px"></div>';
-    h+=buildWizardNav(nav.back,nav.next,nav.canNext,nav.hint);
-  }
+  h+=result.html;
   return h;
 }
 
@@ -3964,10 +3993,7 @@ function buildStep0(){
 
   // Next button
   var canNext=e.name.trim().length>0&&e._template;
-  S._wizNav={back:null,next:null,canNext:canNext,hint:''};
-  h+='<div style="height:16px"></div>';
-  h+='<button class="btn btn-acc" '+(canNext?'':'disabled')+' onclick="buildStep0Next()">Next →</button>';
-  return h;
+  return {html:h,nav:{back:null,next:'step0',canNext:canNext,hint:'Choose a name and template'}};
 }
 
 function buildPickTemplate(key){
@@ -4060,8 +4086,7 @@ function buildStep1(){
   h+='<button class="btn btn-ghost" style="margin-bottom:16px" onclick="buildAddDay()">+ Add Session</button>';
 
   var canNext=e.days.every(function(d){return d.split&&d.split.length>0;});
-  S._wizNav={back:0,next:2,canNext:canNext,hint:'at least one pattern per session'};
-  return h;
+  return {html:h,nav:{back:0,next:2,canNext:canNext,hint:'at least one pattern per session'}};
 }
 
 function buildToggleSplit(di,pat){
@@ -4071,8 +4096,7 @@ function buildToggleSplit(di,pat){
   if(idx>=0)d.split.splice(idx,1);
   else d.split.push(pat);
   // Auto-update focus label if it hasn't been manually edited
-  var autoFocus=d.split.map(function(p){return BUILD_PATTERNS[p]||p;}).join(' / ');
-  if(!d._focusEdited)d.focus=autoFocus;
+  if(!d._focusEdited)d.focus=buildAutoFocus(d.split);
   sv();draw();
 }
 
@@ -4105,8 +4129,7 @@ function buildToggleSplitPicker(di,pat){
   var idx=d.split.indexOf(pat);
   if(idx>=0)d.split.splice(idx,1);
   else d.split.push(pat);
-  var autoFocus=d.split.map(function(p){return BUILD_PATTERNS[p]||p;}).join(' / ');
-  if(!d._focusEdited)d.focus=autoFocus;
+  if(!d._focusEdited)d.focus=buildAutoFocus(d.split);
   sv();
   // Update row in place without closing sheet
   var row=document.getElementById('split-row-'+pat);
@@ -4212,18 +4235,18 @@ function buildStep2(){
     ? _activePhases.map(function(k){return BUILD_PHASE_MAP[k]?BUILD_PHASE_MAP[k].label:k;}).join(', ')
     : 'Tap to select…';
   var _phaseEmpty=!_activePhases.length;
-  h+='<div class="lbl" style="margin-bottom:8px">PHASES</div>';
+  var _dayLabel=(day.label||(day.focus?'':'')+' ').trim()+(day.focus?' — '+day.focus:'');
+  h+='<div class="lbl" style="margin-bottom:8px">PHASES FOR '+(_dayLabel).toUpperCase()+'</div>';
   h+='<div onclick="buildOpenPhasePicker('+di+')" style="'+
      'display:flex;align-items:center;justify-content:space-between;'+
-     'padding:11px 14px;border-radius:10px;border:1px solid '+(_phaseEmpty?'var(--brd)':'var(--acc-brd)')+';'+
+     'height:52px;padding:0 16px;border-radius:10px;border:1px solid '+(_phaseEmpty?'var(--brd)':'var(--acc-brd)')+';'+
      'background:'+(_phaseEmpty?'var(--bg3)':'var(--acc-bg)')+';cursor:pointer;margin-bottom:16px">';
   h+='<span style="font-size:13px;font-weight:600;color:'+(_phaseEmpty?'var(--mu)':'var(--acc)')+'">'+_phaseLabel+'</span>';
   h+='<span style="color:var(--mu);font-size:12px">▾</span>';
   h+='</div>';
 
   var canNext=(day.phases||[]).indexOf('strength')>=0;
-  S._wizNav={back:1,next:3,canNext:canNext,hint:'Strength phase is required'};
-  return h;
+  return {html:h,nav:{back:1,next:3,canNext:canNext,hint:'Strength phase is required'}};
 }
 
 function buildTogglePhase(di,phKey){
@@ -4279,11 +4302,11 @@ function buildStep3(){
       var volStr=ex.vol?ex.vol:(ex.reps>0?ex.sets+'×'+ex.reps:'');
       h+='<div class="build-drag-row" data-di="'+di+'" data-phase="'+phKey+'" data-gei="'+globalEi+'" '+
          'style="display:flex;align-items:center;gap:0;padding:12px 14px;background:var(--bg3);'+
-         'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px;touch-action:none;user-select:none">';
+         'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px;touch-action:pan-y;user-select:none">';
       // Drag handle — ≡ bars, generous touch area
       h+='<div class="build-drag-handle" style="'+
          'display:flex;align-items:center;justify-content:center;'+
-         'width:36px;height:44px;flex-shrink:0;cursor:grab;color:var(--mu);font-size:16px;letter-spacing:1px;margin-right:6px">⋮⋮</div>';
+         'width:32px;height:100%;flex-shrink:0;cursor:grab;color:var(--mu);font-size:15px;letter-spacing:1px;margin-right:8px;touch-action:none">⋮⋮</div>';
       h+='<div style="flex:1;min-width:0">';
       h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
       h+='<div style="font-size:11px;color:var(--mu)">'+volStr+(ex.rest?' · '+ex.rest+'s':'')+'</div>';
@@ -4299,8 +4322,7 @@ function buildStep3(){
     h+='</div>';
   });
 
-  S._wizNav={back:2,next:4,canNext:true,hint:''};
-  return h;
+  return {html:h,nav:{back:2,next:4,canNext:true,hint:''}};
 }
 
 function buildMoveEx(di,ei,dir){
@@ -4351,14 +4373,21 @@ function buildOpenPicker(di,phKey){
     return matchPhase&&!matchSplit;
   });
 
-  var h='<div style="padding:0 20px 30px">';
+  var h='<div style="padding:0 20px 16px">';
   h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Adding to <strong>'+phConf.label+'</strong>'+
      (split.length?' · '+split.map(function(p){return BUILD_PATTERNS[p]||p;}).join('/'):'')+'</div>';
+  // Search field — keyboard-safe: sits near top of sheet
   h+='<input type="text" id="bpicker-search" placeholder="Search exercises…" '+
-     'oninput="buildFilterPicker()" style="margin-bottom:12px;font-size:14px" autofocus>';
+     'oninput="buildFilterPicker()" style="margin-bottom:10px;font-size:14px" autocomplete="off">';
+  // Results: only shown after typing
   h+='<div id="bpicker-results">';
-  h+=buildPickerResults(suggested,other,phKey,di);
-  h+='</div></div>';
+  h+='<div style="text-align:center;padding:16px 0">';
+  h+='<button class="btn btn-ghost" style="width:100%" onclick="buildOpenLibrary('+di+',\''+phKey+'\')">';
+  h+='Exercise Library ›</button>';
+  h+='</div>';
+  h+='</div>';
+  h+='<div style="height:300px"></div>'; // keyboard spacer
+  h+='</div>';
   openSheet(h,'Add Exercise');
   setTimeout(function(){var el=document.getElementById('bpicker-search');if(el)el.focus();},200);
 }
@@ -4380,12 +4409,13 @@ function buildPickerResults(suggested,other,phKey,di){
 }
 
 function buildPickerRow(e,phKey,di){
+  // Show a tick if already in this session (but always allow adding again)
   var alreadyAdded=S.customEdit.days[di]&&S.customEdit.days[di].exercises.some(function(ex){return ex.name===e.name;});
   return '<div class="prog-item" onclick="buildAddExercise(\''+e.key+'\')">' +
-    '<div><div style="font-size:13px;font-weight:600">'+e.name+'</div>' +
-    '<div class="lbl">'+(e.patterns||[]).join(' · ')+'</div></div>' +
-    '<button class="btn btn-pill '+(alreadyAdded?'btn-ghost':'btn-acc')+'">'+
-    (alreadyAdded?'Again':'Add')+'</button></div>';
+    '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+
+    (alreadyAdded?' <span style="font-size:10px;color:var(--acc)">✓ added</span>':'')+
+    '</div><div class="lbl">'+(e.patterns||[]).join(' · ')+'</div></div>' +
+    '<button class="btn btn-pill btn-acc">Add</button></div>';
 }
 
 function buildFilterPicker(){
@@ -4393,30 +4423,21 @@ function buildFilterPicker(){
   var el=document.getElementById('bpicker-results');if(!el)return;
   var di=S.customEdit.activeDay;
   var phKey=S.customEdit.activePhase||'strength';
-  if(q.trim().length<2){
-    var day=S.customEdit.days[di];var split=day?day.split||[]:[];
-    var phaseFilter={warmup:['warmup','activation'],activation:['warmup','activation'],
-      mobility:['warmup','cooldown'],strength:['kpi','primer'],accessory:['accessory','kpi'],
-      core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown']};
-    var validPhases=phaseFilter[phKey]||['kpi','accessory'];
-    var suggested=EX.filter(function(e){
-      return e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;})&&
-             split.length&&e.patterns&&e.patterns.some(function(p){return split.indexOf(p)>=0;});
-    });
-    var other=EX.filter(function(e){
-      return e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;})&&
-             !(e.patterns&&e.patterns.some(function(p){return split.indexOf(p)>=0;}));
-    });
-    el.innerHTML=buildPickerResults(suggested,other,phKey,di);
+  if(q.trim().length<1){
+    // Show library button only when nothing typed
+    el.innerHTML='<div style="text-align:center;padding:16px 0">'+
+      '<button class="btn btn-ghost" style="width:100%" onclick="buildOpenLibrary('+di+',\''+phKey+'\')">' +
+      'Exercise Library ›</button></div>';
     return;
   }
   q=q.toLowerCase();
   var results=EX.filter(function(e){
-    return e.name.toLowerCase().indexOf(q)>=0||(e.tags||[]).join(' ').indexOf(q)>=0||
-           (e.patterns||[]).join(' ').indexOf(q)>=0;
+    return e.name.toLowerCase().indexOf(q)>=0||
+           (e.patterns||[]).join(' ').toLowerCase().indexOf(q)>=0;
   }).slice(0,40);
-  el.innerHTML=results.length?results.map(function(e){return buildPickerRow(e,phKey,di);}).join(''):
-    '<div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">No exercises found. <span style="color:var(--acc);cursor:pointer" onclick="buildAddCustomExercise()">Add custom ›</span></div>';
+  el.innerHTML=results.length
+    ?results.map(function(e){return buildPickerRow(e,phKey,di);}).join('')
+    :'<div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">No results for "'+q+'". <span style="color:var(--acc);cursor:pointer" onclick="buildAddCustomExercise()">Add as custom ›</span></div>';
 }
 
 function buildAddExercise(exKey){
@@ -4452,6 +4473,36 @@ function buildAddExercise(exKey){
   }
 }
 
+function buildOpenLibrary(di,phKey){
+  S.customEdit.activeDay=di;S.customEdit.activePhase=phKey;sv();
+  var phaseFilter={
+    warmup:['warmup','activation'],activation:['warmup','activation'],
+    mobility:['warmup','cooldown'],strength:['kpi','primer'],accessory:['accessory','kpi'],
+    core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown']
+  };
+  var validPhases=phaseFilter[phKey]||['kpi','accessory'];
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:16px">Browse exercises for <strong>'+(BUILD_PHASE_MAP[phKey]||{label:phKey}).label+'</strong>. Tap any exercise to add it.</div>';
+  var patternOrder=['push','pull','squat','hinge','lunge','core','carry','explosive','conditioning','rotation','locomotion'];
+  patternOrder.forEach(function(pat){
+    var patExs=EX.filter(function(e){
+      return (e.patterns||[]).indexOf(pat)>=0&&
+             e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
+    });
+    if(!patExs.length)return;
+    h+='<div style="margin-bottom:14px">';
+    h+='<div class="lbl" style="margin-bottom:6px">'+BUILD_PATTERNS[pat].toUpperCase()+'</div>';
+    patExs.forEach(function(e){
+      h+='<div class="prog-item" onclick="buildAddExercise(\''+e.key+'\');this.style.opacity=0.5">';
+      h+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>';
+      h+='<div class="lbl">'+(e.equipment||[]).join(' · ')+'</div></div>';
+      h+='<button class="btn btn-pill btn-acc">Add</button></div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+  openSheet(h,'Exercise Library');
+}
 function buildAddCustomExercise(){
   var q=(document.getElementById('bpicker-search')||{}).value||'';
   if(!q.trim())return;
@@ -4505,8 +4556,7 @@ function buildStep4(){
 
   h+='<div style="height:16px"></div>';
   h+='<button class="btn btn-acc" onclick="buildSave()">Save Programme</button>';
-  S._wizNav={back:3,next:null,canNext:true,hint:''};
-  return h;
+  return {html:h,nav:{back:3,next:null,canNext:true,hint:''}};
 }
 
 function buildConfigEx(di,ei){
@@ -4675,35 +4725,83 @@ function buildSave(){
 function buildDayDropdown(activeDi,step){
   var e=S.customEdit;
   if(e.days.length<=1)return '';
+  var day=e.days[activeDi]||e.days[0];
+  var label=day.label+(day.focus?' — '+day.focus:'');
+  // Tappable field — same height as Back/Next (52px)
   var h='<div style="margin-bottom:16px">';
-  h+='<div style="position:relative">';
-  h+='<select onchange="S.customEdit.activeDay=parseInt(this.value);sv();draw()" '+
-     'style="width:100%;padding:10px 40px 10px 14px;font-size:14px;font-weight:700;border-radius:10px;'+
-     'border:1px solid var(--acc-brd);background:var(--acc-bg);color:var(--acc);cursor:pointer;'+
-     'appearance:none;-webkit-appearance:none">';
-  e.days.forEach(function(d,i){
-    h+='<option value="'+i+'"'+(i===activeDi?' selected':'')+'>'+d.label+(d.focus?' — '+d.focus:'')+'</option>';
-  });
-  h+='</select>';
-  h+='<div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--acc);font-size:13px;font-weight:700">▾</div>';
-  h+='</div></div>';
+  h+='<div onclick="buildOpenDayPicker('+activeDi+','+step+')" style="'+
+     'display:flex;align-items:center;justify-content:space-between;'+
+     'height:52px;padding:0 16px;border-radius:10px;'+
+     'border:1px solid var(--acc-brd);background:var(--acc-bg);cursor:pointer">';
+  h+='<span style="font-size:14px;font-weight:700;color:var(--acc)">'+label+'</span>';
+  h+='<span style="color:var(--acc);font-size:13px">▾</span>';
+  h+='</div>';
+  h+='</div>';
   return h;
 }
 
+function buildOpenDayPicker(activeDi,step){
+  var e=S.customEdit;
+  var h='<div style="padding:0 20px 30px">';
+  e.days.forEach(function(d,i){
+    var sel=i===activeDi;
+    var label=d.label+(d.focus?' — '+d.focus:'');
+    h+='<div onclick="buildSelectDay('+i+','+step+')" style="'+
+       'display:flex;align-items:center;justify-content:space-between;'+
+       'padding:14px 16px;border-radius:10px;margin-bottom:8px;cursor:pointer;'+
+       'border:1.5px solid '+(sel?'var(--acc-brd)':'var(--brd)')+';'+
+       'background:'+(sel?'var(--acc-bg)':'var(--bg3)')+'">';
+    h+='<span style="font-size:14px;font-weight:700;color:'+(sel?'var(--acc)':'var(--tx)')+'">'+label+'</span>';
+    if(sel)h+='<span style="color:var(--acc);font-weight:700">✓</span>';
+    h+='</div>';
+  });
+  h+='</div>';
+  openSheet(h,'Select Session');
+}
+
+function buildSelectDay(i,step){
+  S.customEdit.activeDay=i;
+  sv();closeSheet();draw();
+}
+
 // Navigation bar with back/next
+function buildWizardNavFlash(btn,step){
+  btn.classList.add('btn-acc');btn.classList.remove('btn-ghost');
+  btn.style.opacity='1';
+  setTimeout(function(){buildGoto(step);},140);
+}
+function buildWizardNavFlashNext(btn,step){
+  btn.classList.add('btn-acc');btn.classList.remove('btn-ghost');
+  btn.style.opacity='1';
+  setTimeout(function(){buildGoto(step);},140);
+}
 function buildWizardNav(backStep,nextStep,canNext,hint){
-  var h='<div style="display:flex;gap:8px;margin-top:20px">';
-  if(backStep>=0){
-    h+='<button class="btn btn-ghost" style="flex:1" onclick="buildGoto('+backStep+')">← Back</button>';
+  var backDisabled=(backStep===null||backStep<0);
+  var nextDisabled=(nextStep===null||!canNext);
+  var h='<div style="display:flex;gap:8px;margin-top:0">';
+  // Back — always rendered, always ghost until pressed
+  if(backDisabled){
+    h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>';
+  } else {
+    h+='<button class="btn btn-ghost" style="flex:1" onclick="buildWizardNavFlash(this,'+backStep+')">← Back</button>';
   }
-  if(nextStep!==null){
-    h+='<button class="btn btn-acc" style="flex:1" '+
-       (canNext?'':'disabled title="'+hint+'"')+
-       ' onclick="buildGoto('+nextStep+')">Next →</button>';
+  // Next — always rendered, ghost style, lights up on press
+  if(nextStep===null){
+    h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>Next →</button>';
+  } else if(nextStep==='step0'){
+    if(nextDisabled){
+      h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled title="'+hint+'">Next →</button>';
+    } else {
+      h+='<button class="btn btn-ghost" style="flex:1" onclick="buildWizardNavFlashNext(this,0);setTimeout(buildStep0Next,140)">Next →</button>';
+    }
+  } else if(nextDisabled){
+    h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled title="'+hint+'">Next →</button>';
+  } else {
+    h+='<button class="btn btn-ghost" style="flex:1" onclick="buildWizardNavFlashNext(this,'+nextStep+')">Next →</button>';
   }
   h+='</div>';
   if(!canNext&&hint){
-    h+='<div style="font-size:11px;color:var(--mu);text-align:center;margin-top:8px">'+hint+'</div>';
+    h+='<div style="font-size:11px;color:var(--mu);text-align:center;margin-top:6px">'+hint+'</div>';
   }
   return h;
 }
@@ -4765,8 +4863,13 @@ function initBuildDrag(){
         var rr=r.getBoundingClientRect();
         if(midY>=rr.top&&midY<=rr.bottom){target=r;}
       });
-      // Highlight target
+      // Highlight only same-phase rows; leave cross-phase rows untouched
       document.querySelectorAll('.build-drag-row').forEach(function(r){
+        if(r===_drag.srcRow)return;
+        if(r.dataset.phase!==_drag.srcPhase){
+          // Restore cross-phase rows to default (don't touch them)
+          r.style.borderColor='';r.style.background='';return;
+        }
         r.style.borderColor=r===target?'var(--acc)':'';
         r.style.background=r===target?'var(--bg2)':'';
       });
@@ -4778,8 +4881,11 @@ function initBuildDrag(){
       if(_drag.clone){_drag.clone.remove();_drag.clone=null;}
       _drag.srcRow.style.opacity='';
       handle.style.cursor='grab';
+      // Reset ALL rows to their CSS defaults (not inline styles)
       document.querySelectorAll('.build-drag-row').forEach(function(r){
-        r.style.borderColor='';r.style.background='';
+        r.style.borderColor='';
+        r.style.background='';
+        r.style.border='';  // clear fully to let CSS take over
       });
 
       // Find drop target
