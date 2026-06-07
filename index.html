@@ -5540,7 +5540,12 @@ function timerMountCanvas(){
   if(existing)return; // already mounted
 
   var t=S.timer;
-  if(t.setup){return;} // don't mount during setup
+  // Auto-start stopwatch on first mount if no session running
+  if(!t.running&&t.elapsed===0&&t.mode==='stopwatch'){
+    t.setup=false;t.running=true;startTimerTick();
+  } else {
+    t.setup=false;
+  }
 
   var wrap=document.createElement('div');
   wrap.id='timer-canvas-wrap';
@@ -5552,13 +5557,18 @@ function timerMountCanvas(){
     'z-index:90;background:var(--bg);'+
     'display:flex;flex-direction:column;touch-action:none;';
 
-  // ── Dashboard strip: pills + buttons in one compact card ──
+  // ── Dashboard strip: heading + pills + buttons, no bg ──
   var dash=document.createElement('div');
   dash.style.cssText='flex:none;'+
     'padding:max(10px,env(safe-area-inset-top)) 14px 10px;'+
-    'background:var(--bg2);'+
-    'border-bottom:0.5px solid var(--brd);'+
     'pointer-events:auto;';
+
+  // TIMER heading
+  var heading=document.createElement('div');
+  heading.style.cssText='font-size:24px;font-weight:800;letter-spacing:-0.5px;color:var(--tx);'+
+    'line-height:1.1;margin-bottom:8px;padding-left:2px;';
+  heading.textContent='Timer';
+  dash.appendChild(heading);
 
   // Pills row
   var pillRow=document.createElement('div');
@@ -5569,8 +5579,9 @@ function timerMountCanvas(){
     var btn=document.createElement('button');
     btn.textContent=m.l;
     btn.className='btn btn-pill '+(t.mode===m.k?'btn-acc':'btn-ghost');
-    btn.style.cssText='flex:1;font-size:12px;padding:6px 4px;';
-    btn.onclick=function(){setTimerMode(m.k);};
+    btn.style.cssText='flex:1;font-size:12px;padding:6px 4px;text-align:center;display:flex;align-items:center;justify-content:center;';
+    btn.dataset.mode=m.k;
+    btn.onclick=function(){setTimerMode(this.dataset.mode);};
     pillRow.appendChild(btn);
   });
   dash.appendChild(pillRow);
@@ -5583,14 +5594,14 @@ function timerMountCanvas(){
   var btnPause=document.createElement('button');
   btnPause.id='timer-btn-pause';
   btnPause.className='btn btn-acc';
-  btnPause.style.cssText='flex:1;font-size:15px;font-weight:800;height:44px;';
+  btnPause.style.cssText='flex:1;font-size:15px;font-weight:800;height:44px;text-align:center;display:flex;align-items:center;justify-content:center;';
   btnPause.textContent=t.running?'Pause':'Resume';
   btnPause.onclick=function(){timerToggle();};
   btnRow.appendChild(btnPause);
 
   var btnReset=document.createElement('button');
   btnReset.className='btn btn-ghost';
-  btnReset.style.cssText='flex:1;font-size:15px;height:44px;';
+  btnReset.style.cssText='flex:1;font-size:15px;height:44px;text-align:center;display:flex;align-items:center;justify-content:center;';
   btnReset.textContent='Reset';
   btnReset.onclick=function(){timerReset();};
   btnRow.appendChild(btnReset);
@@ -5693,52 +5704,30 @@ function timerSkipPhase(){
 // ── Canvas-aware timer controls ──────────────────────────────
 // Override timerV to use canvas when running
 function timerV(){
+  // Canvas is ALWAYS the timer screen — mount immediately
+  setTimeout(timerMountCanvas, 0);
+  return '<div style="height:100%"></div>';
+}
+
+function timerOpenConfig(mode){
   var t=S.timer;
-
-  // If running (or paused mid-session), mount canvas and return minimal HTML
-  if(!t.setup){
-    // Schedule canvas mount after draw
-    setTimeout(timerMountCanvas, 0);
-    // Return empty placeholder — canvas covers the screen
-    return '<div style="height:100%"></div>';
-  }
-
-  // Setup: unmount canvas, show HTML setup
-  timerUnmountCanvas();
-
-  var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  h+='<div class="h1" style="margin-bottom:16px">Timer</div>';
-
-  var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
-  h+='<div style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap">';
-  modes.forEach(function(m){
-    h+='<button class="btn btn-pill'+(t.mode===m.k?' btn-acc':' btn-ghost')+'" data-mode="'+m.k+'" onclick="setTimerMode(this.dataset.mode)">'+m.l+'</button>';
-  });
-  h+='</div>';
-
-  if(t.mode==='stopwatch'){
-    h+='<div style="text-align:center;padding:40px 0;font-size:72px;font-weight:900;letter-spacing:-2px;color:var(--acc)">00:00</div>';
-    h+='<button class="btn btn-acc" style="height:58px;font-size:17px;font-weight:800" onclick="timerStartStopwatch()">Start</button>';
-
-  } else if(t.mode==='countdown'){
+  var h='<div style="padding:0 20px 30px">';
+  if(mode==='countdown'){
     var mins=Math.floor(t.totalSecs/60);var secs=t.totalSecs%60;
     h+=timerSetupStepper('MINUTES','cdMins',mins,'m',1);
     h+=timerSetupStepper('SECONDS','cdSecs',secs,'s',5);
-    h+='<button class="btn btn-acc" style="height:58px;font-size:17px;font-weight:800;margin-top:8px" onclick="startCountdown()">Start</button>';
-
-  } else if(t.mode==='tabata'){
+    h+='<button class="btn btn-acc" style="height:56px;font-size:17px;font-weight:800;margin-top:8px" onclick="closeSheet();startCountdown()">Start</button>';
+  } else if(mode==='tabata'){
     h+=timerSetupStepper('WORK (seconds)','tabWork',t.tabWork,'s',5);
     h+=timerSetupStepper('REST (seconds)','tabRest',t.tabRest,'s',5);
     h+=timerSetupStepper('ROUNDS','tabRounds',t.tabRounds,'',1);
-    h+='<button class="btn btn-acc" style="height:58px;font-size:17px;font-weight:800;margin-top:8px" onclick="startTabata()">Start</button>';
-
-  } else if(t.mode==='emom'){
+    h+='<button class="btn btn-acc" style="height:56px;font-size:17px;font-weight:800;margin-top:8px" onclick="closeSheet();startTabata()">Start</button>';
+  } else if(mode==='emom'){
     h+=timerSetupStepper('TOTAL MINUTES','emomMins',t.emomMins,' min',1);
-    h+='<button class="btn btn-acc" style="height:58px;font-size:17px;font-weight:800;margin-top:8px" onclick="startEMOM()">Start</button>';
+    h+='<button class="btn btn-acc" style="height:56px;font-size:17px;font-weight:800;margin-top:8px" onclick="closeSheet();startEMOM()">Start</button>';
   }
-
   h+='</div>';
-  return h;
+  openSheet(h,mode.charAt(0).toUpperCase()+mode.slice(1)+' Setup');
 }
 
 function timerSetupStepper(label,field,value,suffix,delta){
@@ -5856,28 +5845,44 @@ function adjTimer(field,delta){
   sv();
 }
 function setTimerMode(m){
-  S.timer.mode=m;S.timer.setup=true;S.timer.running=false;
+  var t=S.timer;
   if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
-  timerUnmountCanvas();
+  t.running=false;t.elapsed=0;t.mode=m;t.setup=false;
   timerClearAccCache();
-  sv();draw();
+  if(m==='stopwatch'){
+    // Start immediately
+    t.elapsed=0;t.running=true;
+    sv();startTimerTick();
+  } else {
+    // Open config sheet — keep canvas live underneath
+    t.remaining=t.totalSecs;
+    sv();
+    timerOpenConfig(m);
+  }
+  // Update pill highlight
+  var pills=document.querySelectorAll('#timer-mode-pills button');
+  pills.forEach(function(btn){
+    var isActive=btn.dataset&&btn.dataset.mode===m;
+    btn.className='btn btn-pill '+(isActive?'btn-acc':'btn-ghost');
+    btn.style.flex='1';btn.style.fontSize='12px';btn.style.padding='6px 4px';
+  });
 }
 function startCountdown(){
   var t=S.timer;if(t.totalSecs<=0)return;
   t.remaining=t.totalSecs;t.setup=false;t.running=true;
-  sv();draw();startTimerTick();
+  sv();startTimerTick();
 }
 function startTabata(){
   var t=S.timer;
   t.tabCurrent=0;t.tabPhase='work';t.remaining=t.tabWork;
   t.setup=false;t.running=true;
-  sv();draw();startTimerTick();
+  sv();startTimerTick();
 }
 function startEMOM(){
   var t=S.timer;
   t.emomRound=0;t.elapsed=0;
   t.setup=false;t.running=true;
-  sv();draw();startTimerTick();
+  sv();startTimerTick();
 }
 function timerToggle(){
   var ctx=_getAudioCtx();if(ctx&&ctx.state==='suspended')ctx.resume();
@@ -5889,11 +5894,17 @@ function timerToggle(){
   if(S.timer.setup)draw();
 }
 function timerReset(){
-  S.timer.running=false;S.timer.setup=true;S.timer.elapsed=0;
-  S.timer.remaining=S.timer.totalSecs;
+  var t=S.timer;
+  t.running=false;t.elapsed=0;t.setup=false;
+  t.remaining=t.totalSecs;
+  t.tabCurrent=0;t.tabPhase='work';t.tabRemaining=t.tabWork;
+  t.emomRound=0;
   if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
-  timerUnmountCanvas();
-  sv();draw();
+  // Reset Tabata remaining to work phase
+  if(t.mode==='tabata')t.remaining=t.tabWork;
+  var pb=document.getElementById('timer-btn-pause');
+  if(pb)pb.textContent='Resume';
+  sv();
 }
 
 // Ensure canvas is cleaned up when leaving timer tab
