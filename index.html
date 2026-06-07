@@ -2287,9 +2287,7 @@ function openJournalView(){
   openSheet(h,'Journal — '+(cl.name||'Athlete'));
 }
 function clearAllHistory(){
-  if(confirm('Clear all sessions and PBs? This cannot be undone.')){
-    var cl=C();cl.hist=[];cl.pr={};sv();openJournalView();
-  }
+  appConfirm('Clear all sessions and PBs? This cannot be undone.',function(){var cl=C();cl.hist=[];cl.pr={};sv();openJournalView();});
 }
 function clearHistoryItem(idx){
   var cl=C();
@@ -2707,6 +2705,15 @@ function selectSession(idx){
 // EXERCISE WINDOW
 // ═══════════════════════════════════════════════════════════════
 
+function appConfirm(msg, onOK, onCancel){
+  var h='<div style="padding:8px 20px 28px">';
+  h+='<div style="font-size:15px;color:var(--tx);line-height:1.5;margin-bottom:24px">'+msg+'</div>';
+  h+='<div style="display:flex;gap:10px">';
+  h+='<button class="btn btn-ghost" style="flex:1" onclick="closeSheet();'+(onCancel?'setTimeout(function(){('+onCancel+')();},320);':'')+'">Cancel</button>';
+  h+='<button class="btn btn-acc" style="flex:1" onclick="closeSheet();setTimeout(function(){('+onOK+')();},320);">Confirm</button>';
+  h+='</div></div>';
+  openSheet(h,'Confirm');
+}
 function getExVideo(ex){
   if(ex&&ex.video) return ex.video;
   if(!ex||!ex.name) return null;
@@ -3645,11 +3652,7 @@ function togglePgGroup(cat){
 }
 
 function switchTPL(key){
-  if(confirm('Switch to this programme? Your current day progress will reset.')){
-    C().tplKey=key;C().day=0;
-    S.wx=null; // clear any stale session — stale exercises would show wrong content
-    sv();draw();
-  }
+  appConfirm('Switch to this programme? Your current day progress will reset.',function(){C().tplKey=key;C().day=0;S.wx=null;sv();draw();});
 }
 function deletePB(name){
   var cl=C();
@@ -3663,25 +3666,13 @@ function deletePBByIndex(idx){
   sv();openJournalView();
 }
 function deleteCustomProg(key){
-  if(confirm('Delete this programme? This cannot be undone.')){
-    var cl=C();
-    cl.customPrograms=(cl.customPrograms||[]).filter(function(p){return p.key!==key;});
-    if(cl.tplKey===key){cl.tplKey=TPL[0].key;cl.day=0;}
-    sv();draw();
-  }
+  appConfirm('Delete this programme? This cannot be undone.',function(){var cl=C();cl.customPrograms=(cl.customPrograms||[]).filter(function(p){return p.key!==key;});if(cl.tplKey===key){cl.tplKey=TPL[0].key;cl.day=0;}sv();draw();});
 }
 function deleteCustomPlan(key){
-  if(confirm('Delete this plan? This cannot be undone.')){
-    var cl=C();
-    cl.customPlans=(cl.customPlans||[]).filter(function(p){return p.key!==key;});
-    if(cl.plan&&cl.plan.key===key){cl.plan=null;}
-    sv();draw();
-  }
+  appConfirm('Delete this plan? This cannot be undone.',function(){var cl=C();cl.customPlans=(cl.customPlans||[]).filter(function(p){return p.key!==key;});if(cl.plan&&cl.plan.key===key){cl.plan=null;}sv();draw();});
 }
 function retakeOB(){
-  if(confirm('Retake setup? Your data will be preserved.')){
-    C().ob={done:false,step:0,ans:{}};sv();draw();
-  }
+  appConfirm('Retake setup? Your data will be preserved.',function(){C().ob={done:false,step:0,ans:{}};sv();draw();});
 }
 
 
@@ -4198,8 +4189,7 @@ function buildTogglePhaseSheet(di,phKey){
   if(idx>=0){
     var exCount=S.customEdit.days[di].exercises.filter(function(e){return e.ph===phKey;}).length;
     if(exCount>0){
-      if(!confirm('Remove '+BUILD_PHASE_MAP[phKey].label+' and its '+exCount+' exercise'+(exCount>1?'s':'')+' from this session?'))return;
-      S.customEdit.days[di].exercises=S.customEdit.days[di].exercises.filter(function(e){return e.ph!==phKey;});
+      appConfirm('Remove '+BUILD_PHASE_MAP[phKey].label+' and its '+exCount+' exercise'+(exCount>1?'s':'')+' from this session?',function(){S.customEdit.days[di].exercises=S.customEdit.days[di].exercises.filter(function(e){return e.ph!==phKey;});phases.splice(idx,1);sv();buildEnsureDay(di);draw();});return;
     }
     phases.splice(idx,1);
   } else {
@@ -4280,8 +4270,7 @@ function buildTogglePhase(di,phKey){
     // Removing — check if has exercises
     var exCount=S.customEdit.days[di].exercises.filter(function(e){return e.ph===phKey;}).length;
     if(exCount>0){
-      if(!confirm('Remove '+BUILD_PHASE_MAP[phKey].label+' phase and its '+exCount+' exercise'+(exCount>1?'s':'')+' from this session?'))return;
-      S.customEdit.days[di].exercises=S.customEdit.days[di].exercises.filter(function(e){return e.ph!==phKey;});
+      appConfirm('Remove '+BUILD_PHASE_MAP[phKey].label+' phase and its '+exCount+' exercise'+(exCount>1?'s':'')+' from this session?',function(){S.customEdit.days[di].exercises=S.customEdit.days[di].exercises.filter(function(e){return e.ph!==phKey;});phases.splice(idx,1);sv();draw();});return;
     }
     phases.splice(idx,1);
   } else {
@@ -4784,10 +4773,7 @@ function buildSave(){
   });
   S.customEdit={step:0,name:'',days:[],activeDay:0,activePhase:null};
   sv();
-  if(confirm('Programme saved! Switch to it now?')){
-    C().tplKey=key;C().day=0;S.wx=null;sv();
-  }
-  draw();
+  appConfirm('Programme saved! Switch to it now?',function(){C().tplKey=key;C().day=0;S.wx=null;sv();draw();},function(){draw();});
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -5100,10 +5086,7 @@ function saveBuildPlan(){
   cl.customPlans.push({key:key,name:e.name,desc:'Custom progression plan',cyclic:e.cyclic,weeks:e.weeks});
   S.planEdit={name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};
   sv();
-  if(confirm('Progression plan saved! Attach it now?')){
-    attachPlan(key);sv();
-  }
-  draw();
+  appConfirm('Progression plan saved! Attach it now?',function(){attachPlan(key);sv();draw();},function(){draw();});
 }
 
 
