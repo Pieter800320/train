@@ -4473,9 +4473,24 @@ function buildAddExercise(exKey){
 }
 
 function buildLibraryAddEx(btn,exKey){
-  // Add the exercise and update button in-place — no sheet close/reopen needed
-  buildAddExercise(exKey);
-  if(btn){btn.textContent='✓';btn.classList.remove('btn-acc');btn.classList.add('btn-ghost');btn.disabled=true;}
+  var di=S.customEdit.activeDay;
+  var phKey=S.customEdit.activePhase||'strength';
+  if(di===null||di===undefined)return;
+  var exData=EX_MAP[exKey];
+  if(!exData)return;
+  var day=S.customEdit.days[di];
+  var alreadyIdx=-1;
+  (day.exercises||[]).forEach(function(ex,i){if(ex.name===exData.name)alreadyIdx=i;});
+  if(alreadyIdx>=0){
+    // Remove it
+    day.exercises.splice(alreadyIdx,1);
+    sv();
+    if(btn){btn.textContent='Add';btn.classList.remove('btn-ghost');btn.classList.add('btn-acc');btn.disabled=false;}
+  } else {
+    // Add it
+    buildAddExercise(exKey);
+    if(btn){btn.textContent='✓ Added';btn.classList.remove('btn-acc');btn.classList.add('btn-ghost');btn.disabled=false;}
+  }
 }
 function buildToggleLibrarySection(pat){
   var body=document.getElementById('lib-body-'+pat);
@@ -4518,14 +4533,15 @@ function buildOpenLibrary(di,phKey){
       h+='<div class="prog-item" style="margin-bottom:4px">';
       h+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>';
       h+='<div class="lbl">'+(e.equipment||[]).join(' · ')+'</div></div>';
-      h+='<button class="btn btn-pill btn-acc" onclick="buildLibraryAddEx(this,\''+e.key+'\');">Add</button>';
+      var _libAdded=S.customEdit.days[di]&&S.customEdit.days[di].exercises.some(function(ex){return ex.name===e.name;});
+      h+='<button class="btn btn-pill '+(_libAdded?'btn-ghost':'btn-acc')+'" onclick="buildLibraryAddEx(this,\''+e.key+'\');">'+(_libAdded?'✓ Added':'Add')+'</button>';
       h+='</div>';
     });
     h+='</div>';
     h+='</div>';
   });
   h+='</div>';
-  openSheet(h,'Exercise Library');
+  openSheet(h,'Exercise Library',function(){draw();});
 }
 function buildAddCustomExercise(){
   var q=(document.getElementById('bpicker-search')||{}).value||'';
@@ -4565,12 +4581,23 @@ function buildStep4(){
     h+='<div class="phase-head">'+phConf.label+'</div>';
     phExs.forEach(function(ex){
       var globalEi=day.exercises.indexOf(ex);
+      var track=ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol);
+      var hasWeight=track.indexOf('weight')>=0;
+      var hasTime=track.indexOf('time')>=0;
+      var sub='';
+      if(hasTime&&ex.vol)sub=ex.vol;
+      else if(ex.reps>0)sub=ex.sets+'\xd7'+ex.reps;
+      if(hasWeight&&ex.weight>0)sub+=(sub?' · ':'')+ex.weight+'kg';
+      else if(hasWeight)sub+=(sub?' · ':'')+' BW';
+      if(ex.rest)sub+=' · '+ex.rest+'s';
       h+='<div onclick="buildConfigEx('+di+','+globalEi+')" style="'+
-         'display:flex;align-items:center;gap:10px;padding:12px 14px;'+
+         'display:flex;align-items:center;gap:0;padding:12px 14px;'+
          'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px;cursor:pointer">';
-      h+='<div style="flex:1">';
+      // Left spacer matches drag handle width in step 3
+      h+='<div style="width:40px;flex-shrink:0"></div>';
+      h+='<div style="flex:1;min-width:0">';
       h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
-      if(ex.cue)h+='<div style="font-size:11px;color:var(--mu);margin-top:2px">'+ex.cue+'</div>';
+      if(sub)h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+sub+'</div>';
       h+='</div>';
       h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
       h+='</div>';
