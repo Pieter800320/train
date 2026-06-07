@@ -2706,14 +2706,21 @@ function selectSession(idx){
 // ═══════════════════════════════════════════════════════════════
 
 var _confirmOK=null,_confirmCancel=null;
+function _dismissConfirm(){
+  // Hide sheet WITHOUT firing _onClose, so callbacks are not wiped by a redraw
+  var sheet=document.getElementById('sheet');
+  var ov=document.getElementById('sheet-overlay');
+  if(sheet){sheet.classList.remove('show');sheet._onClose=null;}
+  if(ov)ov.classList.remove('show');
+}
 function appConfirm(msg, onOK, onCancel){
   _confirmOK=onOK||null;
   _confirmCancel=onCancel||null;
   var h='<div style="padding:8px 20px 28px">';
   h+='<div style="font-size:15px;color:var(--tx);line-height:1.5;margin-bottom:24px">'+msg+'</div>';
   h+='<div style="display:flex;gap:10px">';
-  h+='<button class="btn btn-ghost" style="flex:1" onclick="closeSheet();setTimeout(function(){if(_confirmCancel)_confirmCancel();},320);">Cancel</button>';
-  h+='<button class="btn btn-acc" style="flex:1" onclick="closeSheet();setTimeout(function(){if(_confirmOK)_confirmOK();},320);">Confirm</button>';
+  h+='<button class="btn btn-ghost" style="flex:1" onclick="_dismissConfirm();setTimeout(function(){if(_confirmCancel){var cb=_confirmCancel;_confirmCancel=null;cb();}},320);">Cancel</button>';
+  h+='<button class="btn btn-acc" style="flex:1" onclick="_dismissConfirm();setTimeout(function(){if(_confirmOK){var cb=_confirmOK;_confirmOK=null;cb();}},320);">Confirm</button>';
   h+='</div></div>';
   openSheet(h,'Confirm');
 }
