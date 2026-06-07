@@ -3899,11 +3899,26 @@ function buildWizardV(){
   });
   h+='</div>';
 
-  if(step===0)h+=buildStep0();
-  else if(step===1)h+=buildStep1();
-  else if(step===2)h+=buildStep2();
-  else if(step===3)h+=buildStep3();
-  else if(step===4)h+=buildStep4();
+  // Nav bar immediately below step graphic — always visible
+  var _backStep=[null,0,1,2,3][step];
+  var _nextStep=[null,null,null,null,null]; // step-specific, set in each step fn via S._wizNav
+  // We compute canNext per step below then inject nav
+  var stepContent='';
+  if(step===0)stepContent=buildStep0();
+  else if(step===1)stepContent=buildStep1();
+  else if(step===2)stepContent=buildStep2();
+  else if(step===3)stepContent=buildStep3();
+  else if(step===4)stepContent=buildStep4();
+  // S._wizNav is set by each step function: {back,next,canNext,hint}
+  var nav=S._wizNav||{back:_backStep,next:null,canNext:true,hint:''};
+  h+=buildWizardNav(nav.back,nav.next,nav.canNext,nav.hint);
+  h+='<div style="height:16px"></div>';
+  h+=stepContent;
+  // Repeat nav at bottom for long steps
+  if(step===3||step===4){
+    h+='<div style="height:8px"></div>';
+    h+=buildWizardNav(nav.back,nav.next,nav.canNext,nav.hint);
+  }
   return h;
 }
 
@@ -3949,6 +3964,7 @@ function buildStep0(){
 
   // Next button
   var canNext=e.name.trim().length>0&&e._template;
+  S._wizNav={back:null,next:null,canNext:canNext,hint:''};
   h+='<div style="height:16px"></div>';
   h+='<button class="btn btn-acc" '+(canNext?'':'disabled')+' onclick="buildStep0Next()">Next →</button>';
   return h;
@@ -4044,7 +4060,7 @@ function buildStep1(){
   h+='<button class="btn btn-ghost" style="margin-bottom:16px" onclick="buildAddDay()">+ Add Session</button>';
 
   var canNext=e.days.every(function(d){return d.split&&d.split.length>0;});
-  h+=buildWizardNav(0,2,canNext,'at least one pattern per session');
+  S._wizNav={back:0,next:2,canNext:canNext,hint:'at least one pattern per session'};
   return h;
 }
 
@@ -4103,6 +4119,68 @@ function buildToggleSplitPicker(di,pat){
   }
 }
 
+function buildOpenPhasePicker(di){
+  S.customEdit.activeDay=di;sv();
+  var day=S.customEdit.days[di];
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:16px">Select which phases this session contains. Strength is required.</div>';
+  h+='<div style="display:flex;flex-direction:column;gap:8px">';
+  BUILD_PHASES.forEach(function(ph){
+    var active=(day.phases||[]).indexOf(ph.key)>=0;
+    var exCount=(day.exercises||[]).filter(function(e){return e.ph===ph.key;}).length;
+    var subline=active?(exCount>0?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet'):
+      (ph.sets+'×'+ph.reps+(ph.reps>0?' reps':ph.reps===0?'timed':'')+(ph.rest>0?' · '+ph.rest+'s rest':''));
+    h+='<div onclick="buildTogglePhaseSheet('+di+',\''+ph.key+'\')" id="phase-row-'+ph.key+'" style="'+
+       'display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;cursor:pointer;'+
+       'border:1.5px solid '+(active?'var(--acc-brd)':'var(--brd)')+';'+
+       'background:'+(active?'var(--acc-bg)':'var(--bg3)')+'">';
+    h+='<div style="flex:1">';
+    h+='<div id="phase-lbl-'+ph.key+'" style="font-size:13px;font-weight:600;color:'+(active?'var(--acc)':'var(--tx)')+'">'+(active?'✓ ':'')+ph.label+'</div>';
+    h+='<div id="phase-sub-'+ph.key+'" style="font-size:11px;color:var(--mu);margin-top:1px">'+subline+'</div>';
+    h+='</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  h+='<button class="btn btn-acc" style="margin-top:20px" onclick="closeSheet();draw()">Done</button>';
+  h+='</div>';
+  openSheet(h,'Phases');
+}
+
+function buildTogglePhaseSheet(di,phKey){
+  buildEnsureDay(di);
+  var phases=S.customEdit.days[di].phases;
+  var idx=phases.indexOf(phKey);
+  if(idx>=0){
+    var exCount=S.customEdit.days[di].exercises.filter(function(e){return e.ph===phKey;}).length;
+    if(exCount>0){
+      if(!confirm('Remove '+BUILD_PHASE_MAP[phKey].label+' and its '+exCount+' exercise'+(exCount>1?'s':'')+' from this session?'))return;
+      S.customEdit.days[di].exercises=S.customEdit.days[di].exercises.filter(function(e){return e.ph!==phKey;});
+    }
+    phases.splice(idx,1);
+  } else {
+    phases.push(phKey);
+    var order=BUILD_PHASES.map(function(p){return p.key;});
+    phases.sort(function(a,b){return order.indexOf(a)-order.indexOf(b);});
+  }
+  sv();
+  // Update row in place
+  var active=phases.indexOf(phKey)>=0;
+  var row=document.getElementById('phase-row-'+phKey);
+  var lbl=document.getElementById('phase-lbl-'+phKey);
+  var sub=document.getElementById('phase-sub-'+phKey);
+  if(row){
+    row.style.border='1.5px solid '+(active?'var(--acc-brd)':'var(--brd)');
+    row.style.background=active?'var(--acc-bg)':'var(--bg3)';
+  }
+  if(lbl){lbl.style.color=active?'var(--acc)':'var(--tx)';lbl.textContent=(active?'✓ ':'')+BUILD_PHASE_MAP[phKey].label;}
+  if(sub){
+    var exCount=S.customEdit.days[di].exercises.filter(function(e){return e.ph===phKey;}).length;
+    var ph=BUILD_PHASE_MAP[phKey];
+    sub.textContent=active?(exCount>0?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet'):
+      (ph.sets+'×'+ph.reps+(ph.reps>0?' reps':ph.reps===0?'timed':'')+(ph.rest>0?' · '+ph.rest+'s rest':''));
+  }
+}
+
 function buildAddDay(){
   S.customEdit.days.push({label:'Day '+(S.customEdit.days.length+1),focus:'',split:[],phases:['warmup','strength'],exercises:[]});
   sv();draw();
@@ -4128,29 +4206,23 @@ function buildStep2(){
   var day=e.days[di];
   buildEnsureDay(di);
 
-  h+='<div class="lbl" style="margin-bottom:10px">SELECT PHASES FOR THIS SESSION</div>';
-  h+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">';
-  BUILD_PHASES.forEach(function(ph){
-    var active=(day.phases||[]).indexOf(ph.key)>=0;
-    var exCount=(day.exercises||[]).filter(function(e){return e.ph===ph.key;}).length;
-    h+='<div onclick="buildTogglePhase('+di+',\''+ph.key+'\')" style="'+
-       'display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;'+
-       'border:1.5px solid '+(active?'var(--acc-brd)':'var(--brd)')+';'+
-       'background:'+(active?'var(--acc-bg)':'var(--bg3)')+';cursor:pointer">';
-    h+='<div style="flex:1">';
-    h+='<div style="font-size:13px;font-weight:600;color:'+(active?'var(--acc)':'var(--tx)')+'">'+(active?'✓ ':'')+ph.label+'</div>';
-    h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">';
-    if(active&&exCount>0)h+=exCount+' exercise'+(exCount>1?'s':'');
-    else if(active)h+='no exercises yet';
-    else h+=ph.sets+'×'+ph.reps+(ph.reps>0?' reps':ph.reps===0?'timed':'')+(ph.rest>0?' · '+ph.rest+'s rest':'');
-    h+='</div></div>';
-    if(active)h+='<div style="color:var(--acc);font-size:13px;font-weight:700;flex-shrink:0">✓</div>';
-    h+='</div>';
-  });
+  // Phase picker — tappable field opens sheet
+  var _activePhases=(day.phases||[]);
+  var _phaseLabel=_activePhases.length
+    ? _activePhases.map(function(k){return BUILD_PHASE_MAP[k]?BUILD_PHASE_MAP[k].label:k;}).join(', ')
+    : 'Tap to select…';
+  var _phaseEmpty=!_activePhases.length;
+  h+='<div class="lbl" style="margin-bottom:8px">PHASES</div>';
+  h+='<div onclick="buildOpenPhasePicker('+di+')" style="'+
+     'display:flex;align-items:center;justify-content:space-between;'+
+     'padding:11px 14px;border-radius:10px;border:1px solid '+(_phaseEmpty?'var(--brd)':'var(--acc-brd)')+';'+
+     'background:'+(_phaseEmpty?'var(--bg3)':'var(--acc-bg)')+';cursor:pointer;margin-bottom:16px">';
+  h+='<span style="font-size:13px;font-weight:600;color:'+(_phaseEmpty?'var(--mu)':'var(--acc)')+'">'+_phaseLabel+'</span>';
+  h+='<span style="color:var(--mu);font-size:12px">▾</span>';
   h+='</div>';
 
   var canNext=(day.phases||[]).indexOf('strength')>=0;
-  h+=buildWizardNav(1,3,canNext,'Strength phase is required');
+  S._wizNav={back:1,next:3,canNext:canNext,hint:'Strength phase is required'};
   return h;
 }
 
@@ -4206,7 +4278,7 @@ function buildStep3(){
       var globalEi=day.exercises.indexOf(ex);
       var volStr=ex.vol?ex.vol:(ex.reps>0?ex.sets+'×'+ex.reps:'');
       h+='<div class="build-drag-row" data-di="'+di+'" data-phase="'+phKey+'" data-gei="'+globalEi+'" '+
-         'style="display:flex;align-items:center;gap:0;padding:10px 12px;background:var(--bg3);'+
+         'style="display:flex;align-items:center;gap:0;padding:12px 14px;background:var(--bg3);'+
          'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px;touch-action:none;user-select:none">';
       // Drag handle — ≡ bars, generous touch area
       h+='<div class="build-drag-handle" style="'+
@@ -4227,13 +4299,7 @@ function buildStep3(){
     h+='</div>';
   });
 
-  // Can always go forward from step 3
-  var hasAny=(day.exercises||[]).length>0;
-  h+=buildWizardNav(2,4,true,'');
-  // But show a hint if empty
-  if(!hasAny){
-    h='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--mu);text-align:center">Add exercises above, or tap Configure → to set up defaults and save.</div>'+h;
-  }
+  S._wizNav={back:2,next:4,canNext:true,hint:''};
   return h;
 }
 
@@ -4439,7 +4505,7 @@ function buildStep4(){
 
   h+='<div style="height:16px"></div>';
   h+='<button class="btn btn-acc" onclick="buildSave()">Save Programme</button>';
-  h+=buildWizardNav(3,null,false,'');
+  S._wizNav={back:3,next:null,canNext:true,hint:''};
   return h;
 }
 
@@ -4456,14 +4522,11 @@ function buildConfigEx(di,ei){
   var h='<div style="padding:0 20px 30px">';
   h+='<div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:16px">'+exEntry.name+'</div>';
 
-  // Phase selector
-  h+='<div class="lbl" style="margin-bottom:8px">MOVE TO PHASE</div>';
-  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:8px">Tap to reassign this exercise to a different phase.</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
-  phases.forEach(function(ph){
-    var isActive=(exEntry.ph||'strength')===ph;
-    h+='<button class="btn btn-pill'+(isActive?' btn-acc':' btn-ghost')+'" onclick="buildSetExPh('+di+','+ei+',\''+ph+'\')">'+phaseLabels[ph]+'</button>';
-  });
+  // Phase — read-only label (reassign via Step 3 drag)
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">';
+  h+='<div class="lbl" style="margin-bottom:0">PHASE</div>';
+  h+='<span style="font-size:12px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:20px;padding:2px 10px">';
+  h+=phaseLabels[exEntry.ph||'strength']+'</span>';
   h+='</div>';
 
   // Track field toggles
@@ -4660,7 +4723,10 @@ function initBuildDrag(){
     var handle=row.querySelector('.build-drag-handle');
     if(!handle)return;
 
-    function onStart(y){
+    function onStart(y,x,rowEl){
+      // Only initiate drag if touch is in left third of row
+      var rowRect=rowEl.getBoundingClientRect();
+      if(x>rowRect.left+rowRect.width/3)return;
       _drag.active=true;
       _drag.srcRow=row;
       _drag.srcDi=parseInt(row.dataset.di);
@@ -4738,14 +4804,14 @@ function initBuildDrag(){
     }
 
     handle.addEventListener('touchstart',function(e){
-      e.preventDefault();onStart(e.touches[0].clientY);
+      e.preventDefault();onStart(e.touches[0].clientY,e.touches[0].clientX,row);
     },{passive:false});
     document.addEventListener('touchmove',function(e){
       if(_drag.active){e.preventDefault();onMove(e.touches[0].clientY);}
     },{passive:false,capture:true});
     document.addEventListener('touchend',function(){onEnd();},{capture:true});
     // Mouse support for desktop testing
-    handle.addEventListener('mousedown',function(e){e.preventDefault();onStart(e.clientY);});
+    handle.addEventListener('mousedown',function(e){e.preventDefault();onStart(e.clientY,e.clientX,row);});
     document.addEventListener('mousemove',function(e){if(_drag.active)onMove(e.clientY);});
     document.addEventListener('mouseup',function(){if(_drag.active)onEnd();});
   });
