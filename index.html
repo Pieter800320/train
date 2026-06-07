@@ -5371,11 +5371,11 @@ function timerDrawFrame(){
   // ── Running / paused ──
   var cx=W/2, cy;
 
-  // Layout: mode pill at top, ring in centre, controls at bottom
-  var pillH=32; var ctrlH=120; var ringMargin=20;
-  var ringArea=H-pillH-20-ctrlH-ringMargin;
-  var ringR=Math.min(ringArea/2,W/2-40)*0.86;
-  cy=pillH+20+ringArea/2;
+  // Layout: pills at top (~54px), buttons at bottom (~140px), ring centred between
+  var safeTop=54; var btmH=140; var padding=16;
+  var availH=H-safeTop-btmH;
+  var ringR=Math.min(availH/2-padding, W/2-padding)*0.88;
+  cy=safeTop+availH/2;
 
   timerDrawRunning(ctx,W,H,cx,cy,ringR,acc,bg,t);
 }
@@ -5453,20 +5453,6 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
     }
   }
 
-  // ── Inner ring glow ──
-  if(!t.setup){
-    var glowR=R+strokeW/2;
-    var glowGrad=ctx.createRadialGradient(cx,cy,R-strokeW,cx,cy,glowR+8);
-    glowGrad.addColorStop(0,timerColourAlpha(ringCol,0));
-    glowGrad.addColorStop(0.5,timerColourAlpha(ringCol,isWarning?0.18:0.10));
-    glowGrad.addColorStop(1,timerColourAlpha(ringCol,0));
-    ctx.beginPath();
-    ctx.arc(cx,cy,glowR,0,Math.PI*2);
-    ctx.lineWidth=strokeW+16;
-    ctx.strokeStyle=glowGrad;
-    ctx.stroke();
-  }
-
   // ── Track ring ──
   ctx.beginPath();
   ctx.arc(cx,cy,R,0,Math.PI*2);
@@ -5475,27 +5461,22 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
   ctx.lineCap='round';
   ctx.stroke();
 
-  // ── Progress arc ──
+  // ── Progress arc with subtle glow ──
   if(pct>0){
     var startA=-Math.PI/2;
     var endA=-Math.PI/2+pct*Math.PI*2;
+    ctx.save();
+    ctx.shadowColor=timerColourAlpha(ringCol,0.5);
+    ctx.shadowBlur=isWarning?18:10;
     ctx.beginPath();
     ctx.arc(cx,cy,R,startA,endA);
     ctx.strokeStyle=ringCol;
     ctx.lineWidth=strokeW;
     ctx.lineCap='round';
     ctx.stroke();
+    ctx.restore();
 
-    // Arc end cap glow dot
-    var dotX=cx+R*Math.cos(endA);
-    var dotY=cy+R*Math.sin(endA);
-    var dotGrad=ctx.createRadialGradient(dotX,dotY,0,dotX,dotY,strokeW*1.2);
-    dotGrad.addColorStop(0,timerColourAlpha(ringCol,0.6));
-    dotGrad.addColorStop(1,timerColourAlpha(ringCol,0));
-    ctx.beginPath();
-    ctx.arc(dotX,dotY,strokeW*1.2,0,Math.PI*2);
-    ctx.fillStyle=dotGrad;
-    ctx.fill();
+
   }
 
   // ── Text inside ring ──
@@ -5581,16 +5562,11 @@ function timerMountCanvas(){
   wrap.appendChild(canvas);
   _timerCanvas=canvas;
 
-  // Controls overlay (HTML over canvas)
-  var ctrl=document.createElement('div');
-  ctrl.id='timer-ctrl-overlay';
-  ctrl.style.cssText='position:absolute;bottom:max(90px,env(safe-area-inset-bottom)+80px);'+
-    'left:0;right:0;padding:0 20px;display:flex;flex-direction:column;gap:12px;z-index:2;pointer-events:none;';
-
-  // Mode pills row
+  // Pills row — fixed at TOP of canvas
   var pillRow=document.createElement('div');
   pillRow.id='timer-mode-pills';
-  pillRow.style.cssText='display:flex;gap:6px;justify-content:center;pointer-events:auto;margin-bottom:4px;';
+  pillRow.style.cssText='position:absolute;top:max(14px,env(safe-area-inset-top));'+
+    'left:0;right:0;display:flex;gap:6px;justify-content:center;z-index:2;pointer-events:auto;padding:0 14px;';
   var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
   modes.forEach(function(m){
     var btn=document.createElement('button');
@@ -5600,12 +5576,13 @@ function timerMountCanvas(){
     btn.onclick=function(){setTimerMode(m.k);};
     pillRow.appendChild(btn);
   });
-  ctrl.appendChild(pillRow);
+  wrap.appendChild(pillRow);
 
-  // Pause/Resume + Reset buttons
+  // Pause/Resume + Reset buttons — fixed at BOTTOM
   var btnRow=document.createElement('div');
   btnRow.id='timer-btn-row';
-  btnRow.style.cssText='display:flex;gap:10px;pointer-events:auto;';
+  btnRow.style.cssText='position:absolute;bottom:max(90px,env(safe-area-inset-bottom)+76px);'+
+    'left:20px;right:20px;display:flex;gap:10px;pointer-events:auto;z-index:2;';
 
   var btnPause=document.createElement('button');
   btnPause.id='timer-btn-pause';
@@ -5622,8 +5599,7 @@ function timerMountCanvas(){
   btnReset.onclick=function(){timerReset();};
   btnRow.appendChild(btnReset);
 
-  ctrl.appendChild(btnRow);
-  wrap.appendChild(ctrl);
+  wrap.appendChild(btnRow);
 
   // Tap anywhere on canvas to pause/resume
   canvas.addEventListener('touchstart',function(e){
@@ -5751,13 +5727,14 @@ function timerStartStopwatch(){
 }
 
 // ── Sound triggers in tick ────────────────────────────────────
-function timerCheckSound(t, prevRemaining, phaseTotal){
-  var rem=prevRemaining;
-  // 3-beep warning at last 3 seconds of any phase
-  if(rem===3){ timerBeepTriple(timerGetAccColour()==='#E07B2A'?880:1047); }
-  // Double-beep at 50% of phase
+function timerCheckSound(t, curRemaining, phaseTotal){
+  var rem=curRemaining;
+  // Countdown warning beeps — fires when DISPLAY shows these values
+  if(rem===3){ timerBeepTriple(880); }        // 3-2-1 warning
+  else if(rem===1){ timerBeep(1100,0.08,0.18); } // final "go" tick
+  // 50% beep
   var half=Math.round(phaseTotal/2);
-  if(half>3&&rem===half){ timerBeepDouble(timerGetAccColour()==='#E07B2A'?660:784); }
+  if(half>5&&rem===half){ timerBeepDouble(660); }
 }
 
 // ── Override startTimerTick for canvas + sound ────────────────
@@ -5774,17 +5751,15 @@ function startTimerTick(){
       // No sound triggers for stopwatch — open-ended
 
     } else if(t.mode==='countdown'){
-      var prev=t.remaining;
       if(t.remaining>0){t.remaining--;sv();}
       else{
         timerBeepEnd();
         _timerFlash={colour:timerGetAccColour(),alpha:0.5,startTime:Date.now(),duration:600};
         t.running=false;sv();timerUnmountCanvas();draw();return;
       }
-      timerCheckSound(t,prev,t.totalSecs);
+      timerCheckSound(t,t.remaining,t.totalSecs);
 
     } else if(t.mode==='tabata'){
-      var prev2=t.remaining;
       var isWork=t.tabPhase==='work';
       var phTotal=isWork?t.tabWork:t.tabRest;
       if(t.remaining>0){t.remaining--;sv();}
@@ -5803,7 +5778,7 @@ function startTimerTick(){
         }
         sv();return;
       }
-      timerCheckSound(t,prev2,phTotal);
+      timerCheckSound(t,t.remaining,phTotal);
 
     } else if(t.mode==='emom'){
       t.elapsed++;sv();
