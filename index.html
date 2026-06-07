@@ -5310,10 +5310,14 @@ var _timerRAF = null;
 var _timerCanvas = null;
 var _timerFlash = null; // {colour, alpha, startTime, duration}
 
+var _timerAccCache='';
 function timerGetAccColour(){
-  // Read the current --acc CSS variable at runtime
-  return getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#E07B2A';
+  if(_timerAccCache)return _timerAccCache;
+  var v=getComputedStyle(document.documentElement).getPropertyValue('--acc').trim();
+  if(v){_timerAccCache=v;}
+  return v||'#E07B2A';
 }
+function timerClearAccCache(){_timerAccCache='';}
 function timerGetBg(){
   return getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0e0e10';
 }
@@ -5354,8 +5358,8 @@ function timerDrawFrame(){
   var acc=timerGetAccColour();
   var bg=timerGetBg();
 
-  ctx.save();
-  ctx.scale(dpr,dpr);
+  if(W<10||H<10)return; // canvas not yet sized
+  ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
 
   // ── Flash overlay ──
@@ -5381,7 +5385,6 @@ function timerDrawFrame(){
   cy=H/2;
 
   timerDrawRunning(ctx,W,H,cx,cy,ringR,acc,bg,t);
-  ctx.restore();
 }
 
 function timerDrawSetup(ctx,W,H,acc,bg,t){
@@ -5541,27 +5544,61 @@ function timerMountCanvas(){
 
   var wrap=document.createElement('div');
   wrap.id='timer-canvas-wrap';
+  // Sit inside the tab-bar layout — not fixed full screen
+  // Position below the screen top, above the tab bar
   wrap.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%);'+
-    'width:100%;max-width:430px;height:100%;z-index:90;background:var(--bg);'+
+    'width:100%;max-width:430px;'+
+    'bottom:max(64px,env(safe-area-inset-bottom)+64px);'+
+    'z-index:90;background:var(--bg);'+
     'display:flex;flex-direction:column;touch-action:none;';
 
-  // ── Row 1: Mode pills ──
+  // ── Dashboard strip: pills + buttons in one compact card ──
+  var dash=document.createElement('div');
+  dash.style.cssText='flex:none;'+
+    'padding:max(10px,env(safe-area-inset-top)) 14px 10px;'+
+    'background:var(--bg2);'+
+    'border-bottom:0.5px solid var(--brd);'+
+    'pointer-events:auto;';
+
+  // Pills row
   var pillRow=document.createElement('div');
   pillRow.id='timer-mode-pills';
-  pillRow.style.cssText='flex:none;display:flex;gap:6px;justify-content:center;'+
-    'padding:max(14px,env(safe-area-inset-top)) 14px 12px;pointer-events:auto;';
+  pillRow.style.cssText='display:flex;gap:6px;justify-content:center;margin-bottom:8px;';
   var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
   modes.forEach(function(m){
     var btn=document.createElement('button');
     btn.textContent=m.l;
     btn.className='btn btn-pill '+(t.mode===m.k?'btn-acc':'btn-ghost');
-    btn.style.cssText='flex:none;';
+    btn.style.cssText='flex:1;font-size:12px;padding:6px 4px;';
     btn.onclick=function(){setTimerMode(m.k);};
     pillRow.appendChild(btn);
   });
-  wrap.appendChild(pillRow);
+  dash.appendChild(pillRow);
 
-  // ── Row 2: Canvas (flex:1) ──
+  // Buttons row — compact, inline
+  var btnRow=document.createElement('div');
+  btnRow.id='timer-btn-row';
+  btnRow.style.cssText='display:flex;gap:8px;';
+
+  var btnPause=document.createElement('button');
+  btnPause.id='timer-btn-pause';
+  btnPause.className='btn btn-acc';
+  btnPause.style.cssText='flex:1;font-size:15px;font-weight:800;height:44px;';
+  btnPause.textContent=t.running?'Pause':'Resume';
+  btnPause.onclick=function(){timerToggle();};
+  btnRow.appendChild(btnPause);
+
+  var btnReset=document.createElement('button');
+  btnReset.className='btn btn-ghost';
+  btnReset.style.cssText='flex:1;font-size:15px;height:44px;';
+  btnReset.textContent='Reset';
+  btnReset.onclick=function(){timerReset();};
+  btnRow.appendChild(btnReset);
+
+  dash.appendChild(btnRow);
+  wrap.appendChild(dash);
+
+  // ── Canvas (flex:1) — ring fills all remaining space ──
   var canvasWrap=document.createElement('div');
   canvasWrap.style.cssText='flex:1;position:relative;min-height:0;';
   var canvas=document.createElement('canvas');
@@ -5570,34 +5607,17 @@ function timerMountCanvas(){
   canvasWrap.appendChild(canvas);
   wrap.appendChild(canvasWrap);
   _timerCanvas=canvas;
-
-  // ── Row 3: Controls ──
-  var ctrlRow=document.createElement('div');
-  ctrlRow.style.cssText='flex:none;padding:12px 20px;margin-bottom:max(76px,calc(env(safe-area-inset-bottom)+76px));'+
-    'display:flex;flex-direction:column;gap:10px;pointer-events:auto;';
-
-  // Pause/Reset buttons
-  var btnRow=document.createElement('div');
-  btnRow.id='timer-btn-row';
-  btnRow.style.cssText='display:flex;gap:10px;';
-
-  var btnPause=document.createElement('button');
-  btnPause.id='timer-btn-pause';
-  btnPause.className='btn btn-acc';
-  btnPause.style.cssText='flex:1;font-size:17px;font-weight:800;height:56px;';
-  btnPause.textContent=t.running?'Pause':'Resume';
-  btnPause.onclick=function(){timerToggle();};
-  btnRow.appendChild(btnPause);
-
-  var btnReset=document.createElement('button');
-  btnReset.className='btn btn-ghost';
-  btnReset.style.cssText='flex:1;font-size:17px;height:56px;';
-  btnReset.textContent='Reset';
-  btnReset.onclick=function(){timerReset();};
-  btnRow.appendChild(btnReset);
-
-  ctrlRow.appendChild(btnRow);
-  wrap.appendChild(ctrlRow);
+  // Pre-size canvas using window dimensions so first frame draws correctly
+  // Dash strip is approximately 88px on most phones
+  var _initDpr=window.devicePixelRatio||1;
+  var _initW=Math.min(window.innerWidth,430);
+  var _initH=window.innerHeight-88-Math.max(64,20+64); // minus dash and tabbar estimate
+  if(_initW>0&&_initH>0){
+    canvas.width=Math.round(_initW*_initDpr);
+    canvas.height=Math.round(_initH*_initDpr);
+    canvas.style.width=_initW+'px';
+    canvas.style.height=_initH+'px';
+  }
 
   // Tap anywhere on canvas to pause/resume
   canvas.addEventListener('touchstart',function(e){
@@ -5630,13 +5650,14 @@ function timerMountCanvas(){
     var cw=canvas.parentElement;
     if(cw){
       var dpr=window.devicePixelRatio||1;
-      var pw=Math.round(cw.offsetWidth*dpr);
-      var ph=Math.round(cw.offsetHeight*dpr);
+      var logW=cw.offsetWidth||Math.min(window.innerWidth,430);
+      var logH=cw.offsetHeight||(window.innerHeight-88-Math.max(64,84));
+      var pw=Math.round(logW*dpr);
+      var ph=Math.round(logH*dpr);
       if(pw>0&&ph>0&&(canvas.width!==pw||canvas.height!==ph)){
         canvas.width=pw; canvas.height=ph;
-        // CSS size stays at logical pixels
-        canvas.style.width=cw.offsetWidth+'px';
-        canvas.style.height=cw.offsetHeight+'px';
+        canvas.style.width=logW+'px';
+        canvas.style.height=logH+'px';
       }
     }
     timerDrawFrame();
@@ -5838,6 +5859,7 @@ function setTimerMode(m){
   S.timer.mode=m;S.timer.setup=true;S.timer.running=false;
   if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
   timerUnmountCanvas();
+  timerClearAccCache();
   sv();draw();
 }
 function startCountdown(){
