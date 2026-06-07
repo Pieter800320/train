@@ -2698,6 +2698,7 @@ function selectSession(idx){
   // Preserves the cycle counter so plan-week advancement stays accurate.
   var cycleStart=Math.floor((cl.day||0)/len)*len;
   cl.day=cycleStart+idx;
+  S.wx=null; // clear session so exercises re-initialise for the new day
   sv();closeSheet();draw();
 }
 
@@ -2820,10 +2821,15 @@ function openExWindow(exIdx){
   h+='<div style="font-size:22px;font-weight:800;color:var(--tx);line-height:1.15;margin-bottom:4px">'+exEntry.name+'</div>';
   if(exEntry.cue)h+='<div style="font-size:12px;color:var(--mu);font-style:italic;margin-bottom:10px">'+exEntry.cue+'</div>';
 
-  // Watch button
+  // Watch button — look up by key first, fall back to name search in EX array
   var exObj=EX_MAP&&EX_MAP[exEntry.key];
-  var _isCurated=exObj&&exObj.video;
-  var _ytId=_isCurated?exObj.video.replace('https://www.youtube.com/watch?v=',''):'';
+  if(!exObj&&exEntry.name&&EX_MAP){
+    // pre-built templates store name only, no key — scan EX for name match
+    var _exKeys=Object.keys(EX_MAP);
+    for(var _ei=0;_ei<_exKeys.length;_ei++){if(EX_MAP[_exKeys[_ei]].name===exEntry.name){exObj=EX_MAP[_exKeys[_ei]];break;}}
+  }
+  var _isCurated=exObj&&exObj.video&&exObj.video.indexOf('watch?v=')>=0;
+  var _ytId=_isCurated?exObj.video.split('watch?v=')[1]:'';
   var _fallbackUrl=getExVideo(exObj||{name:exEntry.name});
   if(_isCurated){
     h+='<button onclick="openVideoPlayer(\''+_ytId+'\')" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:4px 10px;margin-bottom:14px;cursor:pointer">'
