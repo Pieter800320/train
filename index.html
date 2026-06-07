@@ -1850,11 +1850,12 @@ function initDrumScroll(id,items,val,cb){
 // ═══════════════════════════════════════════════════════════════
 // SHEET SYSTEM
 // ═══════════════════════════════════════════════════════════════
-function openSheet(html,title){
+function openSheet(html,title,onClose){
   var s=document.getElementById('sheet');
   var sb=document.getElementById('sheet-body');
   var ov=document.getElementById('sheet-overlay');
   sb.innerHTML=(title?'<div class="sheet-title">'+title+'</div>':'')+html;
+  s._onClose=onClose||null;
   ov.classList.add('show');s.classList.add('show');
   initSheetsBindings();
 }
@@ -1863,6 +1864,7 @@ function closeSheet(){
   if(sheet)sheet._noSwipe=false;
   sheet.classList.remove('show');
   document.getElementById('sheet-overlay').classList.remove('show');
+  if(sheet&&sheet._onClose){var cb=sheet._onClose;sheet._onClose=null;cb();}
 }
 function initSheetsBindings(){
   var overlay=document.getElementById('sheet-overlay');
@@ -2809,7 +2811,7 @@ function openExWindow(exIdx){
   } else if(isRounds&&nextSet){
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
     h+='<div class="lbl" style="margin-bottom:8px">ROUNDS COMPLETED</div>';
-    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
+    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:16px">';
     h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
     h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'</div>';
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
@@ -3901,7 +3903,7 @@ function buildV(){
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
   h+='<div class="h1" style="margin-bottom:4px">Build</div>';
   h+='<div style="font-size:13px;color:var(--mu);margin-bottom:16px">Create custom training plans & progression plans</div>';
-  h+='<div style="display:flex;gap:6px;margin-bottom:20px">';
+  h+='<div style="display:flex;gap:6px;margin-bottom:16px">';
   h+='<button class="btn'+(S.buildMode==='program'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'program\';sv();draw()" style="flex:1">Training Plan</button>';
   h+='<button class="btn'+(S.buildMode==='plan'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'plan\';sv();draw()" style="flex:1">Progression Plan</button>';
   h+='</div>';
@@ -3946,7 +3948,7 @@ function buildWizardV(){
   else if(step===3)result=buildStep3();
   else if(step===4)result=buildStep4();
   h+=buildWizardNav(result.nav.back,result.nav.next,result.nav.canNext,result.nav.hint);
-  h+='<div style="height:16px"></div>';
+  h+='<div style="height:20px"></div>';
   h+=result.html;
   return h;
 }
@@ -4078,7 +4080,7 @@ function buildStep1(){
        'padding:11px 14px;border-radius:10px;border:1px solid '+(_splitEmpty?'var(--brd)':'var(--acc-brd)')+';'+
        'background:'+(_splitEmpty?'var(--bg3)':'var(--acc-bg)')+';cursor:pointer;margin-bottom:4px">';
     h+='<span style="font-size:13px;font-weight:600;color:'+(_splitEmpty?'var(--mu)':'var(--acc)')+'">'+_splitLabel+'</span>';
-    h+='<span style="color:var(--mu);font-size:12px">▾</span>';
+    h+='<span style="color:var(--acc);font-size:13px">▾</span>';
     h+='</div>';
     h+='</div>';
   });
@@ -4120,7 +4122,7 @@ function buildOpenSplitPicker(di){
   h+='</div>';
   h+='<button class="btn btn-acc" style="margin-top:20px" onclick="closeSheet();draw()">Done</button>';
   h+='</div>';
-  openSheet(h,'Movement Patterns');
+  openSheet(h,'Movement Patterns',function(){draw();});
 }
 
 function buildToggleSplitPicker(di,pat){
@@ -4166,7 +4168,7 @@ function buildOpenPhasePicker(di){
   h+='</div>';
   h+='<button class="btn btn-acc" style="margin-top:20px" onclick="closeSheet();draw()">Done</button>';
   h+='</div>';
-  openSheet(h,'Phases');
+  openSheet(h,'Phases',function(){draw();});
 }
 
 function buildTogglePhaseSheet(di,phKey){
@@ -4224,6 +4226,7 @@ function buildStep2(){
   if(di>=e.days.length)di=0;
   var h='';
 
+  h+='<div class="lbl" style="margin-bottom:6px">DAILY SESSION</div>';
   h+=buildDayDropdown(di,2);
 
   var day=e.days[di];
@@ -4242,7 +4245,7 @@ function buildStep2(){
      'height:52px;padding:0 16px;border-radius:10px;border:1px solid '+(_phaseEmpty?'var(--brd)':'var(--acc-brd)')+';'+
      'background:'+(_phaseEmpty?'var(--bg3)':'var(--acc-bg)')+';cursor:pointer;margin-bottom:16px">';
   h+='<span style="font-size:13px;font-weight:600;color:'+(_phaseEmpty?'var(--mu)':'var(--acc)')+'">'+_phaseLabel+'</span>';
-  h+='<span style="color:var(--mu);font-size:12px">▾</span>';
+  h+='<span style="color:var(--acc);font-size:13px">▾</span>';
   h+='</div>';
 
   var canNext=(day.phases||[]).indexOf('strength')>=0;
@@ -4473,6 +4476,19 @@ function buildAddExercise(exKey){
   }
 }
 
+function buildLibraryAddEx(btn,exKey){
+  // Add the exercise and update button in-place — no sheet close/reopen needed
+  buildAddExercise(exKey);
+  if(btn){btn.textContent='✓';btn.classList.remove('btn-acc');btn.classList.add('btn-ghost');btn.disabled=true;}
+}
+function buildToggleLibrarySection(pat){
+  var body=document.getElementById('lib-body-'+pat);
+  var arrow=document.getElementById('lib-arrow-'+pat);
+  if(!body)return;
+  var isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(arrow)arrow.textContent=isOpen?'▸':'▾';
+}
 function buildOpenLibrary(di,phKey){
   S.customEdit.activeDay=di;S.customEdit.activePhase=phKey;sv();
   var phaseFilter={
@@ -4482,22 +4498,34 @@ function buildOpenLibrary(di,phKey){
   };
   var validPhases=phaseFilter[phKey]||['kpi','accessory'];
   var h='<div style="padding:0 20px 30px">';
-  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:16px">Browse exercises for <strong>'+(BUILD_PHASE_MAP[phKey]||{label:phKey}).label+'</strong>. Tap any exercise to add it.</div>';
+  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:16px">Browse exercises for <strong>'+(BUILD_PHASE_MAP[phKey]||{label:phKey}).label+'</strong>. Tap Add — exercises appear immediately.</div>';
   var patternOrder=['push','pull','squat','hinge','lunge','core','carry','explosive','conditioning','rotation','locomotion'];
-  patternOrder.forEach(function(pat){
+  patternOrder.forEach(function(pat,pi){
     var patExs=EX.filter(function(e){
       return (e.patterns||[]).indexOf(pat)>=0&&
              e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
     });
     if(!patExs.length)return;
-    h+='<div style="margin-bottom:14px">';
-    h+='<div class="lbl" style="margin-bottom:6px">'+BUILD_PATTERNS[pat].toUpperCase()+'</div>';
+    var isFirst=pi===0;
+    h+='<div style="margin-bottom:6px">';
+    // Collapsible header
+    h+='<div onclick="buildToggleLibrarySection(\''+pat+'\')" style="'+
+       'display:flex;align-items:center;justify-content:space-between;'+
+       'padding:10px 14px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--brd);'+
+       'cursor:pointer;margin-bottom:4px">';
+    h+='<span style="font-size:12px;font-weight:700;letter-spacing:0.5px;color:var(--acc)">'+BUILD_PATTERNS[pat].toUpperCase()+'</span>';
+    h+='<span id="lib-arrow-'+pat+'" style="color:var(--acc);font-size:13px">'+(isFirst?'▾':'▸')+'</span>';
+    h+='</div>';
+    // Collapsible body — first one open, rest closed
+    h+='<div id="lib-body-'+pat+'" style="display:'+(isFirst?'block':'none')+'">';
     patExs.forEach(function(e){
-      h+='<div class="prog-item" onclick="buildAddExercise(\''+e.key+'\');this.style.opacity=0.5">';
+      h+='<div class="prog-item" style="margin-bottom:4px">';
       h+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>';
       h+='<div class="lbl">'+(e.equipment||[]).join(' · ')+'</div></div>';
-      h+='<button class="btn btn-pill btn-acc">Add</button></div>';
+      h+='<button class="btn btn-pill btn-acc" onclick="buildLibraryAddEx(this,\''+e.key+'\');">Add</button>';
+      h+='</div>';
     });
+    h+='</div>';
     h+='</div>';
   });
   h+='</div>';
@@ -4733,7 +4761,7 @@ function buildDayDropdown(activeDi,step){
      'display:flex;align-items:center;justify-content:space-between;'+
      'height:52px;padding:0 16px;border-radius:10px;'+
      'border:1px solid var(--acc-brd);background:var(--acc-bg);cursor:pointer">';
-  h+='<span style="font-size:14px;font-weight:700;color:var(--acc)">'+label+'</span>';
+  h+='<span style="font-size:13px;font-weight:600;color:var(--acc)">'+label+'</span>';
   h+='<span style="color:var(--acc);font-size:13px">▾</span>';
   h+='</div>';
   h+='</div>';
@@ -4751,8 +4779,8 @@ function buildOpenDayPicker(activeDi,step){
        'padding:14px 16px;border-radius:10px;margin-bottom:8px;cursor:pointer;'+
        'border:1.5px solid '+(sel?'var(--acc-brd)':'var(--brd)')+';'+
        'background:'+(sel?'var(--acc-bg)':'var(--bg3)')+'">';
-    h+='<span style="font-size:14px;font-weight:700;color:'+(sel?'var(--acc)':'var(--tx)')+'">'+label+'</span>';
-    if(sel)h+='<span style="color:var(--acc);font-weight:700">✓</span>';
+    h+='<span style="font-size:13px;font-weight:600;color:'+(sel?'var(--acc)':'var(--tx)')+'">'+label+'</span>';
+    if(sel)h+='<span style="color:var(--acc);font-size:13px">✓</span>';
     h+='</div>';
   });
   h+='</div>';
@@ -4778,7 +4806,7 @@ function buildWizardNavFlashNext(btn,step){
 function buildWizardNav(backStep,nextStep,canNext,hint){
   var backDisabled=(backStep===null||backStep<0);
   var nextDisabled=(nextStep===null||!canNext);
-  var h='<div style="display:flex;gap:8px;margin-top:0">';
+  var h='<div style="display:flex;gap:8px">';
   // Back — always rendered, always ghost until pressed
   if(backDisabled){
     h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>';
@@ -4867,11 +4895,10 @@ function initBuildDrag(){
       document.querySelectorAll('.build-drag-row').forEach(function(r){
         if(r===_drag.srcRow)return;
         if(r.dataset.phase!==_drag.srcPhase){
-          // Restore cross-phase rows to default (don't touch them)
-          r.style.borderColor='';r.style.background='';return;
+          r.style.background='var(--bg3)';r.style.border='0.5px solid var(--brd)';return;
         }
-        r.style.borderColor=r===target?'var(--acc)':'';
-        r.style.background=r===target?'var(--bg2)':'';
+        r.style.border=r===target?'0.5px solid var(--acc)':'0.5px solid var(--brd)';
+        r.style.background=r===target?'var(--bg2)':'var(--bg3)';
       });
     }
 
@@ -4881,11 +4908,10 @@ function initBuildDrag(){
       if(_drag.clone){_drag.clone.remove();_drag.clone=null;}
       _drag.srcRow.style.opacity='';
       handle.style.cursor='grab';
-      // Reset ALL rows to their CSS defaults (not inline styles)
+      // Restore all rows to their default visual state explicitly
       document.querySelectorAll('.build-drag-row').forEach(function(r){
-        r.style.borderColor='';
-        r.style.background='';
-        r.style.border='';  // clear fully to let CSS take over
+        r.style.background='var(--bg3)';
+        r.style.border='0.5px solid var(--brd)';
       });
 
       // Find drop target
