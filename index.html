@@ -3064,32 +3064,6 @@ function doLogSet(globalIdx){
   if(!wx.exDone)wx.exDone={};
   var allDoneNow=wx.sets.filter(function(s){return s.exIdx===exIdx;}).every(function(s){return s.done;});
   if(allDoneNow)wx.exDone[exIdx]=true;
-  // Auto-PR check
-  // Weighted: new PR if kg×reps volume beats previous best at same or higher weight
-  // Bodyweight (kg=0): new PR if reps beat previous best
-  // Timed: no auto-PR (time is not always better — user can log manually)
-  var _cl=C();if(!_cl.pr)_cl.pr={};
-  var _exName=wx.exercises[exIdx].name;
-  var _existing=_cl.pr[_exName];
-  var _isNewPR=false;
-  if(kg>0){
-    // Weighted: beat it if higher weight, or same weight with more reps
-    if(!_existing||_existing.kg===undefined){
-      _isNewPR=true;
-    } else {
-      var _prevKg=_existing.kg||0;var _prevReps=_existing.reps||0;
-      if(kg>_prevKg||(kg===_prevKg&&reps>_prevReps))_isNewPR=true;
-    }
-  } else if(reps>0){
-    // Bodyweight: beat it if more reps
-    if(!_existing){
-      _isNewPR=true;
-    } else {
-      var _prevReps2=_existing.reps||0;
-      if(reps>_prevReps2)_isNewPR=true;
-    }
-  }
-  if(_isNewPR)_cl.pr[_exName]={kg:kg,reps:reps,date:Date.now()};
 
   // Set rest timer
   var restSecs=(wx.exercises[exIdx].rest)||60;
@@ -3671,19 +3645,15 @@ function switchTPL(key){
   }
 }
 function deletePB(name){
-  if(confirm('Delete PB for '+name+'?')){
-    var cl=C();
-    if(cl.pr&&cl.pr[name]){delete cl.pr[name];sv();draw();}
-  }
+  var cl=C();
+  if(cl.pr&&cl.pr[name]){delete cl.pr[name];sv();draw();}
 }
 function deletePBByIndex(idx){
   var cl=C();
   var keys=Object.keys(cl.pr||{});
   if(idx<0||idx>=keys.length)return;
-  var name=keys[idx];
-  if(confirm('Delete PB for '+name+'?')){
-    delete cl.pr[name];sv();openJournalView();
-  }
+  delete cl.pr[keys[idx]];
+  sv();openJournalView();
 }
 function deleteCustomProg(key){
   if(confirm('Delete this programme? This cannot be undone.')){
@@ -5348,8 +5318,9 @@ function timerBeep(freq, dur, vol, delay){
   }catch(e){}
 }
 function timerBeepDouble(freq){ timerBeep(freq,0.1,0.28,0); timerBeep(freq*1.25,0.1,0.28,0.15); }
-function timerBeepTriple(freq){ timerBeep(freq,0.07,0.22,0); timerBeep(freq,0.07,0.22,0.12); timerBeep(freq*1.5,0.12,0.32,0.24); }
-function timerBeepEnd(){ timerBeep(660,0.15,0.3,0); timerBeep(880,0.15,0.3,0.18); timerBeep(1100,0.25,0.35,0.36); }
+function timerBeepStart(){ timerBeep(880,0.12,0.32,0); } // single clean beep — start / phase begin
+function timerBeepWarn(){  timerBeep(1100,0.10,0.28,0); } // single high beep — 10s warning
+function timerBeepEnd(){   timerBeep(660,0.15,0.3,0); timerBeep(880,0.15,0.3,0.18); timerBeep(1100,0.25,0.35,0.36); }
 
 // ── Canvas timer RAF loop ────────────────────────────────────
 var _timerRAF = null;
@@ -5788,18 +5759,16 @@ function timerSetupStepper(label,field,value,suffix,delta){
 
 function timerStartStopwatch(){
   var t=S.timer; t.elapsed=0; t.setup=false; t.running=true;
+  timerBeepStart();
   sv(); draw(); startTimerTick();
 }
 
 // ── Sound triggers in tick ────────────────────────────────────
 function timerCheckSound(t, curRemaining, phaseTotal){
   var rem=curRemaining;
-  // Countdown warning beeps — fires when DISPLAY shows these values
-  if(rem===3){ timerBeepTriple(880); }        // 3-2-1 warning
-  else if(rem===1){ timerBeep(1100,0.08,0.18); } // final "go" tick
-  // 50% beep
+  if(rem===10){ timerBeepWarn(); }             // 10 seconds left
   var half=Math.round(phaseTotal/2);
-  if(half>5&&rem===half){ timerBeepDouble(660); }
+  if(half>10&&rem===half){ timerBeepDouble(660); } // 50% mark
 }
 
 // ── Override startTimerTick for canvas + sound ────────────────
@@ -5836,7 +5805,7 @@ function startTimerTick(){
         else{
           t.tabCurrent++;
           if(t.tabCurrent>=t.tabRounds){
-            timerBeepEnd();setTimeout(function(){timerBeepEnd();},300);
+            timerBeepEnd();
             t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();return;
           }
           t.tabPhase='work';t.remaining=t.tabWork;
@@ -5853,7 +5822,7 @@ function startTimerTick(){
       if(newRound!==t.emomRound){
         t.emomRound=newRound;
         if(newRound>=t.emomMins){
-          timerBeepEnd();setTimeout(function(){timerBeepEnd();},300);
+          timerBeepEnd();
           t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();return;
         }
         timerBeepEnd();
@@ -5916,18 +5885,21 @@ function setTimerMode(m){
 function startCountdown(){
   var t=S.timer;if(t.totalSecs<=0)return;
   t.remaining=t.totalSecs;t.setup=false;t.running=true;
+  timerBeepStart();
   sv();startTimerTick();
 }
 function startTabata(){
   var t=S.timer;
   t.tabCurrent=0;t.tabPhase='work';t.remaining=t.tabWork;
   t.setup=false;t.running=true;
+  timerBeepStart();
   sv();startTimerTick();
 }
 function startEMOM(){
   var t=S.timer;
   t.emomRound=0;t.elapsed=0;
   t.setup=false;t.running=true;
+  timerBeepStart();
   sv();startTimerTick();
 }
 function timerToggle(){
