@@ -1642,27 +1642,7 @@ function logSet(si,kg){
   if(S.wx.restActive){startRestTick();updateRestPill();}
 }
 // PR recording is intentional only — client presses ★ PB button (logPB)
-var CONGRATS=[
-  'You are on fire! 🔥',
-  'Beast mode: activated. 💪',
-  'That’s how champions are made!',
-  'Your future self thanks you. 🙏',
-  'Another one in the books. Keep going!',
-  'Sweat now, shine later. ✨',
-  'The iron doesn’t lie — neither do you.',
-  'Consistency is the superpower. You’ve got it.',
-  'One session closer to the best version of you.',
-  'Legendary effort today. Seriously.',
-  'You showed up. That’s already winning.',
-  'Recovery starts now — you’ve earned it.',
-  'Hard work? Check. Done. ✅',
-  'That session won’t forget you.',
-  'The only bad workout is the one that didn’t happen — yours happened.',
-  'You just made yesterday’s you proud.',
-  'Rest up. Tomorrow you go again. ',
-  'Pain is temporary, progress is permanent.',
-  'Discipline is freedom. Today you were free.',
-  'Another brick in the wall of gains. 🧱'
+var CONGRATS=['You are on fire!','Beast mode: activated.','That’s how champions are made!','Your future self thanks you.','Another one in the books. Keep going!','Sweat now, shine later.','The iron doesn’t lie — neither do you.','Consistency is the superpower. You’ve got it.','One session closer to the best version of you.','Legendary effort today. Seriously.','You showed up. That’s already winning.','Recovery starts now — you’ve earned it.','Hard work? Check. Done.','That session won’t forget you.','The only bad workout is the one that didn’t happen — yours happened.','You just made yesterday’s you proud.','Rest up. Tomorrow you go again.','Pain is temporary, progress is permanent.','Discipline is freedom. Today you were free.','Another brick in the wall of gains.'
 ];
 function finishSession(){
   if(!S.wx||!S.wx.playing)return;
@@ -1957,7 +1937,7 @@ function obShowRecommendation(recKey,ans){
   var h='<div style="padding:0 20px 30px">';
   // Recommendation
   h+='<div style="text-align:center;margin-bottom:20px">';
-  h+='<div style="font-size:40px;margin-bottom:8px">🎯</div>';
+
   h+='<div style="font-size:18px;font-weight:800;color:var(--tx);margin-bottom:4px">Your programme is ready</div>';
   h+='<div style="font-size:13px;color:var(--mu)">Based on your answers, we recommend:</div>';
   h+='</div>';
@@ -1981,7 +1961,7 @@ function obShowRecommendation(recKey,ans){
   h+='<button class="btn btn-acc" onclick="closeSheet();S.tab=\'today\';sv();draw()">Start training ›</button>';
   h+='<button class="btn btn-ghost" onclick="closeSheet();S.tab=\'programs\';sv();draw()">Browse all programmes</button>';
   h+='<button class="btn btn-ghost" onclick="closeSheet();S.tab=\'build\';sv();draw()">Build my own programme</button>';
-  h+='<button class="btn btn-ghost" style="font-size:12px;color:var(--mu)" onclick="closeSheet();retakeOB()">Retake questionnaire</button>';
+  h+='<button class="btn btn-ghost" onclick="closeSheet();retakeOB()">Retake questionnaire</button>';
   h+='</div>';
   h+='</div>';
   openSheet(h,'Welcome, '+(cl.name||'Athlete')+'!');
