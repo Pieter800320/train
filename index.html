@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Falkenburg">
-<meta name="theme-color" content="#D4691E" id="theme-meta">
+<meta name="theme-color" content="#E07B2A" id="theme-meta">
 <script>
 // Set theme-color immediately from stored state before first paint
 (function(){
@@ -2296,11 +2296,16 @@ function clearHistoryItem(idx){
 
 function _exportDownload(html, filename){
   var blob=new Blob([html],{type:'text/html'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;a.download=filename;
-  document.body.appendChild(a);a.click();
-  document.body.removeChild(a);URL.revokeObjectURL(url);
+  var file=new File([blob],filename,{type:'text/html'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:filename}).catch(function(){});
+  } else {
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);URL.revokeObjectURL(url);
+  }
 }
 
 function _exportStyles(){
