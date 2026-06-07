@@ -5273,29 +5273,66 @@ function draw(){
 // ═══════════════════════════════════════════════════════════════
 // TIMER VIEW
 // ═══════════════════════════════════════════════════════════════
+// ── Timer ring renderer ────────────────────────────────────────
+function timerRingHTML(label, sub, timeStr, pct, colour, ringTotal){
+  // pct: 0–1, how much of the ring is filled (1=full, 0=empty)
+  // For stopwatch pct counts up; for countdown pct counts down
+  var S2=260; // SVG size
+  var cx=130,cy=130,r=112;
+  var circ=2*Math.PI*r;
+  var offset=circ*(1-pct);
+  return '<svg id="timer-ring-svg" width="'+S2+'" height="'+S2+'" viewBox="0 0 '+S2+' '+S2+'" style="overflow:visible">'+
+    // Track ring (dim background)
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>'+
+    // Progress ring
+    '<circle id="timer-ring" cx="'+cx+'" cy="'+cy+'" r="'+r+'"'+
+      ' fill="none" stroke="'+colour+'" stroke-width="14"'+
+      ' stroke-dasharray="'+circ+'"'+
+      ' stroke-dashoffset="'+offset+'"'+
+      ' stroke-linecap="round"'+
+      ' transform="rotate(-90 '+cx+' '+cy+')"'+
+      ' style="transition:stroke-dashoffset 0.8s linear;filter:drop-shadow(0 0 8px '+colour+'66)"/>'+
+    // Label above time
+    (label?'<text x="'+cx+'" y="'+(cy-32)+'" text-anchor="middle" font-size="13" font-weight="800" letter-spacing="2" fill="'+colour+'" opacity="0.8" font-family="system-ui,sans-serif">'+label+'</text>':'')+
+    // Main time display
+    '<text id="timer-big" x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="54" font-weight="900" fill="'+colour+'" font-family="system-ui,-apple-system,sans-serif" letter-spacing="-1">'+timeStr+'</text>'+
+    // Sub label below time
+    (sub?'<text id="timer-sub" x="'+cx+'" y="'+(cy+42)+'" text-anchor="middle" font-size="12" font-weight="600" fill="rgba(255,255,255,0.45)" font-family="system-ui,sans-serif">'+sub+'</text>':'')+
+    '</svg>';
+}
+
+function timerControls(t, startLabel){
+  var h='<div style="display:flex;gap:10px;margin-top:28px">';
+  h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1;font-size:16px;font-weight:800;height:56px">'+(t.running?'Pause':startLabel)+'</button>';
+  h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1;font-size:16px;height:56px">Reset</button>';
+  h+='</div>';
+  return h;
+}
+
 function timerV(){
   var t=S.timer;
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  h+='<div class="h1" style="margin-bottom:16px">Timer</div>';
 
-  // Mode selector
-  var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
-  h+='<div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">';
-  modes.forEach(function(m){
-    h+='<button class="btn btn-pill'+(t.mode===m.k?' btn-acc':' btn-ghost')+'" data-mode="'+m.k+'" onclick="setTimerMode(this.dataset.mode)">'+m.l+'</button>';
-  });
-  h+='</div>';
+  // Mode selector — only shown in setup or when paused
+  if(t.setup||!t.running){
+    var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
+    h+='<div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">';
+    modes.forEach(function(m){
+      h+='<button class="btn btn-pill'+(t.mode===m.k?' btn-acc':' btn-ghost')+'" data-mode="'+m.k+'" onclick="setTimerMode(this.dataset.mode)">'+m.l+'</button>';
+    });
+    h+='</div>';
+  }
 
   // ── Stopwatch ──
   if(t.mode==='stopwatch'){
     var m=Math.floor(t.elapsed/60);var s=t.elapsed%60;
-    h+='<div style="text-align:center;padding:30px 0">';
-    h+='<div id="timer-big" style="font-size:80px;font-weight:900;letter-spacing:-2px;color:var(--acc);line-height:1">'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s+'</div>';
+    var timeStr=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    // Ring fills up as time passes — caps visually at 60 min
+    var pct=Math.min(1,t.elapsed/(60*60));
+    h+='<div style="display:flex;justify-content:center;margin:10px 0 0">';
+    h+=timerRingHTML('STOPWATCH',null,timeStr,pct,'var(--acc)',3600);
     h+='</div>';
-    h+='<div style="display:flex;gap:8px">';
-    h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1">'+(t.running?'Pause':'Start')+'</button>';
-    h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1">Reset</button>';
-    h+='</div>';
+    h+=timerControls(t,t.elapsed>0?'Resume':'Start');
 
   // ── Countdown ──
   } else if(t.mode==='countdown'){
@@ -5303,16 +5340,16 @@ function timerV(){
       var mins=Math.floor(t.totalSecs/60);var secs=t.totalSecs%60;
       h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">MINUTES</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'cdMins\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-cd-mins" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+mins+'m'+'</div><button onclick="adjTimer(\'cdMins\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
       h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">SECONDS</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'cdSecs\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-cd-secs" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+secs+'s'+'</div><button onclick="adjTimer(\'cdSecs\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<button class="btn btn-acc" onclick="startCountdown()">Start</button>';
+      h+='<button class="btn btn-acc" style="height:56px;font-size:16px" onclick="startCountdown()">Start</button>';
     } else {
       var rem=t.remaining;var rm=Math.floor(rem/60);var rs=rem%60;
-      h+='<div style="text-align:center;padding:30px 0">';
-      h+='<div id="timer-big" style="font-size:80px;font-weight:900;letter-spacing:-2px;color:var(--acc);line-height:1">'+(rm<10?'0':'')+rm+':'+(rs<10?'0':'')+rs+'</div>';
+      var timeStr=(rm<10?'0':'')+rm+':'+(rs<10?'0':'')+rs;
+      var pct=t.totalSecs>0?rem/t.totalSecs:0;
+      var ringCol=rem<=10?'#ff6b6b':'var(--acc)';
+      h+='<div style="display:flex;justify-content:center;margin:10px 0 0">';
+      h+=timerRingHTML('COUNTDOWN',null,timeStr,pct,ringCol,t.totalSecs);
       h+='</div>';
-      h+='<div style="display:flex;gap:8px">';
-      h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1">'+(t.running?'Pause':'Resume')+'</button>';
-      h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1">Reset</button>';
-      h+='</div>';
+      h+=timerControls(t,'Resume');
     }
 
   // ── Tabata ──
@@ -5321,36 +5358,34 @@ function timerV(){
       h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">WORK (seconds)</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'tabWork\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-tab-work" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+t.tabWork+'s'+'</div><button onclick="adjTimer(\'tabWork\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
       h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">REST (seconds)</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'tabRest\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-tab-rest" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+t.tabRest+'s'+'</div><button onclick="adjTimer(\'tabRest\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
       h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">ROUNDS</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'tabRounds\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-tab-rounds" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+t.tabRounds+'</div><button onclick="adjTimer(\'tabRounds\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<button class="btn btn-acc" onclick="startTabata()">Start</button>';
+      h+='<button class="btn btn-acc" style="height:56px;font-size:16px" onclick="startTabata()">Start</button>';
     } else {
       var phase=t.tabPhase;var rd=t.tabCurrent;
-      h+='<div style="text-align:center;padding:20px 0">';
-      h+='<div class="lbl lbl-acc" style="font-size:14px;margin-bottom:8px">'+(phase==='work'?'WORK':'REST')+'</div>';
-      h+='<div id="timer-big" style="font-size:80px;font-weight:900;letter-spacing:-2px;color:'+(phase==='work'?'var(--acc)':'var(--teal)')+';line-height:1">'+t.remaining+'</div>';
-      h+='<div class="lbl" style="margin-top:10px">Round '+(rd+1)+' of '+t.tabRounds+'</div>';
+      var isWork=phase==='work';
+      var phaseTotal=isWork?t.tabWork:t.tabRest;
+      var pct=phaseTotal>0?t.remaining/phaseTotal:0;
+      var ringCol=isWork?'var(--acc)':'var(--teal)';
+      var label=isWork?'WORK':'REST';
+      var sub='Round '+(rd+1)+' of '+t.tabRounds;
+      h+='<div style="display:flex;justify-content:center;margin:10px 0 0">';
+      h+=timerRingHTML(label,sub,String(t.remaining),pct,ringCol,phaseTotal);
       h+='</div>';
-      h+='<div style="display:flex;gap:8px">';
-      h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1">'+(t.running?'Pause':'Resume')+'</button>';
-      h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1">Reset</button>';
-      h+='</div>';
+      h+=timerControls(t,'Resume');
     }
 
   // ── EMOM ──
   } else if(t.mode==='emom'){
     if(t.setup){
       h+='<div style="margin-bottom:14px"><div class="lbl" style="margin-bottom:6px">TOTAL MINUTES</div><div style="display:flex;align-items:center;gap:0"><button onclick="adjTimer(\'emomMins\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">-</button><div id="t-emom-mins" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--acc)">'+t.emomMins+' min'+'</div><button onclick="adjTimer(\'emomMins\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button></div></div>';
-      h+='<button class="btn btn-acc" onclick="startEMOM()">Start</button>';
+      h+='<button class="btn btn-acc" style="height:56px;font-size:16px" onclick="startEMOM()">Start</button>';
     } else {
       var secInMin=t.elapsed%60;var emRem=60-secInMin;var emRd=t.emomRound;
-      h+='<div style="text-align:center;padding:20px 0">';
-      h+='<div class="lbl" style="font-size:14px;margin-bottom:8px">MINUTE '+(emRd+1)+' / '+t.emomMins+'</div>';
-      h+='<div id="timer-big" style="font-size:80px;font-weight:900;letter-spacing:-2px;color:var(--acc);line-height:1">'+emRem+'</div>';
-      h+='<div class="lbl" style="margin-top:10px">seconds remaining</div>';
+      var pct=emRem/60;
+      var sub='Minute '+(emRd+1)+' of '+t.emomMins;
+      h+='<div style="display:flex;justify-content:center;margin:10px 0 0">';
+      h+=timerRingHTML('EMOM',sub,String(emRem),pct,'var(--acc)',60);
       h+='</div>';
-      h+='<div style="display:flex;gap:8px">';
-      h+='<button class="btn'+(t.running?' btn-ghost':' btn-acc')+'" onclick="timerToggle()" style="flex:1">'+(t.running?'Pause':'Resume')+'</button>';
-      h+='<button class="btn btn-ghost" onclick="timerReset()" style="flex:1">Reset</button>';
-      h+='</div>';
+      h+=timerControls(t,'Resume');
     }
   }
 
@@ -5435,6 +5470,9 @@ function startTimerTick(){
         var big=document.getElementById('timer-big');
         if(big){var m=Math.floor(t.elapsed/60);var s=t.elapsed%60;
           big.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+        var ring=document.getElementById('timer-ring');
+        if(ring){var r=112;var circ=2*Math.PI*r;var pct=Math.min(1,t.elapsed/3600);
+          ring.style.strokeDashoffset=circ*(1-pct);}
       }
     } else if(t.mode==='countdown'){
       if(t.remaining>0){t.remaining--;sv();}
@@ -5442,7 +5480,12 @@ function startTimerTick(){
       if(S.tab==='timer'){
         var big=document.getElementById('timer-big');
         if(big){var m=Math.floor(t.remaining/60);var s=t.remaining%60;
-          big.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+          big.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+          big.setAttribute('fill',t.remaining<=10?'#ff6b6b':'var(--acc)');}
+        var ring=document.getElementById('timer-ring');
+        if(ring){var r=112;var circ=2*Math.PI*r;var pct=t.totalSecs>0?t.remaining/t.totalSecs:0;
+          ring.style.strokeDashoffset=circ*(1-pct);
+          ring.setAttribute('stroke',t.remaining<=10?'#ff6b6b':'var(--acc)');}
       }
     } else if(t.mode==='tabata'){
       if(t.remaining>0){t.remaining--;sv();}
@@ -5455,7 +5498,16 @@ function startTimerTick(){
         }
         sv();draw();return;
       }
-      if(S.tab==='timer'){var big=document.getElementById('timer-big');if(big)big.textContent=t.remaining;}
+      if(S.tab==='timer'){
+        var big=document.getElementById('timer-big');if(big)big.textContent=t.remaining;
+        var ring=document.getElementById('timer-ring');
+        var isWork=t.tabPhase==='work';var phTotal=isWork?t.tabWork:t.tabRest;
+        var tabCol=isWork?'var(--acc)':'var(--teal)';
+        if(ring){var r=112;var circ=2*Math.PI*r;var pct=phTotal>0?t.remaining/phTotal:0;
+          ring.style.strokeDashoffset=circ*(1-pct);
+          ring.setAttribute('stroke',tabCol);}
+        if(big)big.setAttribute('fill',tabCol);
+      }
     } else if(t.mode==='emom'){
       t.elapsed++;sv();
       var newRound=Math.floor(t.elapsed/60);
@@ -5465,8 +5517,13 @@ function startTimerTick(){
         draw();return;
       }
       if(S.tab==='timer'){
-        var big=document.getElementById('timer-big');
-        if(big)big.textContent=60-(t.elapsed%60);
+        var secInMin=t.elapsed%60;var emRem=60-secInMin;
+        var big=document.getElementById('timer-big');if(big)big.textContent=emRem;
+        var sub=document.getElementById('timer-sub');
+        if(sub)sub.textContent='Minute '+(t.emomRound+1)+' of '+t.emomMins;
+        var ring=document.getElementById('timer-ring');
+        if(ring){var r=112;var circ=2*Math.PI*r;var pct=emRem/60;
+          ring.style.strokeDashoffset=circ*(1-pct);}
       }
     }
   },1000);
