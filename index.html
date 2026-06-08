@@ -5670,8 +5670,8 @@ function timerMountCanvas(){
   modes.forEach(function(m){
     var btn=document.createElement('button');
     btn.textContent=m.l;
-    btn.className='btn btn-pill '+(t.mode===m.k?'btn-acc':'btn-ghost');
-    btn.style.cssText='flex:1;font-size:12px;padding:6px 4px;text-align:center;display:flex;align-items:center;justify-content:center;';
+    btn.className='btn '+(t.mode===m.k?'btn-acc':'btn-ghost');
+    btn.style.cssText='flex:0 0 calc(25% - 5px);font-size:13px;font-weight:700;height:44px;text-align:center;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:12px;width:auto;';
     btn.dataset.mode=m.k;
     btn.onclick=function(){setTimerMode(this.dataset.mode);};
     pillRow.appendChild(btn);
