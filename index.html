@@ -91,7 +91,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .sheet-overlay.show{opacity:1;pointer-events:all}
 .sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;z-index:201;transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom)}
 .sheet.show{transform:translateX(-50%) translateY(0)}
-.sheet-top{position:fixed;top:0;bottom:auto;left:50%;transform:translateX(-50%) translateY(-100%);width:100%;max-width:430px;background:var(--bg2);border-radius:0 0 20px 20px;z-index:201;transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:90vh;overflow-y:auto;padding-top:env(safe-area-inset-top)}
+.sheet-top{position:fixed;top:0;bottom:auto;left:50%;transform:translateX(-50%) translateY(-100%);width:100%;max-width:430px;background:var(--bg2);border-radius:0 0 20px 20px;z-index:201;transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:90vh;overflow-y:auto;padding-top:calc(env(safe-area-inset-top) + 16px)}
 .sheet-top.show{transform:translateX(-50%) translateY(0)}
 .sheet-handle{width:36px;height:4px;background:var(--brd);border-radius:2px;margin:12px auto 20px}
 .sheet-title{font-size:16px;font-weight:700;color:var(--tx);padding:0 20px 16px}
