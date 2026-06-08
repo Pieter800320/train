@@ -120,7 +120,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .plan-pill-rpe{background:var(--acc-bg);border:1px solid var(--acc-brd);border-radius:16px;padding:2px 9px;font-size:9px;font-weight:800;color:var(--acc)}
 .streak-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
 .dot-on{background:var(--teal)}.dot-cur{background:var(--acc)}.dot-off{background:var(--brd)}
-#admin-badge{position:fixed;top:max(8px,env(safe-area-inset-top));right:14px;z-index:150;background:var(--acc);color:#fff;font-size:9px;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:20px;display:none}
+#admin-badge{display:none!important}
 .section-head{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:16px 14px 6px;color:var(--acc)}
 .group-head{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg2);border-radius:10px;cursor:pointer;margin-bottom:3px;border:0.5px solid var(--brd)}
 .group-head.open{border-radius:10px 10px 0 0;border-bottom:none;margin-bottom:0}
@@ -1974,6 +1974,8 @@ function obShowRecommendation(recKey,ans){
 // ═══════════════════════════════════════════════════════════════
 function linkify(text){
   if(!text)return '';
+  // Preserve newlines as <br> for paragraph spacing
+  text=text.replace(/\r\n/g,'\n').replace(/\n\n+/g,'<br><br>').replace(/\n/g,'<br>');
   return text.replace(/(https?:\/\/[^\s<]+)/g,function(url){
     var label=url.replace(/^https?:\/\//,'').replace(/\/$/,'');
     if(label.length>40)label=label.substring(0,40)+'…';
@@ -2023,7 +2025,12 @@ function homeV(){
 
   // Top bar
   h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:max(16px,env(safe-area-inset-top)) 16px 0">';
+  h+='<div style="display:flex;align-items:center;gap:8px">';
   h+='<div id="wordmark" style="font-size:13px;font-weight:900;letter-spacing:2px;user-select:none;cursor:default">FALKENBURG</div>';
+  if(S.admin&&S.admin.active){
+    h+='<span style="font-size:9px;font-weight:800;letter-spacing:1px;background:var(--acc);color:#fff;padding:3px 8px;border-radius:20px">ADMIN</span>';
+  }
+  h+='</div>';
   h+='<div style="display:flex;gap:10px;align-items:center">';
   h+='<div onclick="openAvatarSheet()" style="width:32px;height:32px;border-radius:16px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0">'+(cl.initials||'?')+'</div>';
   h+='<button onclick="openSettingsSheet()" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;color:var(--mu)">';
