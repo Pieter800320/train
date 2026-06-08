@@ -1844,12 +1844,14 @@ function openSheet(html,title,onClose){
 }
 function closeSheet(){
   var sheet=document.getElementById('sheet');
+  var ov=document.getElementById('sheet-overlay');
   if(sheet)sheet._noSwipe=false;
   sheet.style.transition='';
   sheet.style.transform='';
   sheet.style.pointerEvents='';
+  ov.style.pointerEvents='';
   sheet.classList.remove('show');
-  document.getElementById('sheet-overlay').classList.remove('show');
+  ov.classList.remove('show');
   if(sheet&&sheet._onClose){var cb=sheet._onClose;sheet._onClose=null;cb();}
 }
 function openTopSheet(html,onClose){
@@ -1866,6 +1868,7 @@ function closeTopSheet(){
   sheet.style.transition='';
   sheet.style.transform='';
   sheet.style.pointerEvents='';
+  ov.style.pointerEvents='';
   sheet.classList.remove('show');
   ov.classList.remove('show');
   if(sheet._onClose){var cb=sheet._onClose;sheet._onClose=null;cb();}
@@ -1889,6 +1892,7 @@ function initTopSheetBindings(){
     var velocity=dt>0?Math.abs(lastY-startY)/dt:0;
     if((dy<-80||velocity>0.4)){
       sheet.style.pointerEvents='none';
+      overlay.style.pointerEvents='none';
       sheet.style.transition='';sheet.style.transform='';
       closeTopSheet();
     } else {
@@ -1917,7 +1921,10 @@ function initSheetsBindings(){
     var dt=Date.now()-lastT;
     var velocity=dt>0?Math.abs(lastY-startY)/dt:0;
     if((dy>100||velocity>0.4)&&!sheet._noSwipe){
+      // Kill pointer events on both sheet AND overlay immediately
+      // so the 300ms CSS dismiss transition doesn't swallow the next tap
       sheet.style.pointerEvents='none';
+      overlay.style.pointerEvents='none';
       sheet.style.transition='';sheet.style.transform='';
       closeSheet();
     } else {
