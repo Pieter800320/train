@@ -1842,6 +1842,9 @@ function openSheet(html,title,onClose){
 function closeSheet(){
   var sheet=document.getElementById('sheet');
   if(sheet)sheet._noSwipe=false;
+  sheet.style.transition='';
+  sheet.style.transform='';
+  sheet.style.pointerEvents='';
   sheet.classList.remove('show');
   document.getElementById('sheet-overlay').classList.remove('show');
   if(sheet&&sheet._onClose){var cb=sheet._onClose;sheet._onClose=null;cb();}
@@ -1860,11 +1863,16 @@ function initSheetsBindings(){
   }
   function onEnd(y){
     if(!dragging)return;dragging=false;
-    sheet.style.transition='';sheet.style.transform='';
     var dy=y-startY;
     var dt=Date.now()-lastT;
     var velocity=dt>0?Math.abs(lastY-startY)/dt:0;
-    if((dy>100||velocity>0.4)&&!sheet._noSwipe){closeSheet();}
+    if((dy>100||velocity>0.4)&&!sheet._noSwipe){
+      sheet.style.pointerEvents='none';
+      sheet.style.transition='';sheet.style.transform='';
+      closeSheet();
+    } else {
+      sheet.style.transition='';sheet.style.transform='';
+    }
   }
   dragZone.addEventListener('touchstart',function(e){onStart(e.touches[0].clientY);},{passive:true});
   dragZone.addEventListener('touchmove',function(e){onMove(e.touches[0].clientY);},{passive:true});
