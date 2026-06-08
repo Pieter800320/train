@@ -5944,17 +5944,17 @@ function setTimerMode(m){
     t.elapsed=0;t.running=true;
     sv();startTimerTick();
   } else {
-    // Open config sheet — keep canvas live underneath
+    // Open config sheet — defer so touch event completes cleanly first
     t.remaining=t.totalSecs;
     sv();
-    timerOpenConfig(m);
+    setTimeout(function(){timerOpenConfig(m);},50);
   }
-  // Update pill highlight
+  // Update pill highlight — preserve blocky style
   var pills=document.querySelectorAll('#timer-mode-pills button');
   pills.forEach(function(btn){
     var isActive=btn.dataset&&btn.dataset.mode===m;
-    btn.className='btn btn-pill '+(isActive?'btn-acc':'btn-ghost');
-    btn.style.flex='1';btn.style.fontSize='12px';btn.style.padding='6px 4px';
+    btn.className='btn '+(isActive?'btn-acc':'btn-ghost');
+    btn.style.borderRadius='12px';btn.style.width='auto';
   });
 }
 function startCountdown(){
