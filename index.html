@@ -2208,14 +2208,14 @@ function openAvatarSheet(){
   h+='<div><div style="font-size:16px;font-weight:700;color:var(--tx)">'+(cl.name||'Athlete')+'</div>';
   h+='<div class="lbl" style="margin-top:2px">'+(cl.tplKey?getTPL(cl.tplKey).name:'No programme set')+'</div></div>';
   h+='</div>';
-  h+='<div onclick="openJournalView()" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd);margin-bottom:8px">';
+  h+='<div onclick="closeTopSheet();openJournalView()" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd);margin-bottom:8px">';
   h+='<div style="width:38px;height:38px;border-radius:10px;background:var(--acc-bg);border:0.5px solid var(--acc-brd);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
   h+='<i class="ti ti-book" style="color:var(--acc);font-size:20px"></i></div>';
   h+='<div><div style="font-size:14px;font-weight:700;color:var(--tx)">Journal</div>';
   h+='<div class="lbl" style="margin-top:1px">Session history &amp; personal bests</div></div>';
   h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px;margin-left:auto"></i>';
   h+='</div>';
-  h+='<div onclick="closeSheet();setTimeout(function(){retakeOB();},350)" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd)">';
+  h+='<div onclick="closeTopSheet();setTimeout(function(){retakeOB();},350)" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg3);border-radius:12px;cursor:pointer;border:0.5px solid var(--brd)">';
   h+='<div style="width:38px;height:38px;border-radius:10px;background:var(--acc-bg);border:0.5px solid var(--acc-brd);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
   h+='<i class="ti ti-refresh" style="color:var(--acc);font-size:20px"></i></div>';
   h+='<div><div style="font-size:14px;font-weight:700;color:var(--tx)">Retake Setup</div>';
