@@ -3492,7 +3492,7 @@ function programsV(){
         var itemStyle='cursor:'+(isLocked?'default':'pointer')+(isLocked?';opacity:0.4':'');
         h+='<div class="prog-item'+(isActive?' active-prog':'')+'" data-key="'+p.key+'" onclick="'+(isLocked?'':'openPlanPreview(this.dataset.key)')+'" style="'+itemStyle+'">';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+p.name+'</div>';
-        h+='<div class="lbl">'+p.weeks.length+' wks'+(p.cyclic?' · cyclic':'')+'</div></div>';
+        h+='<div class="lbl">'+p.weeks.length+' wks'+(p.cyclic?' · cyclic':'')+(isLocked&&compatList?' · needs: '+compatList.map(function(k){var t=getTPL(k);return t?t.name:'';}).filter(Boolean).join(' or '):'')+' </div></div>';
         if(isActive){h+='<span class="pr-badge" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc)">Active</span>';}
         else if(isLocked){h+='<i class="ti ti-lock" style="color:var(--mu);font-size:15px"></i>';}
         else{h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px"></i>';}
@@ -4028,6 +4028,12 @@ function buildWizardV(){
   else if(step===2)result=buildStep2();
   else if(step===3)result=buildStep3();
   else if(step===4)result=buildStep4();
+  var _stepHints=["Name your programme and pick a starting structure.",
+    "Set the focus and movement pattern for each training day.",
+    "Choose which phases each day includes — e.g. warm-up, strength, core.",
+    "Add exercises to each phase for each day.",
+    "Set frequency, equipment, and skill level for each exercise."];
+  h+='<div style="font-size:11px;color:var(--mu);text-align:center;margin-bottom:12px;line-height:1.5">'+(_stepHints[step]||'')+'</div>';
   h+=buildWizardNav(result.nav.back,result.nav.next,result.nav.canNext,result.nav.hint);
   h+='<div style="height:20px"></div>';
   h+=result.html;
@@ -4649,6 +4655,7 @@ function buildStep4(){
   if(di>=e.days.length)di=0;
   var h='';
 
+  h+='<div style="height:12px"></div>';
   h+=buildDayDropdown(di,4);
 
   var day=e.days[di];
