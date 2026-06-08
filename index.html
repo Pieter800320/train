@@ -91,6 +91,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .sheet-overlay.show{opacity:1;pointer-events:all}
 .sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:430px;background:var(--bg2);border-radius:20px 20px 0 0;z-index:201;transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom)}
 .sheet.show{transform:translateX(-50%) translateY(0)}
+.sheet-top{position:fixed;top:0;bottom:auto;left:50%;transform:translateX(-50%) translateY(-100%);width:100%;max-width:430px;background:var(--bg2);border-radius:0 0 20px 20px;z-index:201;transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:90vh;overflow-y:auto;padding-top:env(safe-area-inset-top)}
+.sheet-top.show{transform:translateX(-50%) translateY(0)}
 .sheet-handle{width:36px;height:4px;background:var(--brd);border-radius:2px;margin:12px auto 20px}
 .sheet-title{font-size:16px;font-weight:700;color:var(--tx);padding:0 20px 16px}
 .toggle{width:48px;height:28px;border-radius:14px;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
@@ -182,6 +184,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   </div>
   <div id="sheet-overlay" class="sheet-overlay"></div>
   <div id="sheet" class="sheet"><div id="sheet-drag-zone" style="padding:16px 0 4px;cursor:grab;touch-action:none"><div class="sheet-handle"></div></div><div id="sheet-body"></div></div>
+  <div id="sheet-top-overlay" class="sheet-overlay" style="z-index:200"></div>
+  <div id="sheet-top" class="sheet-top"><div id="sheet-top-body"></div><div id="sheet-top-drag-zone" style="padding:4px 0 16px;cursor:grab;touch-action:none"><div class="sheet-handle"></div></div></div>
   <div id="admin-badge">ADMIN</div>
   <div id="ptr-indicator">
     <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1848,6 +1852,53 @@ function closeSheet(){
   document.getElementById('sheet-overlay').classList.remove('show');
   if(sheet&&sheet._onClose){var cb=sheet._onClose;sheet._onClose=null;cb();}
 }
+function openTopSheet(html,onClose){
+  var s=document.getElementById('sheet-top');
+  var sb=document.getElementById('sheet-top-body');
+  var ov=document.getElementById('sheet-top-overlay');
+  sb.innerHTML=html;
+  s._onClose=onClose||null;
+  ov.classList.add('show');s.classList.add('show');
+}
+function closeTopSheet(){
+  var sheet=document.getElementById('sheet-top');
+  var ov=document.getElementById('sheet-top-overlay');
+  sheet.style.transition='';
+  sheet.style.transform='';
+  sheet.style.pointerEvents='';
+  sheet.classList.remove('show');
+  ov.classList.remove('show');
+  if(sheet._onClose){var cb=sheet._onClose;sheet._onClose=null;cb();}
+}
+function initTopSheetBindings(){
+  var overlay=document.getElementById('sheet-top-overlay');
+  var sheet=document.getElementById('sheet-top');
+  overlay.onclick=function(){closeTopSheet();};
+  var dragZone=document.getElementById('sheet-top-drag-zone');
+  var startY=0,lastY=0,lastT=0,dragging=false;
+  function onStart(y){startY=y;lastY=y;lastT=Date.now();dragging=true;sheet.style.transition='none';}
+  function onMove(y){
+    if(!dragging)return;
+    var dy=y-startY;lastY=y;lastT=Date.now();
+    if(dy<0)sheet.style.transform='translateX(-50%) translateY('+dy+'px)';
+  }
+  function onEnd(y){
+    if(!dragging)return;dragging=false;
+    var dy=y-startY;
+    var dt=Date.now()-lastT;
+    var velocity=dt>0?Math.abs(lastY-startY)/dt:0;
+    if((dy<-80||velocity>0.4)){
+      sheet.style.pointerEvents='none';
+      sheet.style.transition='';sheet.style.transform='';
+      closeTopSheet();
+    } else {
+      sheet.style.transition='';sheet.style.transform='';
+    }
+  }
+  dragZone.addEventListener('touchstart',function(e){onStart(e.touches[0].clientY);},{passive:true});
+  dragZone.addEventListener('touchmove',function(e){onMove(e.touches[0].clientY);},{passive:true});
+  dragZone.addEventListener('touchend',function(e){onEnd(e.changedTouches[0].clientY);});
+}
 function initSheetsBindings(){
   var overlay=document.getElementById('sheet-overlay');
   var sheet=document.getElementById('sheet');
@@ -2164,7 +2215,7 @@ function openAvatarSheet(){
   h+='<div class="lbl" style="margin-top:1px">Redo the questionnaire</div></div>';
   h+='<i class="ti ti-chevron-right" style="color:var(--mu);font-size:16px;margin-left:auto"></i>';
   h+='</div></div>';
-  openSheet(h,'Profile');
+  openTopSheet(h);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2196,7 +2247,7 @@ function openSettingsSheet(){
     h+='</div>';
   });
   h+='</div>';
-  openSheet(h,'Settings');
+  openTopSheet(h);
 }
 function setColourTheme(key){
   S.colourTheme=key;sv();applyTheme();
@@ -5214,7 +5265,7 @@ function openAdminSheet(){
     h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="changePIN()">Change PIN</button>';
     h+='<button class="btn btn-coral" onclick="deactivateAdmin()">Exit Admin Mode</button>';
     h+='</div>';
-    openSheet(h,'Admin');return;
+    openTopSheet(h);return;
   }
   if(!S.admin.set){
     var h='<div style="padding:0 20px 20px">';
@@ -5223,20 +5274,20 @@ function openAdminSheet(){
     h+='<input type="password" id="pin-b" inputmode="numeric" maxlength="4" placeholder="Confirm PIN" style="margin-bottom:16px">';
     h+='<button class="btn btn-acc" onclick="setAdminPIN()">Set PIN</button>';
     h+='</div>';
-    openSheet(h,'Set Admin PIN');
+    openTopSheet(h);
   } else {
     var h='<div style="padding:0 20px 20px">';
     h+='<div style="font-size:13px;color:var(--mu);margin-bottom:16px">Enter your admin PIN.</div>';
     h+='<input type="password" id="pin-in" inputmode="numeric" maxlength="4" placeholder="PIN" style="margin-bottom:16px">';
     h+='<button class="btn btn-acc" onclick="checkAdminPIN()">Unlock</button>';
     h+='</div>';
-    openSheet(h,'Admin Login');
+    openTopSheet(h);
   }
 }
-function setAdminPIN(){var a=document.getElementById('pin-a').value;var b=document.getElementById('pin-b').value;if(a.length!==4||a!==b){alert('PINs must match and be 4 digits.');return;}S.admin.pin=a;S.admin.set=true;S.admin.active=true;S.admin.expiry=Date.now()+600000;sv();document.getElementById('admin-badge').style.display='block';closeSheet();draw();}
-function checkAdminPIN(){var v=document.getElementById('pin-in').value;if(v===S.admin.pin){S.admin.active=true;S.admin.expiry=Date.now()+600000;sv();document.getElementById('admin-badge').style.display='block';closeSheet();draw();}else{alert('Incorrect PIN.');}}
-function deactivateAdmin(){S.admin.active=false;sv();document.getElementById('admin-badge').style.display='none';closeSheet();draw();}
-function changePIN(){S.admin.set=false;S.admin.pin='';S.admin.active=false;sv();closeSheet();}
+function setAdminPIN(){var a=document.getElementById('pin-a').value;var b=document.getElementById('pin-b').value;if(a.length!==4||a!==b){alert('PINs must match and be 4 digits.');return;}S.admin.pin=a;S.admin.set=true;S.admin.active=true;S.admin.expiry=Date.now()+600000;sv();closeTopSheet();draw();}
+function checkAdminPIN(){var v=document.getElementById('pin-in').value;if(v===S.admin.pin){S.admin.active=true;S.admin.expiry=Date.now()+600000;sv();closeTopSheet();draw();}else{alert('Incorrect PIN.');}}
+function deactivateAdmin(){S.admin.active=false;sv();closeTopSheet();draw();}
+function changePIN(){S.admin.set=false;S.admin.pin='';S.admin.active=false;sv();closeTopSheet();}
 function editNotice(){
   var h='<div style="padding:0 20px 20px">';
   h+='<input type="text" id="n-title" value="'+(S.notice.title||'')+'" placeholder="Notice title" style="margin-bottom:8px">';
@@ -5247,9 +5298,9 @@ function editNotice(){
   h+='</div>';
   h+='<button class="btn btn-acc" onclick="saveNotice()">Save</button>';
   h+='</div>';
-  openSheet(h,'Notice Board');
+  openTopSheet(h);
 }
-function saveNotice(){S.notice.title=document.getElementById('n-title').value;S.notice.body=document.getElementById('n-body').value;sv();closeSheet();draw();}
+function saveNotice(){S.notice.title=document.getElementById('n-title').value;S.notice.body=document.getElementById('n-body').value;sv();closeTopSheet();draw();}
 
 // ═══════════════════════════════════════════════════════════════
 // THEME
@@ -6078,6 +6129,7 @@ document.documentElement.classList.toggle('light',S.theme==='light');
 draw();
 initPullToRefresh();
 initSheetsBindings();
+initTopSheetBindings();
 
 // Service Worker registration
 if('serviceWorker' in navigator){
