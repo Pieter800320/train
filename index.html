@@ -1837,7 +1837,6 @@ function openSheet(html,title,onClose){
   sb.innerHTML=(title?'<div class="sheet-title">'+title+'</div>':'')+html;
   s._onClose=onClose||null;
   ov.classList.add('show');s.classList.add('show');
-  initSheetsBindings();
 }
 function closeSheet(){
   var sheet=document.getElementById('sheet');
@@ -6078,6 +6077,7 @@ ld();
 document.documentElement.classList.toggle('light',S.theme==='light');
 draw();
 initPullToRefresh();
+initSheetsBindings();
 
 // Service Worker registration
 if('serviceWorker' in navigator){
