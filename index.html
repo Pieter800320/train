@@ -3602,7 +3602,7 @@ function openPlanPreview(key){
   } else {
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="attachPlan(this.dataset.key);sv();draw();closeSheet()">Select this Plan</button>';
     if(isCustom){
-      h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomPlan(this.dataset.key);closeSheet()">✕ Delete Plan</button>';
+      h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomPlan(this.dataset.key)">✕ Delete Plan</button>';
     }
   }
   h+='</div>';
@@ -3674,7 +3674,7 @@ function openProgPreview(key){
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="switchTPL(this.dataset.key)">Select this Program</button>';
   }
   if(isCustom){
-    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key);closeSheet()">✕ Delete Program</button>';
+    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">✕ Delete Program</button>';
   }
   h+='</div>';
   h+='</div>';
@@ -5647,7 +5647,7 @@ function timerMountCanvas(){
     'width:100%;max-width:430px;'+
     'bottom:max(64px,env(safe-area-inset-bottom)+64px);'+
     'z-index:90;background:var(--bg);'+
-    'display:flex;flex-direction:column;touch-action:none;';
+    'display:flex;flex-direction:column;';
 
   // ── Dashboard strip: heading + pills + buttons, no bg ──
   var dash=document.createElement('div');
