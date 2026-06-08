@@ -2051,7 +2051,7 @@ function homeV(){
   if(inProgress){
     h+='<button class="btn btn-acc" style="font-size:14px;font-weight:700" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Continue Session →</button>';
   } else {
-    h+='<button class="btn btn-acc" style="font-size:14px;font-weight:700" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Start Training →</button>';
+    h+='<button style="font-size:14px;font-weight:700;background:var(--acc);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:13px 20px;cursor:pointer;width:100%;letter-spacing:.2px" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Start Training →</button>';
   }
   h+='</div></div>';
 
