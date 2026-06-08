@@ -241,7 +241,7 @@ function resolveTrack(name,ph,reps,vol){
   var n=(name||'').toLowerCase();
   var p=ph||'strength';
   // Carries → distance + weight
-  if(n.indexOf('carry')>=0||n.indexOf('march')>=0&&n.indexOf('sled')>=0)
+  if(n.indexOf('carry')>=0||n.indexOf('march')>=0||n.indexOf('loaded carry')>=0||n.indexOf('offset carry')>=0)
     return['distance','weight'];
   // Sled push/drag → distance
   if(n.indexOf('sled push')>=0||n.indexOf('sled drag')>=0||n.indexOf('sled march')>=0)
@@ -3687,6 +3687,8 @@ function openProgPreview(key){
   if(!tpl)return;
   var isActive=cl.tplKey===key;
   var isCustom=!(function(){for(var i=0;i<TPL.length;i++)if(TPL[i].key===key)return true;return false;})();
+  var draftEntry=(cl.customPrograms||[]).find(function(p){return p.key===key&&p.draft;});
+  var isDraft=!!draftEntry;
   var h='<div style="padding:0 20px 30px">';
 
   // Header
@@ -3733,12 +3735,15 @@ function openProgPreview(key){
 
   // Action buttons
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 0 0">';
-  if(isActive){
+  if(isDraft){
+    h+='<button class="btn btn-acc" data-key="'+key+'" onclick="buildResumeDraft(this.dataset.key)">↩ Resume Draft</button>';
+    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">✕ Delete Draft</button>';
+  } else if(isActive){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:12px 0">✓ Currently active</div>';
   } else {
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="switchTPL(this.dataset.key)">Select this Program</button>';
   }
-  if(isCustom){
+  if(isCustom&&!isDraft){
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">✕ Delete Program</button>';
   }
   h+='</div>';
@@ -4054,8 +4059,13 @@ function buildEnsureDay(di){
 // ═══════════════════════════════════════════════════════════════
 function buildV(){
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  h+='<div class="h1" style="margin-bottom:4px">Build</div>';
-  h+='<div style="font-size:13px;color:var(--mu);margin-bottom:16px">Create custom training plans & progression plans</div>';
+  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between">';
+  h+='<div><div class="h1" style="margin-bottom:4px">Build</div>';
+  h+='<div style="font-size:13px;color:var(--mu);margin-bottom:16px">Create custom training plans &amp; progression plans</div></div>';
+  if(S.customEdit&&S.customEdit.name){
+    h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-top:4px;flex-shrink:0" onclick="buildSaveDraft()">⤓ Save Draft</button>';
+  }
+  h+='</div>';
   h+='<div style="display:flex;gap:6px;margin-bottom:16px">';
   h+='<button class="btn'+(S.buildMode==='program'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'program\';sv();draw()" style="flex:1">Training Plan</button>';
   h+='<button class="btn'+(S.buildMode==='plan'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'plan\';sv();draw()" style="flex:1">Progression Plan</button>';
@@ -4792,7 +4802,10 @@ function buildConfigEx(di,ei){
   h+='</div>';
 
   // Track field toggles
-  h+='<div class="lbl" style="margin-bottom:8px">TRACK FIELDS</div>';
+  h+='<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">';
+  h+='<div class="lbl">TRACK FIELDS</div>';
+  h+='<span style="font-size:10px;color:var(--mu)">tap any to toggle</span>';
+  h+='</div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
   allTrack.forEach(function(t){
     var isActive=track.indexOf(t)>=0;
@@ -4901,6 +4914,10 @@ function buildSave(){
   if(!e.name.trim()||!e.days.length){alert('Add a name and at least one session.');return;}
   var key='custom_'+Date.now();
   var cl=C();if(!cl.customPrograms)cl.customPrograms=[];
+  // Remove any saved draft for this build
+  if(e._draftKey){
+    cl.customPrograms=cl.customPrograms.filter(function(p){return p.key!==e._draftKey;});
+  }
   var tplDays=e.days.map(function(d){
     return {
       label:d.label,
@@ -5015,6 +5032,45 @@ function buildWizardNav(backStep,nextStep,canNext,hint){
   return h;
 }
 
+// Draft save — stores customEdit into customPrograms with draft:true flag
+function buildSaveDraft(){
+  var e=S.customEdit;
+  if(!e||!e.name)return;
+  var cl=C();
+  var key='draft_'+Date.now();
+  // Check if existing draft exists and update it
+  var existing=(cl.customPrograms||[]).findIndex(function(p){return p.draft&&p._draftSource===e._draftKey;});
+  if(existing>=0){
+    key=cl.customPrograms[existing].key;
+    cl.customPrograms[existing]={
+      key:key,name:e.name+' (Draft)',cat:'custom',desc:'Draft — tap to resume',
+      draft:true,_draftSource:e._draftKey||key,_editState:JSON.parse(JSON.stringify(e)),
+      tpl:{name:e.name,days:[],duration:45,compatiblePlans:[]}
+    };
+  } else {
+    var draftKey='draft_'+Date.now();
+    e._draftKey=draftKey;
+    cl.customPrograms=cl.customPrograms||[];
+    cl.customPrograms.push({
+      key:draftKey,name:e.name+' (Draft)',cat:'custom',desc:'Draft — tap to resume',
+      draft:true,_draftSource:draftKey,_editState:JSON.parse(JSON.stringify(e)),
+      tpl:{name:e.name,days:[],duration:45,compatiblePlans:[]}
+    });
+  }
+  sv();
+  appConfirm('Draft saved under My Programs. You can resume it anytime.',function(){},{label:'OK'});
+}
+// Resume a saved draft — restores customEdit state and navigates to BUILD
+function buildResumeDraft(key){
+  var cl=C();
+  var draft=(cl.customPrograms||[]).find(function(p){return p.key===key&&p.draft;});
+  if(!draft||!draft._editState)return;
+  S.customEdit=JSON.parse(JSON.stringify(draft._editState));
+  S.buildMode='program';
+  S.tab='build';
+  closeSheet();
+  sv();draw();
+}
 // Legacy compatibility — saveBuildProgram now calls buildSave
 function saveBuildProgram(){buildSave();}
 
