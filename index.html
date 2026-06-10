@@ -3801,12 +3801,12 @@ function programsV(){
 
   // ── Header ──
   h+='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between">';
-  h+='<div><div class="h1" style="margin-bottom:4px">Programs</div>';
-  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Training plans &amp; progression</div></div>';
-  h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-top:4px;flex-shrink:0" onclick="exportProgramme()">⤓ Export</button>';
+  h+='<div class="h1" style="margin-bottom:4px">Programs</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Training plans &amp; progression</div>';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;border-top:0.5px solid var(--brd);padding-top:12px;margin-bottom:16px">';
+  h+='<div style="flex:1"></div>';
+  h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;flex-shrink:0" onclick="exportProgramme()">⤓ Export</button>';
   h+='</div>';
-
   h+='</div>';
 
   // ── TRAINING PROGRAMMES ──
@@ -4427,14 +4427,14 @@ function buildEnsureDay(di){
 // ═══════════════════════════════════════════════════════════════
 function buildV(){
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between">';
-  h+='<div><div class="h1" style="margin-bottom:4px">Build</div>';
-  h+='<div style="font-size:13px;color:var(--mu);margin-bottom:16px">Create custom training plans &amp; progression plans</div></div>';
+  h+='<div class="h1" style="margin-bottom:4px">Build</div>';
+  h+='<div style="font-size:13px;color:var(--mu);margin-bottom:14px">Create custom training plans &amp; progression plans</div>';
+  h+='<div style="display:flex;align-items:center;border-top:0.5px solid var(--brd);padding-top:10px;margin-bottom:16px">';
+  h+='<div style="flex:1"></div>';
   if(S.customEdit&&S.customEdit.name){
-    h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-top:4px;flex-shrink:0" onclick="buildSaveDraft()">⤓ Save Draft</button>';
+    h+='<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="buildSaveDraft()">⤓ Save Draft</button>';
   }
   h+='</div>';
-  h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
   h+='<div style="display:flex;gap:6px;margin-bottom:16px">';
   h+='<button class="btn'+(S.buildMode==='program'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'program\';sv();draw()" style="flex:1">Training Plan</button>';
   h+='<button class="btn'+(S.buildMode==='plan'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'plan\';sv();draw()" style="flex:1">Progression Plan</button>';
@@ -6240,8 +6240,9 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
 function timerMountCanvas(){
   var screen=document.getElementById('screen');
   if(!screen)return;
+  // Always remount fresh to pick up layout changes
   var existing=document.getElementById('timer-canvas-wrap');
-  if(existing)return; // already mounted
+  if(existing&&existing.parentNode)existing.parentNode.removeChild(existing);
 
   var t=S.timer;
   // Auto-start stopwatch on first mount if no session running
@@ -6253,31 +6254,34 @@ function timerMountCanvas(){
 
   var wrap=document.createElement('div');
   wrap.id='timer-canvas-wrap';
-  // Sit inside the tab-bar layout — not fixed full screen
-  // Position below the screen top, above the tab bar
   wrap.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%);'+
     'width:100%;max-width:430px;'+
     'bottom:max(64px,env(safe-area-inset-bottom)+64px);'+
     'z-index:90;background:var(--bg);'+
     'display:flex;flex-direction:column;';
 
-  // ── Dashboard strip: heading + pills + buttons, no bg ──
+  // ── Top strip: heading + divider + mode pills ──
   var dash=document.createElement('div');
   dash.style.cssText='flex:none;'+
-    'padding:max(10px,env(safe-area-inset-top)) 14px 10px;'+
+    'padding:max(10px,env(safe-area-inset-top)) 14px 0;'+
     'pointer-events:auto;';
 
   // TIMER heading
   var heading=document.createElement('div');
   heading.style.cssText='font-size:24px;font-weight:800;letter-spacing:-0.5px;color:var(--tx);'+
-    'line-height:1.1;margin-bottom:8px;padding-left:2px;';
+    'line-height:1.1;margin-bottom:12px;padding-left:2px;';
   heading.textContent='Timer';
   dash.appendChild(heading);
+
+  // Divider
+  var divider=document.createElement('div');
+  divider.style.cssText='border-top:0.5px solid var(--brd);margin-bottom:12px;';
+  dash.appendChild(divider);
 
   // Pills row
   var pillRow=document.createElement('div');
   pillRow.id='timer-mode-pills';
-  pillRow.style.cssText='display:flex;gap:6px;justify-content:center;margin-bottom:8px;';
+  pillRow.style.cssText='display:flex;gap:6px;justify-content:center;margin-bottom:0;';
   var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
   modes.forEach(function(m){
     var btn=document.createElement('button');
@@ -6289,31 +6293,9 @@ function timerMountCanvas(){
     pillRow.appendChild(btn);
   });
   dash.appendChild(pillRow);
-
-  // Buttons row — compact, inline
-  var btnRow=document.createElement('div');
-  btnRow.id='timer-btn-row';
-  btnRow.style.cssText='display:flex;gap:8px;';
-
-  var btnPause=document.createElement('button');
-  btnPause.id='timer-btn-pause';
-  btnPause.className='btn btn-acc';
-  btnPause.style.cssText='flex:1;font-size:15px;font-weight:800;height:44px;text-align:center;display:flex;align-items:center;justify-content:center;';
-  btnPause.textContent=t.running?'Pause':'Resume';
-  btnPause.onclick=function(){timerToggle();};
-  btnRow.appendChild(btnPause);
-
-  var btnReset=document.createElement('button');
-  btnReset.className='btn btn-ghost';
-  btnReset.style.cssText='flex:1;font-size:15px;height:44px;text-align:center;display:flex;align-items:center;justify-content:center;';
-  btnReset.textContent='Reset';
-  btnReset.onclick=function(){timerReset();};
-  btnRow.appendChild(btnReset);
-
-  dash.appendChild(btnRow);
   wrap.appendChild(dash);
 
-  // ── Canvas (flex:1) — ring fills all remaining space ──
+  // ── Canvas (flex:1) — ring fills all remaining space between top and bottom bars ──
   var canvasWrap=document.createElement('div');
   canvasWrap.style.cssText='flex:1;position:relative;min-height:0;';
   var canvas=document.createElement('canvas');
@@ -6326,7 +6308,7 @@ function timerMountCanvas(){
   // Dash strip is approximately 88px on most phones
   var _initDpr=window.devicePixelRatio||1;
   var _initW=Math.min(window.innerWidth,430);
-  var _initH=window.innerHeight-88-Math.max(64,20+64); // minus dash and tabbar estimate
+  var _initH=window.innerHeight-88-72-Math.max(64,20); // minus dash (~88px), bottom bar (~72px), tabbar (~64px)
   if(_initW>0&&_initH>0){
     canvas.width=Math.round(_initW*_initDpr);
     canvas.height=Math.round(_initH*_initDpr);
@@ -6357,6 +6339,30 @@ function timerMountCanvas(){
   // Click for desktop
   canvas.addEventListener('click',function(){ timerToggle(); });
 
+  // ── Bottom bar: Pause/Reset — flex child of wrap, sits above tabbar ──
+  var bottomBar=document.createElement('div');
+  bottomBar.id='timer-btn-row';
+  bottomBar.style.cssText='flex:none;'+
+    'padding:10px 14px;background:var(--bg2);'+
+    'border-top:0.5px solid var(--brd);'+
+    'display:flex;gap:8px;pointer-events:auto;';
+
+  var btnPause=document.createElement('button');
+  btnPause.id='timer-btn-pause';
+  btnPause.className='btn btn-acc';
+  btnPause.style.cssText='flex:1;font-size:15px;font-weight:800;height:52px;display:flex;align-items:center;justify-content:center;';
+  btnPause.textContent=t.running?'Pause':'Resume';
+  btnPause.onclick=function(){timerToggle();};
+  bottomBar.appendChild(btnPause);
+
+  var btnReset=document.createElement('button');
+  btnReset.className='btn btn-ghost';
+  btnReset.style.cssText='flex:1;font-size:15px;height:52px;display:flex;align-items:center;justify-content:center;';
+  btnReset.textContent='Reset';
+  btnReset.onclick=function(){timerReset();};
+  bottomBar.appendChild(btnReset);
+
+  wrap.appendChild(bottomBar);
   document.getElementById('app').appendChild(wrap);
 
   // RAF loop — size canvas at physical pixels (DPR-aware)
@@ -6366,7 +6372,7 @@ function timerMountCanvas(){
     if(cw){
       var dpr=window.devicePixelRatio||1;
       var logW=cw.offsetWidth||Math.min(window.innerWidth,430);
-      var logH=cw.offsetHeight||(window.innerHeight-88-Math.max(64,84));
+      var logH=cw.offsetHeight||(window.innerHeight-160);
       var pw=Math.round(logW*dpr);
       var ph=Math.round(logH*dpr);
       if(pw>0&&ph>0&&(canvas.width!==pw||canvas.height!==ph)){
@@ -6388,6 +6394,7 @@ function timerUnmountCanvas(){
   if(_timerRAF){cancelAnimationFrame(_timerRAF);_timerRAF=null;}
   var wrap=document.getElementById('timer-canvas-wrap');
   if(wrap&&wrap.parentNode)wrap.parentNode.removeChild(wrap);
+
   _timerCanvas=null;
 }
 
