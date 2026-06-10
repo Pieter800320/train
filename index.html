@@ -1768,7 +1768,7 @@ function startSession(){
     }
   });
   _restCirclePos={x:null,y:null}; // reset to default position for each new session
-  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:day.exercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},playing:false};
+  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:day.exercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},skipped:{},playing:false};
   sv();draw();
 }
 function enterPlayMode(){
@@ -2909,7 +2909,12 @@ function todayV(){
       if(isPlaying){
         var exSets=S.wx.sets.filter(function(s){return s.exIdx===origIdx;});
         var doneSets=exSets.filter(function(s){return s.done;}).length;
-        if(doneSets>0)h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
+        var isSkipped=!isDone&&S.wx.skipped&&S.wx.skipped[origIdx];
+        if(isSkipped){
+          h+='<div style="font-size:9px;color:var(--mu);margin-top:2px">↷ Skipped — coming back</div>';
+        } else if(doneSets>0){
+          h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
+        }
       }
       h+='</div><div style="display:flex;align-items:center;gap:6px">';
       h+='<div class="ex-vol" style="'+(isActive?'color:var(--acc)':'')+'">';
@@ -2944,7 +2949,12 @@ function todayV(){
       if(isPlaying){
         var exSets=S.wx.sets.filter(function(s){return s.exIdx===origIdx;});
         var doneSets=exSets.filter(function(s){return s.done;}).length;
-        if(doneSets>0)h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
+        var isSkipped=!isDone&&S.wx.skipped&&S.wx.skipped[origIdx];
+        if(isSkipped){
+          h+='<div style="font-size:9px;color:var(--mu);margin-top:2px">↷ Skipped — coming back</div>';
+        } else if(doneSets>0){
+          h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+doneSets+'/'+exSets.length+' sets done</div>';
+        }
       }
       h+='</div><div style="display:flex;align-items:center;gap:6px">';
       h+='<div class="ex-vol" style="'+(isActive?'color:var(--acc)':'')+'">';
@@ -3195,7 +3205,10 @@ function openExWindow(exIdx){
   // Phase eyebrow + skip button row
   h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
   h+='<div class="lbl lbl-acc">'+(phLabel[ph]||ph.charAt(0).toUpperCase()+ph.slice(1))+'</div>';
-  if(_playing&&!allDone){
+  var _alreadySkipped=_playing&&S.wx.skipped&&S.wx.skipped[exIdx];
+  var _setsStarted=doneSets>0;
+  var _anySkipped=_playing&&S.wx.skipped&&Object.keys(S.wx.skipped).some(function(k){return S.wx.skipped[k];});
+  if(_playing&&!allDone&&!_alreadySkipped&&!_setsStarted&&!_anySkipped){
     h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;color:var(--mu);border-color:var(--brd);padding:4px 10px" onclick="skipExercise('+exIdx+')">Skip ↷</button>';
   }
   h+='</div>';
@@ -3529,7 +3542,7 @@ function doLogSet(globalIdx){
   // Mark exercise done if all sets complete
   if(!wx.exDone)wx.exDone={};
   var allDoneNow=wx.sets.filter(function(s){return s.exIdx===exIdx;}).every(function(s){return s.done;});
-  if(allDoneNow)wx.exDone[exIdx]=true;
+  if(allDoneNow){wx.exDone[exIdx]=true;if(wx.skipped)wx.skipped[exIdx]=false;}
 
   // Set rest timer
   var restSecs=(wx.exercises[exIdx].rest)||60;
@@ -3542,45 +3555,53 @@ function doLogSet(globalIdx){
   closeSheet();
   // Start floating rest circle
   if(restSecs>0)startRestCircle(restSecs);
-  // Redraw list
-  setTimeout(function(){draw();},300);
+  // Redraw list, then auto-open next exercise
+  // (rest circle also calls autoOpenNextEx when it expires, but this handles rest=0 cases
+  // and ensures skipped exercises are surfaced immediately when their turn comes)
+  setTimeout(function(){
+    draw();
+    // Only auto-open if no rest timer running (rest circle handles the rest>0 case)
+    if(!S.wx||!S.wx.restActive){
+      setTimeout(function(){autoOpenNextEx();},150);
+    }
+  },300);
 } // end doLogSet
 
 function skipExercise(exIdx){
   var wx=S.wx;if(!wx||!wx.playing)return;
-  // Collect undone sets for this exercise
+  if(!wx.skipped)wx.skipped={};
+  // Collect all undone sets for this exercise
   var skipSets=wx.sets.filter(function(s){return s.exIdx===exIdx&&!s.done;});
   if(!skipSets.length)return;
-  // Remove them from current positions
+  // Register as skipped
+  wx.skipped[exIdx]=true;
+  // Remove from current queue position
   wx.sets=wx.sets.filter(function(s){return!(s.exIdx===exIdx&&!s.done);});
-  // Find the next exercise index (first one with any undone sets remaining)
-  var nextExIdx=-1;
-  for(var i=0;i<wx.exercises.length;i++){
-    if(i===exIdx)continue;
-    var hasPending=wx.sets.some(function(s){return s.exIdx===i&&!s.done;});
-    if(hasPending){nextExIdx=i;break;}
-  }
-  if(nextExIdx<0){
-    // No other exercise has pending sets — put skipped sets at the end
+  // Find first undone set in remaining queue
+  var firstUndoneSet=null;
+  for(var k=0;k<wx.sets.length;k++){if(!wx.sets[k].done){firstUndoneSet=wx.sets[k];break;}}
+  if(!firstUndoneSet){
+    // Nothing else pending — just append
     wx.sets=wx.sets.concat(skipSets);
+  } else if(!wx.skipped[firstUndoneSet.exIdx]){
+    // Next exercise is NOT skipped — insert immediately after all its sets
+    var nextEx=firstUndoneSet.exIdx;
+    var lastPos=-1;
+    for(var j=wx.sets.length-1;j>=0;j--){if(wx.sets[j].exIdx===nextEx){lastPos=j;break;}}
+    wx.sets=wx.sets.slice(0,lastPos+1).concat(skipSets).concat(wx.sets.slice(lastPos+1));
   } else {
-    // Find the position after the last set of nextExIdx, insert skipped sets there
-    var lastNextPos=-1;
-    for(var j=wx.sets.length-1;j>=0;j--){
-      if(wx.sets[j].exIdx===nextExIdx){lastNextPos=j;break;}
-    }
-    var before=wx.sets.slice(0,lastNextPos+1);
-    var after=wx.sets.slice(lastNextPos+1);
-    wx.sets=before.concat(skipSets).concat(after);
+    // Next exercise is also skipped — append to end (skipped exercises resolved in order)
+    wx.sets=wx.sets.concat(skipSets);
   }
   // Advance currentSet to first undone
   var nextUndone=-1;
-  for(var k=0;k<wx.sets.length;k++){if(!wx.sets[k].done){nextUndone=k;break;}}
+  for(var m=0;m<wx.sets.length;m++){if(!wx.sets[m].done){nextUndone=m;break;}}
   wx.currentSet=nextUndone>=0?nextUndone:0;
   sv();
   closeSheet();
-  setTimeout(function(){draw();autoOpenNextEx();},200);
+  setTimeout(function(){draw();autoOpenNextEx();},350);
 }
+
 function logTimedSet(exIdx){
   var wx=S.wx;if(!wx||!wx.playing)return;
   // Stop any running timer first
@@ -3594,7 +3615,7 @@ function logTimedSet(exIdx){
     _lw2[wx.exercises[exIdx].name]={kg:0,reps:0,vol:wx.exercises[exIdx].vol||''};
     if(!wx.exDone)wx.exDone={};
     var allDoneNow=exSets.every(function(s){return s.done;});
-    if(allDoneNow)wx.exDone[exIdx]=true;
+    if(allDoneNow){wx.exDone[exIdx]=true;if(wx.skipped)wx.skipped[exIdx]=false;}
     // Reset timedEx so the next tap starts fresh
     wx.timedEx=null;
     wx._pendingTime=undefined;
@@ -3758,12 +3779,11 @@ function removeRestCircle(){
 }
 function autoOpenNextEx(){
   var wx=S.wx;if(!wx)return;
-  // Find first incomplete exercise
+  // Find next exercise by QUEUE ORDER — first undone set in wx.sets
+  // This respects skips: a skipped exercise moves to end of queue
   var nextIdx=-1;
-  for(var i=0;i<wx.exercises.length;i++){
-    var exSets=wx.sets.filter(function(s){return s.exIdx===i;});
-    var done=exSets.filter(function(s){return s.done;}).length;
-    if(done<exSets.length){nextIdx=i;break;}
+  for(var k=0;k<wx.sets.length;k++){
+    if(!wx.sets[k].done){nextIdx=wx.sets[k].exIdx;break;}
   }
   if(nextIdx>=0)openExWindow(nextIdx);
   else draw(); // all done
