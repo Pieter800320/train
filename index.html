@@ -4496,7 +4496,7 @@ function buildStep0(){
   // Name input
   h+='<div class="lbl" style="margin-bottom:6px">PROGRAMME NAME</div>';
   h+='<input type="text" id="build-name" value="'+e.name+'" placeholder="e.g. My Strength Plan" '+
-     'oninput="S.customEdit.name=this.value;sv()" style="margin-bottom:20px;font-size:16px;font-weight:700">';
+     'oninput="S.customEdit.name=this.value;sv();buildUpdateNavState()" style="margin-bottom:20px;font-size:16px;font-weight:700">';
 
   // Template picker
   h+='<div class="lbl" style="margin-bottom:10px">CHOOSE A STARTING POINT</div>';
@@ -4544,7 +4544,10 @@ function buildPickTemplate(key){
       S.customEdit.days=[{label:'Day 1',focus:'',split:[],phases:['warmup','strength'],exercises:[]}];
     }
   }
-  sv();draw();
+  sv();
+  // Update nav state live without losing input focus
+  setTimeout(buildUpdateNavState,0);
+  draw();
 }
 
 function buildSetDayCount(n){
@@ -5397,10 +5400,39 @@ function buildWizardNavFlashNext(btn,step){
   btn.style.opacity='1';
   setTimeout(function(){buildGoto(step);},140);
 }
+
+// Update nav button state without full redraw (avoids losing input focus)
+function buildUpdateNavState(){
+  var e=S.customEdit;
+  var canNext=e.name.trim().length>0&&!!e._template;
+  // Find the nav wrapper and rebuild just the buttons
+  var allBtns=document.querySelectorAll('#screen button');
+  allBtns.forEach(function(btn){
+    var oc=btn.getAttribute('onclick')||'';
+    if(oc.indexOf('buildStep0Next')>=0||oc.indexOf('buildGoto')>=0){
+      // This is a nav button — no need to change
+    }
+    if(oc.indexOf('buildStep0Next')>=0){
+      // Next button already exists and active
+    }
+  });
+  // Simpler: just update the nav wrapper by ID
+  var navWrap=document.getElementById('build-wizard-nav');
+  if(!navWrap)return;
+  if(canNext){
+    navWrap.innerHTML=
+      '<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>'+
+      '<button class="btn btn-acc" style="flex:1" onclick="buildStep0Next()">Next →</button>';
+  } else {
+    navWrap.innerHTML=
+      '<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>'+
+      '<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>Next →</button>';
+  }
+}
 function buildWizardNav(backStep,nextStep,canNext,hint){
   var backDisabled=(backStep===null||backStep<0);
   var nextDisabled=(nextStep===null||!canNext);
-  var h='<div style="display:flex;gap:8px;padding-top:16px;border-top:0.5px solid var(--brd);margin-top:4px">';
+  var h='<div id="build-wizard-nav" style="display:flex;gap:8px;padding-top:16px;border-top:0.5px solid var(--brd);margin-top:4px">';
   // Back
   if(backDisabled){
     h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>';
@@ -5414,7 +5446,7 @@ function buildWizardNav(backStep,nextStep,canNext,hint){
     if(nextDisabled){
       h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled title="'+hint+'">Next →</button>';
     } else {
-      h+='<button class="btn btn-acc" style="flex:1" onclick="buildStep0Next()">Next →</button>';
+      h+='<button id="build-next-btn" class="btn btn-acc" style="flex:1" onclick="buildStep0Next()">Next →</button>';
     }
   } else if(nextDisabled){
     h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled title="'+hint+'">Next →</button>';
