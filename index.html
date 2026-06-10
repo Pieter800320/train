@@ -2962,7 +2962,7 @@ function todayV(){
     h+='<button class="btn btn-acc" onclick="finishSession()">Finish Session</button>';
     h+='</div>';
   }
-  h+='<div style="height:80px"></div>';
+  h+='<div style="height:20px"></div>';
   return h;
 }
 
@@ -4412,6 +4412,7 @@ function buildV(){
     h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;margin-top:4px;flex-shrink:0" onclick="buildSaveDraft()">⤓ Save Draft</button>';
   }
   h+='</div>';
+  h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
   h+='<div style="display:flex;gap:6px;margin-bottom:16px">';
   h+='<button class="btn'+(S.buildMode==='program'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'program\';sv();draw()" style="flex:1">Training Plan</button>';
   h+='<button class="btn'+(S.buildMode==='plan'?' btn-acc':' btn-ghost')+'" onclick="S.buildMode=\'plan\';sv();draw()" style="flex:1">Progression Plan</button>';
@@ -4461,9 +4462,26 @@ function buildWizardV(){
     "Choose which phases each day includes — e.g. warm-up, strength, core.",
     "Add exercises to each phase for each day.",
     "Set frequency, equipment, and skill level for each exercise."];
+  // Speech bubble — tail points to the active step circle
+  // Tail left position: (step + 0.5) / 5 of container width
+  var _tailPct=Math.round((step+0.5)/5*100);
+  var _bubble=''
+    +'<div style="position:relative;background:var(--bg3);border:0.5px solid var(--brd);'
+    +'border-radius:12px;padding:10px 14px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.18)">'
+    // Tail — triangle pointing UP toward the circle row above
+    +'<div style="position:absolute;top:-7px;left:calc('+_tailPct+'% - 7px);'
+    +'width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;'
+    +'border-bottom:7px solid var(--brd)"></div>'
+    // Inner tail cover (matches bg3)
+    +'<div style="position:absolute;top:-5.5px;left:calc('+_tailPct+'% - 6px);'
+    +'width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;'
+    +'border-bottom:6px solid var(--bg3)"></div>'
+    +'<div style="font-size:12px;color:var(--tx2);line-height:1.55;text-align:center">'+(_stepHints[step]||'')+'</div>'
+    +'</div>';
+
+  h+=_bubble;
   h+=result.html;
-  h+='<div style="height:16px"></div>';
-  h+='<div style="font-size:11px;color:var(--mu);text-align:center;margin-bottom:10px;line-height:1.5">'+(_stepHints[step]||'')+'</div>';
+  h+='<div style="height:20px"></div>';
   h+=buildWizardNav(result.nav.back,result.nav.next,result.nav.canNext,result.nav.hint);
   return h;
 }
@@ -4501,9 +4519,9 @@ function buildStep0(){
   if(e._template==='blank'||e._template==='custom'){
     h+='<div class="lbl" style="margin-bottom:8px;margin-top:16px">SESSIONS PER WEEK</div>';
     h+='<div style="display:flex;gap:6px;margin-bottom:16px">';
-    [2,3,4,5,6].forEach(function(n){
+    [1,2,3,4,5,6,7].forEach(function(n){
       var sel=e.days.length===n;
-      h+='<button class="btn btn-pill'+(sel?' btn-acc':' btn-ghost')+'" onclick="buildSetDayCount('+n+')">'+n+'</button>';
+      h+='<button class="btn tap btn-pill'+(sel?' btn-acc':' btn-ghost')+'" onclick="buildSetDayCount('+n+')">'+n+'</button>';
     });
     h+='</div>';
   }
@@ -4741,28 +4759,12 @@ function buildStep2(){
   var h='';
 
   h+='<div style="height:12px"></div>';
-  h+='<div class="lbl" style="margin-bottom:6px">DAILY SESSION</div>';
   h+=buildDayDropdown(di,2);
 
   var day=e.days[di];
   buildEnsureDay(di);
 
-  // Phase picker — tappable field opens sheet
-  var _activePhases=(day.phases||[]);
-  var _phaseLabel=_activePhases.length
-    ? _activePhases.map(function(k){return BUILD_PHASE_MAP[k]?BUILD_PHASE_MAP[k].label:k;}).join(', ')
-    : 'Tap to select…';
-  var _phaseEmpty=!_activePhases.length;
-  var _dayLabel=(day.label||(day.focus?'':'')+' ').trim()+(day.focus?' — '+day.focus:'');
-  h+='<div style="height:20px"></div>';
-  h+='<div class="lbl" style="margin-bottom:8px">PHASES FOR '+(_dayLabel).toUpperCase()+'</div>';
-  h+='<div onclick="buildOpenPhasePicker('+di+')" style="'+
-     'display:flex;align-items:center;justify-content:space-between;'+
-     'height:52px;padding:0 16px;border-radius:10px;border:1px solid '+(_phaseEmpty?'var(--brd)':'var(--acc-brd)')+';'+
-     'background:'+(_phaseEmpty?'var(--bg3)':'var(--acc-bg)')+';cursor:pointer;margin-bottom:16px">';
-  h+='<span style="font-size:13px;font-weight:600;color:'+(_phaseEmpty?'var(--mu)':'var(--acc)')+'">'+_phaseLabel+'</span>';
-  h+='<span style="color:var(--acc);font-size:13px">▾</span>';
-  h+='</div>';
+
 
   // Validate ALL days have strength phase, not just the active day
   var allDaysValid=e.days.every(function(d){return (d.phases||[]).indexOf('strength')>=0;});
@@ -4801,43 +4803,6 @@ function buildStep3(){
 
   h+='<div style="height:12px"></div>';
   h+=buildDayDropdown(di,3);
-
-  var day=e.days[di];
-  buildEnsureDay(di);
-  var phases=day.phases||['strength'];
-  var phOrder=BUILD_PHASES.map(function(p){return p.key;});
-  var sortedPhases=phases.slice().sort(function(a,b){return phOrder.indexOf(a)-phOrder.indexOf(b);});
-
-  sortedPhases.forEach(function(phKey){
-    var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey};
-    var phExs=(day.exercises||[]).filter(function(ex){return ex.ph===phKey;});
-    h+='<div style="margin-bottom:16px">';
-    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-    h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--acc)">'+phConf.label.toUpperCase()+'</div>';
-    h+='<span style="font-size:10px;color:var(--mu)">'+phExs.length+' exercise'+(phExs.length!==1?'s':'')+'</span>';
-    h+='</div>';
-
-    phExs.forEach(function(ex){
-      var globalEi=day.exercises.indexOf(ex);
-      h+='<div class="build-drag-row" data-di="'+di+'" data-phase="'+phKey+'" data-gei="'+globalEi+'" '+
-         'style="display:flex;align-items:center;gap:0;padding:12px 14px;background:var(--bg3);'+
-         'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px;touch-action:pan-y;user-select:none">';
-      h+='<div class="build-drag-handle" style="'+
-         'display:flex;align-items:center;justify-content:center;'+
-         'width:32px;flex-shrink:0;cursor:grab;color:var(--mu);font-size:15px;letter-spacing:1px;margin-right:8px;touch-action:none">⋮⋮</div>';
-      h+='<div style="flex:1;min-width:0">';
-      h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
-      h+='</div>';
-      h+='<button onclick="event.stopPropagation();buildRemoveEx('+di+','+globalEi+')" '+
-         'style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:8px;flex-shrink:0">✕</button>';
-      h+='</div>';
-    });
-
-    // Add exercise button
-    h+='<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" '+
-       'onclick="buildOpenPicker('+di+',\''+phKey+'\')">+ Add to '+phConf.label+'</button>';
-    h+='</div>';
-  });
 
   return {html:h,nav:{back:2,next:4,canNext:true,hint:''}};
 }
@@ -5086,46 +5051,19 @@ function buildStep4(){
   var h='';
 
   h+='<div style="height:12px"></div>';
-  h+=buildDayDropdown(di,4);
 
-  var day=e.days[di];
-  buildEnsureDay(di);
-  var phases=day.phases||['strength'];
-  var phOrder=BUILD_PHASES.map(function(p){return p.key;});
-  var sortedPhases=phases.slice().sort(function(a,b){return phOrder.indexOf(a)-phOrder.indexOf(b);});
-
-  sortedPhases.forEach(function(phKey){
-    var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey};
-    var phExs=(day.exercises||[]).filter(function(ex){return ex.ph===phKey;});
-    if(phExs.length===0)return;
-    h+='<div class="phase-head">'+phConf.label+'</div>';
-    phExs.forEach(function(ex){
-      var globalEi=day.exercises.indexOf(ex);
-      var track=ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol);
-      var hasWeight=track.indexOf('weight')>=0;
-      var hasTime=track.indexOf('time')>=0;
-      var sub='';
-      if(hasTime&&ex.vol)sub=ex.vol;
-      else if(ex.reps>0)sub=ex.sets+'\xd7'+ex.reps;
-      if(hasWeight&&ex.weight>0)sub+=(sub?' · ':'')+ex.weight+'kg';
-      else if(hasWeight)sub+=(sub?' · ':'')+' BW';
-      if(ex.rest)sub+=' · '+ex.rest+'s';
-      h+='<div onclick="buildConfigEx('+di+','+globalEi+')" style="'+
-         'display:flex;align-items:center;gap:0;padding:12px 14px;'+
-         'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px;cursor:pointer">';
-      // Left spacer matches drag handle width in step 3
-      h+='<div style="width:40px;flex-shrink:0"></div>';
-      h+='<div style="flex:1;min-width:0">';
-      h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
-      if(sub)h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+sub+'</div>';
-      h+='</div>';
-      h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
-      h+='</div>';
-    });
+  // Pill row + Save button on same line
+  h+='<div class="lbl" style="margin-bottom:8px">DAILY SESSION</div>';
+  h+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:18px">';
+  e.days.forEach(function(d,i){
+    var isActive=i===di;
+    h+='<button class="btn btn-pill tap '+(isActive?'btn-acc':'btn-ghost')+'" '
+      +'style="min-width:36px;font-size:13px;font-weight:700;padding:6px 14px" '
+      +'onclick="S.customEdit.activeDay='+i+';sv();buildOpenConfigSheet('+i+')">'+(i+1)+'</button>';
   });
+  h+='<button class="btn btn-pill btn-acc" style="margin-left:auto;font-size:12px;padding:6px 14px;white-space:nowrap" onclick="buildSave()">Save ✓</button>';
+  h+='</div>';
 
-  h+='<div style="height:16px"></div>';
-  h+='<button class="btn btn-acc" onclick="buildSave()">Save Programme</button>';
   return {html:h,nav:{back:3,next:null,canNext:true,hint:''}};
 }
 
@@ -5277,6 +5215,89 @@ function buildToggleTrack(di,ei,field){
   sv();buildConfigEx(di,ei);
 }
 
+
+// Pill tap → exercise list sheet for this day (step 3)
+function buildOpenExSheet(di){
+  S.customEdit.activeDay=di;sv();
+  var e=S.customEdit;
+  var day=e.days[di];
+  buildEnsureDay(di);
+  var phases=day.phases||['strength'];
+  var phOrder=BUILD_PHASES.map(function(p){return p.key;});
+  var sortedPhases=phases.slice().sort(function(a,b){return phOrder.indexOf(a)-phOrder.indexOf(b);});
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:16px">'+(day.label||'Session '+(di+1))+(day.focus?' — '+day.focus:'')+'</div>';
+  sortedPhases.forEach(function(phKey){
+    var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey};
+    var phExs=(day.exercises||[]).filter(function(ex){return ex.ph===phKey;});
+    h+='<div style="margin-bottom:16px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--acc)">'+phConf.label.toUpperCase()+'</div>';
+    h+='<span style="font-size:10px;color:var(--mu)">'+phExs.length+' exercise'+(phExs.length!==1?'s':'')+'</span>';
+    h+='</div>';
+    phExs.forEach(function(ex){
+      var globalEi=day.exercises.indexOf(ex);
+      h+='<div style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);'
+        +'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
+      h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
+      h+='<button onclick="event.stopPropagation();buildRemoveEx('+di+','+globalEi+');buildOpenExSheet('+di+')" '
+        +'style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:15px;padding:4px 8px">✕</button>';
+      h+='</div>';
+    });
+    h+='<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" '
+      +'onclick="buildOpenPicker('+di+',\''+phKey+'\');">+ Add to '+phConf.label+'</button>';
+    h+='</div>';
+  });
+  h+='</div>';
+  openSheet(h,day.label||'Session '+(di+1),function(){draw();});
+}
+
+// Pill tap → configure sheet for this day (step 4)
+function buildOpenConfigSheet(di){
+  S.customEdit.activeDay=di;sv();
+  var e=S.customEdit;
+  var day=e.days[di];
+  buildEnsureDay(di);
+  var phases=day.phases||['strength'];
+  var phOrder=BUILD_PHASES.map(function(p){return p.key;});
+  var sortedPhases=phases.slice().sort(function(a,b){return phOrder.indexOf(a)-phOrder.indexOf(b);});
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:16px">'+(day.label||'Session '+(di+1))+(day.focus?' — '+day.focus:'')+'</div>';
+  var hasAny=false;
+  sortedPhases.forEach(function(phKey){
+    var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey};
+    var phExs=(day.exercises||[]).filter(function(ex){return ex.ph===phKey;});
+    if(!phExs.length)return;
+    hasAny=true;
+    h+='<div class="phase-head">'+phConf.label+'</div>';
+    phExs.forEach(function(ex){
+      var globalEi=day.exercises.indexOf(ex);
+      var track=ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol);
+      var hasWeight=track.indexOf('weight')>=0;
+      var hasTime=track.indexOf('time')>=0;
+      var sub='';
+      if(hasTime&&ex.vol)sub=ex.vol;
+      else if(ex.reps>0)sub=ex.sets+'×'+ex.reps;
+      if(hasWeight&&ex.weight>0)sub+=(sub?' · ':'')+ex.weight+'kg';
+      else if(hasWeight)sub+=(sub?' · ':'')+'BW';
+      if(ex.rest)sub+=' · '+ex.rest+'s';
+      h+='<div onclick="buildConfigEx('+di+','+globalEi+')" style="'
+        +'display:flex;align-items:center;padding:12px 14px;'
+        +'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px;cursor:pointer">';
+      h+='<div style="flex:1;min-width:0">';
+      h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
+      if(sub)h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+sub+'</div>';
+      h+='</div>';
+      h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
+      h+='</div>';
+    });
+  });
+  if(!hasAny){
+    h+='<div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">No exercises yet — add some in Step 3.</div>';
+  }
+  h+='</div>';
+  openSheet(h,day.label||'Session '+(di+1),function(){draw();});
+}
 // ─────────────────────────────────────────────────────────────
 // SAVE
 // ─────────────────────────────────────────────────────────────
@@ -5320,20 +5341,22 @@ function buildSave(){
 // SHARED HELPERS
 // ─────────────────────────────────────────────────────────────
 
-// Day dropdown (for steps 2-4)
+// Day pills (for steps 2-4) — numbered 1..N, active pill highlighted, tap opens sheet
 function buildDayDropdown(activeDi,step){
   var e=S.customEdit;
   if(e.days.length<=1)return '';
-  var day=e.days[activeDi]||e.days[0];
-  var label=day.label+(day.focus?' — '+day.focus:'');
-  // Tappable field — same height as Back/Next (52px)
-  var h='<div style="margin-bottom:16px">';
-  h+='<div onclick="buildOpenDayPicker('+activeDi+','+step+')" style="'+
-     'display:flex;align-items:center;justify-content:space-between;'+
-     'height:52px;padding:0 16px;border-radius:10px;'+
-     'border:1px solid var(--acc-brd);background:var(--acc-bg);cursor:pointer">';
-  h+='<span style="font-size:13px;font-weight:600;color:var(--acc)">'+label+'</span>';
-  h+='<span style="color:var(--acc);font-size:13px">▾</span>';
+  var h='<div style="margin-bottom:18px">';
+  h+='<div class="lbl" style="margin-bottom:8px">DAILY SESSION</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  e.days.forEach(function(d,i){
+    var isActive=i===activeDi;
+    var openFn=step===2?'buildOpenPhasePicker('+i+')'
+              :step===3?'buildOpenExSheet('+i+')'
+              :'buildOpenConfigSheet('+i+')';
+    h+='<button class="btn btn-pill tap '+(isActive?'btn-acc':'btn-ghost')+'" '
+      +'style="min-width:36px;font-size:13px;font-weight:700;padding:6px 14px" '
+      +'onclick="S.customEdit.activeDay='+i+';sv();'+openFn+'">'+(i+1)+'</button>';
+  });
   h+='</div>';
   h+='</div>';
   return h;
@@ -5377,29 +5400,28 @@ function buildWizardNavFlashNext(btn,step){
 function buildWizardNav(backStep,nextStep,canNext,hint){
   var backDisabled=(backStep===null||backStep<0);
   var nextDisabled=(nextStep===null||!canNext);
-  var h='<div style="display:flex;gap:8px">';
-  // Back — always rendered, always ghost until pressed
+  var h='<div style="display:flex;gap:8px;padding-top:16px;border-top:0.5px solid var(--brd);margin-top:4px">';
+  // Back
   if(backDisabled){
     h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>';
   } else {
-    h+='<button class="btn btn-ghost" style="flex:1" onclick="buildWizardNavFlash(this,'+backStep+')">← Back</button>';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="buildGoto('+backStep+')">← Back</button>';
   }
-  // Next — always rendered, ghost style, lights up on press
+  // Next
   if(nextStep===null){
     h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>Next →</button>';
   } else if(nextStep==='step0'){
     if(nextDisabled){
       h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled title="'+hint+'">Next →</button>';
     } else {
-      h+='<button class="btn btn-ghost" style="flex:1" onclick="buildWizardNavFlashNext(this,0);setTimeout(buildStep0Next,140)">Next →</button>';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="buildStep0Next()">Next →</button>';
     }
   } else if(nextDisabled){
     h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled title="'+hint+'">Next →</button>';
   } else {
-    h+='<button class="btn btn-ghost" style="flex:1" onclick="buildWizardNavFlashNext(this,'+nextStep+')">Next →</button>';
+    h+='<button class="btn btn-acc" style="flex:1" onclick="buildGoto('+nextStep+')">Next →</button>';
   }
   h+='</div>';
-
   return h;
 }
 
