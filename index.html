@@ -3208,7 +3208,9 @@ function openExWindow(exIdx){
   var _alreadySkipped=_playing&&S.wx.skipped&&S.wx.skipped[exIdx];
   var _setsStarted=doneSets>0;
   var _anySkipped=_playing&&S.wx.skipped&&Object.keys(S.wx.skipped).some(function(k){return S.wx.skipped[k];});
-  if(_playing&&!allDone&&!_alreadySkipped&&!_setsStarted&&!_anySkipped){
+  // Last exercise = no undone sets belonging to a different exercise after this one
+  var _isLast=_playing&&!wx.sets.some(function(s){return!s.done&&s.exIdx!==exIdx;});
+  if(_playing&&!allDone&&!_alreadySkipped&&!_setsStarted&&!_anySkipped&&!_isLast){
     h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;color:var(--mu);border-color:var(--brd);padding:4px 10px" onclick="skipExercise('+exIdx+')">Skip ↷</button>';
   }
   h+='</div>';
