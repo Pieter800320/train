@@ -2383,7 +2383,7 @@ function _exportDownload(html, filename){
 
 function _exportStyles(){
   return '<style>'+
-    'body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:640px;margin:0 auto;padding:20px;color:#1a1a1a;background:#f8f9fb}'+
+    'body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:640px;margin:0 auto;padding:20px;color:#1a1a1a;background:#f8f9fb}'+    '.hero{background:linear-gradient(135deg,#1a1a2e 0%,#2d2d44 100%);border-radius:14px;padding:24px 20px;margin-bottom:24px;color:#fff}'+    '.hero-name{font-size:26px;font-weight:900;margin-bottom:4px}'+    '.hero-prog{font-size:14px;font-weight:600;color:#E07B2A;margin-bottom:10px}'+    '.hero-goals{font-size:13px;color:#e0e0e0;margin-bottom:6px}'+    '.hero-notes{font-size:12px;color:#c0c0c0;margin-bottom:6px;font-style:italic;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px}'+    '.hero-meta{font-size:11px;color:#888;margin-top:4px}'+
     'h1{font-size:22px;font-weight:900;margin-bottom:4px}'+
     'h2{font-size:13px;font-weight:700;margin:22px 0 8px;color:#777;text-transform:uppercase;letter-spacing:1px}'+
     'h3{font-size:14px;font-weight:700;margin:10px 0 3px}'+
@@ -2445,15 +2445,59 @@ function exportJournal(){
 
 // ── Programme export: training plan + progression plan ──
 function exportProgramme(){
+  var cl=C();
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:4px">Export Programme</div>';
+  h+='<div style="font-size:13px;color:var(--mu);margin-bottom:20px">Personalise the export for your client</div>';
+  // Client name
+  h+='<div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Client Name</div>';
+  h+='<input id="expClientName" type="text" placeholder="'+(cl.name||'Athlete')+'" value="'+(cl.name||'')+'" style="'+
+    'width:100%;box-sizing:border-box;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;'+
+    'color:var(--tx);font-size:14px;padding:10px 12px;outline:none;margin-bottom:14px">';
+  // Goals
+  h+='<div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Goals</div>';
+  h+='<textarea id="expGoals" rows="3" placeholder="e.g. Build strength, lose 5 kg, run 5 km..." style="'+
+    'width:100%;box-sizing:border-box;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;'+
+    'color:var(--tx);font-size:13px;padding:10px 12px;outline:none;resize:none;margin-bottom:14px;font-family:inherit"></textarea>';
+  // Coach notes
+  h+='<div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Coach Notes <span style="font-weight:400;color:var(--mu)">(optional)</span></div>';
+  h+='<textarea id="expNotes" rows="3" placeholder="Any additional notes for the client..." style="'+
+    'width:100%;box-sizing:border-box;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;'+
+    'color:var(--tx);font-size:13px;padding:10px 12px;outline:none;resize:none;margin-bottom:14px;font-family:inherit"></textarea>';
+  // Start date
+  h+='<div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Start Date <span style="font-weight:400;color:var(--mu)">(optional)</span></div>';
+  h+='<input id="expStartDate" type="date" style="'+
+    'width:100%;box-sizing:border-box;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;'+
+    'color:var(--tx);font-size:14px;padding:10px 12px;outline:none;margin-bottom:20px">';
+  // Export button
+  h+='<button class="btn btn-acc" onclick="_doExportProgramme()">⤓ Export</button>';
+  h+='</div>';
+  openSheet(h,'Export Programme');
+}
+
+function _doExportProgramme(){
+  var clientName=(document.getElementById('expClientName')||{}).value||C().name||'Athlete';
+  var goals=(document.getElementById('expGoals')||{}).value||'';
+  var notes=(document.getElementById('expNotes')||{}).value||'';
+  var startDate=(document.getElementById('expStartDate')||{}).value||'';
+  closeSheet();
+
   var cl=C();var tpl=ACTIVE_TPL();var banner=planBannerData();
   var date=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
   var h='<!DOCTYPE html><html><head><meta charset="UTF-8">';
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">';
-  h+='<title>Falkenburg Programme — '+(cl.name||'Athlete')+' — '+date+'</title>';
+  h+='<title>Falkenburg Programme — '+clientName+' — '+date+'</title>';
   h+=_exportStyles()+'</head><body>';
 
-  h+='<h1>'+(cl.name||'Athlete')+'</h1>';
-  h+='<div class="lbl">Programme export • '+date+'</div>';
+  // Hero section
+  h+='<div class="hero">';
+  h+='<div class="hero-name">'+clientName+'</div>';
+  h+='<div class="hero-prog">'+tpl.name+'</div>';
+  if(goals)h+='<div class="hero-goals"><strong>Goals:</strong> '+goals+'</div>';
+  if(startDate){var sd=new Date(startDate);h+='<div class="hero-meta">Start: '+sd.toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"})+'</div>';}
+  if(notes)h+='<div class="hero-notes"><strong>Coach Notes:</strong> '+notes+'</div>';
+  h+='<div class="hero-meta">Exported '+date+'</div>';
+  h+='</div>';
 
   // Active training programme
   h+='<h2>Training Programme</h2>';
@@ -2529,12 +2573,14 @@ function exportProgramme(){
 
   h+='<div style="text-align:center;margin-top:24px;font-size:11px;color:#aaa">Generated by Falkenburg • '+date+'</div>';
   h+='</body></html>';
-  _exportDownload(h,'Falkenburg_Programme_'+(cl.name||'Athlete').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.html');
+  _exportDownload(h,'Falkenburg_Programme_'+(clientName).replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.html');
 }
 
 // ═══════════════════════════════════════════════════════════════
 // TODAY VIEW
 // ═══════════════════════════════════════════════════════════════
+
+
 function todayV(){
   var cl=C();var tpl=ACTIVE_TPL();
   var dayIdx=cl.day%tpl.days.length;
@@ -3754,6 +3800,9 @@ function openProgPreview(key){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:12px 0">✓ Currently active</div>';
   } else {
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="switchTPL(this.dataset.key)">Select this Program</button>';
+  }
+  if(!isDraft){
+    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadTemplate(this.dataset.key)">✏ Edit in Build</button>';
   }
   if(isCustom&&!isDraft){
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">✕ Delete Program</button>';
@@ -5105,6 +5154,35 @@ function buildResumeDraft(key){
   S.tab='build';
   closeSheet();
   sv();draw();
+}
+// Load a pre-built or custom template into BUILD for editing
+function buildLoadTemplate(key){
+  var proceed=function(){
+    var tpl=getTPL(key);
+    if(!tpl){
+      var cl=C();
+      var customs=cl.customPrograms||[];
+      for(var i=0;i<customs.length;i++){if(customs[i].key===key){tpl=customs[i].tpl||customs[i];break;}}
+    }
+    if(!tpl)return;
+    S.customEdit={
+      step:0,
+      name:tpl.name+' (Copy)',
+      days:JSON.parse(JSON.stringify(tpl.days||[])),
+      activeDay:0,
+      activePhase:null
+    };
+    S.buildMode='program';
+    S.tab='build';
+    closeSheet();
+    sv();draw();
+  };
+  // Warn if unsaved work exists
+  if(S.customEdit&&S.customEdit.name&&S.customEdit.days&&S.customEdit.days.length>0){
+    appConfirm('Discard current build and load this programme?',proceed,null);
+  } else {
+    proceed();
+  }
 }
 // Legacy compatibility — saveBuildProgram now calls buildSave
 function saveBuildProgram(){buildSave();}
