@@ -4526,9 +4526,8 @@ function buildStep0(){
     h+='</div>';
   }
 
-  // Next button
-  var canNext=e.name.trim().length>0&&e._template;
-  return {html:h,nav:{back:null,next:'step0',canNext:canNext,hint:'Choose a name and template'}};
+  // Next always active — validation message shown inline on press
+  return {html:h,nav:{back:null,next:'step0',canNext:true,hint:''}};
 }
 
 function buildPickTemplate(key){
@@ -4559,7 +4558,16 @@ function buildSetDayCount(n){
 
 function buildStep0Next(){
   var e=S.customEdit;
-  if(!e.name.trim()||!e._template)return;
+  // Inline validation — show message, don't block
+  if(!e.name.trim()&&!e._template){
+    buildShowValidationMsg('Enter a programme name and choose a starting point.');return;
+  }
+  if(!e.name.trim()){
+    buildShowValidationMsg('Enter a programme name first.');return;
+  }
+  if(!e._template){
+    buildShowValidationMsg('Choose a starting point.');return;
+  }
   // Apply template auto-population if not blank/custom
   var tplKey=e._template;
   if(BUILD_TEMPLATE_DAYS[tplKey]){
@@ -5401,38 +5409,29 @@ function buildWizardNavFlashNext(btn,step){
   setTimeout(function(){buildGoto(step);},140);
 }
 
+// Show a brief inline validation message in the wizard nav area
+function buildShowValidationMsg(msg){
+  var el=document.getElementById('build-validation-msg');
+  if(!el)return;
+  el.textContent=msg;
+  el.style.opacity='1';
+  el.style.maxHeight='40px';
+  clearTimeout(el._t);
+  el._t=setTimeout(function(){
+    el.style.opacity='0';
+    el.style.maxHeight='0';
+  },2500);
+}
+
 // Update nav button state without full redraw (avoids losing input focus)
 function buildUpdateNavState(){
-  var e=S.customEdit;
-  var canNext=e.name.trim().length>0&&!!e._template;
-  // Find the nav wrapper and rebuild just the buttons
-  var allBtns=document.querySelectorAll('#screen button');
-  allBtns.forEach(function(btn){
-    var oc=btn.getAttribute('onclick')||'';
-    if(oc.indexOf('buildStep0Next')>=0||oc.indexOf('buildGoto')>=0){
-      // This is a nav button — no need to change
-    }
-    if(oc.indexOf('buildStep0Next')>=0){
-      // Next button already exists and active
-    }
-  });
-  // Simpler: just update the nav wrapper by ID
-  var navWrap=document.getElementById('build-wizard-nav');
-  if(!navWrap)return;
-  if(canNext){
-    navWrap.innerHTML=
-      '<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>'+
-      '<button class="btn btn-acc" style="flex:1" onclick="buildStep0Next()">Next →</button>';
-  } else {
-    navWrap.innerHTML=
-      '<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>'+
-      '<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>Next →</button>';
-  }
+  // Nav state is now always active for step 0 — nothing to update
 }
 function buildWizardNav(backStep,nextStep,canNext,hint){
   var backDisabled=(backStep===null||backStep<0);
   var nextDisabled=(nextStep===null||!canNext);
-  var h='<div id="build-wizard-nav" style="display:flex;gap:8px;padding-top:16px;border-top:0.5px solid var(--brd);margin-top:4px">';
+  var h='<div id="build-validation-msg" style="font-size:12px;font-weight:600;color:var(--coral);opacity:0;max-height:0;overflow:hidden;text-align:center;margin-bottom:4px;transition:opacity .2s,max-height .2s"></div>';
+  h+='<div id="build-wizard-nav" style="display:flex;gap:8px;padding-top:16px;border-top:0.5px solid var(--brd);margin-top:4px">';
   // Back
   if(backDisabled){
     h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>← Back</button>';
