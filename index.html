@@ -32,7 +32,7 @@
   --teal:#1D9E75;--teal-bg:#001A12;--teal-brd:#003020;
   --coral:#C85030;--coral-bg:#1C0800;--coral-brd:#2E1200;
   --bg:#0e0e10;--bg2:#16161a;--bg3:#1c1c20;
-  --brd:#242428;--tx:#f0f0f2;--tx2:#a0a0a8;--mu:#505058;
+  --brd:#242428;--tx:#f0f0f2;--tx2:#a0a0a8;--mu:#72727c;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,'SF Pro Text',sans-serif;overflow:hidden}
@@ -52,8 +52,9 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 .card-acc{background:var(--acc-bg);border-color:var(--acc-brd)}
 .card-teal{background:var(--teal-bg);border-color:var(--teal-brd)}
 .card-coral{background:var(--coral-bg);border-color:var(--coral-brd)}
-.btn{display:block;width:100%;padding:14px;border:1px solid var(--acc-brd);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;transition:opacity .15s;background:var(--acc-bg);color:var(--acc)}
-.btn:active{opacity:.75}
+.btn{display:block;width:100%;padding:14px;border:1px solid var(--acc-brd);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;transition:opacity .12s,transform .1s,filter .1s;background:var(--acc-bg);color:var(--acc)}
+.btn:active{opacity:.85;transform:scale(0.97);filter:brightness(0.88)}
+.tap:active{opacity:.7;transform:scale(0.98);transition:transform .1s,opacity .1s}
 .btn-acc{background:var(--acc-bg);border-color:var(--acc-brd);color:var(--acc)}
 .btn-ghost{background:var(--bg3);border:1px solid var(--brd);color:var(--tx2)}
 .btn-teal{background:var(--teal-bg);border:1px solid var(--teal-brd);color:var(--teal)}
@@ -805,6 +806,43 @@ var TPL = [
     exT('Child\'s Pose','1','5min',0,'cooldown')
   ]}
 ]},
+{key:'fat_gym3',name:'Fat Loss Gym 3-Day',cat:'fatloss',desc:'Full body A/B/C — gym based, 3 sessions per week',duration:50,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
+  {label:'Session A',focus:'Full Body (Push Focus)',exercises:[
+    exT('Jump Rope','1','3min',0,'warmup'),ex('Arm Circles',2,15,30,'warmup'),ex('Glute Bridge',2,12,30,'warmup'),
+    ex('Back Squat',4,10,75,'strength'),ex('Barbell Bench Press (Flat)',4,10,75,'strength'),
+    ex('Barbell Row (Overhand)',3,10,75,'strength'),ex('Dumbbell Lateral Raise',3,15,45,'strength'),
+    exT('Plank','3','45s',45,'core'),exT('Assault Bike (Steady State)','1','15min',0,'cardio')
+  ]},
+  {label:'Session B',focus:'Full Body (Pull Focus)',exercises:[
+    exT('High Knees','2','30s',30,'warmup'),ex('Hip Circle',2,10,30,'warmup'),ex('Leg Swing (Forward)',2,10,30,'warmup'),
+    ex('Conventional Deadlift',4,8,90,'strength'),ex('Lat Pulldown (Wide Grip)',4,10,75,'strength'),
+    ex('Dumbbell Bench Press (Incline)',3,12,60,'strength'),ex('Reverse Lunge (Dumbbell)',3,12,60,'strength'),
+    ex('Cable Crunch',3,15,45,'core'),exT('Treadmill (Incline Walk)','1','15min',0,'cardio')
+  ]},
+  {label:'Session C',focus:'Full Body (Legs + Carry)',exercises:[
+    exT('Jump Rope','1','2min',0,'warmup'),ex('Hip Circle',2,10,30,'warmup'),ex('Walking Lunge (Dumbbell)',2,10,45,'warmup'),
+    ex('Leg Press',4,12,60,'strength'),ex('Romanian Deadlift',4,10,75,'strength'),
+    ex('Barbell Overhead Press',3,10,60,'strength'),ex('Cable Row (Seated)',3,12,60,'strength'),
+    exT('Plank','2','45s',45,'core'),exT('Assault Bike (Steady State)','1','15min',0,'cardio')
+  ]}
+]},
+
+{key:'fat_gym2',name:'Fat Loss Gym 2-Day',cat:'fatloss',desc:'Full body A/B — gym based, 2 sessions per week',duration:55,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
+  {label:'Session A',focus:'Full Body — Push & Hinge',exercises:[
+    exT('Jump Rope','1','3min',0,'warmup'),ex('Arm Circles',2,15,30,'warmup'),ex('Glute Bridge',2,12,30,'warmup'),
+    ex('Back Squat',4,10,75,'strength'),ex('Barbell Bench Press (Flat)',4,10,75,'strength'),
+    ex('Romanian Deadlift',4,10,75,'strength'),ex('Barbell Overhead Press',3,12,60,'strength'),
+    exT('Plank','3','45s',45,'core'),exT('Assault Bike (Steady State)','1','20min',0,'cardio')
+  ]},
+  {label:'Session B',focus:'Full Body — Pull & Squat',exercises:[
+    exT('High Knees','2','30s',30,'warmup'),ex('Hip Circle',2,10,30,'warmup'),ex('Leg Swing (Forward)',2,10,30,'warmup'),
+    ex('Conventional Deadlift',4,8,90,'strength'),ex('Lat Pulldown (Wide Grip)',4,10,75,'strength'),
+    ex('Leg Press',3,12,60,'strength'),ex('Cable Row (Seated)',3,12,60,'strength'),
+    ex('Cable Crunch',3,15,45,'core'),exT('Treadmill (Incline Walk)','1','20min',0,'cardio')
+  ]}
+]},
+
+
 
 // ── FOUNDATION ──────────────────────────────────────────────────
 
@@ -1759,6 +1797,8 @@ function obRecommendTPL(ans){
   if(goal.indexOf('fat')>=0||goal.indexOf('Lose')>=0){
     if(equip.indexOf('Bodyweight')>=0)return'fat_home_bw';
     if(isHome)return'fat_home_db';
+    if(days<=2)return'fat_gym2';
+    if(days===3)return'fat_gym3';
     return'fat_gym';
   }
   if(goal.indexOf('muscle')>=0||goal.indexOf('Build')>=0){
@@ -1946,23 +1986,46 @@ function obV(){
   var cl=C();
   var step=cl.ob.step||0;
   var q=OB_QUESTIONS[step];
-  var h='<div style="padding:40px 20px 100px">';
-  h+='<div style="margin-bottom:8px"><span class="lbl">'+
-    (step+1)+' of '+OB_QUESTIONS.length+'</span></div>';
+  var ans=cl.ob.ans;
+  var h='<div style="padding:max(44px,env(safe-area-inset-top)) 20px 120px">';
+  // Progress bar
+  h+='<div style="display:flex;gap:5px;margin-bottom:20px">';
+  for(var _pi=0;_pi<OB_QUESTIONS.length;_pi++){
+    var _done=_pi<step;var _cur=_pi===step;
+    h+='<div style="flex:1;height:3px;border-radius:2px;background:'+(_done||_cur?'var(--acc)':'var(--brd)')+'"></div>';
+  }
+  h+='</div>';
+  h+='<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mu);margin-bottom:8px">'+(step+1)+' of '+OB_QUESTIONS.length+'</div>';
   h+='<div class="h1" style="margin-bottom:28px">'+q.q+'</div>';
   if(q.type==='text'){
-    h+='<input id="ob-text" type="text" placeholder="'+q.ph+'" value="'+(cl.ob.ans[q.id]||'')+'" style="margin-bottom:16px">';
-    h+='<button class="btn btn-acc" onclick="obNext()">Continue →</button>';
+    h+='<input id="ob-text" type="text" placeholder="'+q.ph+'" value="'+(ans[q.id]||'')+'" style="margin-bottom:16px">';
   } else {
-    q.opts.forEach(function(opt,i){
-      var sel=(cl.ob.ans[q.id]===opt)?'background:var(--acc-bg);border-color:var(--acc);':'';
-      h+='<div onclick="obSelect(\''+opt+'\')" style="'+sel+'padding:13px 16px;border-radius:10px;border:0.5px solid var(--brd);margin-bottom:8px;cursor:pointer;transition:background .1s">';
+    q.opts.forEach(function(opt){
+      var isSel=(ans[q.id]===opt);
+      var sel=isSel?'background:var(--acc-bg);border-color:var(--acc);color:var(--acc);':'color:var(--tx);';
+      h+='<div class="tap" onclick="obSelect(\''+opt+'\')" style="'+sel+'padding:13px 16px;border-radius:10px;border:0.5px solid var(--brd);margin-bottom:8px;cursor:pointer;transition:background .1s,transform .1s,opacity .1s">';
       h+='<span style="font-size:14px;font-weight:500">'+opt+'</span></div>';
     });
   }
+  // Fixed Back / Next bar
+  h+='<div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:12px 20px calc(16px + env(safe-area-inset-bottom));background:var(--bg);border-top:0.5px solid var(--brd);display:flex;gap:10px;z-index:50">';
+  if(step>0){
+    h+='<button class="btn btn-ghost" style="flex:1" onclick="obBack()">← Back</button>';
+  } else {
+    h+='<div style="flex:1"></div>';
+  }
+  var canNext=!!(ans[q.id]);
+  var nextLabel=(step===OB_QUESTIONS.length-1)?'Finish ✓':(q.type==='text'?'Continue →':'Next →');
+  if(canNext){
+    h+='<button class="btn btn-acc" style="flex:1" onclick="obNext()">'+nextLabel+'</button>';
+  } else {
+    h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>'+nextLabel+'</button>';
+  }
+  h+='</div>';
   h+='</div>';
   return h;
 }
+
 function obSelect(val){
   var cl=C();var step=cl.ob.step||0;var q=OB_QUESTIONS[step];
   cl.ob.ans[q.id]=val;sv();
@@ -1977,6 +2040,10 @@ function obNext(){
   if(!cl.ob.ans[q.id]&&q.type==='text'){return;}
   if(step<OB_QUESTIONS.length-1){cl.ob.step=step+1;sv();draw();}
   else{obFinish();}
+}
+function obBack(){
+  var cl=C();var step=cl.ob.step||0;
+  if(step>0){cl.ob.step=step-1;sv();draw();}
 }
 function obFinish(){
   var cl=C();
@@ -2947,8 +3014,13 @@ function openExWindow(exIdx){
 
   var h='<div style="padding:0 20px 30px">';
 
-  // Phase eyebrow
-  h+='<div class="lbl lbl-acc" style="margin-bottom:6px">'+(phLabel[ph]||ph.charAt(0).toUpperCase()+ph.slice(1))+'</div>';
+  // Phase eyebrow + skip button row
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+  h+='<div class="lbl lbl-acc">'+(phLabel[ph]||ph.charAt(0).toUpperCase()+ph.slice(1))+'</div>';
+  if(_playing&&!allDone){
+    h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;color:var(--mu);border-color:var(--brd);padding:4px 10px" onclick="skipExercise('+exIdx+')">Skip ↷</button>';
+  }
+  h+='</div>';
 
   // Exercise name
   h+='<div style="font-size:22px;font-weight:800;color:var(--tx);line-height:1.15;margin-bottom:4px">'+exEntry.name+'</div>';
@@ -3296,6 +3368,41 @@ function doLogSet(globalIdx){
   setTimeout(function(){draw();},300);
 } // end doLogSet
 
+function skipExercise(exIdx){
+  var wx=S.wx;if(!wx||!wx.playing)return;
+  // Collect undone sets for this exercise
+  var skipSets=wx.sets.filter(function(s){return s.exIdx===exIdx&&!s.done;});
+  if(!skipSets.length)return;
+  // Remove them from current positions
+  wx.sets=wx.sets.filter(function(s){return!(s.exIdx===exIdx&&!s.done);});
+  // Find the next exercise index (first one with any undone sets remaining)
+  var nextExIdx=-1;
+  for(var i=0;i<wx.exercises.length;i++){
+    if(i===exIdx)continue;
+    var hasPending=wx.sets.some(function(s){return s.exIdx===i&&!s.done;});
+    if(hasPending){nextExIdx=i;break;}
+  }
+  if(nextExIdx<0){
+    // No other exercise has pending sets — put skipped sets at the end
+    wx.sets=wx.sets.concat(skipSets);
+  } else {
+    // Find the position after the last set of nextExIdx, insert skipped sets there
+    var lastNextPos=-1;
+    for(var j=wx.sets.length-1;j>=0;j--){
+      if(wx.sets[j].exIdx===nextExIdx){lastNextPos=j;break;}
+    }
+    var before=wx.sets.slice(0,lastNextPos+1);
+    var after=wx.sets.slice(lastNextPos+1);
+    wx.sets=before.concat(skipSets).concat(after);
+  }
+  // Advance currentSet to first undone
+  var nextUndone=-1;
+  for(var k=0;k<wx.sets.length;k++){if(!wx.sets[k].done){nextUndone=k;break;}}
+  wx.currentSet=nextUndone>=0?nextUndone:0;
+  sv();
+  closeSheet();
+  setTimeout(function(){draw();autoOpenNextEx();},200);
+}
 function logTimedSet(exIdx){
   var wx=S.wx;if(!wx||!wx.playing)return;
   // Stop any running timer first
@@ -4176,10 +4283,10 @@ function buildWizardV(){
     "Choose which phases each day includes — e.g. warm-up, strength, core.",
     "Add exercises to each phase for each day.",
     "Set frequency, equipment, and skill level for each exercise."];
-  h+='<div style="font-size:11px;color:var(--mu);text-align:center;margin-bottom:12px;line-height:1.5">'+(_stepHints[step]||'')+'</div>';
-  h+=buildWizardNav(result.nav.back,result.nav.next,result.nav.canNext,result.nav.hint);
-  h+='<div style="height:20px"></div>';
   h+=result.html;
+  h+='<div style="height:16px"></div>';
+  h+='<div style="font-size:11px;color:var(--mu);text-align:center;margin-bottom:10px;line-height:1.5">'+(_stepHints[step]||'')+'</div>';
+  h+=buildWizardNav(result.nav.back,result.nav.next,result.nav.canNext,result.nav.hint);
   return h;
 }
 
@@ -4479,8 +4586,10 @@ function buildStep2(){
   h+='<span style="color:var(--acc);font-size:13px">▾</span>';
   h+='</div>';
 
-  var canNext=(day.phases||[]).indexOf('strength')>=0;
-  return {html:h,nav:{back:1,next:3,canNext:canNext,hint:'Strength phase is required'}};
+  // Validate ALL days have strength phase, not just the active day
+  var allDaysValid=e.days.every(function(d){return (d.phases||[]).indexOf('strength')>=0;});
+  var hint=allDaysValid?'':'All sessions need a Strength phase';
+  return {html:h,nav:{back:1,next:3,canNext:allDaysValid,hint:hint}};
 }
 
 function buildTogglePhase(di,phKey){
@@ -5465,17 +5574,33 @@ function checkAdminPIN(){var v=document.getElementById('pin-in').value;if(v===S.
 function deactivateAdmin(){S.admin.active=false;sv();closeTopSheet();draw();}
 function changePIN(){S.admin.set=false;S.admin.pin='';S.admin.active=false;sv();closeTopSheet();}
 function editNotice(){
-  var h='<div style="padding:0 20px 20px">';
-  h+='<input type="text" id="n-title" value="'+(S.notice.title||'')+'" placeholder="Notice title" style="margin-bottom:8px">';
-  h+='<textarea id="n-body" rows="4" placeholder="Notice message…" style="margin-bottom:8px">'+(S.notice.body||'')+'</textarea>';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">';
-  h+='<span style="font-size:13px;font-weight:600">Show notice</span>';
-  h+='<button class="toggle '+(S.notice.active?'toggle-on':'toggle-off')+'" onclick="S.notice.active=!S.notice.active;sv()"><div class="toggle-knob"></div></button>';
+  var h='<div style="padding:0 20px 24px">';
+  h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:12px 14px;margin-bottom:16px">';
+  h+='<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mu);margin-bottom:6px">CURRENT NOTICE</div>';
+  if(S.notice.title||S.notice.body){
+    h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px">'+(S.notice.title||'(no title)')+'</div>';
+    h+='<div style="font-size:12px;color:var(--tx2)">'+(S.notice.body||'')+'</div>';
+    h+='<div style="margin-top:6px;font-size:11px;color:'+(S.notice.active?'var(--teal)':'var(--mu)')+'">'+(S.notice.active?'● Active':'○ Inactive')+'</div>';
+  } else {
+    h+='<div style="font-size:12px;color:var(--mu)">No notice loaded yet</div>';
+  }
   h+='</div>';
-  h+='<button class="btn btn-acc" onclick="saveNotice()">Save</button>';
+  h+='<div style="background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:10px;padding:12px 14px;margin-bottom:16px">';
+  h+='<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--acc);margin-bottom:6px">HOW TO UPDATE</div>';
+  h+='<div style="font-size:12px;color:var(--tx2);line-height:1.7">';
+  h+='1. Edit <a href="https://github.com/Pieter800320/train/edit/main/notice.json" target="_blank" style="color:var(--acc);font-weight:600">notice.json on GitHub</a><br>';
+  h+='2. Set <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">active: true</code> with your title &amp; body<br>';
+  h+='3. Commit — all clients see it on next refresh';
+  h+='</div></div>';
+  h+='<button class="btn btn-ghost" style="margin-bottom:16px" onclick="fetchRemoteNotice();var b=this;b.textContent=\'Refreshing…\';setTimeout(function(){closeSheet();editNotice();},1400)">↻ Refresh from GitHub</button>';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:0.5px solid var(--brd)">';
+  h+='<span style="font-size:13px;font-weight:600;color:var(--tx2)">Show notice</span>';
+  h+='<button class="toggle '+(S.notice.active?'toggle-on':'toggle-off')+'" onclick="S.notice.active=!S.notice.active;sv();draw()"><div class="toggle-knob"></div></button>';
   h+='</div>';
-  openTopSheet(h);
+  h+='</div>';
+  openSheet(h,'Notice');
 }
+
 function saveNotice(){S.notice.title=document.getElementById('n-title').value;S.notice.body=document.getElementById('n-body').value;sv();closeTopSheet();draw();}
 
 // ═══════════════════════════════════════════════════════════════
@@ -6298,6 +6423,24 @@ function initPullToRefresh(){
   });
 }
 
+
+// ── Remote Notice Fetch ──────────────────────────────────────
+// Fetches notice.json from GitHub repo and merges into S.notice
+function fetchRemoteNotice(){
+  var url='https://raw.githubusercontent.com/Pieter800320/train/main/notice.json';
+  fetch(url+'?t='+Date.now())
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(data){
+      if(!data)return;
+      // Merge remote into S.notice — remote wins
+      S.notice=S.notice||{};
+      S.notice.title=data.title||'';
+      S.notice.body=data.body||'';
+      S.notice.active=!!(data.active);
+      sv();draw();
+    })
+    .catch(function(){/* offline — use local S.notice */});
+}
 // BOOT
 // ═══════════════════════════════════════════════════════════════
 ld();
@@ -6306,6 +6449,40 @@ draw();
 initPullToRefresh();
 initSheetsBindings();
 initTopSheetBindings();
+fetchRemoteNotice();
+// ── Android Back Button Handler ──────────────────────────────
+// Push an initial state so we can intercept the first back press
+history.pushState({app:true},'','');
+
+window.addEventListener('popstate',function(e){
+  // If a bottom sheet is open, close it instead of navigating away
+  var sheet=document.getElementById('sheet');
+  var overlay=document.getElementById('sheet-overlay');
+  if(sheet&&sheet.classList.contains('show')){
+    closeSheet();
+    history.pushState({app:true},'','');
+    return;
+  }
+  // If a top sheet is open, close it
+  var topSheet=document.getElementById('sheet-top');
+  if(topSheet&&topSheet.classList.contains('show')){
+    closeTopSheet();
+    history.pushState({app:true},'','');
+    return;
+  }
+  // Navigate tabs: today→home, programs/build/timer→today, home = do nothing (let app close)
+  var tabOrder=['home','today','programs','build','timer'];
+  var cur=S.tab||'home';
+  var prevMap={today:'home',programs:'today',build:'today',timer:'today'};
+  if(prevMap[cur]){
+    S.tab=prevMap[cur];sv();draw();
+    history.pushState({app:true},'','');
+    return;
+  }
+  // On home tab with no sheets — let the OS handle it (app closes naturally)
+  // Don't push state, so the next back press exits
+});
+
 
 // Service Worker registration
 if('serviceWorker' in navigator){
