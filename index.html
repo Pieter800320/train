@@ -768,7 +768,7 @@ var TPL = [
   ]}
 ]},
 
-{key:'fat_home_db',name:'Fat Loss Home Dumbbells',cat:'fatloss',desc:'Full body dumbbell circuit 4 days per week',duration:45,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
+{key:'fat_home_db',name:'Fat Loss Home Dumbbells (4-Day Rotation)',cat:'fatloss',desc:'Full body dumbbell circuit — A/B/C/D rotating cycle, use 4 days per week',duration:45,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Body Dumbbell Circuit',exercises:[
     exT('Jump Rope','1','3min',0,'warmup'),ex('Hip Circle',2,10,30,'warmup'),
     exT('Goblet Squat (Dumbbell)','3','50s',10,'strength'),exT('Dumbbell Front Raise','3','50s',10,'strength'),
@@ -839,6 +839,129 @@ var TPL = [
     ex('Conventional Deadlift',4,8,90,'strength'),ex('Lat Pulldown (Wide Grip)',4,10,75,'strength'),
     ex('Leg Press',3,12,60,'strength'),ex('Cable Row (Seated)',3,12,60,'strength'),
     ex('Cable Crunch',3,15,45,'core'),exT('Treadmill (Incline Walk)','1','20min',0,'cardio')
+  ]}
+]},
+
+
+// ── 2-DAY HYPERTROPHY ────────────────────────────────────────────
+// Evidence basis: Schoenfeld 2016 — 2×/week frequency sufficient for hypertrophy.
+// Upper/Lower split. Each session: 4–6 compound lifts + 3–4 isolation accessories.
+// Rep ranges 8–12 strength, 12–15 accessories. Rest 90s compounds, 60s accessories.
+// Volume: ~18–22 sets per session compensates for fewer training days.
+
+{key:'hyp_2day',name:'Hypertrophy 2-Day',cat:'hypertrophy',desc:'Upper/Lower split — 2 sessions per week, high volume, gym based',duration:75,defaultPlan:'wave_3_1',compatiblePlans:['wave_3_1','maintenance'],days:[
+  {label:'Session A',focus:'Upper Body',exercises:[
+    ex('Band Pull-Apart',2,20,30,'warmup','Retract scapula fully at peak.'),
+    ex('Scapular Push-Up',2,12,30,'warmup'),
+    ex('Barbell Bench Press (Flat)',4,10,90,'strength','Control the descent — 2 seconds down. Full range of motion.'),
+    ex('Barbell Row (Overhand)',4,10,90,'strength','Hinge to 45°. Pull bar to lower chest. Squeeze at the top.'),
+    ex('Dumbbell Bench Press (Incline)',3,12,75,'strength','Elbows at 60°. Full stretch at bottom.'),
+    ex('Lat Pulldown (Wide Grip)',3,12,75,'strength','Pull to upper chest. Full hang at top.'),
+    ex('Barbell Overhead Press',3,12,75,'strength','Brace core. Bar path: straight up, head through the window.'),
+    ex('Seated Cable Row',3,15,60,'accessory','Drive elbows behind you. Pause 1s at peak contraction.'),
+    ex('Dumbbell Lateral Raise',4,15,60,'accessory','Lead with elbow. Stop at shoulder height.'),
+    ex('Rear Delt Fly (Dumbbell)',3,15,60,'accessory','Slight elbow bend. Think elbow — not hand.'),
+    ex('Cable Tricep Pushdown (Rope)',3,15,60,'accessory','Flare rope at bottom. Full elbow extension.'),
+    ex('Dumbbell Bicep Curl',3,15,60,'accessory','Supinate at top. No swinging.'),
+    ex('Dead Bug',3,10,45,'core'),
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Kneeling Lat Stretch',2,0,0,'cooldown',null,'30s')
+  ]},
+  {label:'Session B',focus:'Lower Body',exercises:[
+    ex('Glute Bridge (Bodyweight)',2,15,30,'warmup','Full hip extension. Squeeze at top.'),
+    ex('Leg Swing (Forward)',2,10,30,'warmup'),
+    ex('Goblet Squat (Dumbbell)',2,8,45,'warmup','Primer sets — moderate weight, feel the depth.'),
+    ex('Back Squat',4,10,90,'strength','Sit between your knees. Drive the floor away. Chest tall.'),
+    ex('Romanian Deadlift (Barbell)',4,10,90,'strength','Push hips back first. Bar stays close. Squeeze glutes at top.'),
+    ex('Leg Press',4,12,75,'strength','Full range. Feet shoulder-width. Do not lock knees.'),
+    ex('Bulgarian Split Squat (Dumbbell)',3,12,75,'strength','Rear foot elevated. Front shin vertical. Full depth.'),
+    ex('Leg Curl (Machine, Prone)',4,15,60,'accessory','Full range. Slow eccentric — 3s down.'),
+    ex('Hip Thrust (Dumbbell)',3,15,75,'accessory','Full hip extension. Chin to chest. Squeeze 1s at top.'),
+    ex('Leg Extension (Machine)',3,15,60,'accessory','Full extension. 1s pause. 2s eccentric.'),
+    ex('Calf Raise (Standing, Machine)',4,20,45,'accessory','Full range — heel drop to full toe raise. 1s pause at top.'),
+    ex('Plank',3,0,60,'core','Squeeze everything. This is not a rest.','45s'),
+    ex('Bird Dog',3,10,45,'core','Opposite arm and leg. Hold 2s. Control the return.'),
+    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'45s'),
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s')
+  ]}
+]},
+
+// ── 2-DAY ENDURANCE / FITNESS ────────────────────────────────────
+// Evidence basis: ACSM Guidelines for Exercise Testing and Prescription (11th ed).
+// 2×/week concurrent training: strength-endurance circuit + dedicated cardio/core day.
+// Session A: compound metabolic circuit, moderate loads, 45s work/30s rest.
+// Session B: longer aerobic effort + anti-rotation and bracing core work.
+// Supports VO2max improvement, body composition, and general cardiovascular health.
+
+{key:'end_2day',name:'Fitness 2-Day',cat:'endurance',desc:'Strength-endurance circuit + cardio day — 2 sessions per week',duration:55,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
+  {label:'Session A',focus:'Full Body Metabolic Circuit',exercises:[
+    exT('Jump Rope','1','3min',0,'warmup'),
+    ex('Arm Circles',2,15,20,'warmup'),
+    ex('Hip Circle',2,10,20,'warmup'),
+    exT('Goblet Squat (Dumbbell)','4','45s',30,'strength','Keep chest up. Elbows inside knees.'),
+    exT('Push-Up','4','45s',30,'strength','Straight line from head to heel. Full range.'),
+    exT('Dumbbell Row (Single-Arm)','4','45s',30,'strength','Brace on bench. Pull elbow to hip.'),
+    exT('Romanian Deadlift (Dumbbell)','4','45s',30,'strength','Hip hinge pattern. Soft knees. Feel the hamstrings load.'),
+    exT('Dumbbell Overhead Press (Standing)','4','45s',30,'strength','Brace core. Lock out overhead.'),
+    exT('Reverse Lunge (Dumbbell)','3','45s',30,'strength','Control descent. Drive through front heel to stand.'),
+    exT('Mountain Climbers','3','40s',20,'cardio','Drive knees to chest. Hips level.'),
+    exT('Plank','3','45s',30,'core'),
+    exT('Burpee','3','30s',30,'cardio','Full hip extension at top. Soft landing.'),
+    ex('Child\'s Pose',1,0,0,'cooldown',null,'2min')
+  ]},
+  {label:'Session B',focus:'Cardio + Core',exercises:[
+    exT('High Knees','2','30s',30,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Hip Circle',2,10,20,'warmup'),
+    exT('Assault Bike (Steady State)','1','25min',0,'cardio','Maintain conversational pace. Nasal breathing if possible.'),
+    ex('Plank',3,0,60,'core','Full body tension. Breathe through it.','50s'),
+    ex('Dead Bug',3,10,45,'core','Press lower back into floor throughout.'),
+    ex('Pallof Press (Standing)',3,12,45,'core','Full extension. Resist rotation. Controlled return.'),
+    ex('Bird Dog',3,10,45,'core','Opposite arm and leg. Hold 2s at extension.'),
+    ex('Reverse Crunch',3,15,45,'core','Curl pelvis — not spine. Control the descent.'),
+    ex('Hollow Body Hold',2,0,45,'core','Lower back stays down. Breathe.','30s'),
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'40s'),
+    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'40s'),
+    ex('Child\'s Pose',1,0,0,'cooldown',null,'2min')
+  ]}
+]},
+
+// ── 2-DAY FAT LOSS BODYWEIGHT ─────────────────────────────────────
+// Evidence basis: Trapp et al. 2008 — HIIT 3×/week superior to steady-state for
+// fat loss; Boutcher 2011 — bodyweight HIIT effective with 2 sessions/week minimum.
+// A/B alternate push/hinge and pull/squat emphasis.
+// Work:rest = 40s:20s (Tabata-derived, modified for beginners).
+// Finisher: 10-min steady-state cardio to extend fat-burning window post-HIIT.
+
+{key:'fat_bw_2day',name:'Fat Loss Bodyweight 2-Day',cat:'fatloss',desc:'HIIT metabolic circuits — no equipment, 2 sessions per week',duration:40,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
+  {label:'Session A',focus:'Push + Hinge HIIT',exercises:[
+    exT('High Knees','2','30s',30,'warmup'),
+    ex('Arm Circles',2,15,20,'warmup'),
+    ex('Glute Bridge (Bodyweight)',2,15,30,'warmup'),
+    exT('Push-Up','4','40s',20,'strength','Full range. Keep hips level. Modify on knees if needed.'),
+    exT('Jump Squat','4','40s',20,'cardio','Land softly with bent knees. Full extension at top.'),
+    exT('Reverse Lunge (Bodyweight)','4','40s',20,'strength','Alternate legs. Control the descent. Knee does not touch floor.'),
+    exT('Mountain Climbers','4','40s',20,'cardio','Drive knees to chest. Hips level throughout.'),
+    exT('Plank','3','40s',20,'core'),
+    exT('Burpee','3','40s',20,'cardio','Step out if needed. Controlled pace beats sloppy speed.'),
+    exT('High Knees','1','10min',0,'cardio','Moderate steady-state pace. Finish strong.'),
+    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s'),
+    ex('Child\'s Pose',1,0,0,'cooldown',null,'90s')
+  ]},
+  {label:'Session B',focus:'Pull + Squat HIIT',exercises:[
+    exT('Jump Rope','2','1min',30,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Hip Circle',2,10,20,'warmup'),
+    exT('Inverted Row (Bodyweight)','4','40s',20,'strength','Use a table edge or low bar. Pull chest to hands.'),
+    exT('Squat-to-Stand','1','2min',0,'warmup','Slow and deliberate. Open hips.'),
+    exT('Bodyweight Squat','4','40s',20,'strength','Full depth. Drive knees out. Chest up.'),
+    exT('Split Squat Jump','4','40s',20,'cardio','Explosive. Switch legs in air. Land controlled.'),
+    exT('Hollow Body Hold','3','30s',20,'core','Lower back flat on floor. Breathe.'),
+    exT('Reverse Crunch','3','40s',20,'core','Curl the pelvis. Slow on the way down.'),
+    exT('Burpee','3','40s',20,'cardio'),
+    exT('High Knees','1','10min',0,'cardio','Moderate steady-state to close out. Keep moving.'),
+    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'40s'),
+    ex('Child\'s Pose',1,0,0,'cooldown',null,'90s')
   ]}
 ]},
 
@@ -1769,61 +1892,90 @@ var OB_QUESTIONS=[
   {id:'context',q:'Anything else the programme should account for?',type:'choice',opts:['Nothing — standard plan is fine','I am over 60 or have joint concerns','I am returning after a long break (3+ months off)','I have very limited time (30 min max per session)']}
 ];
 function obRecommendTPL(ans){
-  var goal=ans.goal||'';var days=parseInt(ans.days)||3;var equip=ans.equipment||'';var level=ans.level||'';var ctx=ans.context||'';
-  var isAdv=level.indexOf('Advanced')>=0||level.indexOf('Intermediate')>=0;
-  var isBeginner=level.indexOf('beginner')>=0||level.indexOf('Beginner')>=0;
-  var isHome=equip.indexOf('Dumbbells only')>=0||equip.indexOf('Dumbbells +')>=0||equip.indexOf('Bodyweight')>=0||equip.indexOf('Kettlebells')>=0;
-  var isFullGym=equip.indexOf('Full gym')>=0;
+  var goal=ans.goal||'';
+  var days=parseInt((ans.days||'3 days').split(' ')[0])||3;
+  var equip=ans.equipment||'';
+  var level=ans.level||'';
+  var ctx=ans.context||'';
+  var injuries=ans.injuries||'';
 
-  // Rehab goal takes absolute priority — must not be overridden by context
+  var isAdv=level.indexOf('Advanced')>=0||level.indexOf('Intermediate')>=0;
+  var isBeginner=level.indexOf('beginner')>=0||level.indexOf('Beginner')>=0||level.indexOf('Some experience')>=0;
+  var isHome=equip.indexOf('Dumbbells only')>=0||equip.indexOf('Dumbbells +')>=0||equip.indexOf('Bodyweight')>=0||equip.indexOf('Kettlebells')>=0;
+  var isBodyweight=equip.indexOf('Bodyweight')>=0;
+  var isFullGym=equip.indexOf('Full gym')>=0||equip.indexOf('barbells')>=0;
+
+  // ── Rehab — takes absolute priority ──────────────────────────
   if(goal.indexOf('Rehab')>=0){
-    if(ans.injuries&&ans.injuries.indexOf('Lower back')>=0)return'rhb_back';
-    if(ans.injuries&&ans.injuries.indexOf('Knee')>=0)return'rhb_knee';
+    if(injuries.indexOf('Lower back')>=0)return'rhb_back';
+    if(injuries.indexOf('Knee')>=0)return'rhb_knee';
     return'rhb_sho';
   }
 
-  // Context overrides (only for non-rehab goals)
+  // ── Context overrides (non-rehab) ─────────────────────────────
   if(ctx.indexOf('over 60')>=0||ctx.indexOf('joint')>=0)return'fnd_senior';
   if(ctx.indexOf('returning')>=0||ctx.indexOf('long break')>=0)return'fnd_return';
   if(ctx.indexOf('30 min')>=0)return'fnd_30min';
+
+  // ── Sport performance ─────────────────────────────────────────
   if(goal.indexOf('sport')>=0||goal.indexOf('Sport')>=0){
     if(equip.indexOf('Climbing')>=0)return'spt_climb';
     if(days<=2)return'spt_run';
-    return'spt_jump';
+    return'spt_jump'; // 3-day; best available for sport
   }
+
+  // ── Improve fitness / Endurance ───────────────────────────────
   if(goal.indexOf('fitness')>=0||goal.indexOf('Improve')>=0){
-    if(days<=3)return'end_b3';if(days===4)return'end_b4';return'end_b5';
+    if(days<=2)return'end_2day';
+    if(days===3)return'end_b3';
+    if(days===4)return'end_b4';
+    return'end_b5'; // covers 5 and 6 days
   }
+
+  // ── Lose fat ──────────────────────────────────────────────────
   if(goal.indexOf('fat')>=0||goal.indexOf('Lose')>=0){
-    if(equip.indexOf('Bodyweight')>=0)return'fat_home_bw';
-    if(isHome)return'fat_home_db';
+    if(isBodyweight){
+      if(days<=2)return'fat_bw_2day'; // dedicated 2-day bodyweight HIIT fat loss
+      return'fat_home_bw'; // 5-day rotating bodyweight programme
+    }
+    if(isHome){
+      if(days<=2)return'fat_gym2'; // closest 2-day to home dumbbells
+      return'fat_home_db';
+    }
     if(days<=2)return'fat_gym2';
     if(days===3)return'fat_gym3';
-    return'fat_gym';
+    return'fat_gym'; // 4-day; also fine for 5-6 day users who want fat focus
   }
+
+  // ── Build muscle / Hypertrophy ────────────────────────────────
   if(goal.indexOf('muscle')>=0||goal.indexOf('Build')>=0){
-    if(isHome)return isBeginner?'fnd_home_db':'str_db3';
-    if(days<=3)return'hyp_b3';if(days===4)return'hyp_b4';return'hyp_b5';
+    if(isHome){
+      if(days<=2)return'fnd_2day'; // best 2-day option for home
+      return isBeginner?'fnd_home_db':'str_db3';
+    }
+    if(days<=2)return isBeginner?'fnd_2day':'hyp_2day'; // dedicated hypertrophy 2-day for gym
+    if(days===3)return'hyp_b3';
+    if(days===4)return'hyp_b4';
+    return'hyp_b5'; // covers 5 and 6 days
   }
-  // strength / general health
+
+  // ── Get stronger / General health (explicit + fallthrough) ────
   if(isBeginner){
     if(days<=2)return'fnd_2day';
     if(isHome)return'fnd_home_db';
     return'fnd_beg';
   }
-  if(equip.indexOf('Bodyweight')>=0)return'fnd_beg';
+  if(isBodyweight)return days<=2?'fnd_2day':'fnd_beg';
   if(days<=2)return'fnd_2day';
   if(days===3){
     if(isHome)return'str_db3';
     return isAdv?'str_b3':'fnd_beg';
   }
-  if(days===4){
-    // Upper/lower is the gold standard for 4-day intermediate
-    return isAdv?'str_ul4':'str_b4';
-  }
+  if(days===4)return isAdv?'str_ul4':'str_b4';
   if(days===5)return isAdv?'str_b5':'str_b4';
-  return'str_b5';
+  return isAdv?'str_b5':'str_b4'; // 6-day: best available is 5-day strength
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 // DRUM COMPONENT
@@ -1998,11 +2150,15 @@ function obV(){
   h+='<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mu);margin-bottom:8px">'+(step+1)+' of '+OB_QUESTIONS.length+'</div>';
   h+='<div class="h1" style="margin-bottom:28px">'+q.q+'</div>';
   if(q.type==='text'){
-    h+='<input id="ob-text" type="text" placeholder="'+q.ph+'" value="'+(ans[q.id]||'')+'" style="margin-bottom:16px">';
+    // oninput writes live to ans so canNext updates without re-render
+    h+='<input id="ob-text" type="text" placeholder="'+q.ph+'" value="'+(ans[q.id]||'')+'" '
+     +'oninput="C().ob.ans[\''+q.id+'\']=this.value.trim();var nb=document.getElementById(\'ob-next-btn\');if(nb){if(this.value.trim()){nb.disabled=false;nb.className=\'btn btn-acc\';nb.style.opacity=\'1\';}else{nb.disabled=true;nb.className=\'btn btn-ghost\';nb.style.opacity=\'0.35\';}}" '
+     +'style="margin-bottom:16px">';
   } else {
     q.opts.forEach(function(opt){
       var isSel=(ans[q.id]===opt);
       var sel=isSel?'background:var(--acc-bg);border-color:var(--acc);color:var(--acc);':'color:var(--tx);';
+      // No auto-advance — just select and let user press Next
       h+='<div class="tap" onclick="obSelect(\''+opt+'\')" style="'+sel+'padding:13px 16px;border-radius:10px;border:0.5px solid var(--brd);margin-bottom:8px;cursor:pointer;transition:background .1s,transform .1s,opacity .1s">';
       h+='<span style="font-size:14px;font-weight:500">'+opt+'</span></div>';
     });
@@ -2014,13 +2170,11 @@ function obV(){
   } else {
     h+='<div style="flex:1"></div>';
   }
-  var canNext=!!(ans[q.id]);
-  var nextLabel=(step===OB_QUESTIONS.length-1)?'Finish ✓':(q.type==='text'?'Continue →':'Next →');
-  if(canNext){
-    h+='<button class="btn btn-acc" style="flex:1" onclick="obNext()">'+nextLabel+'</button>';
-  } else {
-    h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled>'+nextLabel+'</button>';
-  }
+  var canNext=(q.type==='text')?(!!ans[q.id]):(!!ans[q.id]);
+  // For text: button starts disabled if field empty, enabled if pre-filled
+  var nextLabel=(step===OB_QUESTIONS.length-1)?'Finish ✓':'Continue →';
+  var nextDisabled=!canNext;
+  h+='<button id="ob-next-btn" class="btn '+(nextDisabled?'btn-ghost':'btn-acc')+'" style="flex:1'+(nextDisabled?';opacity:0.35':'')+'" '+(nextDisabled?'disabled':'')+' onclick="obNext()">'+nextLabel+'</button>';
   h+='</div>';
   h+='</div>';
   return h;
@@ -2028,16 +2182,17 @@ function obV(){
 
 function obSelect(val){
   var cl=C();var step=cl.ob.step||0;var q=OB_QUESTIONS[step];
-  cl.ob.ans[q.id]=val;sv();
-  setTimeout(function(){obNext();},150);
+  cl.ob.ans[q.id]=val;sv();draw();
 }
 function obNext(){
   var cl=C();var step=cl.ob.step||0;var q=OB_QUESTIONS[step];
   if(q.type==='text'){
     var v=document.getElementById('ob-text');
-    if(v)cl.ob.ans[q.id]=v.value.trim();
+    var val=v?v.value.trim():'';
+    if(!val)return; // guard: don't advance with empty name
+    cl.ob.ans[q.id]=val;
   }
-  if(!cl.ob.ans[q.id]&&q.type==='text'){return;}
+  if(!cl.ob.ans[q.id])return;
   if(step<OB_QUESTIONS.length-1){cl.ob.step=step+1;sv();draw();}
   else{obFinish();}
 }
@@ -2062,29 +2217,50 @@ function obShowRecommendation(recKey,ans){
   var cl=C();
   var tpl=getTPL(recKey);
   if(!tpl)return;
-  // Find other compatible programmes (same category or close)
+  var requestedDays=parseInt((ans.days||'3 days').split(' ')[0])||3;
+  var actualDays=tpl.days.length;
+  var daysMismatch=actualDays!==requestedDays;
+
+  // Other good fits: same category, sorted by proximity to requested days
   var others=TPL.filter(function(t){
     return t.key!==recKey&&t.cat===tpl.cat&&t.days&&t.days.length>0;
+  }).sort(function(a,b){
+    return Math.abs(a.days.length-requestedDays)-Math.abs(b.days.length-requestedDays);
   }).slice(0,3);
-  var h='<div style="padding:0 20px 30px">';
-  // Recommendation
-  h+='<div style="text-align:center;margin-bottom:20px">';
 
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="text-align:center;margin-bottom:20px">';
   h+='<div style="font-size:18px;font-weight:800;color:var(--tx);margin-bottom:4px">Your programme is ready</div>';
   h+='<div style="font-size:13px;color:var(--mu)">Based on your answers, we recommend:</div>';
   h+='</div>';
-  h+='<div style="background:var(--acc-bg);border:1px solid var(--acc-brd);border-radius:12px;padding:14px 16px;margin-bottom:16px">';
+
+  // Main recommendation card
+  h+='<div style="background:var(--acc-bg);border:1px solid var(--acc-brd);border-radius:12px;padding:14px 16px;margin-bottom:'+(daysMismatch?'8px':'16px')+'">';
   h+='<div style="font-size:15px;font-weight:800;color:var(--acc);margin-bottom:4px">'+tpl.name+'</div>';
   h+='<div style="font-size:12px;color:var(--mu)">'+tpl.desc+'</div>';
-  h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">'+tpl.days.length+' sessions/week · ~'+tpl.duration+' min per session</div>';
+  h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">'+actualDays+' sessions/week · ~'+tpl.duration+' min per session</div>';
   h+='</div>';
+
+  // Days mismatch note — with coaching context for common cases
+  if(daysMismatch){
+    var mismatchMsg='ⓘ You asked for '+requestedDays+' days — this is our closest '+actualDays+'-day match. See alternatives below.';
+    var isBegRec=recKey==='fnd_beg'||recKey==='fnd_home_db'||recKey==='fnd_2day'||recKey==='fnd_return';
+    var isHighDayBeginner=isBegRec&&requestedDays>=4;
+    if(isHighDayBeginner){
+      mismatchMsg='ⓘ As a beginner, '+actualDays+' days is the sweet spot. More frequency before your body adapts leads to overtraining and slower progress — not faster. Start here and progress from there.';
+    }
+    h+='<div style="font-size:12px;color:var(--mu);background:var(--bg3);border:0.5px solid var(--brd);border-radius:8px;padding:8px 12px;margin-bottom:16px">';
+    h+=mismatchMsg;
+    h+='</div>';
+  }
+
   if(others.length>0){
     h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--mu);margin-bottom:8px">OTHER GOOD FITS</div>';
     others.forEach(function(t){
       h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px">';
       h+='<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+t.name+'</div>';
       h+='<div style="font-size:11px;color:var(--mu)">'+t.days.length+' days · '+t.duration+'min</div></div>';
-      h+='<button class="btn btn-ghost btn-sm" onclick="switchTPL(\''+t.key+'\')">Load</button>';
+      h+='<button class="btn btn-ghost btn-sm" data-key="'+t.key+'" onclick="switchTPL(this.dataset.key);closeSheet()">Load</button>';
       h+='</div>';
     });
     h+='<div style="height:8px"></div>';
@@ -2098,6 +2274,8 @@ function obShowRecommendation(recKey,ans){
   h+='</div>';
   openSheet(h,'Welcome, '+(cl.name||'Athlete')+'!');
 }
+
+
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -5624,10 +5802,10 @@ function draw(){
   // Onboarding gate
   if(!cl.ob.done){
     screen.innerHTML=obV();
-    document.getElementById('tabbar').style.opacity='0.3';
+    document.getElementById('tabbar').style.display='none';
     bindScreen();return;
   }
-  document.getElementById('tabbar').style.opacity='1';
+  document.getElementById('tabbar').style.display='';document.getElementById('tabbar').style.opacity='1';
 
   // Tab content
   var content='';
