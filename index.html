@@ -1829,8 +1829,16 @@ function startSession(){
   var dayIdx=cl.day%tpl.days.length;
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
+  // Sort exercises into canonical phase display order so the player queue
+  // matches what todayV renders. Non-destructive — does not mutate the TPL.
+  var orderedExercises=day.exercises.slice().sort(function(a,b){
+    var ai=_PH_ORDER.indexOf(a.ph||'strength');
+    var bi=_PH_ORDER.indexOf(b.ph||'strength');
+    if(ai<0)ai=_PH_ORDER.length;if(bi<0)bi=_PH_ORDER.length;
+    return ai-bi;
+  });
   var setsData=[];
-  day.exercises.forEach(function(exEntry,ei){
+  orderedExercises.forEach(function(exEntry,ei){
     var volMod=banner?banner.volMod:1;
     var sets=Math.max(1,Math.round((exEntry.sets||1)*volMod));
     for(var s=0;s<sets;s++){
@@ -1838,7 +1846,7 @@ function startSession(){
     }
   });
   _restCirclePos={x:null,y:null}; // reset to default position for each new session
-  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:day.exercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},skipped:{},playing:false};
+  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:orderedExercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},skipped:{},playing:false};
   sv();draw();
 }
 function enterPlayMode(){
@@ -2965,7 +2973,9 @@ function todayV(){
     });
     var _lastPh=null;
     sortedExercises.forEach(function(exEntry){
-      var origIdx=day.exercises.indexOf(exEntry);
+      // Look up in wx.exercises (phase-sorted) so exIdx matches the player queue
+      var wxExs=isPlaying&&S.wx?S.wx.exercises:null;
+      var origIdx=wxExs?wxExs.indexOf(exEntry):day.exercises.indexOf(exEntry);
       var _curPh=exEntry.ph||'strength';
       if(_curPh!==_lastPh){h+='<div class="phase-head">'+phaseLabels[_curPh]+'</div>';_lastPh=_curPh;}
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
@@ -3007,7 +3017,8 @@ function todayV(){
       if(exsInPhase.length===0)return;
       h+='<div class="phase-head">'+phaseLabels[ph]+'</div>';
       exsInPhase.forEach(function(exEntry){
-        var origIdx=day.exercises.indexOf(exEntry);
+        var wxExs=isPlaying&&S.wx?S.wx.exercises:null;
+        var origIdx=wxExs?wxExs.indexOf(exEntry):day.exercises.indexOf(exEntry);
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
       var isActive=isPlaying&&origIdx===activeExIdx&&!isDone;
       var vol=exEntry.vol||'';
@@ -3754,37 +3765,37 @@ function stopExTimer(){
 // ═══════════════════════════════════════════════════════════════
 var _restCircleTick=null;
 var _restCirclePos={x:null,y:null}; // null = default position
+var _restCircleRAF=null;
 
 function startRestCircle(totalSecs){
   if(!S.wx||!S.wx.playing)return; // no REST circle in VIEW mode
-  if(_restCircleTick){clearInterval(_restCircleTick);_restCircleTick=null;}
+  if(_restCircleRAF){cancelAnimationFrame(_restCircleRAF);_restCircleRAF=null;}
   renderRestCircle(totalSecs,totalSecs);
-  _restCircleTick=setInterval(function(){
+  // Drive ring via RAF for smooth linear countdown — no CSS transition lag
+  var r=36;var circ=2*Math.PI*r;
+  function rafTick(){
     var wx=S.wx;
     if(!wx||!wx.restActive){
-      clearInterval(_restCircleTick);_restCircleTick=null;
       removeRestCircle();return;
     }
-    var rem=Math.max(0,Math.ceil((wx.restEnd-Date.now())/1000));
-    // Update text
+    var now=Date.now();
+    var rem=Math.max(0,(wx.restEnd-now)/1000); // continuous, not ceil
+    var pct=rem/totalSecs;
     var el=document.getElementById('rest-circle-secs');
-    if(el)el.textContent=rem;
-    // Update ring
+    if(el)el.textContent=Math.ceil(rem);
     var ring=document.getElementById('rest-circle-ring');
-    if(ring){
-      var pct=rem/totalSecs;
-      var r=28;var circ=2*Math.PI*r;
-      ring.style.strokeDashoffset=circ*(1-pct);
-    }
-    if(rem<=0||Date.now()>=wx.restEnd){
+    if(ring)ring.style.strokeDashoffset=circ*(1-pct);
+    if(now>=wx.restEnd){
       wx.restActive=false;sv();
-      clearInterval(_restCircleTick);_restCircleTick=null;
+      if(_restCircleRAF){cancelAnimationFrame(_restCircleRAF);_restCircleRAF=null;}
       removeRestCircle();
       draw();
-      // Auto-open next exercise window
       setTimeout(function(){autoOpenNextEx();},350);
+      return;
     }
-  },500);
+    _restCircleRAF=requestAnimationFrame(rafTick);
+  }
+  _restCircleRAF=requestAnimationFrame(rafTick);
 }
 
 function renderRestCircle(rem,total){
@@ -3810,7 +3821,7 @@ function renderRestCircle(rem,total){
         ' stroke-dashoffset="'+(circ*(1-pct))+'"'+
         ' stroke-linecap="round"'+
         ' transform="rotate(-90 '+(SIZE/2)+' '+(SIZE/2)+')"'+
-        ' style="transition:stroke-dashoffset .5s linear"/>'+
+        '/>'+
     '</svg>'+
     '<div style="position:absolute;top:0;left:0;width:100%;height:100%;'+
       'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:none">'+
@@ -3822,7 +3833,7 @@ function renderRestCircle(rem,total){
   el.addEventListener('click',function(e){
     if(Math.abs(e.clientX-_dragStart.x)<5&&Math.abs(e.clientY-_dragStart.y)<5){
       if(S.wx){S.wx.restActive=false;sv();}
-      if(_restCircleTick){clearInterval(_restCircleTick);_restCircleTick=null;}
+      if(_restCircleRAF){cancelAnimationFrame(_restCircleRAF);_restCircleRAF=null;}
       removeRestCircle();draw();
       setTimeout(function(){autoOpenNextEx();},350);
     }
