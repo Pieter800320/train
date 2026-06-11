@@ -229,6 +229,26 @@ function ld(){
   if(cl.plan===undefined)cl.plan=null;
   if(!cl.ob)cl.ob={done:false,step:0,ans:{}};
   if(!cl.lastWeights)cl.lastWeights={};
+  // Migration: sort custom programme exercises by canonical phase order
+  // (fixes data saved before splice() fix where phases could be out of order)
+  var _phMigOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  if(cl.customPrograms&&cl.customPrograms.length){
+    cl.customPrograms.forEach(function(cp){
+      if(cp.tpl&&cp.tpl.days){
+        cp.tpl.days.forEach(function(d){
+          if(d.exercises&&d.exercises.length>1){
+            d.exercises.sort(function(a,b){
+              var ai=_phMigOrder.indexOf(a.ph||'strength');
+              var bi=_phMigOrder.indexOf(b.ph||'strength');
+              if(ai<0)ai=_phMigOrder.length;
+              if(bi<0)bi=_phMigOrder.length;
+              return ai-bi;
+            });
+          }
+        });
+      }
+    });
+  }
 }
 function C(){return S.clients[S.activeClient];}
 function clients(){return Object.keys(S.clients).map(function(k){return S.clients[k];});}
@@ -2886,9 +2906,16 @@ function todayV(){
   var _isCustomTpl=!!(cl.customPrograms&&cl.customPrograms.some(function(cp){return cp.key===cl.tplKey;}));
 
   if(_isCustomTpl){
-    // Custom programme: render in builder insertion order, phase label changes inline
+    // Custom programme: render sorted by canonical phase order (non-destructive copy)
+    var _phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+    var sortedExercises=day.exercises.slice().sort(function(a,b){
+      var ai=_phOrder.indexOf(a.ph||'strength'); var bi=_phOrder.indexOf(b.ph||'strength');
+      if(ai<0)ai=_phOrder.length; if(bi<0)bi=_phOrder.length;
+      return ai-bi;
+    });
     var _lastPh=null;
-    day.exercises.forEach(function(exEntry,origIdx){
+    sortedExercises.forEach(function(exEntry){
+      var origIdx=day.exercises.indexOf(exEntry);
       var _curPh=exEntry.ph||'strength';
       if(_curPh!==_lastPh){h+='<div class="phase-head">'+phaseLabels[_curPh]+'</div>';_lastPh=_curPh;}
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
@@ -5554,7 +5581,7 @@ function buildSave(){
   });
   var totalDuration=Math.round(tplDays.reduce(function(sum,d){
     return sum+(d.exercises.length*4);
-  },0)/tplDays.length*10)||45;
+  },0)/tplDays.length)||45;
   cl.customPrograms.push({
     key:key,name:e.name,cat:'custom',desc:e.days.length+' sessions/week',
     days:tplDays.length,duration:totalDuration,defaultPlan:'linear',
