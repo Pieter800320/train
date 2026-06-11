@@ -6240,54 +6240,54 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
 function timerMountCanvas(){
   var screen=document.getElementById('screen');
   if(!screen)return;
-  // Always remount fresh to pick up layout changes
   var existing=document.getElementById('timer-canvas-wrap');
   if(existing&&existing.parentNode)existing.parentNode.removeChild(existing);
 
   var t=S.timer;
-  // Auto-start stopwatch on first mount if no session running
   if(!t.running&&t.elapsed===0&&t.mode==='stopwatch'){
     t.setup=false;t.running=true;startTimerTick();
   } else {
     t.setup=false;
   }
 
+  // ── Measured layout constants ──────────────────────────────
+  var TABBAR_H=64;
+  var BOTTOM_BAR_H=72; // Pause/Reset bar height
+  var safeTop=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat')||'0')||0;
+  var TOP_PAD=Math.max(10,safeTop);
+  var vw=Math.min(window.innerWidth,430);
+  var vh=window.innerHeight;
+
+  // Outer wrap: full screen above tabbar
   var wrap=document.createElement('div');
   wrap.id='timer-canvas-wrap';
   wrap.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%);'+
-    'width:100%;max-width:430px;'+
-    'bottom:max(64px,env(safe-area-inset-bottom)+64px);'+
-    'z-index:90;background:var(--bg);'+
-    'display:flex;flex-direction:column;';
+    'width:100%;max-width:430px;height:'+(vh-TABBAR_H)+'px;'+
+    'z-index:90;background:var(--bg);overflow:hidden;';
 
-  // ── Top strip: heading + divider + mode pills ──
+  // ── Top strip: heading + divider + pills ──────────────────
   var dash=document.createElement('div');
-  dash.style.cssText='flex:none;'+
-    'padding:max(10px,env(safe-area-inset-top)) 14px 0;'+
-    'pointer-events:auto;';
+  dash.id='timer-dash';
+  dash.style.cssText='position:absolute;top:0;left:0;right:0;padding:'+TOP_PAD+'px 14px 0;pointer-events:auto;';
 
-  // TIMER heading
   var heading=document.createElement('div');
-  heading.style.cssText='font-size:24px;font-weight:800;letter-spacing:-0.5px;color:var(--tx);'+
-    'line-height:1.1;margin-bottom:12px;padding-left:2px;';
+  heading.style.cssText='font-size:24px;font-weight:800;color:var(--tx);margin-bottom:12px;';
   heading.textContent='Timer';
   dash.appendChild(heading);
 
-  // Divider
   var divider=document.createElement('div');
   divider.style.cssText='border-top:0.5px solid var(--brd);margin-bottom:12px;';
   dash.appendChild(divider);
 
-  // Pills row
   var pillRow=document.createElement('div');
   pillRow.id='timer-mode-pills';
-  pillRow.style.cssText='display:flex;gap:6px;justify-content:center;margin-bottom:0;';
+  pillRow.style.cssText='display:flex;gap:6px;';
   var modes=[{k:'stopwatch',l:'Stopwatch'},{k:'countdown',l:'Countdown'},{k:'tabata',l:'Tabata'},{k:'emom',l:'EMOM'}];
   modes.forEach(function(m){
     var btn=document.createElement('button');
     btn.textContent=m.l;
     btn.className='btn '+(t.mode===m.k?'btn-acc':'btn-ghost');
-    btn.style.cssText='flex:0 0 calc(25% - 5px);font-size:13px;font-weight:700;height:44px;text-align:center;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:12px;width:auto;';
+    btn.style.cssText='flex:1;font-size:13px;font-weight:700;height:44px;border-radius:12px;';
     btn.dataset.mode=m.k;
     btn.onclick=function(){setTimerMode(this.dataset.mode);};
     pillRow.appendChild(btn);
@@ -6295,28 +6295,55 @@ function timerMountCanvas(){
   dash.appendChild(pillRow);
   wrap.appendChild(dash);
 
-  // ── Canvas (flex:1) — ring fills all remaining space between top and bottom bars ──
+  // ── Bottom bar: Pause/Reset ────────────────────────────────
+  var bottomBar=document.createElement('div');
+  bottomBar.id='timer-btn-row';
+  bottomBar.style.cssText='position:absolute;bottom:0;left:0;right:0;height:'+BOTTOM_BAR_H+'px;'+
+    'padding:10px 14px;background:var(--bg2);'+
+    'border-top:0.5px solid var(--brd);'+
+    'display:flex;gap:8px;pointer-events:auto;';
+
+  var btnPause=document.createElement('button');
+  btnPause.id='timer-btn-pause';
+  btnPause.className='btn btn-acc';
+  btnPause.style.cssText='flex:1;font-size:15px;font-weight:800;height:52px;';
+  btnPause.textContent=t.running?'Pause':'Resume';
+  btnPause.onclick=function(){timerToggle();};
+  bottomBar.appendChild(btnPause);
+
+  var btnReset=document.createElement('button');
+  btnReset.className='btn btn-ghost';
+  btnReset.style.cssText='flex:1;font-size:15px;height:52px;';
+  btnReset.textContent='Reset';
+  btnReset.onclick=function(){timerReset();};
+  bottomBar.appendChild(btnReset);
+  wrap.appendChild(bottomBar);
+
+  // ── Canvas: fills space between dash and bottom bar ───────
   var canvasWrap=document.createElement('div');
-  canvasWrap.style.cssText='flex:1;position:relative;min-height:0;';
+  canvasWrap.id='timer-canvas-wrap-inner';
+  canvasWrap.style.cssText='position:absolute;left:0;right:0;overflow:hidden;';
   var canvas=document.createElement('canvas');
   canvas.id='timer-canvas';
-  canvas.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;display:block;';
+  canvas.style.cssText='display:block;width:100%;height:100%;';
   canvasWrap.appendChild(canvas);
   wrap.appendChild(canvasWrap);
   _timerCanvas=canvas;
-  // Pre-size canvas using window dimensions so first frame draws correctly
-  // Dash strip is approximately 88px on most phones
-  var _initDpr=window.devicePixelRatio||1;
-  var _initW=Math.min(window.innerWidth,430);
-  var _initH=window.innerHeight-88-72-Math.max(64,20); // minus dash (~88px), bottom bar (~72px), tabbar (~64px)
-  if(_initW>0&&_initH>0){
-    canvas.width=Math.round(_initW*_initDpr);
-    canvas.height=Math.round(_initH*_initDpr);
-    canvas.style.width=_initW+'px';
-    canvas.style.height=_initH+'px';
+
+  // Position canvasWrap after dash is in DOM so we can measure it
+  function positionCanvas(){
+    var dashH=dash.offsetHeight||120;
+    var top=dashH+8;
+    var h=(vh-TABBAR_H)-top-BOTTOM_BAR_H;
+    canvasWrap.style.top=top+'px';
+    canvasWrap.style.height=Math.max(100,h)+'px';
   }
 
-  // Tap anywhere on canvas to pause/resume
+  document.getElementById('app').appendChild(wrap);
+  // Measure after paint
+  setTimeout(positionCanvas,0);
+
+  // Tap to pause/resume
   canvas.addEventListener('touchstart',function(e){
     e.preventDefault();
     _timerTapStart={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()};
@@ -6327,59 +6354,23 @@ function timerMountCanvas(){
     var dy=e.changedTouches[0].clientY-_timerTapStart.y;
     var dt=Date.now()-_timerTapStart.t;
     _timerTapStart=null;
-    if(Math.abs(dx)<12&&Math.abs(dy)<12&&dt<400){
-      // Tap — pause/resume
-      timerToggle();
-    } else if(dy<-60&&dt<500){
-      // Swipe up — skip phase (Tabata/EMOM)
-      timerSkipPhase();
-    }
+    if(Math.abs(dx)<12&&Math.abs(dy)<12&&dt<400){timerToggle();}
+    else if(dy<-60&&dt<500){timerSkipPhase();}
   });
+  canvas.addEventListener('click',function(){timerToggle();});
 
-  // Click for desktop
-  canvas.addEventListener('click',function(){ timerToggle(); });
-
-  // ── Bottom bar: Pause/Reset — flex child of wrap, sits above tabbar ──
-  var bottomBar=document.createElement('div');
-  bottomBar.id='timer-btn-row';
-  bottomBar.style.cssText='flex:none;'+
-    'padding:10px 14px;background:var(--bg2);'+
-    'border-top:0.5px solid var(--brd);'+
-    'display:flex;gap:8px;pointer-events:auto;';
-
-  var btnPause=document.createElement('button');
-  btnPause.id='timer-btn-pause';
-  btnPause.className='btn btn-acc';
-  btnPause.style.cssText='flex:1;font-size:15px;font-weight:800;height:52px;display:flex;align-items:center;justify-content:center;';
-  btnPause.textContent=t.running?'Pause':'Resume';
-  btnPause.onclick=function(){timerToggle();};
-  bottomBar.appendChild(btnPause);
-
-  var btnReset=document.createElement('button');
-  btnReset.className='btn btn-ghost';
-  btnReset.style.cssText='flex:1;font-size:15px;height:52px;display:flex;align-items:center;justify-content:center;';
-  btnReset.textContent='Reset';
-  btnReset.onclick=function(){timerReset();};
-  bottomBar.appendChild(btnReset);
-
-  wrap.appendChild(bottomBar);
-  document.getElementById('app').appendChild(wrap);
-
-  // RAF loop — size canvas at physical pixels (DPR-aware)
+  // RAF loop — size canvas at physical pixels
   function rafLoop(){
     _timerRAF=requestAnimationFrame(rafLoop);
-    var cw=canvas.parentElement;
-    if(cw){
-      var dpr=window.devicePixelRatio||1;
-      var logW=cw.offsetWidth||Math.min(window.innerWidth,430);
-      var logH=cw.offsetHeight||(window.innerHeight-160);
-      var pw=Math.round(logW*dpr);
-      var ph=Math.round(logH*dpr);
-      if(pw>0&&ph>0&&(canvas.width!==pw||canvas.height!==ph)){
-        canvas.width=pw; canvas.height=ph;
-        canvas.style.width=logW+'px';
-        canvas.style.height=logH+'px';
-      }
+    var dpr=window.devicePixelRatio||1;
+    var logW=canvasWrap.offsetWidth||vw;
+    var logH=canvasWrap.offsetHeight||300;
+    var pw=Math.round(logW*dpr);
+    var ph=Math.round(logH*dpr);
+    if(pw>0&&ph>0&&(canvas.width!==pw||canvas.height!==ph)){
+      canvas.width=pw;canvas.height=ph;
+      canvas.style.width=logW+'px';
+      canvas.style.height=logH+'px';
     }
     timerDrawFrame();
     var pb=document.getElementById('timer-btn-pause');
@@ -6387,6 +6378,7 @@ function timerMountCanvas(){
   }
   _timerRAF=requestAnimationFrame(rafLoop);
 }
+
 
 var _timerTapStart=null;
 
