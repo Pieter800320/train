@@ -4651,7 +4651,7 @@ function buildStep1(){
       +'onclick="S.customEdit.activeDay='+i+';sv();buildOpenSplitSheet('+i+')">'+( i+1)+'</button>';
   });
   h+='</div>';
-  h+='<button class="btn btn-ghost btn-sm" style="margin-bottom:16px" onclick="buildAddDay()">+ Add Session</button>';
+
 
   var canNext=e.days.every(function(d){return d.split&&d.split.length>0;});
   return {html:h,nav:{back:0,next:2,canNext:canNext,hint:'Set movement patterns for each session'}};
@@ -4699,10 +4699,7 @@ function buildOpenSplitSheet(di){
   h+='<span style="font-size:13px;font-weight:600;color:'+(hasPatterns?'var(--acc)':'var(--mu)')+'">'+splitLabel+'</span>';
   h+='<span style="color:var(--acc);font-size:13px">›</span>';
   h+='</div>';
-  // Remove session button (if more than 1)
-  if(S.customEdit.days.length>1){
-    h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="buildRemoveDay('+di+');closeSheet();draw()">Remove this session</button>';
-  }
+
   h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
   h+='</div>';
   openSheet(h,'Session '+(di+1),function(){draw();});
@@ -5179,7 +5176,6 @@ function buildConfigEx(di,ei){
   var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
 
   var h='<div style="padding:0 20px 30px">';
-  h+='<div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:16px">'+exEntry.name+'</div>';
 
   // Phase — read-only label (reassign via Step 3 drag)
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">';
@@ -5344,30 +5340,73 @@ function buildDrillToLibrary(di,phKey){
     +'<span style="font-size:15px;font-weight:800;color:var(--tx)">Add to '+phConf.label+'</span>'
     +'</div>';
 
-  var h='<div style="padding:0 20px 30px">';
-  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Adding to <strong>'+phConf.label+'</strong>'
+  var contextLine='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Adding to <strong>'+phConf.label+'</strong>'
     +(split.length?' · '+split.map(function(p){return BUILD_PATTERNS[p]||p;}).join('/'):'')+'</div>';
-  h+='<input type="text" id="bpicker-search" placeholder="Search exercises…" '
-    +'data-di="'+di+'" data-ph="'+phKey+'" data-vp="'+validPhases.join(',')+'" '
-    +'oninput="buildFilterPickerDrill(this)" '
-    +'style="margin-bottom:12px;font-size:14px" autocomplete="off">';
-  // Single container — swapped between library view and search results
-  h+='<div id="bpicker-container">';
-  h+=buildLibraryHTML(di,phKey,validPhases);
-  h+='</div>';
-  h+='<button class="btn btn-acc" style="margin-top:16px" onclick="buildOpenExSheet('+di+')">← Back to session</button>';
-  h+='</div>';
+
+  var libraryHTML=buildLibraryHTML(di,phKey,validPhases);
+
+  // Build the full sheet HTML — search results div starts hidden
+  var fullHTML='<div style="padding:0 20px 30px">'
+    +contextLine
+    +'<input type="text" id="bpicker-search" placeholder="Search exercises…" '
+    +'style="margin-bottom:12px;font-size:14px" autocomplete="off">'
+    +'<div id="bpicker-results" style="display:none"></div>'
+    +'<div id="bpicker-library">'+libraryHTML+'</div>'
+    +'<button class="btn btn-acc" style="margin-top:16px" onclick="buildOpenExSheet('+di+')">← Back to session</button>'
+    +'</div>';
 
   var sb=document.getElementById('sheet-body');
-  if(sb) sb.innerHTML=backTitle+h;
-  setTimeout(function(){var el=document.getElementById('bpicker-search');if(el)el.focus();},100);
+  if(sb){
+    sb.innerHTML=backTitle+fullHTML;
+    // Attach event listener directly — more reliable than oninput attribute
+    var inp=sb.querySelector('#bpicker-search');
+    var lib=sb.querySelector('#bpicker-library');
+    var res=sb.querySelector('#bpicker-results');
+    if(inp&&lib&&res){
+      inp.addEventListener('input',function(){
+        var q=this.value||'';
+        if(!q.trim()){
+          lib.style.display='block';
+          res.style.display='none';
+          res.innerHTML='';
+          return;
+        }
+        lib.style.display='none';
+        res.style.display='block';
+        var results=EX.filter(function(e){
+          var matchPhase=e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
+          var matchQ=e.name.toLowerCase().indexOf(q.toLowerCase())>=0;
+          return matchPhase&&matchQ;
+        }).slice(0,40);
+        var html='';
+        results.forEach(function(e){
+          var added=day.exercises&&day.exercises.some(function(ex){return ex.name===e.name;});
+          var ekey=e.key;
+          html+='<div class="prog-item" style="margin-bottom:4px">'
+            +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>'
+            +'<div class="lbl">'+(e.equipment||[]).join(' · ')+'</div></div>'
+            +'<button class="btn btn-pill '+(added?'btn-ghost':'btn-acc')+'" '
+            +'onclick="buildLibraryAddEx(this,&quot;'+ekey+'&quot;);">'+(added?'✓ Added':'Add')+'</button>'
+            +'</div>';
+        });
+        // Custom add row — use DOM to avoid quote escaping
+        res.innerHTML=html;
+        var customDiv=document.createElement('div');
+        customDiv.style.cssText='margin-top:10px;padding:10px 14px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
+        customDiv.innerHTML='<span style="font-size:13px;color:var(--tx2)">Add <strong style="color:var(--tx)">'+q.trim()+'</strong> as custom</span><button class="btn btn-pill btn-acc" style="pointer-events:none">Add</button>';
+        (function(capturedQ){customDiv.onclick=function(){buildAddCustomExDrill(di,phKey,capturedQ);};})(q.trim());
+        res.appendChild(customDiv);
+      });
+      inp.focus();
+    }
+  }
 }
 
-// Build the full library HTML (collapsible sections by movement pattern)
+
 function buildLibraryHTML(di,phKey,validPhases){
   var html='';
   var patternOrder=['push','pull','squat','hinge','lunge','core','carry','explosive','conditioning','rotation','locomotion'];
-  var isFirst=true;
+  var isFirst=false; // all sections start collapsed
   patternOrder.forEach(function(pat){
     var patExs=EX.filter(function(e){
       return (e.patterns||[]).indexOf(pat)>=0&&
@@ -5399,99 +5438,10 @@ function buildLibraryHTML(di,phKey,validPhases){
 }
 
 // Search filter — replaces container content entirely
-function buildFilterPickerDrill(inp){
-  var di=parseInt(inp.dataset.di);
-  var phKey=inp.dataset.ph;
-  var validPhases=(inp.dataset.vp||'').split(',');
-  var q=inp.value||'';
-  // Walk up from input to find the container sibling
-  var container=null;
-  var parent=inp.parentElement;
-  if(parent){
-    var kids=parent.children;
-    for(var i=0;i<kids.length;i++){
-      if(kids[i].id==='bpicker-container'){container=kids[i];break;}
-    }
-  }
-  if(!container)container=document.getElementById('bpicker-container');
-  if(!container)return;
-  if(!q.trim()){
-    // Restore full library
-    container.innerHTML=buildLibraryHTML(di,phKey,validPhases);
-    return;
-  }
-  // Search results
-  var results=EX.filter(function(e){
-    var matchPhase=e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
-    var matchQ=e.name.toLowerCase().indexOf(q.toLowerCase())>=0;
-    return matchPhase&&matchQ;
-  }).slice(0,40);
-  var html='';
-  results.forEach(function(e){
-    var added=S.customEdit.days[di]&&S.customEdit.days[di].exercises.some(function(ex){return ex.name===e.name;});
-    html+='<div class="prog-item" style="margin-bottom:4px">'
-      +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>'
-      +'<div class="lbl">'+(e.equipment||[]).join(' · ')+'</div></div>'
-      +'<button class="btn btn-pill '+(added?'btn-ghost':'btn-acc')+'" '
-      +'onclick="buildLibraryAddEx(this,\''+e.key+'\');">'+(added?'&#10003; Added':'Add')+'</button>'
-      +'</div>';
-  });
-  // Custom add row — always shown when typing
-  html+='<div style="margin-top:10px;padding:10px 14px;background:var(--bg3);'
-    +'border:0.5px solid var(--brd);border-radius:10px;'
-    +'display:flex;align-items:center;justify-content:space-between;cursor:pointer" '
-    +'onclick="buildAddCustomExDrill('+di+',\''+phKey+'\')">'
-    +'<span style="font-size:13px;color:var(--tx2)">Add <strong style="color:var(--tx)">'+q.trim()+'</strong> as custom</span>'
-    +'<span style="font-size:18px;color:var(--acc)">+</span>'
-    +'</div>';
-  container.innerHTML=html;
-}
 
 
-function buildFilterPickerDrill(di,phKey){
-  var inp=document.getElementById('bpicker-search');
-  if(!inp)return;
-  var q=inp.value||'';
-  // Traverse from input to find sibling divs
-  var container=inp.parentElement;
-  var lib=container?container.querySelector('#bpicker-library'):document.getElementById('bpicker-library');
-  var res=container?container.querySelector('#bpicker-results'):document.getElementById('bpicker-results');
-  if(!lib)lib=document.getElementById('bpicker-library');
-  if(!res)res=document.getElementById('bpicker-results');
-  if(!lib||!res)return;
-  if(!q.trim()){lib.style.display='block';res.style.display='none';res.innerHTML='';return;}
-  lib.style.display='none';res.style.display='block';
-  var phaseFilter={warmup:['warmup','activation'],activation:['warmup','activation'],
-    mobility:['warmup','cooldown'],strength:['kpi','primer'],accessory:['accessory','kpi'],
-    core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown']};
-  var validPhases=phaseFilter[phKey]||['kpi','accessory'];
-  var results=EX.filter(function(e){
-    var matchPhase=e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
-    var matchQ=e.name.toLowerCase().indexOf(q.toLowerCase())>=0;
-    return matchPhase&&matchQ;
-  }).slice(0,40);
-  var html='';
-  results.forEach(function(e){
-    var added=S.customEdit.days[di]&&S.customEdit.days[di].exercises.some(function(ex){return ex.name===e.name;});
-    html+='<div class="prog-item" style="margin-bottom:4px">'
-      +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>'
-      +'<div class="lbl">'+(e.equipment||[]).join(' · ')+'</div></div>'
-      +'<button class="btn btn-pill '+(added?'btn-ghost':'btn-acc')+'" '
-      +'onclick="buildLibraryAddEx(this,\''+e.key+'\');">'+(added?'&#10003; Added':'Add')+'</button>'
-      +'</div>';
-  });
-  html+='<div style="margin-top:12px;padding:10px 14px;background:var(--bg3);'
-    +'border:0.5px solid var(--brd);border-radius:10px;'
-    +'display:flex;align-items:center;justify-content:space-between;cursor:pointer" '
-    +'onclick="buildAddCustomExDrill('+di+',\''+phKey+'\')"><span style="font-size:13px;color:var(--tx2)">'
-    +'Add <strong style="color:var(--tx)">'+q.trim()+'</strong> as custom'
-    +'</span><span style="font-size:18px;color:var(--acc)">+</span></div>';
-  res.innerHTML=html;
-}
-
-// Add a custom-named exercise from the drill-down picker
-function buildAddCustomExDrill(di,phKey){
-  var q=(document.getElementById('bpicker-search')||{}).value||'';
+function buildAddCustomExDrill(di,phKey,q){
+  if(q===undefined){q=(document.getElementById('bpicker-search')||{}).value||'';}
   if(!q.trim())return;
   var phConf=BUILD_PHASE_MAP[phKey]||BUILD_PHASE_MAP['strength'];
   S.customEdit.days[di].exercises.push({
@@ -5503,31 +5453,7 @@ function buildAddCustomExDrill(di,phKey){
   buildOpenExSheet(di); // back to session, sheet stays open
 }
 
-function buildFilterPickerDrill(di,phKey){
-  var q=(document.getElementById('bpicker-search')||{}).value||'';
-  var phaseFilter={
-    warmup:['warmup','activation'],activation:['warmup','activation'],
-    mobility:['warmup','cooldown'],strength:['kpi','primer'],
-    accessory:['accessory','kpi'],core:['accessory','kpi'],
-    cardio:['finisher'],cooldown:['cooldown']
-  };
-  var validPhases=phaseFilter[phKey]||['kpi','accessory'];
-  var results=EX.filter(function(e){
-    var matchPhase=e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
-    var matchQ=!q||e.name.toLowerCase().indexOf(q.toLowerCase())>=0;
-    return matchPhase&&matchQ;
-  }).slice(0,30);
-  var res=document.getElementById('bpicker-results');
-  if(!res)return;
-  res.innerHTML=results.map(function(ex){
-    return '<div onclick="buildAddExFromPicker(\''+ex.name+'\',\''+phKey+'\');buildOpenExSheet('+di+')" style="'
-      +'display:flex;align-items:center;padding:10px 12px;background:var(--bg3);'
-      +'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px;cursor:pointer">'
-      +'<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>'
-      +'<span style="font-size:18px;color:var(--acc);line-height:1">+</span>'
-      +'</div>';
-  }).join('');
-}
+
 function buildOpenExSheet(di){
   S.customEdit.activeDay=di;sv();
   var e=S.customEdit;
