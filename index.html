@@ -449,6 +449,15 @@ var PLANS = [
     {label:'Phase 3 — Peak',theme:'peak',rpe:9,rir:1,weightPct:100,volMod:1.0,tip:'Test your max set. Record it. You\'ve earned it.'}
   ]}
 
+  ,{key:'pull_plateau_6',name:'Pull-Up Plateau Breaker — 6 Week',desc:'For clients stuck at the same rep count. Volume → weighted overload → peak → deload.',cyclic:false,weeks:[
+    {label:'Week 1 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:60,volMod:0.8,tip:'Sub-maximal only. No failure. Accumulate more total reps than the client is used to — that\'s the whole point of this week. Controlled tempo: 2 sec up, 1 hold, 3 sec down.'},
+    {label:'Week 2 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:65,volMod:0.9,tip:'Add 1 rep per set across all three days versus last week. Still no grinding. If it feels easy, good — that\'s correct.'},
+    {label:'Week 3 — Strength Layer',theme:'build',rpe:8,rir:2,weightPct:80,volMod:1.0,tip:'Weighted pull-ups start now. 4–6 kg added. The bodyweight sets will start feeling lighter — that\'s the signal it\'s working. Eccentric reps: jump up, lower 6 seconds.'},
+    {label:'Week 4 — Strength Layer',theme:'build',rpe:8,rir:2,weightPct:85,volMod:1.0,tip:'Add 2 kg to weighted days if all reps were clean last week. Top holds and slow eccentrics remain. Quality over speed.'},
+    {label:'Week 5 — Intensification',theme:'peak',rpe:9,rir:1,weightPct:95,volMod:1.0,tip:'Peak effort. Work up to a heavy 1–2 rep weighted pull-up on Day A. Max rep test on Day B — this is the new baseline. Rest fully between every set (3 min minimum).'},
+    {label:'Week 6 — Deload + Retest',theme:'deload',rpe:5,rir:5,weightPct:65,volMod:0.5,tip:'Do not skip this. Adaptation consolidates during rest, not during work. Easy sessions Monday and Wednesday, then a full retest Friday. Compare to Week 5 Day B numbers.'}
+  ]}
+
   ,{key:'upper_lower_wave',name:'Upper/Lower Wave',desc:'4-week wave cycle — designed for Upper/Lower splits',cyclic:true,weeks:[
     {label:'Week 1 — Accumulate',theme:'build',rpe:7,rir:3,weightPct:75,volMod:1.0,tip:'Build work capacity. Keep all reps crisp. You should leave the session feeling like you had one or two more sets in you.'},
     {label:'Week 2 — Intensify',theme:'build',rpe:8,rir:2,weightPct:82,volMod:1.0,tip:'Same sets, more weight. Upper days recover faster — push the bar weight. On lower days, technique comes first.'},
@@ -1519,6 +1528,41 @@ var TPL = [
 ]}
 
 ,
+// ── PULL-UP PLATEAU BREAKER ──────────────────────────────────────
+
+{key:'spt_pullup_plateau',name:'Pull-Up Plateau Breaker',cat:'sport',desc:'Stuck at the same rep count for months? 6-week protocol — 3 sessions per week, bolts onto existing training',duration:20,defaultPlan:'pull_plateau_6',compatiblePlans:['pull_plateau_6'],days:[
+  {label:'Day A — Volume',focus:'Sub-Maximal Pull-Up Volume',exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup','2 rounds of the warm-up circuit — do not rush this.'),
+    ex('Scapular Pull-Up',2,5,30,'activation','Dead hang. Depress and retract the scaps. No elbow bend. This is the foundation.'),
+    exT('Dead Hang','1','10s',30,'activation','Passive hang. Breathe into the lats.'),
+    ex('Pull-Up',5,3,90,'kpi','Controlled tempo: 2 sec up, 1 sec hold at top, 3 sec down. Stop well short of failure — sub-maximal is the goal this phase.'),
+    ex('Lat Pulldown (Wide Grip)',3,12,75,'accessory','Volume without fatigue cost. Full stretch at top, pull elbows to pockets.'),
+    ex('Band Pull-Apart',3,15,30,'accessory'),
+    ex('Face Pull',3,15,45,'accessory','Shoulder integrity. Light weight, full range.')
+  ]},
+  {label:'Day B — Ladder',focus:'Pull-Up Ladder + Grip',exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup'),
+    ex('Scapular Pull-Up',2,5,30,'activation'),
+    exT('Dead Hang','1','10s',30,'activation'),
+    ex('Pull-Up',1,1,45,'kpi','Ladder: 1 → 2 → 3 → 2 → 1, rest 45 sec between rungs. Repeat the ladder twice. Controlled reps throughout — no kipping.'),
+    ex('Dead Hang',3,0,45,'accessory','Grip and shoulder decompression. 20–30 seconds per set.','25s'),
+    ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
+    ex('Face Pull',3,15,45,'accessory')
+  ]},
+  {label:'Day C — Eccentric',focus:'Tempo Pull-Ups + Accessory',exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup'),
+    ex('Scapular Pull-Up',2,5,30,'activation'),
+    exT('Dead Hang','1','10s',30,'activation'),
+    ex('Pull-Up',4,4,90,'kpi','Same controlled tempo as Day A. Rest 90 sec. In Weeks 3–4 this becomes weighted.'),
+    ex('Pull-Up',2,0,90,'accessory','Slow eccentrics only — jump to the top position, lower for 6–8 seconds. Stop at 4 reps per set.','neg'),
+    ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
+    ex('Band Pull-Apart',3,15,30,'accessory'),
+    ex('Face Pull',3,15,45,'accessory'),
+    exT('Dead Hang','2','20s',30,'cooldown','End every session here. Spinal decompression.')
+  ]}
+]}
+
+,
 // ── FOUNDATION 2-DAY ────────────────────────────────────────────
 
 {key:'fnd_2day',name:'Full Body 2-day',cat:'foundation',desc:'Two full-body sessions per week — all patterns, every session, gym based',duration:60,defaultPlan:'linear',compatiblePlans:['linear','maintenance'],days:[
@@ -1925,7 +1969,7 @@ function finishSession(){
       var _plan=getPlanByKey(cl.plan.key);
       // Rehab and pull-up programmes: disable auto-advance.
       // Phase progression requires clinical/trainer judgement.
-      var _autoAdvanceOk=!(_tpl&&(_tpl.cat==='rehab'||_tpl.key==='spt_pullup'));
+      var _autoAdvanceOk=!(_tpl&&(_tpl.cat==='rehab'||_tpl.key==='spt_pullup'||_tpl.key==='spt_pullup_plateau'));
       if(_plan&&_autoAdvanceOk){
         var _sessionsOnPlan=cl.hist.filter(function(s){return s.date>=(cl.plan.startDate||0);}).length;
         if(_sessionsOnPlan>0&&_sessionsOnPlan%_cycleLen===0)advancePlanWeek();
@@ -4020,7 +4064,7 @@ function programsV(){
   var planGroups=[
     {key:'periodisation',label:'Periodisation',keys:['wave_3_1','wave_5_1','upper_lower_wave','peaking','powerbuilding_block']},
     {key:'linear',      label:'Linear',       keys:['linear','maintenance','active_ageing','return_training']},
-    {key:'specialised', label:'Specialised',  keys:['rehab_12','sport_12','pull_12']}
+    {key:'specialised', label:'Specialised',  keys:['rehab_12','sport_12','pull_12','pull_plateau_6']}
   ];
   planGroups.forEach(function(grp){
     var grpPlans=PLANS.filter(function(p){return grp.keys.indexOf(p.key)>=0;});
