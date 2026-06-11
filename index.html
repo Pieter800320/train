@@ -2674,7 +2674,7 @@ function openJournalView(){
       if(s.plan)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+s.plan+'</div>';
       h+='</div>';
       h+='<div style="text-align:right;margin-right:8px"><div style="font-size:14px;font-weight:700;color:var(--acc)">'+s.duration+'min</div>';
-      h+='<div class="lbl">'+s.sets+' sets</div></div>';
+      h+='<div class="lbl">'+(s.timerSession?'⏱ timer':s.sets+' sets')+'</div></div>';
       h+='<button onclick="clearHistoryItem('+actualIdx+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:4px;flex-shrink:0">✕</button>';
       h+='</div>';
     });
@@ -6734,7 +6734,7 @@ function timerSetupStepper(label,field,value,suffix,delta){
 }
 
 function timerStartStopwatch(){
-  var t=S.timer; t.elapsed=0; t.setup=false; t.running=true;
+  var t=S.timer; t.elapsed=0; t.setup=false; t.running=true; t.startedAt=Date.now();
   timerBeepStart();
   sv(); draw(); startTimerTick();
 }
@@ -6758,15 +6758,22 @@ function startTimerTick(){
     if(t.mode==='stopwatch'){
       t.elapsed++;
       sv();
-      // No sound triggers for stopwatch — open-ended
+      // Offer to log at exactly 5 minutes elapsed (one-time prompt)
+      if(t.elapsed===300&&!t._logOffered){
+        t._logOffered=true;sv();
+        timerOfferLog('Stopwatch','5+ min',false);
+      }
 
     } else if(t.mode==='countdown'){
       if(t.remaining>0){t.remaining--;sv();}
       else{
         timerBeepEnd();
         _timerFlash={colour:timerGetAccColour(),alpha:0.5,startTime:Date.now(),duration:600};
-        t.running=false;sv();timerUnmountCanvas();draw();return;
+        t.running=false;sv();timerUnmountCanvas();draw();
+        timerOfferLog('Countdown',fmtSecs(t.totalSecs),true);
+        return;
       }
+      // Also offer if they stop early after 5+ min (handled in timerToggle/timerReset)
       timerCheckSound(t,t.remaining,t.totalSecs);
 
     } else if(t.mode==='tabata'){
@@ -6782,7 +6789,14 @@ function startTimerTick(){
           t.tabCurrent++;
           if(t.tabCurrent>=t.tabRounds){
             timerBeepEnd();
-            t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();return;
+            t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();
+            timerOfferLog('Tabata',t.tabRounds+' rounds',true);
+            return;
+          }
+          // Threshold: offer at round 3 (one-time)
+          if(t.tabCurrent===3&&!t._logOffered){
+            t._logOffered=true;sv();
+            timerOfferLog('Tabata',t.tabCurrent+' of '+t.tabRounds+' rounds',false);
           }
           t.tabPhase='work';t.remaining=t.tabWork;
         }
@@ -6799,7 +6813,14 @@ function startTimerTick(){
         t.emomRound=newRound;
         if(newRound>=t.emomMins){
           timerBeepEnd();
-          t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();return;
+          t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();
+          timerOfferLog('EMOM',t.emomMins+' min',true);
+          return;
+        }
+        // Threshold: offer at minute 3 (one-time)
+        if(newRound===3&&!t._logOffered){
+          t._logOffered=true;sv();
+          timerOfferLog('EMOM',newRound+' of '+t.emomMins+' min',false);
         }
         timerBeepEnd();
         _timerFlash={colour:timerGetAccColour(),alpha:0.25,startTime:Date.now(),duration:400};
@@ -6860,21 +6881,21 @@ function setTimerMode(m){
 }
 function startCountdown(){
   var t=S.timer;if(t.totalSecs<=0)return;
-  t.remaining=t.totalSecs;t.setup=false;t.running=true;
+  t.remaining=t.totalSecs;t.setup=false;t.running=true;t.startedAt=Date.now();
   timerBeepStart();
   sv();startTimerTick();
 }
 function startTabata(){
   var t=S.timer;
   t.tabCurrent=0;t.tabPhase='work';t.remaining=t.tabWork;
-  t.setup=false;t.running=true;
+  t.setup=false;t.running=true;t.startedAt=Date.now();
   timerBeepStart();
   sv();startTimerTick();
 }
 function startEMOM(){
   var t=S.timer;
   t.emomRound=0;t.elapsed=0;
-  t.setup=false;t.running=true;
+  t.setup=false;t.running=true;t.startedAt=Date.now();
   timerBeepStart();
   sv();startTimerTick();
 }
@@ -6887,12 +6908,44 @@ function timerToggle(){
   if(pb)pb.textContent=S.timer.running?'Pause':'Resume';
   if(S.timer.setup)draw();
 }
+function timerOfferLog(label,detail,completed){
+  var t=S.timer;
+  var duration=t.startedAt?Math.max(1,Math.round((Date.now()-t.startedAt)/60000)):0;
+  if(duration<1)return; // nothing meaningful to log
+  var cl=C();
+  var h='<div style="padding:0 20px 30px;text-align:center">';
+  h+='<div style="font-size:48px;font-weight:900;color:var(--acc);line-height:1;margin-bottom:8px">'+(completed?'✓':'⏱')+'</div>';
+  h+='<div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:6px">'+(completed?'Timer Complete!':'Good work!')+'</div>';
+  h+='<div style="font-size:14px;font-weight:600;color:var(--acc);margin-bottom:4px">'+label+'</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:20px">'+detail+' · '+duration+' min</div>';
+  h+='<div style="font-size:13px;color:var(--tx2);margin-bottom:20px">Log this to your journal?</div>';
+  h+='<button class="btn btn-acc" onclick="timerDoLog(\''+label+'\',\''+detail+'\','+duration+');closeSheet()" style="margin-bottom:8px">Log Session</button>';
+  h+='<button class="btn btn-ghost" onclick="closeSheet()">Skip</button>';
+  h+='</div>';
+  openSheet(h, null);
+}
+function timerDoLog(label,detail,duration){
+  var cl=C();
+  if(!cl.hist)cl.hist=[];
+  cl.hist.push({date:Date.now(),tplKey:'timer',dayIdx:0,label:label,
+    focus:detail,sets:0,duration:duration,plan:null,timerSession:true});
+  sv();
+}
 function timerReset(){
   var t=S.timer;
+  // Offer log on early reset: countdown ran ≥5 min
+  if(t.mode==='countdown'&&!t._logOffered&&t.startedAt){
+    var elapsed=Math.round((Date.now()-t.startedAt)/1000);
+    var ran=t.totalSecs-t.remaining;
+    if(ran>=300){
+      t._logOffered=true;
+      timerOfferLog('Countdown',fmtSecs(ran)+' of '+fmtSecs(t.totalSecs),false);
+    }
+  }
   t.running=false;t.elapsed=0;t.setup=false;
   t.remaining=t.totalSecs;
   t.tabCurrent=0;t.tabPhase='work';t.tabRemaining=t.tabWork;
-  t.emomRound=0;
+  t.emomRound=0;t._logOffered=false;t.startedAt=null;
   if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
   // Reset Tabata remaining to work phase
   if(t.mode==='tabata')t.remaining=t.tabWork;
