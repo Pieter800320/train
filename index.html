@@ -4037,14 +4037,6 @@ function openPlanPreview(key){
   }
   h+='</div>';
   h+='</div>';
-  // Drill-down: swap sheet body in place — no new sheet, no overlay
-  // Back arrow in title navigates back to the session list
-  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;padding:0" onclick="buildOpenConfigSheet('+di+')">'
-    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
-    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">'+exEntry.name+'</span>'
-    +'</div>';
-  var sb=document.getElementById('sheet-body');
-  if(sb) sb.innerHTML=backTitle+h;
 }
 
 // ── Programme preview sheet ──
@@ -4123,14 +4115,6 @@ function openProgPreview(key){
   }
   h+='</div>';
   h+='</div>';
-  // Drill-down: swap sheet body in place — no new sheet, no overlay
-  // Back arrow in title navigates back to the session list
-  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;padding:0" onclick="buildOpenConfigSheet('+di+')">'
-    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
-    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">'+exEntry.name+'</span>'
-    +'</div>';
-  var sb=document.getElementById('sheet-body');
-  if(sb) sb.innerHTML=backTitle+h;
 }
 
 // ── Active Training Plan sheet ──
@@ -4162,14 +4146,6 @@ function openActiveProgramSheet(){
     h+='<button class="btn btn-ghost btn-sm" onclick="retakeOB();closeSheet()">Retake Setup Questionnaire</button>';
   }
   h+='</div>';
-  // Drill-down: swap sheet body in place — no new sheet, no overlay
-  // Back arrow in title navigates back to the session list
-  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;padding:0" onclick="buildOpenConfigSheet('+di+')">'
-    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
-    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">'+exEntry.name+'</span>'
-    +'</div>';
-  var sb=document.getElementById('sheet-body');
-  if(sb) sb.innerHTML=backTitle+h;
 }
 
 function catLabel(c){var m={strength:'Strength',hypertrophy:'Hypertrophy',endurance:'Endurance',fatloss:'Fat Loss',foundation:'Foundation',sport:'Sport',rehab:'Rehab'};return m[c]||c;}
@@ -5243,14 +5219,6 @@ function buildConfigEx(di,ei){
 
   h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">← Back to session</button>';
   h+='</div>';
-  // Drill-down: swap sheet body in place — no new sheet, no overlay
-  // Back arrow in title navigates back to the session list
-  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;padding:0" onclick="buildOpenConfigSheet('+di+')">'
-    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
-    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">'+exEntry.name+'</span>'
-    +'</div>';
-  var sb=document.getElementById('sheet-body');
-  if(sb) sb.innerHTML=backTitle+h;
 }
 
 function buildWizardStepper(di,ei,field,value,label,suffix,delta,min,max){
