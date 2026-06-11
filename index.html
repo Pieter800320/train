@@ -2464,10 +2464,6 @@ function homeV(){
   } else {
     h+='<div style="font-size:12px;color:var(--mu);line-height:1.5;font-style:italic">No current notices.</div>';
   }
-  if(S.admin.active){
-    h+='<button onclick="editNotice()" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--mu);padding:2px">';
-    h+='<i class="ti ti-pencil" style="font-size:14px"></i></button>';
-  }
   h+='</div></div>';
 
   // Weekly Sessions + Recent (combined card)
@@ -6087,7 +6083,6 @@ function openAdminSheet(){
   if(S.admin.active){
     var h='<div style="padding:0 20px 20px">';
     h+='<div class="card card-coral" style="margin-bottom:16px"><div style="font-size:13px;color:var(--coral)">Admin mode active</div></div>';
-    h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="editNotice()">Edit Notice Board</button>';
     h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="changePIN()">Change PIN</button>';
     h+='<button class="btn btn-coral" onclick="deactivateAdmin()">Exit Admin Mode</button>';
     h+='</div>';
@@ -6114,33 +6109,6 @@ function setAdminPIN(){var a=document.getElementById('pin-a').value;var b=docume
 function checkAdminPIN(){var v=document.getElementById('pin-in').value;if(v===S.admin.pin){S.admin.active=true;S.admin.expiry=Date.now()+600000;sv();closeTopSheet();draw();}else{alert('Incorrect PIN.');}}
 function deactivateAdmin(){S.admin.active=false;sv();closeTopSheet();draw();}
 function changePIN(){S.admin.set=false;S.admin.pin='';S.admin.active=false;sv();closeTopSheet();}
-function editNotice(){
-  var h='<div style="padding:0 20px 24px">';
-  h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:12px 14px;margin-bottom:16px">';
-  h+='<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mu);margin-bottom:6px">CURRENT NOTICE</div>';
-  if(S.notice.title||S.notice.body){
-    h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px">'+(S.notice.title||'(no title)')+'</div>';
-    h+='<div style="font-size:12px;color:var(--tx2)">'+(S.notice.body||'')+'</div>';
-    h+='<div style="margin-top:6px;font-size:11px;color:'+(S.notice.active?'var(--teal)':'var(--mu)')+'">'+(S.notice.active?'● Active':'○ Inactive')+'</div>';
-  } else {
-    h+='<div style="font-size:12px;color:var(--mu)">No notice loaded yet</div>';
-  }
-  h+='</div>';
-  h+='<div style="background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:10px;padding:12px 14px;margin-bottom:16px">';
-  h+='<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--acc);margin-bottom:6px">HOW TO UPDATE</div>';
-  h+='<div style="font-size:12px;color:var(--tx2);line-height:1.7">';
-  h+='1. Edit <a href="https://github.com/Pieter800320/train/edit/main/notice.json" target="_blank" style="color:var(--acc);font-weight:600">notice.json on GitHub</a><br>';
-  h+='2. Set <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">active: true</code> with your title &amp; body<br>';
-  h+='3. Commit — all clients see it on next refresh';
-  h+='</div></div>';
-  h+='<button class="btn btn-ghost" style="margin-bottom:16px" onclick="fetchRemoteNotice();var b=this;b.textContent=\'Refreshing…\';setTimeout(function(){closeSheet();editNotice();},1400)">↻ Refresh from GitHub</button>';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:0.5px solid var(--brd)">';
-  h+='<span style="font-size:13px;font-weight:600;color:var(--tx2)">Show notice</span>';
-  h+='<button class="toggle '+(S.notice.active?'toggle-on':'toggle-off')+'" onclick="S.notice.active=!S.notice.active;sv();draw()"><div class="toggle-knob"></div></button>';
-  h+='</div>';
-  h+='</div>';
-  openSheet(h,'Notice');
-}
 
 function saveNotice(){S.notice.title=document.getElementById('n-title').value;S.notice.body=document.getElementById('n-body').value;sv();closeTopSheet();draw();}
 
