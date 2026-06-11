@@ -230,10 +230,18 @@ function ld(){
   if(!cl.ob)cl.ob={done:false,step:0,ans:{}};
   if(!cl.lastWeights)cl.lastWeights={};
   // Migration: sort custom programme exercises by canonical phase order
-  // (fixes data saved before splice() fix where phases could be out of order)
+  // Also fixes duration values corrupted by the stray *10 bug
   var _phMigOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
   if(cl.customPrograms&&cl.customPrograms.length){
     cl.customPrograms.forEach(function(cp){
+      // Fix corrupted duration: recalculate from actual exercise count
+      if(cp.tpl&&cp.tpl.days&&cp.tpl.days.length){
+        var _totalEx=0;
+        cp.tpl.days.forEach(function(d){_totalEx+=(d.exercises||[]).length;});
+        var _corrDur=Math.round(_totalEx*4/cp.tpl.days.length)||45;
+        if(cp.duration>200){cp.duration=_corrDur;}
+        if(cp.tpl.duration>200){cp.tpl.duration=_corrDur;}
+      }
       if(cp.tpl&&cp.tpl.days){
         cp.tpl.days.forEach(function(d){
           if(d.exercises&&d.exercises.length>1){
@@ -5752,10 +5760,29 @@ function buildLoadTemplate(key){
       for(var i=0;i<customs.length;i++){if(customs[i].key===key){tpl=customs[i].tpl||customs[i];break;}}
     }
     if(!tpl)return;
+    var _phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+    // Deep-copy and reconstruct the builder day shape from saved tpl.days
+    // tpl.days stores: {label, focus, exercises:[{name,sets,reps,ph,...}]}
+    // customEdit.days needs: {label, focus, split:[], phases:['warmup',...], exercises:[...]}
+    var rebuiltDays=(tpl.days||[]).map(function(d){
+      var exsCopy=JSON.parse(JSON.stringify(d.exercises||[]));
+      // Derive the phases array from what exercises are actually present
+      var phSet={};
+      exsCopy.forEach(function(ex){phSet[ex.ph||'strength']=true;});
+      var phases=_phOrder.filter(function(ph){return phSet[ph];});
+      if(!phases.length)phases=['strength'];
+      return {
+        label:d.label||'Day 1',
+        focus:d.focus||'',
+        split:d.split||[],
+        phases:phases,
+        exercises:exsCopy
+      };
+    });
     S.customEdit={
       step:0,
       name:tpl.name+' (Copy)',
-      days:JSON.parse(JSON.stringify(tpl.days||[])),
+      days:rebuiltDays,
       activeDay:0,
       activePhase:null
     };
