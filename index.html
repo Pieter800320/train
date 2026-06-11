@@ -4637,45 +4637,24 @@ function buildStep0Next(){
 // ─────────────────────────────────────────────────────────────
 function buildStep1(){
   var e=S.customEdit;
+  var di=e.activeDay||0;
+  if(di>=e.days.length)di=0;
   var h='';
 
-  e.days.forEach(function(day,di){
-    buildEnsureDay(di);
-    h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:14px;padding:16px;margin-bottom:12px">';
-    // Day label
-    h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">';
-    h+='<input type="text" value="'+day.label+'" placeholder="Day name" '+
-       'oninput="S.customEdit.days['+di+'].label=this.value;sv()" '+
-       'style="flex:1;font-size:14px;font-weight:700;background:var(--bg2)">';
-    if(e.days.length>1){
-      h+='<button onclick="buildRemoveDay('+di+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:4px">✕</button>';
-    }
-    h+='</div>';
-    // Focus label (auto from splits, editable)
-    h+='<div class="lbl" style="margin-bottom:6px">FOCUS (auto-fills from splits)</div>';
-    h+='<input type="text" value="'+day.focus+'" placeholder="e.g. Chest &amp; Back" '+
-       'oninput="S.customEdit.days['+di+'].focus=this.value;sv()" '+
-       'style="margin-bottom:12px;font-size:13px;background:var(--bg2)">';
-    // Split — tappable dropdown field
-    var _splitLabel=(day.split&&day.split.length)
-      ? day.split.map(function(p){return BUILD_PATTERNS[p]||p;}).join(', ')
-      : 'Tap to select…';
-    var _splitEmpty=!(day.split&&day.split.length);
-    h+='<div class="lbl" style="margin-bottom:8px">MOVEMENT PATTERNS</div>';
-    h+='<div onclick="buildOpenSplitPicker('+di+')" style="'+
-       'display:flex;align-items:center;justify-content:space-between;'+
-       'padding:11px 14px;border-radius:10px;border:1px solid '+(_splitEmpty?'var(--brd)':'var(--acc-brd)')+';'+
-       'background:'+(_splitEmpty?'var(--bg3)':'var(--acc-bg)')+';cursor:pointer;margin-bottom:4px">';
-    h+='<span style="font-size:13px;font-weight:600;color:'+(_splitEmpty?'var(--mu)':'var(--acc)')+'">'+_splitLabel+'</span>';
-    h+='<span style="color:var(--acc);font-size:13px">▾</span>';
-    h+='</div>';
-    h+='</div>';
+  // Pills row — same pattern as steps 2,3,4
+  h+='<div class="lbl" style="margin-bottom:8px">DAILY SESSION</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
+  e.days.forEach(function(d,i){
+    var isActive=i===di;
+    h+='<button class="btn btn-pill tap '+(isActive?'btn-acc':'btn-ghost')+'" '
+      +'style="min-width:36px;font-size:13px;font-weight:700;padding:6px 14px" '
+      +'onclick="S.customEdit.activeDay='+i+';sv();buildOpenSplitSheet('+i+')">'+( i+1)+'</button>';
   });
-
-  h+='<button class="btn btn-ghost" style="margin-bottom:16px" onclick="buildAddDay()">+ Add Session</button>';
+  h+='</div>';
+  h+='<button class="btn btn-ghost btn-sm" style="margin-bottom:16px" onclick="buildAddDay()">+ Add Session</button>';
 
   var canNext=e.days.every(function(d){return d.split&&d.split.length>0;});
-  return {html:h,nav:{back:0,next:2,canNext:canNext,hint:'at least one pattern per session'}};
+  return {html:h,nav:{back:0,next:2,canNext:canNext,hint:'Set movement patterns for each session'}};
 }
 
 function buildToggleSplit(di,pat){
@@ -4689,6 +4668,74 @@ function buildToggleSplit(di,pat){
   sv();draw();
 }
 
+
+// Step 2: Session sheet — label, focus, movement patterns with drill-down
+function buildOpenSplitSheet(di){
+  S.customEdit.activeDay=di;sv();
+  var day=S.customEdit.days[di];
+  var splitLabel=(day.split&&day.split.length)
+    ? day.split.map(function(p){return BUILD_PATTERNS[p]||p;}).join(', ')
+    : 'None selected';
+  var hasPatterns=!!(day.split&&day.split.length);
+
+  var h='<div style="padding:0 20px 30px">';
+  // Session label
+  h+='<div class="lbl" style="margin-bottom:6px">SESSION NAME</div>';
+  h+='<input type="text" value="'+day.label+'" placeholder="e.g. Session A" '
+    +'oninput="S.customEdit.days['+di+'].label=this.value;sv()" '
+    +'style="margin-bottom:16px;font-size:14px;font-weight:700">';
+  // Focus
+  h+='<div class="lbl" style="margin-bottom:6px">FOCUS</div>';
+  h+='<input type="text" value="'+(day.focus||'')+'" placeholder="e.g. Chest &amp; Back" '
+    +'oninput="S.customEdit.days['+di+'].focus=this.value;sv()" '
+    +'style="margin-bottom:16px;font-size:13px">';
+  // Movement patterns — drill-down row
+  h+='<div class="lbl" style="margin-bottom:8px">MOVEMENT PATTERNS</div>';
+  h+='<div onclick="buildDrillToPatterns('+di+')" style="'
+    +'display:flex;align-items:center;justify-content:space-between;'
+    +'padding:12px 14px;border-radius:10px;'
+    +'border:1px solid '+(hasPatterns?'var(--acc-brd)':'var(--brd)')+';'
+    +'background:'+(hasPatterns?'var(--acc-bg)':'var(--bg3)')+';cursor:pointer;margin-bottom:20px">';
+  h+='<span style="font-size:13px;font-weight:600;color:'+(hasPatterns?'var(--acc)':'var(--mu)')+'">'+splitLabel+'</span>';
+  h+='<span style="color:var(--acc);font-size:13px">›</span>';
+  h+='</div>';
+  // Remove session button (if more than 1)
+  if(S.customEdit.days.length>1){
+    h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="buildRemoveDay('+di+');closeSheet();draw()">Remove this session</button>';
+  }
+  h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
+  h+='</div>';
+  openSheet(h,'Session '+(di+1),function(){draw();});
+}
+
+// Drill-down: swap sheet body to pattern picker, back arrow returns to session sheet
+function buildDrillToPatterns(di){
+  S.customEdit.activeDay=di;sv();
+  var day=S.customEdit.days[di];
+  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer;padding:0" onclick="buildOpenSplitSheet('+di+')">'
+    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
+    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">Movement Patterns</span>'
+    +'</div>';
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:16px">Select all movement patterns for this session.</div>';
+  h+='<div style="display:flex;flex-direction:column;gap:8px">';
+  Object.keys(BUILD_PATTERNS).forEach(function(pat){
+    var sel=(day.split||[]).indexOf(pat)>=0;
+    h+='<div onclick="buildToggleSplitPicker('+di+',\''+pat+'\');buildDrillToPatterns('+di+')" style="'
+      +'display:flex;align-items:center;justify-content:space-between;'
+      +'padding:11px 14px;border-radius:10px;cursor:pointer;'
+      +'border:1.5px solid '+(sel?'var(--acc-brd)':'var(--brd)')+';'
+      +'background:'+(sel?'var(--acc-bg)':'var(--bg3)')+'">';
+    h+='<span style="font-size:13px;font-weight:600;color:'+(sel?'var(--acc)':'var(--tx)')+'">'+BUILD_PATTERNS[pat]+'</span>';
+    h+='<span style="font-size:13px;color:var(--acc)">'+(sel?'✓':'')+'</span>';
+    h+='</div>';
+  });
+  h+='</div>';
+  h+='<button class="btn btn-acc" style="margin-top:20px" onclick="buildOpenSplitSheet('+di+')">← Back to session</button>';
+  h+='</div>';
+  var sb=document.getElementById('sheet-body');
+  if(sb) sb.innerHTML=backTitle+h;
+}
 function buildOpenSplitPicker(di){
   S.customEdit.activeDay=di;sv();
   var day=S.customEdit.days[di];
@@ -5278,6 +5325,131 @@ function buildToggleTrack(di,ei,field){
 
 
 // Pill tap → exercise list sheet for this day (step 3)
+
+// Drill-down: swap sheet body to full exercise library (by movement pattern + search)
+function buildDrillToLibrary(di,phKey){
+  S.customEdit.activeDay=di;
+  S.customEdit.activePhase=phKey;
+  sv();
+  var phConf=BUILD_PHASE_MAP[phKey]||{label:phKey};
+  var day=S.customEdit.days[di];
+  var split=day.split||[];
+
+  var phaseFilter={
+    warmup:['warmup','activation'],activation:['warmup','activation'],
+    mobility:['warmup','cooldown'],strength:['kpi','primer'],
+    accessory:['accessory','kpi'],core:['accessory','kpi'],
+    cardio:['finisher'],cooldown:['cooldown']
+  };
+  var validPhases=phaseFilter[phKey]||['kpi','accessory'];
+
+  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer;padding:0" onclick="buildOpenExSheet('+di+')">'
+    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
+    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">Add to '+phConf.label+'</span>'
+    +'</div>';
+
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Adding to <strong>'+phConf.label+'</strong>'
+    +(split.length?' · '+split.map(function(p){return BUILD_PATTERNS[p]||p;}).join('/'):'')+'</div>';
+  // Search field
+  h+='<input type="text" id="bpicker-search" placeholder="Search exercises…" '
+    +'oninput="buildFilterPickerDrill('+di+',\''+phKey+'\')" style="margin-bottom:10px;font-size:14px" autocomplete="off">';
+  // Search results (hidden until typing)
+  h+='<div id="bpicker-results" style="display:none"></div>';
+  // Library by movement pattern (collapsible sections)
+  h+='<div id="bpicker-library">';
+  var patternOrder=['push','pull','squat','hinge','lunge','core','carry','explosive','conditioning','rotation','locomotion'];
+  var isFirstPat=true;
+  patternOrder.forEach(function(pat){
+    var patExs=EX.filter(function(e){
+      return (e.patterns||[]).indexOf(pat)>=0&&
+             e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
+    });
+    if(!patExs.length)return;
+    var isFirst=isFirstPat;isFirstPat=false;
+    h+='<div style="margin-bottom:6px">';
+    h+='<div onclick="buildToggleLibrarySection(\''+pat+'\')" style="'
+      +'display:flex;align-items:center;justify-content:space-between;'
+      +'padding:10px 14px;border-radius:10px;background:var(--bg3);border:0.5px solid var(--brd);'
+      +'cursor:pointer;margin-bottom:4px">';
+    h+='<span style="font-size:12px;font-weight:700;letter-spacing:0.5px;color:var(--acc)">'+(BUILD_PATTERNS[pat]||pat).toUpperCase()+'</span>';
+    h+='<span id="lib-arrow-'+pat+'" style="color:var(--acc);font-size:13px">'+(isFirst?'▾':'▸')+'</span>';
+    h+='</div>';
+    h+='<div id="lib-body-'+pat+'" style="display:'+(isFirst?'block':'none')+'">';
+    patExs.forEach(function(e){
+      var added=S.customEdit.days[di]&&S.customEdit.days[di].exercises.some(function(ex){return ex.name===e.name;});
+      h+='<div class="prog-item" style="margin-bottom:4px">';
+      h+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>';
+      h+='<div class="lbl">'+(e.equipment||[]).join(' · ')+'</div></div>';
+      h+='<button class="btn btn-pill '+(added?'btn-ghost':'btn-acc')+'" onclick="buildLibraryAddEx(this,\''+e.key+'\');">'+(added?'✓ Added':'Add')+'</button>';
+      h+='</div>';
+    });
+    h+='</div></div>';
+  });
+  h+='</div>';
+  h+='<button class="btn btn-acc" style="margin-top:16px" onclick="buildOpenExSheet('+di+')">← Back to session</button>';
+  h+='</div>';
+
+  var sb=document.getElementById('sheet-body');
+  if(sb) sb.innerHTML=backTitle+h;
+  setTimeout(function(){var el=document.getElementById('bpicker-search');if(el)el.focus();},100);
+}
+
+// Live search for drill-down library
+function buildFilterPickerDrill(di,phKey){
+  var q=(document.getElementById('bpicker-search')||{}).value||'';
+  var lib=document.getElementById('bpicker-library');
+  var res=document.getElementById('bpicker-results');
+  if(!lib||!res)return;
+  if(!q.trim()){lib.style.display='block';res.style.display='none';res.innerHTML='';return;}
+  lib.style.display='none';res.style.display='block';
+  var phaseFilter={
+    warmup:['warmup','activation'],activation:['warmup','activation'],
+    mobility:['warmup','cooldown'],strength:['kpi','primer'],
+    accessory:['accessory','kpi'],core:['accessory','kpi'],
+    cardio:['finisher'],cooldown:['cooldown']
+  };
+  var validPhases=phaseFilter[phKey]||['kpi','accessory'];
+  var results=EX.filter(function(e){
+    var matchPhase=e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
+    var matchQ=e.name.toLowerCase().indexOf(q.toLowerCase())>=0;
+    return matchPhase&&matchQ;
+  }).slice(0,40);
+  res.innerHTML=results.map(function(e){
+    var added=S.customEdit.days[di]&&S.customEdit.days[di].exercises.some(function(ex){return ex.name===e.name;});
+    return '<div class="prog-item" style="margin-bottom:4px">'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+e.name+'</div>'
+      +'<div class="lbl">'+(e.equipment||[]).join(' · ')+'</div></div>'
+      +'<button class="btn btn-pill '+(added?'btn-ghost':'btn-acc')+'" onclick="buildLibraryAddEx(this,\''+e.key+'\');">'+(added?'✓ Added':'Add')+'</button>'
+      +'</div>';
+  }).join('');
+}
+
+function buildFilterPickerDrill(di,phKey){
+  var q=(document.getElementById('bpicker-search')||{}).value||'';
+  var phaseFilter={
+    warmup:['warmup','activation'],activation:['warmup','activation'],
+    mobility:['warmup','cooldown'],strength:['kpi','primer'],
+    accessory:['accessory','kpi'],core:['accessory','kpi'],
+    cardio:['finisher'],cooldown:['cooldown']
+  };
+  var validPhases=phaseFilter[phKey]||['kpi','accessory'];
+  var results=EX.filter(function(e){
+    var matchPhase=e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;});
+    var matchQ=!q||e.name.toLowerCase().indexOf(q.toLowerCase())>=0;
+    return matchPhase&&matchQ;
+  }).slice(0,30);
+  var res=document.getElementById('bpicker-results');
+  if(!res)return;
+  res.innerHTML=results.map(function(ex){
+    return '<div onclick="buildAddExFromPicker(\''+ex.name+'\',\''+phKey+'\');buildOpenExSheet('+di+')" style="'
+      +'display:flex;align-items:center;padding:10px 12px;background:var(--bg3);'
+      +'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px;cursor:pointer">'
+      +'<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>'
+      +'<span style="font-size:18px;color:var(--acc);line-height:1">+</span>'
+      +'</div>';
+  }).join('');
+}
 function buildOpenExSheet(di){
   S.customEdit.activeDay=di;sv();
   var e=S.customEdit;
@@ -5306,7 +5478,7 @@ function buildOpenExSheet(di){
       h+='</div>';
     });
     h+='<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" '
-      +'onclick="buildOpenPicker('+di+',\''+phKey+'\');">+ Add to '+phConf.label+'</button>';
+      +'onclick="buildDrillToLibrary('+di+',\''+phKey+'\');">+ Add to '+phConf.label+'</button>';
     h+='</div>';
   });
   h+='<div style="padding:0 0 8px">';
