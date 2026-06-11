@@ -4037,6 +4037,7 @@ function openPlanPreview(key){
   }
   h+='</div>';
   h+='</div>';
+  openSheet(h,plan.name);
 }
 
 // ── Programme preview sheet ──
@@ -4115,6 +4116,7 @@ function openProgPreview(key){
   }
   h+='</div>';
   h+='</div>';
+  openSheet(h,tpl.name);
 }
 
 // ── Active Training Plan sheet ──
@@ -5000,7 +5002,19 @@ function buildAddExercise(exKey){
   if(di===null||di===undefined)return;
   var ex=buildExFromKey(exKey,phKey);
   if(!ex)return;
-  S.customEdit.days[di].exercises.push(ex);
+  // Insert exercise in correct phase position (not just append to end)
+  var exs=S.customEdit.days[di].exercises;
+  var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var phIdx=phOrder.indexOf(phKey);
+  // Find last exercise of same or earlier phase
+  var insertAt=exs.length;
+  for(var _i=exs.length-1;_i>=0;_i--){
+    var _ph=exs[_i].ph||'strength';
+    var _pi=phOrder.indexOf(_ph);
+    if(_pi<=phIdx){insertAt=_i+1;break;}
+    insertAt=_i;
+  }
+  exs.splice(insertAt,0,ex);
   sv();
   // Flash confirmation and stay open for more adds
   var results=document.getElementById('bpicker-results');
@@ -5409,11 +5423,20 @@ function buildAddCustomExDrill(di,phKey,q){
   if(q===undefined){q=(document.getElementById('bpicker-search')||{}).value||'';}
   if(!q.trim())return;
   var phConf=BUILD_PHASE_MAP[phKey]||BUILD_PHASE_MAP['strength'];
-  S.customEdit.days[di].exercises.push({
-    name:q.trim(),sets:phConf.sets,reps:phConf.reps,rest:phConf.rest,
+  var newEx={name:q.trim(),sets:phConf.sets,reps:phConf.reps,rest:phConf.rest,
     ph:phKey,cue:'',vol:phConf.reps===0?(phConf.rest+'s'):'',
-    track:phConf.reps===0?['time']:['reps','weight'],weight:0
-  });
+    track:phConf.reps===0?['time']:['reps','weight'],weight:0};
+  var exs=S.customEdit.days[di].exercises;
+  var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var phIdx=phOrder.indexOf(phKey);
+  var insertAt=exs.length;
+  for(var _i=exs.length-1;_i>=0;_i--){
+    var _ph=exs[_i].ph||'strength';
+    var _pi=phOrder.indexOf(_ph);
+    if(_pi<=phIdx){insertAt=_i+1;break;}
+    insertAt=_i;
+  }
+  exs.splice(insertAt,0,newEx);
   sv();
   buildOpenExSheet(di); // back to session, sheet stays open
 }
