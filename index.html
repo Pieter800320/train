@@ -293,7 +293,26 @@ function dayToBuilder(d){
   exs.forEach(function(ex){phSet[ex.ph||'strength']=true;});
   var phases=_PH_ORDER.filter(function(ph){return phSet[ph];});
   if(!phases.length)phases=['strength'];
-  return {label:d.label||'Day 1',focus:d.focus||'',split:d.split||[],phases:phases,exercises:exs};
+  // Infer split from exercise patterns if not already set
+  var split=d.split&&d.split.length?d.split.slice():[];
+  if(!split.length&&exs.length){
+    var patSet={};
+    exs.forEach(function(ex){
+      // Look up exercise in EX database by name to get its patterns
+      var exData=EX.find(function(e){return e.name===ex.name;});
+      if(exData&&exData.patterns){
+        exData.patterns.forEach(function(p){
+          if(BUILD_PATTERNS[p])patSet[p]=true;
+        });
+      }
+    });
+    // Sort inferred patterns in BUILD_PATTERNS key order
+    var patOrder=Object.keys(BUILD_PATTERNS);
+    split=patOrder.filter(function(p){return patSet[p];});
+  }
+  var focus=d.focus||'';
+  if(!focus&&split.length)focus=buildAutoFocus(split);
+  return {label:d.label||'Day 1',focus:focus,split:split,phases:phases,exercises:exs};
 }
 
 // Dev guard: warn if a builder day is missing its phases array
