@@ -4037,25 +4037,14 @@ function openPlanPreview(key){
   }
   h+='</div>';
   h+='</div>';
-  // Show as floating card overlay (not a second sheet) so exercises sheet stays visible
-  var overlay=document.createElement('div');
-  overlay.id='build-config-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;'+
-    'justify-content:center;background:rgba(0,0,0,0.5);';
-  var card=document.createElement('div');
-  card.style.cssText='width:100%;max-width:430px;max-height:85vh;overflow-y:auto;'+
-    'background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);'+
-    'animation:slideUp .25s ease;';
-  card.innerHTML=h;
-  overlay.appendChild(card);
-  // Tap backdrop to close
-  overlay.addEventListener('click',function(e){
-    if(e.target===overlay){
-      var el=document.getElementById('build-config-overlay');
-      if(el)el.parentNode.removeChild(el);
-    }
-  });
-  document.getElementById('app').appendChild(overlay);
+  // Drill-down: swap sheet body in place — no new sheet, no overlay
+  // Back arrow in title navigates back to the session list
+  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;padding:0" onclick="buildOpenConfigSheet('+di+')">'
+    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
+    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">'+exEntry.name+'</span>'
+    +'</div>';
+  var sb=document.getElementById('sheet-body');
+  if(sb) sb.innerHTML=backTitle+h;
 }
 
 // ── Programme preview sheet ──
@@ -4134,25 +4123,14 @@ function openProgPreview(key){
   }
   h+='</div>';
   h+='</div>';
-  // Show as floating card overlay (not a second sheet) so exercises sheet stays visible
-  var overlay=document.createElement('div');
-  overlay.id='build-config-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;'+
-    'justify-content:center;background:rgba(0,0,0,0.5);';
-  var card=document.createElement('div');
-  card.style.cssText='width:100%;max-width:430px;max-height:85vh;overflow-y:auto;'+
-    'background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);'+
-    'animation:slideUp .25s ease;';
-  card.innerHTML=h;
-  overlay.appendChild(card);
-  // Tap backdrop to close
-  overlay.addEventListener('click',function(e){
-    if(e.target===overlay){
-      var el=document.getElementById('build-config-overlay');
-      if(el)el.parentNode.removeChild(el);
-    }
-  });
-  document.getElementById('app').appendChild(overlay);
+  // Drill-down: swap sheet body in place — no new sheet, no overlay
+  // Back arrow in title navigates back to the session list
+  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;padding:0" onclick="buildOpenConfigSheet('+di+')">'
+    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
+    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">'+exEntry.name+'</span>'
+    +'</div>';
+  var sb=document.getElementById('sheet-body');
+  if(sb) sb.innerHTML=backTitle+h;
 }
 
 // ── Active Training Plan sheet ──
@@ -4184,25 +4162,14 @@ function openActiveProgramSheet(){
     h+='<button class="btn btn-ghost btn-sm" onclick="retakeOB();closeSheet()">Retake Setup Questionnaire</button>';
   }
   h+='</div>';
-  // Show as floating card overlay (not a second sheet) so exercises sheet stays visible
-  var overlay=document.createElement('div');
-  overlay.id='build-config-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;'+
-    'justify-content:center;background:rgba(0,0,0,0.5);';
-  var card=document.createElement('div');
-  card.style.cssText='width:100%;max-width:430px;max-height:85vh;overflow-y:auto;'+
-    'background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);'+
-    'animation:slideUp .25s ease;';
-  card.innerHTML=h;
-  overlay.appendChild(card);
-  // Tap backdrop to close
-  overlay.addEventListener('click',function(e){
-    if(e.target===overlay){
-      var el=document.getElementById('build-config-overlay');
-      if(el)el.parentNode.removeChild(el);
-    }
-  });
-  document.getElementById('app').appendChild(overlay);
+  // Drill-down: swap sheet body in place — no new sheet, no overlay
+  // Back arrow in title navigates back to the session list
+  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;padding:0" onclick="buildOpenConfigSheet('+di+')">'
+    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
+    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">'+exEntry.name+'</span>'
+    +'</div>';
+  var sb=document.getElementById('sheet-body');
+  if(sb) sb.innerHTML=backTitle+h;
 }
 
 function catLabel(c){var m={strength:'Strength',hypertrophy:'Hypertrophy',endurance:'Endurance',fatloss:'Fat Loss',foundation:'Foundation',sport:'Sport',rehab:'Rehab'};return m[c]||c;}
@@ -5234,27 +5201,16 @@ function buildConfigEx(di,ei){
   h+='<input type="text" value="'+(exEntry.cue||'')+'" placeholder="e.g. Keep chest up" '+
      'oninput="S.customEdit.days['+di+'].exercises['+ei+'].cue=this.value;sv()" style="margin-bottom:20px">';
 
-  h+='<button class="btn btn-acc" onclick="var el=document.getElementById(\'build-config-overlay\');if(el)el.parentNode.removeChild(el);">Done</button>';
+  h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">← Back to session</button>';
   h+='</div>';
-  // Show as floating card overlay (not a second sheet) so exercises sheet stays visible
-  var overlay=document.createElement('div');
-  overlay.id='build-config-overlay';
-  overlay.style.cssText='position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;'+
-    'justify-content:center;background:rgba(0,0,0,0.5);';
-  var card=document.createElement('div');
-  card.style.cssText='width:100%;max-width:430px;max-height:85vh;overflow-y:auto;'+
-    'background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);'+
-    'animation:slideUp .25s ease;';
-  card.innerHTML=h;
-  overlay.appendChild(card);
-  // Tap backdrop to close
-  overlay.addEventListener('click',function(e){
-    if(e.target===overlay){
-      var el=document.getElementById('build-config-overlay');
-      if(el)el.parentNode.removeChild(el);
-    }
-  });
-  document.getElementById('app').appendChild(overlay);
+  // Drill-down: swap sheet body in place — no new sheet, no overlay
+  // Back arrow in title navigates back to the session list
+  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;padding:0" onclick="buildOpenConfigSheet('+di+')">'
+    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
+    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">'+exEntry.name+'</span>'
+    +'</div>';
+  var sb=document.getElementById('sheet-body');
+  if(sb) sb.innerHTML=backTitle+h;
 }
 
 function buildWizardStepper(di,ei,field,value,label,suffix,delta,min,max){
