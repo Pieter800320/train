@@ -1,4 +1,4 @@
-var CACHE = 'falkenburg-v125';
+var CACHE = 'falkenburg-v126';
 var ASSETS = [
   '/train/',
   '/train/index.html',
@@ -33,7 +33,8 @@ self.addEventListener('activate', function(e) {
 self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
   var url = e.request.url;
-  // Network-first for HTML — always get the freshest index.html
+
+  // Network-first for HTML — always serve the freshest index.html
   var isHTML = url.endsWith('/train/') || url.endsWith('index.html') || url.endsWith('/train');
   if (isHTML) {
     e.respondWith(
@@ -47,7 +48,7 @@ self.addEventListener('fetch', function(e) {
       })
     );
   } else {
-    // Cache-first for all other assets (icons, manifest)
+    // Cache-first for static assets (icons, manifest)
     e.respondWith(
       caches.match(e.request).then(function(cached) {
         return cached || fetch(e.request).then(function(response) {
