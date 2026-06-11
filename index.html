@@ -5404,7 +5404,16 @@ function buildFilterPickerDrill(inp){
   var phKey=inp.dataset.ph;
   var validPhases=(inp.dataset.vp||'').split(',');
   var q=inp.value||'';
-  var container=document.getElementById('bpicker-container');
+  // Walk up from input to find the container sibling
+  var container=null;
+  var parent=inp.parentElement;
+  if(parent){
+    var kids=parent.children;
+    for(var i=0;i<kids.length;i++){
+      if(kids[i].id==='bpicker-container'){container=kids[i];break;}
+    }
+  }
+  if(!container)container=document.getElementById('bpicker-container');
   if(!container)return;
   if(!q.trim()){
     // Restore full library
