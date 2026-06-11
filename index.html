@@ -2573,8 +2573,8 @@ function openSettingsSheet(){
 }
 function setColourTheme(key){
   S.colourTheme=key;sv();applyTheme();
-  // Re-render settings sheet body in place
-  var sb=document.getElementById('sheet-body');
+  // Re-render settings sheet body in place — settings opens in sheet-top-body
+  var sb=document.getElementById('sheet-top-body');
   if(sb){
     var h='<div style="padding:0 20px 30px">';
     h+='<div class="lbl" style="margin-bottom:12px">APPEARANCE</div>';
@@ -5312,6 +5312,7 @@ function buildConfigEx(di,ei){
 
   h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">← Back to session</button>';
   h+='</div>';
+  openSheet(h, exEntry.name, function(){buildOpenConfigSheet(di);});
 }
 
 function buildWizardStepper(di,ei,field,value,label,suffix,delta,min,max){
@@ -6966,6 +6967,7 @@ function fetchRemoteNotice(){
 // ═══════════════════════════════════════════════════════════════
 ld();
 document.documentElement.classList.toggle('light',S.theme==='light');
+applyTheme();
 draw();
 initPullToRefresh();
 initSheetsBindings();
