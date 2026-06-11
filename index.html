@@ -4713,12 +4713,22 @@ function buildStep1(){
 
   // Pills row — same pattern as steps 2,3,4
   h+='<div class="lbl" style="margin-bottom:8px">DAILY SESSION</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
+  h+='<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px">';
   e.days.forEach(function(d,i){
     var isActive=i===di;
-    h+='<button class="btn btn-pill tap '+(isActive?'btn-acc':'btn-ghost')+'" '
-      +'style="min-width:36px;font-size:13px;font-weight:700;padding:6px 14px" '
-      +'onclick="S.customEdit.activeDay='+i+';sv();buildOpenSplitSheet('+i+')">'+( i+1)+'</button>';
+    var hasSplit=d.split&&d.split.length>0;
+    var splitSummary=hasSplit?d.split.map(function(p){return BUILD_PATTERNS[p]||p;}).join(', '):'No patterns set — tap to add';
+    h+='<div onclick="S.customEdit.activeDay='+i+';sv();buildOpenSplitSheet('+i+')" style="'
+      +'display:flex;align-items:center;justify-content:space-between;'
+      +'padding:7px 12px;border-radius:8px;cursor:pointer;'
+      +'border:1.5px solid '+(isActive?'var(--acc-brd)':'var(--brd)')+';'
+      +'background:'+(isActive?'var(--acc-bg)':'var(--bg3)')+'\">';
+    h+='<div style="flex:1;min-width:0">';
+    h+='<div style="font-size:12px;font-weight:700;color:'+(isActive?'var(--acc)':'var(--tx)')+'">'+( d.label||'Session '+(i+1))+'</div>';
+    h+='<div style="font-size:10px;color:'+(hasSplit?'var(--mu)':'var(--coral)')+';margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+splitSummary+'</div>';
+    h+='</div>';
+    h+='<span style="color:var(--acc);font-size:12px;margin-left:6px">›</span>';
+    h+='</div>';
   });
   h+='</div>';
 
@@ -4733,8 +4743,7 @@ function buildToggleSplit(di,pat){
   var idx=d.split.indexOf(pat);
   if(idx>=0)d.split.splice(idx,1);
   else d.split.push(pat);
-  // Auto-update focus label if it hasn't been manually edited
-  if(!d._focusEdited)d.focus=buildAutoFocus(d.split);
+  d.focus=buildAutoFocus(d.split);
   sv();draw();
 }
 
@@ -4749,18 +4758,13 @@ function buildOpenSplitSheet(di){
   var hasPatterns=!!(day.split&&day.split.length);
 
   var h='<div style="padding:0 20px 30px">';
-  // Session label
+  // Session name
   h+='<div class="lbl" style="margin-bottom:6px">SESSION NAME</div>';
   h+='<input type="text" value="'+day.label+'" placeholder="e.g. Session A" '
     +'oninput="S.customEdit.days['+di+'].label=this.value;sv()" '
     +'style="margin-bottom:16px;font-size:14px;font-weight:700">';
-  // Focus
-  h+='<div class="lbl" style="margin-bottom:6px">FOCUS</div>';
-  h+='<input type="text" value="'+(day.focus||'')+'" placeholder="Auto-filled from patterns" '
-    +'oninput="S.customEdit.days['+di+'].focus=this.value;S.customEdit.days['+di+']._focusEdited=!!this.value.trim();sv()" '
-    +'style="margin-bottom:16px;font-size:13px">';
-  // Movement patterns — drill-down row
-  h+='<div class="lbl" style="margin-bottom:8px">MOVEMENT PATTERNS</div>';
+  // Movement pattern focus — drill-down row
+  h+='<div class="lbl" style="margin-bottom:8px">MOVEMENT PATTERN FOCUS</div>';
   h+='<div onclick="buildDrillToPatterns('+di+')" style="'
     +'display:flex;align-items:center;justify-content:space-between;'
     +'padding:12px 14px;border-radius:10px;'
@@ -4832,7 +4836,7 @@ function buildToggleSplitPicker(di,pat){
   var idx=d.split.indexOf(pat);
   if(idx>=0)d.split.splice(idx,1);
   else d.split.push(pat);
-  if(!d._focusEdited)d.focus=buildAutoFocus(d.split);
+  d.focus=buildAutoFocus(d.split);
   sv();
   // Update row in place without closing sheet
   var row=document.getElementById('split-row-'+pat);
@@ -5231,18 +5235,8 @@ function buildStep4(){
   var h='';
 
   h+='<div style="height:12px"></div>';
-
-  // Pill row + Save button on same line
-  h+='<div class="lbl" style="margin-bottom:8px">DAILY SESSION</div>';
-  h+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:18px">';
-  e.days.forEach(function(d,i){
-    var isActive=i===di;
-    h+='<button class="btn btn-pill tap '+(isActive?'btn-acc':'btn-ghost')+'" '
-      +'style="min-width:36px;font-size:13px;font-weight:700;padding:6px 14px" '
-      +'onclick="S.customEdit.activeDay='+i+';sv();buildOpenConfigSheet('+i+')">'+(i+1)+'</button>';
-  });
-  h+='<button class="btn btn-pill btn-acc" style="margin-left:auto;font-size:12px;padding:6px 14px;white-space:nowrap" onclick="buildSave()">Save ✓</button>';
-  h+='</div>';
+  h+=buildDayDropdown(di,4);
+  h+='<button class="btn btn-acc" style="font-size:15px;font-weight:800;height:52px" onclick="buildSave()">Save Programme ✓</button>';
 
   return {html:h,nav:{back:3,next:null,canNext:true,hint:''}};
 }
@@ -5664,15 +5658,24 @@ function buildDayDropdown(activeDi,step){
   if(e.days.length<=1)return '';
   var h='<div style="margin-bottom:18px">';
   h+='<div class="lbl" style="margin-bottom:8px">DAILY SESSION</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  h+='<div style="display:flex;flex-direction:column;gap:5px">';
   e.days.forEach(function(d,i){
     var isActive=i===activeDi;
     var openFn=step===2?'buildOpenPhasePicker('+i+')'
               :step===3?'buildOpenExSheet('+i+')'
               :'buildOpenConfigSheet('+i+')';
-    h+='<button class="btn btn-pill tap '+(isActive?'btn-acc':'btn-ghost')+'" '
-      +'style="min-width:36px;font-size:13px;font-weight:700;padding:6px 14px" '
-      +'onclick="S.customEdit.activeDay='+i+';sv();'+openFn+'">'+(i+1)+'</button>';
+    var focus=d.focus||(d.split&&d.split.length?d.split.map(function(p){return BUILD_PATTERNS[p]||p;}).join(', '):'');
+    h+='<div onclick="S.customEdit.activeDay='+i+';sv();'+openFn+'" style="'
+      +'display:flex;align-items:center;justify-content:space-between;'
+      +'padding:7px 12px;border-radius:8px;cursor:pointer;'
+      +'border:1.5px solid '+(isActive?'var(--acc-brd)':'var(--brd)')+';'
+      +'background:'+(isActive?'var(--acc-bg)':'var(--bg3)')+'\">';
+    h+='<div style="flex:1;min-width:0">';
+    h+='<div style="font-size:12px;font-weight:700;color:'+(isActive?'var(--acc)':'var(--tx)')+'">'+( d.label||'Session '+(i+1))+'</div>';
+    if(focus)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+focus+'</div>';
+    h+='</div>';
+    h+='<span style="color:var(--acc);font-size:12px;margin-left:6px">›</span>';
+    h+='</div>';
   });
   h+='</div>';
   h+='</div>';
@@ -5816,7 +5819,8 @@ function buildLoadTemplate(key){
       name:tpl.name+' (Copy)',
       days:(tpl.days||[]).map(dayToBuilder),
       activeDay:0,
-      activePhase:null
+      activePhase:null,
+      _template:'custom'
     };
     S.buildMode='program';
     S.tab='build';
