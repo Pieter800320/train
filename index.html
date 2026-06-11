@@ -3788,7 +3788,16 @@ function startRestCircle(totalSecs){
     if(now>=wx.restEnd){
       wx.restActive=false;sv();
       if(_restCircleRAF){cancelAnimationFrame(_restCircleRAF);_restCircleRAF=null;}
-      removeRestCircle();
+      timerBeepEnd();
+      // Flash the ring red briefly
+      var ringEl=document.getElementById('rest-circle-ring');
+      if(ringEl){
+        ringEl.style.stroke='#ff4444';
+        ringEl.style.strokeDashoffset='0';
+        setTimeout(function(){removeRestCircle();},320);
+      } else {
+        removeRestCircle();
+      }
       draw();
       setTimeout(function(){autoOpenNextEx();},350);
       return;
