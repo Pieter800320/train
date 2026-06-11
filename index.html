@@ -4360,16 +4360,13 @@ var BUILD_PATTERN_COMBOS={
 };
 function buildAutoFocus(split){
   if(!split||!split.length)return'';
-  var key=split.slice().sort().join('+');
-  if(BUILD_PATTERN_COMBOS[key])return BUILD_PATTERN_COMBOS[key];
-  if(split.length===1)return BUILD_PATTERN_FOCUS[split[0]]||split[0];
-  // Fallback: join muscle groups, deduplicated
-  var groups=[];
+  // Use BUILD_PATTERNS labels joined with ' - ', deduplicated
+  var seen=[];
   split.forEach(function(p){
-    var g=BUILD_PATTERN_FOCUS[p]||BUILD_PATTERNS[p]||p;
-    if(groups.indexOf(g)<0)groups.push(g);
+    var label=BUILD_PATTERNS[p]||p;
+    if(seen.indexOf(label)<0)seen.push(label);
   });
-  return groups.slice(0,2).join(' & ');
+  return seen.join(' - ');
 }
 
 // ── Utility: build an exercise object from EX key ─────────────
@@ -4686,8 +4683,8 @@ function buildOpenSplitSheet(di){
     +'style="margin-bottom:16px;font-size:14px;font-weight:700">';
   // Focus
   h+='<div class="lbl" style="margin-bottom:6px">FOCUS</div>';
-  h+='<input type="text" value="'+(day.focus||'')+'" placeholder="e.g. Chest &amp; Back" '
-    +'oninput="S.customEdit.days['+di+'].focus=this.value;sv()" '
+  h+='<input type="text" value="'+(day.focus||'')+'" placeholder="Auto-filled from patterns" '
+    +'oninput="S.customEdit.days['+di+'].focus=this.value;S.customEdit.days['+di+']._focusEdited=!!this.value.trim();sv()" '
     +'style="margin-bottom:16px;font-size:13px">';
   // Movement patterns — drill-down row
   h+='<div class="lbl" style="margin-bottom:8px">MOVEMENT PATTERNS</div>';
