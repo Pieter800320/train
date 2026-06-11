@@ -5991,7 +5991,7 @@ function initBuildDrag(){
         // Recalculate target index after splice
         var newTgt=tgtGei>_drag.srcGei?tgtGei-1:tgtGei;
         exs.splice(newTgt,0,srcEx);
-        sv();draw();
+        sv();buildOpenExSheet(di);
       }
     }
 
