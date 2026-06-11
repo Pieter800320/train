@@ -5942,8 +5942,11 @@ function initBuildDrag(){
       _drag.clone.style.top=(_drag.cloneTop+dy)+'px';
       _drag.lastY=y;
 
-      // Find which row the clone centre overlaps
-      var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2;
+      // Find which row the clone centre overlaps.
+      // When dragging down the source row still occupies its slot, pushing
+      // targets down — compensate by subtracting srcRow height for dy > 0.
+      var rowH=_drag.srcRow.offsetHeight;
+      var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2-(dy>0?rowH:0);
       var target=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
         if(r===_drag.srcRow)return;
@@ -5974,8 +5977,10 @@ function initBuildDrag(){
         r.style.border='0.5px solid var(--brd)';
       });
 
-      // Find drop target
-      var midY=_drag.cloneTop+(_drag.lastY-_drag.startY)+(_drag.srcRow.offsetHeight/2);
+      // Find drop target — same compensation as onMove
+      var dy=_drag.lastY-_drag.startY;
+      var rowH=_drag.srcRow.offsetHeight;
+      var midY=_drag.cloneTop+dy+rowH/2-(dy>0?rowH:0);
       var tgtRow=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
         if(r===_drag.srcRow)return;
