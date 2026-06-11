@@ -169,7 +169,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 #ptr-indicator.ptr-visible{transform:translateX(-50%) translateY(10px)}
 #ptr-indicator svg{width:18px;height:18px;animation:none}
 #ptr-indicator.ptr-spinning svg{animation:ptr-spin .6s linear infinite}
-@keyframes ptr-spin{to{transform:rotate(360deg)}}
+@keyframes ptr-spin{to{transform:rotate(360deg)}}@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.22.0/dist/tabler-icons.min.css">
 </head>
@@ -4037,7 +4037,25 @@ function openPlanPreview(key){
   }
   h+='</div>';
   h+='</div>';
-  openSheet(h,null);
+  // Show as floating card overlay (not a second sheet) so exercises sheet stays visible
+  var overlay=document.createElement('div');
+  overlay.id='build-config-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;'+
+    'justify-content:center;background:rgba(0,0,0,0.5);';
+  var card=document.createElement('div');
+  card.style.cssText='width:100%;max-width:430px;max-height:85vh;overflow-y:auto;'+
+    'background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);'+
+    'animation:slideUp .25s ease;';
+  card.innerHTML=h;
+  overlay.appendChild(card);
+  // Tap backdrop to close
+  overlay.addEventListener('click',function(e){
+    if(e.target===overlay){
+      var el=document.getElementById('build-config-overlay');
+      if(el)el.parentNode.removeChild(el);
+    }
+  });
+  document.getElementById('app').appendChild(overlay);
 }
 
 // ── Programme preview sheet ──
@@ -4116,7 +4134,25 @@ function openProgPreview(key){
   }
   h+='</div>';
   h+='</div>';
-  openSheet(h,null);
+  // Show as floating card overlay (not a second sheet) so exercises sheet stays visible
+  var overlay=document.createElement('div');
+  overlay.id='build-config-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;'+
+    'justify-content:center;background:rgba(0,0,0,0.5);';
+  var card=document.createElement('div');
+  card.style.cssText='width:100%;max-width:430px;max-height:85vh;overflow-y:auto;'+
+    'background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);'+
+    'animation:slideUp .25s ease;';
+  card.innerHTML=h;
+  overlay.appendChild(card);
+  // Tap backdrop to close
+  overlay.addEventListener('click',function(e){
+    if(e.target===overlay){
+      var el=document.getElementById('build-config-overlay');
+      if(el)el.parentNode.removeChild(el);
+    }
+  });
+  document.getElementById('app').appendChild(overlay);
 }
 
 // ── Active Training Plan sheet ──
@@ -4148,7 +4184,25 @@ function openActiveProgramSheet(){
     h+='<button class="btn btn-ghost btn-sm" onclick="retakeOB();closeSheet()">Retake Setup Questionnaire</button>';
   }
   h+='</div>';
-  openSheet(h,null);
+  // Show as floating card overlay (not a second sheet) so exercises sheet stays visible
+  var overlay=document.createElement('div');
+  overlay.id='build-config-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;'+
+    'justify-content:center;background:rgba(0,0,0,0.5);';
+  var card=document.createElement('div');
+  card.style.cssText='width:100%;max-width:430px;max-height:85vh;overflow-y:auto;'+
+    'background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);'+
+    'animation:slideUp .25s ease;';
+  card.innerHTML=h;
+  overlay.appendChild(card);
+  // Tap backdrop to close
+  overlay.addEventListener('click',function(e){
+    if(e.target===overlay){
+      var el=document.getElementById('build-config-overlay');
+      if(el)el.parentNode.removeChild(el);
+    }
+  });
+  document.getElementById('app').appendChild(overlay);
 }
 
 function catLabel(c){var m={strength:'Strength',hypertrophy:'Hypertrophy',endurance:'Endurance',fatloss:'Fat Loss',foundation:'Foundation',sport:'Sport',rehab:'Rehab'};return m[c]||c;}
@@ -4799,9 +4853,9 @@ function buildStep2(){
 
 
 
-  // Validate ALL days have strength phase, not just the active day
-  var allDaysValid=e.days.every(function(d){return (d.phases||[]).indexOf('strength')>=0;});
-  var hint=allDaysValid?'':'All sessions need a Strength phase';
+  // Just need at least one phase per day — cardio/mobility days are valid
+  var allDaysValid=e.days.every(function(d){return (d.phases||[]).length>0;});
+  var hint=allDaysValid?'':'Each session needs at least one phase';
   return {html:h,nav:{back:1,next:3,canNext:allDaysValid,hint:hint}};
 }
 
@@ -5180,9 +5234,27 @@ function buildConfigEx(di,ei){
   h+='<input type="text" value="'+(exEntry.cue||'')+'" placeholder="e.g. Keep chest up" '+
      'oninput="S.customEdit.days['+di+'].exercises['+ei+'].cue=this.value;sv()" style="margin-bottom:20px">';
 
-  h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
+  h+='<button class="btn btn-acc" onclick="var el=document.getElementById(\'build-config-overlay\');if(el)el.parentNode.removeChild(el);">Done</button>';
   h+='</div>';
-  openSheet(h,null);
+  // Show as floating card overlay (not a second sheet) so exercises sheet stays visible
+  var overlay=document.createElement('div');
+  overlay.id='build-config-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:250;display:flex;align-items:flex-end;'+
+    'justify-content:center;background:rgba(0,0,0,0.5);';
+  var card=document.createElement('div');
+  card.style.cssText='width:100%;max-width:430px;max-height:85vh;overflow-y:auto;'+
+    'background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);'+
+    'animation:slideUp .25s ease;';
+  card.innerHTML=h;
+  overlay.appendChild(card);
+  // Tap backdrop to close
+  overlay.addEventListener('click',function(e){
+    if(e.target===overlay){
+      var el=document.getElementById('build-config-overlay');
+      if(el)el.parentNode.removeChild(el);
+    }
+  });
+  document.getElementById('app').appendChild(overlay);
 }
 
 function buildWizardStepper(di,ei,field,value,label,suffix,delta,min,max){
@@ -5281,6 +5353,9 @@ function buildOpenExSheet(di){
       +'onclick="buildOpenPicker('+di+',\''+phKey+'\');">+ Add to '+phConf.label+'</button>';
     h+='</div>';
   });
+  h+='<div style="padding:0 0 8px">';
+  h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
+  h+='</div>';
   h+='</div>';
   openSheet(h,day.label||'Session '+(di+1),function(){draw();});
 }
@@ -5328,6 +5403,9 @@ function buildOpenConfigSheet(di){
   if(!hasAny){
     h+='<div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">No exercises yet — add some in Step 3.</div>';
   }
+  h+='<div style="padding:8px 0">';
+  h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
+  h+='</div>';
   h+='</div>';
   openSheet(h,day.label||'Session '+(di+1),function(){draw();});
 }
