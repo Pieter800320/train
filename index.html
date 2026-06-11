@@ -5324,10 +5324,7 @@ function buildConfigEx(di,ei){
   h+='</div>';
 
   // Track field toggles
-  h+='<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">';
-  h+='<div class="lbl">TRACK FIELDS</div>';
-  h+='<span style="font-size:10px;color:var(--mu)">tap any to toggle</span>';
-  h+='</div>';
+  h+='<div class="lbl" style="margin-bottom:8px">TRACK FIELDS</div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
   allTrack.forEach(function(t){
     var isActive=track.indexOf(t)>=0;
@@ -5615,8 +5612,10 @@ function buildOpenExSheet(di){
     h+='</div>';
     phExs.forEach(function(ex){
       var globalEi=day.exercises.indexOf(ex);
-      h+='<div style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);'
-        +'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
+      h+='<div class="build-drag-row" data-di="'+di+'" data-gei="'+globalEi+'" data-phase="'+phKey+'" '
+        +'style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);'
+        +'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px;touch-action:none">';
+      h+='<div class="build-drag-handle" style="cursor:grab;padding:0 10px 0 0;color:var(--mu);font-size:18px;user-select:none;line-height:1">⠿</div>';
       h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
       h+='<button onclick="event.stopPropagation();buildRemoveEx('+di+','+globalEi+');buildOpenExSheet('+di+')" '
         +'style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:15px;padding:4px 8px">✕</button>';
@@ -5631,6 +5630,7 @@ function buildOpenExSheet(di){
   h+='</div>';
   h+='</div>';
   openSheet(h,day.label||'Session '+(di+1),function(){draw();});
+  setTimeout(initBuildDrag,60);
 }
 
 // Pill tap → configure sheet for this day (step 4)
@@ -5913,9 +5913,6 @@ function initBuildDrag(){
     if(!handle)return;
 
     function onStart(y,x,rowEl){
-      // Only initiate drag if touch is in left third of row
-      var rowRect=rowEl.getBoundingClientRect();
-      if(x>rowRect.left+rowRect.width/3)return;
       _drag.active=true;
       _drag.srcRow=row;
       _drag.srcDi=parseInt(row.dataset.di);
