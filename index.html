@@ -262,6 +262,48 @@ function C(){return S.clients[S.activeClient];}
 function clients(){return Object.keys(S.clients).map(function(k){return S.clients[k];});}
 
 // ═══════════════════════════════════════════════════════════════
+// CANONICAL DAY SHAPE CONVERTERS
+// Two shapes exist intentionally:
+//   Storage day  — {label, focus, exercises:[{name,sets,reps,ph,vol,rest,cue,weight,track}]}
+//                  used by player, tplMap, localStorage. No phases/split.
+//   Builder day  — storage day + {phases:['warmup',...], split:[]}
+//                  used by customEdit only. phases drives section rendering.
+// All boundary crossings MUST go through one of these two functions.
+// ═══════════════════════════════════════════════════════════════
+var _PH_ORDER=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+
+// Builder → Storage  (call before writing to localStorage)
+function dayToStorage(d){
+  return {
+    label:d.label||'Day 1',
+    focus:d.focus||d.label||'',
+    exercises:(d.exercises||[]).map(function(ex){
+      return {name:ex.name,sets:ex.sets||1,reps:ex.reps||0,vol:ex.vol||'',
+              rest:ex.rest||60,ph:ex.ph||'strength',cue:ex.cue||'',
+              weight:ex.weight||0,
+              track:ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol)};
+    })
+  };
+}
+
+// Storage → Builder  (call before putting a day into customEdit)
+function dayToBuilder(d){
+  var exs=JSON.parse(JSON.stringify(d.exercises||[]));
+  var phSet={};
+  exs.forEach(function(ex){phSet[ex.ph||'strength']=true;});
+  var phases=_PH_ORDER.filter(function(ph){return phSet[ph];});
+  if(!phases.length)phases=['strength'];
+  return {label:d.label||'Day 1',focus:d.focus||'',split:d.split||[],phases:phases,exercises:exs};
+}
+
+// Dev guard: warn if a builder day is missing its phases array
+function assertBuilderDay(d,ctx){
+  if(!d||!Array.isArray(d.phases)||d.phases.length===0){
+    console.warn('[Falkenburg] builder day missing phases in '+(ctx||'unknown'),d);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // PROGRAMME TEMPLATES
 // ═══════════════════════════════════════════════════════════════
 
@@ -4481,6 +4523,8 @@ function buildV(){
 function buildWizardV(){
   var e=S.customEdit;
   var step=e.step||0;
+  // Dev guard: catch any day that lost its phases array
+  if(e.days&&e.days.length){e.days.forEach(function(d,i){assertBuilderDay(d,'buildWizardV day '+i);});}
   // Step indicator
   var steps=['Setup','Splits','Phases','Exercises','Configure'];
   var h='';
@@ -5576,17 +5620,7 @@ function buildSave(){
   if(e._draftKey){
     cl.customPrograms=cl.customPrograms.filter(function(p){return p.key!==e._draftKey;});
   }
-  var tplDays=e.days.map(function(d){
-    return {
-      label:d.label,
-      focus:d.focus||d.label,
-      exercises:(d.exercises||[]).map(function(ex){
-        return {name:ex.name,sets:ex.sets,reps:ex.reps||0,vol:ex.vol||'',
-                rest:ex.rest||60,ph:ex.ph||'strength',cue:ex.cue||'',weight:ex.weight||0,
-                track:ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol)};
-      })
-    };
-  });
+  var tplDays=e.days.map(dayToStorage);
   var totalDuration=Math.round(tplDays.reduce(function(sum,d){
     return sum+(d.exercises.length*4);
   },0)/tplDays.length)||45;
@@ -5760,29 +5794,10 @@ function buildLoadTemplate(key){
       for(var i=0;i<customs.length;i++){if(customs[i].key===key){tpl=customs[i].tpl||customs[i];break;}}
     }
     if(!tpl)return;
-    var _phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
-    // Deep-copy and reconstruct the builder day shape from saved tpl.days
-    // tpl.days stores: {label, focus, exercises:[{name,sets,reps,ph,...}]}
-    // customEdit.days needs: {label, focus, split:[], phases:['warmup',...], exercises:[...]}
-    var rebuiltDays=(tpl.days||[]).map(function(d){
-      var exsCopy=JSON.parse(JSON.stringify(d.exercises||[]));
-      // Derive the phases array from what exercises are actually present
-      var phSet={};
-      exsCopy.forEach(function(ex){phSet[ex.ph||'strength']=true;});
-      var phases=_phOrder.filter(function(ph){return phSet[ph];});
-      if(!phases.length)phases=['strength'];
-      return {
-        label:d.label||'Day 1',
-        focus:d.focus||'',
-        split:d.split||[],
-        phases:phases,
-        exercises:exsCopy
-      };
-    });
     S.customEdit={
       step:0,
       name:tpl.name+' (Copy)',
-      days:rebuiltDays,
+      days:(tpl.days||[]).map(dayToBuilder),
       activeDay:0,
       activePhase:null
     };
