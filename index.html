@@ -5943,11 +5943,11 @@ function initBuildDrag(){
       _drag.lastY=y;
 
       // Find which row the clone centre overlaps.
-      // The two prior configurations (no compensation, and -rowH for dy>0)
-      // were asymmetric in opposite directions — the midpoint between them
-      // is -rowH/2 for dy>0 and +rowH/2 for dy<0.
+      // Up direction feels correct as-is (triggers ~1 row of travel).
+      // Down direction previously needed ~2 rows of travel — add rowH to
+      // bring the trigger point back to ~1 row, matching up.
       var rowH=_drag.srcRow.offsetHeight;
-      var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2-(dy>0?rowH/2:(dy<0?-rowH/2:0));
+      var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2+(dy<0?rowH/2:rowH);
       var target=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
         if(r===_drag.srcRow)return;
@@ -5978,10 +5978,10 @@ function initBuildDrag(){
         r.style.border='0.5px solid var(--brd)';
       });
 
-      // Find drop target — same compensation as onMove
+      // Find drop target — same as onMove
       var dy=_drag.lastY-_drag.startY;
       var rowH=_drag.srcRow.offsetHeight;
-      var midY=_drag.cloneTop+dy+rowH/2-(dy>0?rowH/2:(dy<0?-rowH/2:0));
+      var midY=_drag.cloneTop+dy+rowH/2+(dy<0?rowH/2:rowH);
       var tgtRow=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
         if(r===_drag.srcRow)return;
