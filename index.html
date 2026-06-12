@@ -3034,7 +3034,7 @@ function todayV(){
     sortedExercises.forEach(function(exEntry){
       // Look up in wx.exercises (phase-sorted) so exIdx matches the player queue
       var wxExs=isPlaying&&S.wx?S.wx.exercises:null;
-      var origIdx=wxExs?wxExs.indexOf(exEntry):day.exercises.indexOf(exEntry);
+      var origIdx=wxExs?wxExs.findIndex(function(we){return we.name===exEntry.name&&(we.ph||'')===(exEntry.ph||'');}):day.exercises.indexOf(exEntry);
       var _curPh=exEntry.ph||'strength';
       if(_curPh!==_lastPh){h+='<div class="phase-head">'+phaseLabels[_curPh]+'</div>';_lastPh=_curPh;}
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
@@ -3077,7 +3077,7 @@ function todayV(){
       h+='<div class="phase-head">'+phaseLabels[ph]+'</div>';
       exsInPhase.forEach(function(exEntry){
         var wxExs=isPlaying&&S.wx?S.wx.exercises:null;
-        var origIdx=wxExs?wxExs.indexOf(exEntry):day.exercises.indexOf(exEntry);
+        var origIdx=wxExs?wxExs.findIndex(function(we){return we.name===exEntry.name&&(we.ph||'')===(exEntry.ph||'');}):day.exercises.indexOf(exEntry);
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
       var isActive=isPlaying&&origIdx===activeExIdx&&!isDone;
       var vol=exEntry.vol||'';
@@ -5728,7 +5728,7 @@ function buildDayDropdown(activeDi,step){
               :step===3?'buildOpenExSheet('+i+')'
               :'buildOpenConfigSheet('+i+')';
     var focus=d.focus||(d.split&&d.split.length?d.split.map(function(p){return BUILD_PATTERNS[p]||p;}).join(', '):'');
-    h+='<div onclick="S.customEdit.activeDay='+i+';sv();'+openFn+'" style="'
+    h+='<div onclick="S.customEdit.activeDay='+i+';sv();draw();'+openFn+'" style="'
       +'display:flex;align-items:center;justify-content:space-between;'
       +'padding:7px 12px;border-radius:8px;cursor:pointer;'
       +'border:1.5px solid '+(isActive?'var(--acc-brd)':'var(--brd)')+';'
