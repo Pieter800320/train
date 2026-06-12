@@ -6059,7 +6059,12 @@ function openAdminSheet(){
     var h='<div style="padding:0 20px 20px">';
     h+='<div class="card card-coral" style="margin-bottom:16px"><div style="font-size:13px;color:var(--coral)">Admin mode active</div></div>';
     h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="changePIN()">Change PIN</button>';
-    h+='<button class="btn btn-coral" onclick="deactivateAdmin()">Exit Admin Mode</button>';
+    h+='<button class="btn btn-coral" style="margin-bottom:20px" onclick="deactivateAdmin()">Exit Admin Mode</button>';
+    h+='<div class="lbl" style="margin-bottom:8px">DATA BACKUP</div>';
+    h+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px">Save all programmes, history and settings as a file, or restore from a previous backup.</div>';
+    h+='<button class="btn btn-acc" style="margin-bottom:8px" onclick="exportAllData()">⤓ Export All Data</button>';
+    h+='<input type="file" id="import-data-input" accept="application/json" style="display:none" onchange="importAllData(this)">';
+    h+='<button class="btn btn-ghost" onclick="document.getElementById(\'import-data-input\').click()">⤒ Import Data</button>';
     h+='</div>';
     openTopSheet(h);return;
   }
@@ -6084,6 +6089,53 @@ function setAdminPIN(){var a=document.getElementById('pin-a').value;var b=docume
 function checkAdminPIN(){var v=document.getElementById('pin-in').value;if(v===S.admin.pin){S.admin.active=true;S.admin.expiry=Date.now()+600000;sv();closeTopSheet();draw();}else{alert('Incorrect PIN.');}}
 function deactivateAdmin(){S.admin.active=false;sv();closeTopSheet();draw();}
 function changePIN(){S.admin.set=false;S.admin.pin='';S.admin.active=false;sv();closeTopSheet();}
+
+// ── Full app data backup / restore ────────────────────────────
+function exportAllData(){
+  var json=JSON.stringify(S,null,2);
+  var date=new Date().toISOString().slice(0,10);
+  var filename='falkenburg-backup-'+date+'.json';
+  var blob=new Blob([json],{type:'application/json'});
+  var file=new File([blob],filename,{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:filename}).catch(function(){
+      _downloadBlob(blob,filename);
+    });
+  } else {
+    _downloadBlob(blob,filename);
+  }
+}
+function _downloadBlob(blob,filename){
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function importAllData(input){
+  var file=input.files&&input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var parsed;
+    try{parsed=JSON.parse(e.target.result);}
+    catch(err){alert('That file is not valid JSON — import cancelled.');input.value='';return;}
+    // Basic shape check — a Falkenburg backup has a clients object
+    if(!parsed||typeof parsed!=='object'||!parsed.clients){
+      alert('That file does not look like a Falkenburg backup — import cancelled.');
+      input.value='';return;
+    }
+    appConfirm('Restore this backup? This replaces ALL current data — programmes, history and settings — and cannot be undone.',function(){
+      S=parsed;
+      try{localStorage.setItem('falken_v1',JSON.stringify(S));}catch(err){}
+      input.value='';
+      closeTopSheet();
+      draw();
+      alert('Backup restored.');
+    },function(){input.value='';});
+  };
+  reader.readAsText(file);
+}
 
 function saveNotice(){S.notice.title=document.getElementById('n-title').value;S.notice.body=document.getElementById('n-body').value;sv();closeTopSheet();draw();}
 
