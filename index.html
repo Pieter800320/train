@@ -4257,18 +4257,18 @@ function openProgPreview(key){
   // Action buttons
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 0 0">';
   if(isDraft){
-    h+='<button class="btn btn-acc" data-key="'+key+'" onclick="buildResumeDraft(this.dataset.key)">↩ Resume Draft</button>';
-    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">✕ Delete Draft</button>';
+    h+='<button class="btn btn-acc" data-key="'+key+'" onclick="buildResumeDraft(this.dataset.key)">Resume Draft</button>';
+    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete Draft</button>';
   } else if(isActive){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:12px 0">✓ Currently active</div>';
   } else {
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="switchTPL(this.dataset.key)">Select this Program</button>';
   }
   if(!isDraft){
-    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadTemplate(this.dataset.key)">✏ Edit in Build</button>';
+    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadTemplate(this.dataset.key)">Edit in Build</button>';
   }
   if(isCustom&&!isDraft){
-    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">✕ Delete Program</button>';
+    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete Program</button>';
   }
   h+='</div>';
   h+='</div>';
