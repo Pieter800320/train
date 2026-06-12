@@ -4781,7 +4781,7 @@ function buildStep1(){
     var isActive=i===di;
     var hasSplit=d.split&&d.split.length>0;
     var splitSummary=hasSplit?d.split.map(function(p){return BUILD_PATTERNS[p]||p;}).join(', '):'No patterns set — tap to add';
-    h+='<div onclick="S.customEdit.activeDay='+i+';sv();buildOpenSplitSheet('+i+')" style="'
+    h+='<div onclick="S.customEdit.activeDay='+i+';sv();draw();buildOpenSplitSheet('+i+')" style="'
       +'display:flex;align-items:center;justify-content:space-between;'
       +'padding:7px 12px;border-radius:8px;cursor:pointer;'
       +'border:1.5px solid '+(isActive?'var(--acc-brd)':'var(--brd)')+';'
@@ -5614,8 +5614,8 @@ function buildOpenExSheet(di){
       var globalEi=day.exercises.indexOf(ex);
       h+='<div class="build-drag-row" data-di="'+di+'" data-gei="'+globalEi+'" data-phase="'+phKey+'" '
         +'style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);'
-        +'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px;touch-action:none">';
-      h+='<div class="build-drag-handle" style="cursor:grab;padding:0 10px 0 0;color:var(--mu);font-size:18px;user-select:none;line-height:1">⠿</div>';
+        +'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
+      h+='<div class="build-drag-handle" style="cursor:grab;margin:-10px 14px -10px -12px;padding:10px 14px 10px 12px;color:var(--mu);font-size:18px;user-select:none;line-height:1;touch-action:none">⠿</div>';
       h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
       h+='<button onclick="event.stopPropagation();buildRemoveEx('+di+','+globalEi+');buildOpenExSheet('+di+')" '
         +'style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:15px;padding:4px 8px">✕</button>';
@@ -5942,11 +5942,8 @@ function initBuildDrag(){
       _drag.clone.style.top=(_drag.cloneTop+dy)+'px';
       _drag.lastY=y;
 
-      // Find which row the clone centre overlaps.
-      // When dragging down the source row still occupies its slot, pushing
-      // targets down — compensate by subtracting srcRow height for dy > 0.
-      var rowH=_drag.srcRow.offsetHeight;
-      var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2-(dy>0?rowH:0);
+      // Find which row the clone centre overlaps
+      var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2;
       var target=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
         if(r===_drag.srcRow)return;
@@ -5977,10 +5974,9 @@ function initBuildDrag(){
         r.style.border='0.5px solid var(--brd)';
       });
 
-      // Find drop target — same compensation as onMove
+      // Find drop target — same as onMove
       var dy=_drag.lastY-_drag.startY;
-      var rowH=_drag.srcRow.offsetHeight;
-      var midY=_drag.cloneTop+dy+rowH/2-(dy>0?rowH:0);
+      var midY=_drag.cloneTop+dy+_drag.srcRow.offsetHeight/2;
       var tgtRow=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
         if(r===_drag.srcRow)return;
