@@ -1535,7 +1535,7 @@ var TPL = [
     ex('Band Pull-Apart',2,10,30,'warmup','2 rounds of the warm-up circuit — do not rush this.'),
     ex('Scapular Pull-Up',2,5,30,'activation','Dead hang. Depress and retract the scaps. No elbow bend. This is the foundation.'),
     exT('Dead Hang','1','10s',30,'activation','Passive hang. Breathe into the lats.'),
-    ex('Pull-Up',5,3,90,'kpi','Controlled tempo: 2 sec up, 1 sec hold at top, 3 sec down. Stop well short of failure — sub-maximal is the goal this phase.'),
+    ex('Pull-Up',5,3,90,'strength','Controlled tempo: 2 sec up, 1 sec hold at top, 3 sec down. Stop well short of failure — sub-maximal is the goal this phase.'),
     ex('Lat Pulldown (Wide Grip)',3,12,75,'accessory','Volume without fatigue cost. Full stretch at top, pull elbows to pockets.'),
     ex('Band Pull-Apart',3,15,30,'accessory'),
     ex('Face Pull',3,15,45,'accessory','Shoulder integrity. Light weight, full range.')
@@ -1544,7 +1544,7 @@ var TPL = [
     ex('Band Pull-Apart',2,10,30,'warmup'),
     ex('Scapular Pull-Up',2,5,30,'activation'),
     exT('Dead Hang','1','10s',30,'activation'),
-    ex('Pull-Up',1,1,45,'kpi','Ladder: 1 → 2 → 3 → 2 → 1, rest 45 sec between rungs. Repeat the ladder twice. Controlled reps throughout — no kipping.'),
+    ex('Pull-Up',1,1,45,'strength','Ladder: 1 → 2 → 3 → 2 → 1, rest 45 sec between rungs. Repeat the ladder twice. Controlled reps throughout — no kipping.'),
     ex('Dead Hang',3,0,45,'accessory','Grip and shoulder decompression. 20–30 seconds per set.','25s'),
     ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
     ex('Face Pull',3,15,45,'accessory')
@@ -1553,7 +1553,7 @@ var TPL = [
     ex('Band Pull-Apart',2,10,30,'warmup'),
     ex('Scapular Pull-Up',2,5,30,'activation'),
     exT('Dead Hang','1','10s',30,'activation'),
-    ex('Pull-Up',4,4,90,'kpi','Same controlled tempo as Day A. Rest 90 sec. In Weeks 3–4 this becomes weighted.'),
+    ex('Pull-Up',4,4,90,'strength','Same controlled tempo as Day A. Rest 90 sec. In Weeks 3–4 this becomes weighted.'),
     ex('Pull-Up',2,0,90,'accessory','Slow eccentrics only — jump to the top position, lower for 6–8 seconds. Stop at 4 reps per set.','neg'),
     ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
     ex('Band Pull-Apart',3,15,30,'accessory'),
@@ -3031,10 +3031,15 @@ function todayV(){
       return ai-bi;
     });
     var _lastPh=null;
-    sortedExercises.forEach(function(exEntry){
-      // Look up in wx.exercises (phase-sorted) so exIdx matches the player queue
-      var wxExs=isPlaying&&S.wx?S.wx.exercises:null;
-      var origIdx=wxExs?wxExs.findIndex(function(we){return we.name===exEntry.name&&(we.ph||'')===(exEntry.ph||'');}):day.exercises.indexOf(exEntry);
+    sortedExercises.forEach(function(exEntry,sortedIdx){
+      // origIdx is the exercise's position in phase-sorted order — this is
+      // the index space used by S.wx.exercises (created via startSession,
+      // which sorts by the same _PH_ORDER), S.wx.exDone, S.wx.viewAdj, etc.
+      // Using this unconditionally (not just when isPlaying) ensures
+      // openExWindow() opens the correct exercise even in VIEW mode, and
+      // correctly distinguishes duplicate-named exercises (e.g. two calf
+      // stretches in cooldown).
+      var origIdx=sortedIdx;
       var _curPh=exEntry.ph||'strength';
       if(_curPh!==_lastPh){h+='<div class="phase-head">'+phaseLabels[_curPh]+'</div>';_lastPh=_curPh;}
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
@@ -3070,14 +3075,18 @@ function todayV(){
       h+='</div></div>';
     });
   } else {
-    // Pre-built programme: group by phase in fixed order
+    // Pre-built programme: group by phase in fixed order.
+    // Track a running index across all phases — this matches the position
+    // each exercise occupies in S.wx.exercises (sorted by the same phase
+    // order), correctly distinguishing duplicate-named exercises.
+    var _runningIdx=0;
     phases.forEach(function(ph){
       var exsInPhase=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
       if(exsInPhase.length===0)return;
       h+='<div class="phase-head">'+phaseLabels[ph]+'</div>';
       exsInPhase.forEach(function(exEntry){
-        var wxExs=isPlaying&&S.wx?S.wx.exercises:null;
-        var origIdx=wxExs?wxExs.findIndex(function(we){return we.name===exEntry.name&&(we.ph||'')===(exEntry.ph||'');}):day.exercises.indexOf(exEntry);
+        var origIdx=_runningIdx;
+        _runningIdx++;
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
       var isActive=isPlaying&&origIdx===activeExIdx&&!isDone;
       var vol=exEntry.vol||'';
