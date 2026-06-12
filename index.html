@@ -4345,7 +4345,7 @@ function deletePBByIndex(idx){
   sv();openJournalView();
 }
 function deleteCustomProg(key){
-  appConfirm('Delete this programme? This cannot be undone.',function(){var cl=C();cl.customPrograms=(cl.customPrograms||[]).filter(function(p){return p.key!==key;});if(cl.tplKey===key){cl.tplKey=TPL[0].key;cl.day=0;cl.plan=null;}sv();draw();});
+  appConfirm('Delete this programme? This cannot be undone.',function(){var cl=C();cl.customPrograms=(cl.customPrograms||[]).filter(function(p){return p.key!==key;});if(cl.tplKey===key){cl.tplKey=TPL[0].key;cl.day=0;cl.plan=null;S.wx=null;}sv();draw();});
 }
 function deleteCustomPlan(key){
   appConfirm('Delete this plan? This cannot be undone.',function(){var cl=C();cl.customPlans=(cl.customPlans||[]).filter(function(p){return p.key!==key;});if(cl.plan&&cl.plan.key===key){cl.plan=null;}sv();draw();});
@@ -6033,14 +6033,14 @@ function saveBuildPlan(){
 // ═══════════════════════════════════════════════════════════════
 // CLIENT SYSTEM
 // ═══════════════════════════════════════════════════════════════
-function switchClient(k){S.activeClient=k;sv();closeSheet();draw();}
+function switchClient(k){S.activeClient=k;S.wx=null;window._cancelWx=null;sv();closeSheet();draw();}
 function addClient(){
   var key='client_'+Date.now();
   var colours=['#D4691E','#1D9E75','#C85030','#7F77DD','#378ADD','#639922','#D85A30','#888780'];
   var usedCount=Object.keys(S.clients).length;
   S.clients[key]=JSON.parse(JSON.stringify(DEFAULT_CLIENT));
   S.clients[key].colour=colours[usedCount%colours.length];
-  S.activeClient=key;sv();closeSheet();draw();
+  S.activeClient=key;S.wx=null;window._cancelWx=null;sv();closeSheet();draw();
 }
 
 // ═══════════════════════════════════════════════════════════════
