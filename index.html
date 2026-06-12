@@ -213,7 +213,7 @@ function ld(){
   if(!S.activeClient)S.activeClient='default';
   if(!S.clients[S.activeClient])S.clients[S.activeClient]=JSON.parse(JSON.stringify(DEFAULT_CLIENT));
   if(!S.buildMode)S.buildMode='program';
-  if(!S.customEdit)S.customEdit={step:0,name:'',days:[],activeDay:0,activePhase:null};
+  if(!S.customEdit)S.customEdit={step:0,name:'',days:[],activeDay:0,activePhase:null,_template:'custom'};
   if(!S.planEdit)S.planEdit={name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null};
   if(!S.timer)S.timer=DEFAULT_S.timer;
   if(S.timer.setup===undefined)S.timer.setup=true;
@@ -4355,95 +4355,10 @@ function retakeOB(){
 
 // ── Template definitions ──────────────────────────────────────
 var BUILD_TEMPLATES = [
-  {key:'fullbody', label:'Full Body', icon:'◎', desc:'2–3 days · all patterns each session'},
-  {key:'upperlower', label:'Upper / Lower', icon:'◑', desc:'4 days · upper & lower split'},
-  {key:'ppl', label:'Push / Pull / Legs', icon:'▲', desc:'3–6 days · classic PPL split'},
-  {key:'custom', label:'Custom Split', icon:'◈', desc:'Define your own day structure'}
+  {key:'custom', label:'Daily Split', icon:'◈', desc:'Define your own day structure — pick session count, patterns and exercises'}
 ];
 
-var BUILD_TEMPLATE_DAYS = {
-  fullbody: [
-    { label:'Full Body A', focus:'Full Body — Strength', split:['squat','hinge','push','pull','core'],
-      phases:['warmup','strength','core'],
-      exercises:{
-        warmup:['hip_hinge_wall_drill','glute_bridge_bodyweight','cat_cow'],
-        strength:['goblet_squat_dumbbell','dumbbell_row_single_arm','dumbbell_overhead_press_seated','romanian_deadlift_dumbbell'],
-        core:['dead_bug','plank']
-      }
-    },
-    { label:'Full Body B', focus:'Full Body — Power', split:['squat','hinge','push','pull','lunge','core'],
-      phases:['warmup','strength','accessory','core'],
-      exercises:{
-        warmup:['hip_hinge_wall_drill','leg_swing_forward','bird_dog'],
-        strength:['back_squat','barbell_row_overhand','barbell_overhead_press'],
-        accessory:['walking_lunge_with_dbs','dumbbell_lateral_raise','dumbbell_bicep_curl'],
-        core:['pallof_press_standing','farmer_s_carry_dumbbell']
-      }
-    }
-  ],
-  upperlower: [
-    { label:'Upper A', focus:'Upper — Strength', split:['push','pull'],
-      phases:['warmup','strength','accessory'],
-      exercises:{
-        warmup:['wall_slide','band_pull_apart','scapular_push_up'],
-        strength:['barbell_bench_press_flat','barbell_row_overhand','barbell_overhead_press','pull_up'],
-        accessory:['dumbbell_lateral_raise','face_pull','cable_tricep_pushdown_rope','dumbbell_bicep_curl']
-      }
-    },
-    { label:'Lower A', focus:'Lower — Strength', split:['squat','hinge','lunge'],
-      phases:['warmup','strength','accessory'],
-      exercises:{
-        warmup:['hip_hinge_wall_drill','glute_bridge_bodyweight','leg_swing_forward'],
-        strength:['back_squat','romanian_deadlift_barbell','hip_thrust_barbell'],
-        accessory:['walking_lunge_with_dbs','leg_curl_machine_seated','calf_raise_standing_machine']
-      }
-    },
-    { label:'Upper B', focus:'Upper — Volume', split:['push','pull'],
-      phases:['warmup','strength','accessory'],
-      exercises:{
-        warmup:['wall_slide','dead_hang','scapular_pull_up'],
-        strength:['incline_db_bench_press','lat_pulldown_wide_grip','dumbbell_overhead_press_seated'],
-        accessory:['cable_fly_high_to_low','dumbbell_row_single_arm','cable_tricep_pushdown_rope','dumbbell_bicep_curl']
-      }
-    },
-    { label:'Lower B', focus:'Lower — Volume', split:['squat','hinge','lunge','core'],
-      phases:['warmup','strength','accessory','core'],
-      exercises:{
-        warmup:['glute_bridge_bodyweight','cat_cow','leg_swing_forward'],
-        strength:['romanian_deadlift_barbell','goblet_squat_dumbbell','hip_thrust_barbell'],
-        accessory:['split_squat_dumbbell','leg_curl_machine_seated','calf_raise_standing_machine'],
-        core:['dead_bug','plank','pallof_press_standing']
-      }
-    }
-  ],
-  ppl: [
-    { label:'Push', focus:'Chest, Shoulders & Triceps', split:['push'],
-      phases:['warmup','strength','accessory','core'],
-      exercises:{
-        warmup:['wall_slide','scapular_push_up','banded_chest_opener'],
-        strength:['barbell_bench_press_flat','barbell_overhead_press','incline_db_bench_press'],
-        accessory:['dumbbell_lateral_raise','cable_fly_high_to_low','cable_tricep_pushdown_rope'],
-        core:['plank','dead_bug']
-      }
-    },
-    { label:'Pull', focus:'Back & Biceps', split:['pull'],
-      phases:['warmup','strength','accessory'],
-      exercises:{
-        warmup:['band_pull_apart','dead_hang','scapular_pull_up'],
-        strength:['pull_up','barbell_row_overhand','lat_pulldown_wide_grip'],
-        accessory:['dumbbell_row_single_arm','face_pull','dumbbell_bicep_curl']
-      }
-    },
-    { label:'Legs', focus:'Quads, Hamstrings & Glutes', split:['squat','hinge','lunge'],
-      phases:['warmup','strength','accessory'],
-      exercises:{
-        warmup:['hip_hinge_wall_drill','glute_bridge_bodyweight','leg_swing_forward'],
-        strength:['back_squat','romanian_deadlift_barbell','hip_thrust_barbell'],
-        accessory:['walking_lunge_with_dbs','leg_curl_machine_seated','calf_raise_standing_machine']
-      }
-    }
-  ]
-};
+var BUILD_TEMPLATE_DAYS = {};
 
 // Phase config: player phases in order, with defaults
 var BUILD_PHASES=[
@@ -4674,33 +4589,14 @@ function buildStep0(){
   h+='<input type="text" id="build-name" value="'+e.name+'" placeholder="e.g. My Strength Plan" '+
      'oninput="S.customEdit.name=this.value;sv();buildUpdateNavState()" style="margin-bottom:20px;font-size:16px;font-weight:700">';
 
-  // Template picker
-  h+='<div class="lbl" style="margin-bottom:10px">CHOOSE A STARTING POINT</div>';
-  BUILD_TEMPLATES.forEach(function(t){
-    var sel=e._template===t.key;
-    h+='<div onclick="buildPickTemplate(\''+t.key+'\')" style="'+
-       'display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;'+
-       'border:1.5px solid '+(sel?'var(--acc-brd)':'var(--brd)')+';'+
-       'background:'+(sel?'var(--acc-bg)':'var(--bg3)')+';'+
-       'margin-bottom:7px;cursor:pointer;transition:all .15s">';
-    h+='<div style="flex:1">';
-    h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+t.label+'</div>';
-    h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+t.desc+'</div>';
-    h+='</div>';
-    if(sel)h+='<div style="color:var(--acc);font-size:14px;font-weight:700">✓</div>';
-    h+='</div>';
+  // Days picker
+  h+='<div class="lbl" style="margin-bottom:8px">SESSIONS PER WEEK</div>';
+  h+='<div style="display:flex;gap:6px;margin-bottom:16px">';
+  [1,2,3,4,5,6,7].forEach(function(n){
+    var sel=e.days.length===n;
+    h+='<button class="btn tap btn-pill'+(sel?' btn-acc':' btn-ghost')+'" onclick="buildSetDayCount('+n+')">'+n+'</button>';
   });
-
-  // Days picker — only for custom/blank
-  if(e._template==='blank'||e._template==='custom'){
-    h+='<div class="lbl" style="margin-bottom:8px;margin-top:16px">SESSIONS PER WEEK</div>';
-    h+='<div style="display:flex;gap:6px;margin-bottom:16px">';
-    [1,2,3,4,5,6,7].forEach(function(n){
-      var sel=e.days.length===n;
-      h+='<button class="btn tap btn-pill'+(sel?' btn-acc':' btn-ghost')+'" onclick="buildSetDayCount('+n+')">'+n+'</button>';
-    });
-    h+='</div>';
-  }
+  h+='</div>';
 
   // Next always active — validation message shown inline on press
   return {html:h,nav:{back:null,next:'step0',canNext:true,hint:''}};
@@ -5706,7 +5602,7 @@ function buildSave(){
          days:tplDays,duration:totalDuration,
          compatiblePlans:['linear','return_training']}
   });
-  S.customEdit={step:0,name:'',days:[],activeDay:0,activePhase:null};
+  S.customEdit={step:0,name:'',days:[],activeDay:0,activePhase:null,_template:'custom'};
   sv();
   appConfirm('Programme saved! Switch to it now?',function(){C().tplKey=key;C().day=0;C().plan=null;S.wx=null;sv();draw();},function(){draw();});
 }
