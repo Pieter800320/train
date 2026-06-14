@@ -320,10 +320,12 @@ function dayToStorage(d){
     label:d.label||'Day 1',
     focus:d.focus||d.label||'',
     exercises:(d.exercises||[]).map(function(ex){
-      return {name:ex.name,sets:ex.sets||1,reps:ex.reps||0,vol:ex.vol||'',
+      var _exOut={name:ex.name,sets:ex.sets||1,reps:ex.reps||0,vol:ex.vol||'',
               rest:ex.rest||60,ph:ex.ph||'strength',cue:ex.cue||'',
               weight:ex.weight||0,
               track:ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol)};
+      if(ex.unilateral!==undefined)_exOut.unilateral=ex.unilateral;
+      return _exOut;
     })
   };
 }
