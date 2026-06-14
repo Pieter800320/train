@@ -6845,7 +6845,7 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
     pct=emRem/60;
     isWarning=emRem<=5&&emRem>0;
     ringCol=acc;
-    sub='Minute '+(t.emomRound+1)+' of '+t.emomMins;
+    sub='Minute '+Math.min(t.emomRound+1,t.emomMins)+' of '+t.emomMins;
     // Outer ring = minute progress
     outerPct=t.emomMins>0?t.emomRound/t.emomMins:0;
   }
