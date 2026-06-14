@@ -5658,7 +5658,7 @@ function buildConfigEx(di,ei){
   h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">Unilateral</div>';
   h+='<div style="font-size:11px;color:var(--mu);margin-top:2px">'+(_isUni?'One side per set.':'Both sides in a set.')+'</div>';
   h+='</div>';
-  h+='<button class="toggle '+(_isUni?'toggle-on':'toggle-off')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=!S.customEdit.days['+di+'].exercises['+ei+'].unilateral;sv();draw()"><div class="toggle-knob"></div></button>';
+  h+='<button class="toggle '+(_isUni?'toggle-on':'toggle-off')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=!S.customEdit.days['+di+'].exercises['+ei+'].unilateral;sv();buildConfigEx('+di+','+ei+')"><div class="toggle-knob"></div></button>';
   h+='</div>';
 
   // Coaching cue
