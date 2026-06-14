@@ -212,7 +212,7 @@ function getEx(n){return EX_MAP[exKey(n)]||null;}
 // ═══════════════════════════════════════════════════════════════
 // DEFAULT STATE
 // ═══════════════════════════════════════════════════════════════
-var DEFAULT_CLIENT={name:'',initials:'',colour:'#D4691E',ob:{done:false,step:0,ans:{}},tplKey:'str_b4',day:0,plan:null,hist:[],pr:{},lastWeights:{},customPrograms:[],customPlans:[],_pgOpen:{}};
+var DEFAULT_CLIENT={name:'',initials:'',colour:'#D4691E',ob:{done:false,step:0,ans:{}},tplKey:'str_b4',day:0,plan:null,dayCounters:{},plans:{},hist:[],pr:{},lastWeights:{},customPrograms:[],customPlans:[],_pgOpen:{}};
 var DEFAULT_S={activeClient:'default',clients:{default:JSON.parse(JSON.stringify(DEFAULT_CLIENT))},buildMode:'program',customEdit:{step:0,name:'',days:[],activeDay:0,activePhase:null},planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},wx:null,timer:{mode:'tabata',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:40,tabRest:20,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true},tab:'today',colourTheme:'amber',_browserOpen:{},theme:'dark',admin:{active:false,pin:'',set:false},notice:{title:'Welcome to Falkenburg',body:'Your training starts here. Go to Programmes to pick your first programme.',active:true}};
 var S;
 function sv(){try{localStorage.setItem('falken_v1',JSON.stringify(S));}catch(e){}}
@@ -237,6 +237,13 @@ function ld(){
   if(!cl.hist)cl.hist=[];
   if(!cl.pr)cl.pr={};
   if(cl.plan===undefined)cl.plan=null;
+  if(!cl.dayCounters)cl.dayCounters={};
+  if(!cl.plans)cl.plans={};
+  // Migrate legacy single day/plan into per-programme dicts
+  if(cl.tplKey){
+    if(cl.day>0&&cl.dayCounters[cl.tplKey]===undefined){cl.dayCounters[cl.tplKey]=cl.day;}
+    if(cl.plan&&!cl.plans[cl.tplKey]){cl.plans[cl.tplKey]=cl.plan;}
+  }
   if(!cl.ob)cl.ob={done:false,step:0,ans:{}};
   if(!cl.lastWeights)cl.lastWeights={};
   // Migration: sort custom programme exercises by canonical phase order
@@ -580,82 +587,10 @@ var TPL = [
     ex('Lateral Band Walk',2,10,20,'activation'),
     ex('Glute Bridge (Bodyweight)',2,15,20,'activation'),
     ex('Cat-Cow',2,10,20,'warmup')
-  ]},
-  {label:'Session B',focus:'Full Mobility',exercises:[
-    exT('Jump Rope','1','2min',0,'warmup'),
-    ex('Arm Circles',1,20,15,'mobility'),ex('Shoulder CARs',1,5,20,'mobility'),
-    ex('Leg Swing (Forward)',2,10,20,'warmup'),ex('Leg Swing (Lateral)',2,10,20,'warmup'),
-    ex('Lunge with Thoracic Rotation',2,10,20,'warmup'),
-    ex('Hip Airplanes',2,5,20,'mobility'),ex('Hip Circle',2,5,20,'mobility'),
-    ex('Lateral Band Walk',2,10,20,'activation'),
-    ex('Glute Bridge (Bodyweight)',2,15,20,'activation'),
-    ex('Cat-Cow',2,10,20,'warmup')
-  ]},
-  {label:'Session C',focus:'Full Mobility',exercises:[
-    exT('Jump Rope','1','2min',0,'warmup'),
-    ex('Arm Circles',1,20,15,'mobility'),ex('Shoulder CARs',1,5,20,'mobility'),
-    ex('Leg Swing (Forward)',2,10,20,'warmup'),ex('Leg Swing (Lateral)',2,10,20,'warmup'),
-    ex('Lunge with Thoracic Rotation',2,10,20,'warmup'),
-    ex('Hip Airplanes',2,5,20,'mobility'),ex('Hip Circle',2,5,20,'mobility'),
-    ex('Lateral Band Walk',2,10,20,'activation'),
-    ex('Glute Bridge (Bodyweight)',2,15,20,'activation'),
-    ex('Cat-Cow',2,10,20,'warmup')
-  ]},
-  {label:'Session D',focus:'Full Mobility',exercises:[
-    exT('Jump Rope','1','2min',0,'warmup'),
-    ex('Arm Circles',1,20,15,'mobility'),ex('Shoulder CARs',1,5,20,'mobility'),
-    ex('Leg Swing (Forward)',2,10,20,'warmup'),ex('Leg Swing (Lateral)',2,10,20,'warmup'),
-    ex('Lunge with Thoracic Rotation',2,10,20,'warmup'),
-    ex('Hip Airplanes',2,5,20,'mobility'),ex('Hip Circle',2,5,20,'mobility'),
-    ex('Lateral Band Walk',2,10,20,'activation'),
-    ex('Glute Bridge (Bodyweight)',2,15,20,'activation'),
-    ex('Cat-Cow',2,10,20,'warmup')
-  ]},
-  {label:'Session E',focus:'Full Mobility',exercises:[
-    exT('Jump Rope','1','2min',0,'warmup'),
-    ex('Arm Circles',1,20,15,'mobility'),ex('Shoulder CARs',1,5,20,'mobility'),
-    ex('Leg Swing (Forward)',2,10,20,'warmup'),ex('Leg Swing (Lateral)',2,10,20,'warmup'),
-    ex('Lunge with Thoracic Rotation',2,10,20,'warmup'),
-    ex('Hip Airplanes',2,5,20,'mobility'),ex('Hip Circle',2,5,20,'mobility'),
-    ex('Lateral Band Walk',2,10,20,'activation'),
-    ex('Glute Bridge (Bodyweight)',2,15,20,'activation'),
-    ex('Cat-Cow',2,10,20,'warmup')
   ]}
 ]},
 {key:'fnd_cool',name:'Cooldown Programme',cat:'foundation',desc:'Post-session cooldown and breathing — 12 minutes',duration:12,defaultPlan:'maintenance',compatiblePlans:['maintenance'],days:[
   {label:'Session A',focus:'Full Cooldown',exercises:[
-    exT('Walking','1','2min',0,'cooldown'),
-    exT('Standing Calf Stretch','2','30s',15,'cooldown'),exT('Standing Hamstring Stretch','2','30s',15,'cooldown'),
-    exT('Figure-4 Glute Stretch','2','30s',15,'cooldown'),exT('Kneeling Hip Flexor Stretch','2','30s',15,'cooldown'),
-    exT('Doorway Pec Stretch','2','30s',15,'cooldown'),exT('Kneeling Lat Stretch','2','30s',15,'cooldown'),
-    exT('Triceps Overhead Stretch','2','30s',15,'cooldown'),exT('Neck Side Stretch','2','30s',15,'cooldown'),
-    exT('Breathing - Feet Elevated','6','1min',5,'cooldown','Box breathing: 4 count in, 4 hold, 4 out, 4 hold.')
-  ]},
-  {label:'Session B',focus:'Full Cooldown',exercises:[
-    exT('Walking','1','2min',0,'cooldown'),
-    exT('Standing Calf Stretch','2','30s',15,'cooldown'),exT('Standing Hamstring Stretch','2','30s',15,'cooldown'),
-    exT('Figure-4 Glute Stretch','2','30s',15,'cooldown'),exT('Kneeling Hip Flexor Stretch','2','30s',15,'cooldown'),
-    exT('Doorway Pec Stretch','2','30s',15,'cooldown'),exT('Kneeling Lat Stretch','2','30s',15,'cooldown'),
-    exT('Triceps Overhead Stretch','2','30s',15,'cooldown'),exT('Neck Side Stretch','2','30s',15,'cooldown'),
-    exT('Breathing - Feet Elevated','6','1min',5,'cooldown','Box breathing: 4 count in, 4 hold, 4 out, 4 hold.')
-  ]},
-  {label:'Session C',focus:'Full Cooldown',exercises:[
-    exT('Walking','1','2min',0,'cooldown'),
-    exT('Standing Calf Stretch','2','30s',15,'cooldown'),exT('Standing Hamstring Stretch','2','30s',15,'cooldown'),
-    exT('Figure-4 Glute Stretch','2','30s',15,'cooldown'),exT('Kneeling Hip Flexor Stretch','2','30s',15,'cooldown'),
-    exT('Doorway Pec Stretch','2','30s',15,'cooldown'),exT('Kneeling Lat Stretch','2','30s',15,'cooldown'),
-    exT('Triceps Overhead Stretch','2','30s',15,'cooldown'),exT('Neck Side Stretch','2','30s',15,'cooldown'),
-    exT('Breathing - Feet Elevated','6','1min',5,'cooldown','Box breathing: 4 count in, 4 hold, 4 out, 4 hold.')
-  ]},
-  {label:'Session D',focus:'Full Cooldown',exercises:[
-    exT('Walking','1','2min',0,'cooldown'),
-    exT('Standing Calf Stretch','2','30s',15,'cooldown'),exT('Standing Hamstring Stretch','2','30s',15,'cooldown'),
-    exT('Figure-4 Glute Stretch','2','30s',15,'cooldown'),exT('Kneeling Hip Flexor Stretch','2','30s',15,'cooldown'),
-    exT('Doorway Pec Stretch','2','30s',15,'cooldown'),exT('Kneeling Lat Stretch','2','30s',15,'cooldown'),
-    exT('Triceps Overhead Stretch','2','30s',15,'cooldown'),exT('Neck Side Stretch','2','30s',15,'cooldown'),
-    exT('Breathing - Feet Elevated','6','1min',5,'cooldown','Box breathing: 4 count in, 4 hold, 4 out, 4 hold.')
-  ]},
-  {label:'Session E',focus:'Full Cooldown',exercises:[
     exT('Walking','1','2min',0,'cooldown'),
     exT('Standing Calf Stretch','2','30s',15,'cooldown'),exT('Standing Hamstring Stretch','2','30s',15,'cooldown'),
     exT('Figure-4 Glute Stretch','2','30s',15,'cooldown'),exT('Kneeling Hip Flexor Stretch','2','30s',15,'cooldown'),
@@ -1838,10 +1773,11 @@ function ACTIVE_TPL(){return getTPL(C().tplKey)||TPL[1];}
 // ═══════════════════════════════════════════════════════════════
 function planBannerData(){
   var cl=C();
-  if(!cl.plan)return null;
-  var plan=getPlanByKey(cl.plan.key);
+  var _activePlan=(cl.plans&&cl.plans[cl.tplKey])?cl.plans[cl.tplKey]:cl.plan;
+  if(!_activePlan)return null;
+  var plan=getPlanByKey(_activePlan.key);
   if(!plan)return null;
-  var wi=cl.plan.weekIndex||0;
+  var wi=_activePlan.weekIndex||0;
   var weeks=plan.weeks;
   if(wi>=weeks.length){
     if(plan.cyclic)wi=wi%weeks.length;
@@ -1863,11 +1799,16 @@ function advancePlanWeek(){
 }
 function attachPlan(planKey){
   var cl=C();
-  cl.plan={key:planKey,weekIndex:0,startDate:Date.now()};
+  if(!cl.plans)cl.plans={};
+  var newPlan={key:planKey,weekIndex:0,startDate:Date.now()};
+  cl.plans[cl.tplKey]=newPlan;
+  cl.plan=newPlan;
   sv();
 }
 function detachPlan(){
-  C().plan=null;
+  var cl=C();
+  if(cl.plans)delete cl.plans[cl.tplKey];
+  cl.plan=null;
   sv();
 }
 
@@ -1914,7 +1855,7 @@ function startSession(){
     if(!isSessionLocked(tpl.days[_checkIdx]))break;
     cl.day=(cl.day||0)+1;
   }
-  var dayIdx=cl.day%tpl.days.length;
+  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
   // Sort exercises into canonical phase display order so the player queue
@@ -2003,18 +1944,25 @@ function finishSession(){
   if(doneSets>0){
     cl.hist.push({date:Date.now(),tplKey:S.wx.tplKey,dayIdx:S.wx.dayIdx,label:S.wx.dayLabel,
       focus:focus,sets:doneSets,duration:duration,plan:banner?banner.weekLabel:null});
-    cl.day=(cl.day||0)+1;
+    if(!cl.dayCounters)cl.dayCounters={};
+    cl.dayCounters[cl.tplKey]=(cl.dayCounters[cl.tplKey]||0)+1;
+    cl.day=cl.dayCounters[cl.tplKey];
     // Advance plan week after completing a full programme cycle
-    if(cl.plan){
+    if(!cl.plans)cl.plans={};
+    var _curPlan=cl.plans[cl.tplKey]||cl.plan;
+    if(_curPlan){
       var _tpl=ACTIVE_TPL();
       var _cycleLen=_tpl&&_tpl.days&&_tpl.days.length>0?_tpl.days.length:7;
-      var _plan=getPlanByKey(cl.plan.key);
-      // Rehab and pull-up programmes: disable auto-advance.
-      // Phase progression requires clinical/trainer judgement.
+      var _plan=getPlanByKey(_curPlan.key);
       var _autoAdvanceOk=!(_tpl&&(_tpl.cat==='rehab'||_tpl.key==='spt_pullup'||_tpl.key==='spt_pullup_plateau'));
       if(_plan&&_autoAdvanceOk){
-        var _sessionsOnPlan=cl.hist.filter(function(s){return s.date>=(cl.plan.startDate||0);}).length;
-        if(_sessionsOnPlan>0&&_sessionsOnPlan%_cycleLen===0)advancePlanWeek();
+        var _sessionsOnPlan=cl.hist.filter(function(s){return s.date>=(_curPlan.startDate||0);}).length;
+        if(_sessionsOnPlan>0&&_sessionsOnPlan%_cycleLen===0){
+          _curPlan.weekIndex=(_curPlan.weekIndex||0)+1;
+          if(!_plan.cyclic&&_curPlan.weekIndex>=_plan.weeks.length)_curPlan.weekIndex=_plan.weeks.length-1;
+          cl.plans[cl.tplKey]=_curPlan;
+          cl.plan=_curPlan;
+        }
       }
     }
     sv();
@@ -2545,7 +2493,7 @@ function homeV(){
 
   // Today card (dominant)
   var tpl=ACTIVE_TPL();
-  var dayIdx=cl.day%tpl.days.length;
+  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
   var inProgress=!!S.wx;
@@ -3179,7 +3127,7 @@ function _doExportProgramme(){
 
 function todayV(){
   var cl=C();var tpl=ACTIVE_TPL();
-  var dayIdx=cl.day%tpl.days.length;
+  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
 
@@ -3424,7 +3372,7 @@ function isSessionLocked(day){
 }
 function openSessionPicker(){
   var cl=C();var tpl=ACTIVE_TPL();
-  var dayIdx=cl.day%tpl.days.length;
+  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
   var h='<div style="padding:0 20px 30px">';
   var _doneSoFar=sessionsOnProg();
   tpl.days.forEach(function(day,i){
@@ -4537,7 +4485,7 @@ function openActiveProgramSheet(){
   h+='</div>';
   // Sessions list
   h+='<div class="lbl" style="margin-bottom:8px">SESSIONS</div>';
-  var dayIdx=cl.day%tpl.days.length;
+  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
   tpl.days.forEach(function(day,i){
     var isCurrent=i===dayIdx;
     h+='<div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;border:0.5px solid '+(isCurrent?'var(--acc-brd)':'var(--brd)')+';background:'+(isCurrent?'var(--acc-bg)':'var(--bg3)')+'">';
@@ -4570,7 +4518,15 @@ function togglePgGroup(cat){
 function switchTPL(key){
   closeSheet();
   setTimeout(function(){
-    appConfirm('Switch to this programme? Your current day progress will reset.',function(){C().tplKey=key;C().day=0;C().plan=null;S.wx=null;sv();draw();});
+    appConfirm('Switch to this programme?',function(){
+    var cl=C();
+    if(!cl.dayCounters)cl.dayCounters={};
+    if(!cl.plans)cl.plans={};
+    cl.tplKey=key;
+    cl.day=cl.dayCounters[key]||0;
+    cl.plan=cl.plans[key]||null;
+    S.wx=null;sv();draw();
+  });
   },350);
 }
 function deletePB(name){
@@ -6058,7 +6014,13 @@ function buildSave(){
   });
   S.customEdit={step:0,name:'',days:[],activeDay:0,activePhase:null,_template:'custom'};
   sv();
-  appConfirm('Programme saved! Switch to it now?',function(){C().tplKey=key;C().day=0;C().plan=null;S.wx=null;sv();draw();},function(){draw();});
+  appConfirm('Programme saved! Switch to it now?',function(){
+    var cl=C();
+    if(!cl.dayCounters)cl.dayCounters={};
+    if(!cl.plans)cl.plans={};
+    cl.tplKey=key;cl.day=cl.dayCounters[key]||0;cl.plan=cl.plans[key]||null;
+    S.wx=null;sv();draw();
+  },function(){draw();});
 }
 
 // ─────────────────────────────────────────────────────────────
