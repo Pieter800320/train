@@ -3072,8 +3072,8 @@ function _doExportProgramme(){
   h+='<div class="lbl">'+tpl.days.length+' days / week · ~'+durLabel+' · '+tpl.desc+'</div>';
   h+='</div>';
 
-  var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
   tpl.days.forEach(function(day,di){
     h+='<div class="card">';
     h+='<h3>'+day.focus+'</h3>';
@@ -3200,8 +3200,8 @@ function todayV(){
   h+='</div>';
 
   // Exercise list — custom programmes respect insertion order; pre-built use phase grouping
-  var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
   var _isCustomTpl=!!(cl.customPrograms&&cl.customPrograms.some(function(cp){return cp.key===cl.tplKey;}));
 
   if(_isCustomTpl){
@@ -4441,8 +4441,8 @@ function openProgPreview(key){
   h+='</div></div>';
 
   // Sessions
-  var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
   var days=tpl.days||[];
   days.forEach(function(day,di){
     h+='<div style="margin-bottom:16px">';
@@ -5551,11 +5551,11 @@ function buildConfigEx(di,ei){
   var exEntry=S.customEdit.days[di].exercises[ei];
   if(!exEntry)return;
   var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',strength:'Strength',
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',
     accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
   var trackLabels={reps:'Reps',weight:'Weight',time:'Time',distance:'Distance',calories:'Calories',rounds:'Rounds',height:'Height'};
   var allTrack=['reps','weight','time','distance','calories','rounds','height'];
-  var phases=['warmup','activation','mobility','strength','accessory','core','cardio','cooldown'];
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
 
   var h='<div style="padding:0 20px 30px">';
 
