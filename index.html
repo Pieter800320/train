@@ -4401,7 +4401,7 @@ function openPlanPreview(key){
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="attachPlan(this.dataset.key);sv();draw();closeSheet()">Select this Plan</button>';
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadPlan(this.dataset.key)">Edit in Build</button>';
     if(isCustom){
-      h+='<button class="btn btn-ghost" style="margin-top:8px;color:var(--acc)" data-key="'+key+'" onclick="deleteCustomPlan(this.dataset.key)">Delete</button>';
+      h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomPlan(this.dataset.key)">Delete</button>';
     }
   }
   h+='</div>';
@@ -4471,7 +4471,7 @@ function openProgPreview(key){
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 0 0">';
   if(isDraft){
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="buildResumeDraft(this.dataset.key)">Resume Draft</button>';
-    h+='<button class="btn btn-ghost" style="margin-top:8px;color:var(--acc)" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete</button>';
+    h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete</button>';
   } else if(isActive){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:8px 0">✓ Currently active</div>';
   } else {
@@ -4484,13 +4484,13 @@ function openProgPreview(key){
     h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" data-key="'+key+'" onclick="exportProgramme(this.dataset.key)">Export</button>';
     if(isCustom){
       h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" data-key="'+key+'" onclick="archiveProgramme(this.dataset.key)">Archive</button>';
-      h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--acc)" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete</button>';
+      h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete</button>';
     }
     h+='</div>';
   }
   h+='</div>';
   h+='</div>';
-  openSheet(h,tpl.name);
+  openSheet(h,null);
 }
 
 // ── Active Training Plan sheet ──
@@ -4636,7 +4636,7 @@ function openArchivedPreview(idx){
   // Find original archived index (not reversed)
   var origIdx=(cl.archivedProgrammes||[]).length-1-idx;
   h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="restoreArchivedProgramme('+origIdx+')">Restore</button>';
-  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--coral)" onclick="deleteArchivedProgramme('+origIdx+')">Delete</button>';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="deleteArchivedProgramme('+origIdx+')">Delete</button>';
   h+='</div>';
   h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="closeTopSheet();openArchivedProgrammes()">← Back</button>';
   h+='</div>';
