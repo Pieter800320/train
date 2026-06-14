@@ -5653,13 +5653,18 @@ function buildConfigEx(di,ei){
   var _cfgExDb=EX_MAP[exEntry.key]||null;
   if(!_cfgExDb&&exEntry.name){var _cfgKeys=Object.keys(EX_MAP);for(var _ci=0;_ci<_cfgKeys.length;_ci++){if(EX_MAP[_cfgKeys[_ci]].name===exEntry.name){_cfgExDb=EX_MAP[_cfgKeys[_ci]];break;}}}
   var _isUni=exEntry.unilateral!==undefined?exEntry.unilateral:(_cfgExDb?_cfgExDb.unilateral:false);
+  var _isDbEx=!!_cfgExDb; // true = exercise exists in database
   h+='<div style="margin-bottom:14px">';
-  h+='<div class="lbl" style="margin-bottom:8px">UNILATERAL (each side)</div>';
+  h+='<div class="lbl" style="margin-bottom:8px">UNILATERAL</div>';
   h+='<div style="display:flex;gap:8px">';
-  h+='<button class="btn btn-pill'+(_isUni?' btn-acc':' btn-ghost')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=true;sv();draw()">Yes — L/R split</button>';
-  h+='<button class="btn btn-pill'+(!_isUni?' btn-acc':' btn-ghost')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=false;sv();draw()">No</button>';
+  h+='<button class="btn btn-pill'+(_isUni?' btn-acc':' btn-ghost')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=true;sv();draw()">One side per set</button>';
+  h+='<button class="btn btn-pill'+(!_isUni?' btn-acc':' btn-ghost')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=false;sv();draw()">Alternate sides</button>';
   h+='</div>';
-  if(_isUni)h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">TODAY will play Left → Right alternating. '+exEntry.sets+' sets = '+exEntry.sets+' sets per side.</div>';
+  if(_isUni){
+    h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">TODAY plays: Left → Right → Left → Right. '+exEntry.sets+' sets per side.</div>';
+  } else {
+    h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">Both sides trained within each set (e.g. alternating reps).</div>';
+  }
   h+='</div>';
 
   // Coaching cue
@@ -5930,7 +5935,13 @@ function buildAddCustomExDrill(di,phKey,q){
   }
   exs.splice(insertAt,0,newEx);
   sv();
-  buildOpenExSheet(di); // back to session, sheet stays open
+  // Open config sheet for the new exercise immediately so trainer can set unilateral etc.
+  var newEi=S.customEdit.days[di].exercises.indexOf(newEx);
+  if(newEi>=0){
+    buildConfigEx(di,newEi);
+  } else {
+    buildOpenExSheet(di);
+  }
 }
 
 
