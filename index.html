@@ -3119,7 +3119,7 @@ function _doExportProgramme(){
       exs.forEach(function(ex){
         var vol='';
         if(ex.vol)vol=ex.vol;
-        if(ex.reps>0)vol=(vol?vol+' \u00b7 ':'')+ex.sets+'\u00d7'+ex.reps;
+        if(ex.reps>0&&!ex.vol)vol=(vol?vol+' \u00b7 ':'')+ex.sets+'\u00d7'+ex.reps;
         var exEntry=getEx(ex.name);
         var vidUrl=getExVideo(exEntry||{name:ex.name});
         var isCurated=exEntry&&exEntry.video;
@@ -3263,7 +3263,7 @@ function todayV(){
       var _dispKg=_adj?_adj.kg:null;
       var volStr='';
       if(vol)volStr=fmtSecs(parseVolToSecs(vol));
-      if(_dispReps>0)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+_dispReps;
+      if(_dispReps>0&&!vol)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+_dispReps;
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
       h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">'+
@@ -3310,7 +3310,7 @@ function todayV(){
       var _dispKg=_adj?_adj.kg:null;
       var volStr='';
       if(vol)volStr=fmtSecs(parseVolToSecs(vol));
-      if(_dispReps>0)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+_dispReps;
+      if(_dispReps>0&&!vol)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+_dispReps;
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
       h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">'+
@@ -3616,7 +3616,7 @@ function openExWindow(exIdx){
   // Volume + set counter + PB badge
   var volStr='';
   if(exEntry.vol)volStr=exEntry.vol;
-  if(exEntry.reps>0)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+exEntry.reps;
+  if(exEntry.reps>0&&!exEntry.vol)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+exEntry.reps;
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(volStr)h+='<span style="font-size:14px;font-weight:700;color:var(--tx2)">'+volStr+'</span>';
   if(totalSets>0){
