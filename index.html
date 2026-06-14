@@ -5653,18 +5653,12 @@ function buildConfigEx(di,ei){
   var _cfgExDb=EX_MAP[exEntry.key]||null;
   if(!_cfgExDb&&exEntry.name){var _cfgKeys=Object.keys(EX_MAP);for(var _ci=0;_ci<_cfgKeys.length;_ci++){if(EX_MAP[_cfgKeys[_ci]].name===exEntry.name){_cfgExDb=EX_MAP[_cfgKeys[_ci]];break;}}}
   var _isUni=exEntry.unilateral!==undefined?exEntry.unilateral:(_cfgExDb?_cfgExDb.unilateral:false);
-  var _isDbEx=!!_cfgExDb; // true = exercise exists in database
-  h+='<div style="margin-bottom:14px">';
-  h+='<div class="lbl" style="margin-bottom:8px">UNILATERAL</div>';
-  h+='<div style="display:flex;gap:8px">';
-  h+='<button class="btn btn-pill'+(_isUni?' btn-acc':' btn-ghost')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=true;sv();draw()">One side per set</button>';
-  h+='<button class="btn btn-pill'+(!_isUni?' btn-acc':' btn-ghost')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=false;sv();draw()">Alternate sides</button>';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--brd);margin-bottom:16px">';
+  h+='<div>';
+  h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">Unilateral</div>';
+  h+='<div style="font-size:11px;color:var(--mu);margin-top:2px">'+(_isUni?'One side per set.':'Both sides in a set.')+'</div>';
   h+='</div>';
-  if(_isUni){
-    h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">TODAY plays: Left → Right → Left → Right. '+exEntry.sets+' sets per side.</div>';
-  } else {
-    h+='<div style="font-size:11px;color:var(--mu);margin-top:6px">Both sides trained within each set (e.g. alternating reps).</div>';
-  }
+  h+='<button class="toggle '+(_isUni?'toggle-on':'toggle-off')+'" onclick="S.customEdit.days['+di+'].exercises['+ei+'].unilateral=!S.customEdit.days['+di+'].exercises['+ei+'].unilateral;sv();draw()"><div class="toggle-knob"></div></button>';
   h+='</div>';
 
   // Coaching cue
