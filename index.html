@@ -6837,7 +6837,7 @@ function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
     ringCol=isWork?acc:timerColourDim(acc,0.55);
     // Outer ring = round progress
     outerPct=t.tabRounds>0?t.tabCurrent/t.tabRounds:0;
-    sub='Round '+(t.tabCurrent+1)+' of '+t.tabRounds;
+    sub='Round '+Math.min(t.tabCurrent+1,t.tabRounds)+' of '+t.tabRounds;
   } else if(t.mode==='emom'){
     var secInMin=t.elapsed%60; var emRem=60-secInMin;
     mainText=String(emRem);
@@ -7081,7 +7081,11 @@ function timerMountCanvas(){
     }
     timerDrawFrame();
     var pb=document.getElementById('timer-btn-pause');
-    if(pb)pb.textContent=S.timer.running?'Pause':'Resume';
+    if(pb){
+      var t2=S.timer;
+      if(t2.completed)pb.textContent='New Timer';
+      else pb.textContent=t2.running?'Pause':'Resume';
+    }
   }
   _timerRAF=requestAnimationFrame(rafLoop);
 }
@@ -7206,14 +7210,11 @@ function startTimerTick(){
           t.tabCurrent++;
           if(t.tabCurrent>=t.tabRounds){
             timerBeepEnd();
-            t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();
+            t.running=false;t.completed=true;t.setup=true;
+            clearInterval(_timerTick);_timerTick=null;
+            sv();timerUnmountCanvas();draw();
             timerOfferLog('Tabata',t.tabRounds+' rounds',true);
             return;
-          }
-          // Threshold: offer at round 3 (one-time)
-          if(t.tabCurrent===3&&!t._logOffered){
-            t._logOffered=true;sv();
-            timerOfferLog('Tabata',t.tabCurrent+' of '+t.tabRounds+' rounds',false);
           }
           t.tabPhase='work';t.remaining=t.tabWork;
         }
@@ -7233,11 +7234,6 @@ function startTimerTick(){
           t.running=false;t.setup=true;sv();timerUnmountCanvas();draw();
           timerOfferLog('EMOM',t.emomMins+' min',true);
           return;
-        }
-        // Threshold: offer at minute 3 (one-time)
-        if(newRound===3&&!t._logOffered){
-          t._logOffered=true;sv();
-          timerOfferLog('EMOM',newRound+' of '+t.emomMins+' min',false);
         }
         timerBeepEnd();
         _timerFlash={colour:timerGetAccColour(),alpha:0.25,startTime:Date.now(),duration:400};
@@ -7305,6 +7301,7 @@ function startCountdown(){
 function startTabata(){
   var t=S.timer;
   t.tabCurrent=0;t.tabPhase='work';t.remaining=t.tabWork;
+  t.completed=false;t._logOffered=false;
   t.setup=false;t.running=true;t.startedAt=Date.now();
   timerBeepStart();
   sv();startTimerTick();
@@ -7318,12 +7315,19 @@ function startEMOM(){
 }
 function timerToggle(){
   var ctx=_getAudioCtx();if(ctx&&ctx.state==='suspended')ctx.resume();
-  S.timer.running=!S.timer.running;sv();
-  if(S.timer.running)startTimerTick();
+  var t=S.timer;
+  // If timer completed, "New Timer" = reset to setup
+  if(t.completed){
+    timerReset();
+    setTimeout(function(){timerOpenConfig(t.mode);},50);
+    return;
+  }
+  t.running=!t.running;sv();
+  if(t.running)startTimerTick();
   else{if(_timerTick){clearInterval(_timerTick);_timerTick=null;}}
   var pb=document.getElementById('timer-btn-pause');
-  if(pb)pb.textContent=S.timer.running?'Pause':'Resume';
-  if(S.timer.setup)draw();
+  if(pb)pb.textContent=t.running?'Pause':'Resume';
+  if(t.setup)draw();
 }
 function timerOfferLog(label,detail,completed){
   var t=S.timer;
@@ -7359,16 +7363,18 @@ function timerReset(){
       timerOfferLog('Countdown',fmtSecs(ran)+' of '+fmtSecs(t.totalSecs),false);
     }
   }
-  t.running=false;t.elapsed=0;t.setup=false;
+  t.running=false;t.elapsed=0;t.setup=false;t.completed=false;
   t.remaining=t.totalSecs;
   t.tabCurrent=0;t.tabPhase='work';t.tabRemaining=t.tabWork;
   t.emomRound=0;t._logOffered=false;t.startedAt=null;
   if(_timerTick){clearInterval(_timerTick);_timerTick=null;}
   // Reset Tabata remaining to work phase
   if(t.mode==='tabata')t.remaining=t.tabWork;
-  var pb=document.getElementById('timer-btn-pause');
-  if(pb)pb.textContent='Resume';
   sv();
+  // Re-open config so user can adjust and restart cleanly
+  if(t.mode!=='stopwatch'){
+    setTimeout(function(){timerOpenConfig(t.mode);},80);
+  }
 }
 
 // Ensure canvas is cleaned up when leaving timer tab
