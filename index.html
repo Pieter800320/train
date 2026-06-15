@@ -1779,6 +1779,26 @@ var TPL = [
 // TPL lookup map
 var TPL_MAP = {};
 TPL.forEach(function(t){TPL_MAP[t.key]=t;});
+// Programme difficulty levels: 0=Rehab, 1=Foundations, 2=Beginner, 3=Intermediate, 4=Advanced
+var PROG_LEVEL={'end_2day':2,'end_b3':2,'end_b4':3,'end_b5':3,'fat_bw_2day':1,'fat_gym':3,'fat_gym2':2,'fat_gym3':2,'fat_home_bw':1,'fat_home_db':2,'fnd_2day':2,'fnd_2day_mob':1,'fnd_30min':3,'fnd_beg':2,'fnd_cool':1,'fnd_home_db':2,'fnd_mob':1,'fnd_return':2,'fnd_senior':2,'hyp_2day':3,'hyp_b3':3,'hyp_b4':4,'hyp_b5':4,'mob_flow':1,'rhb_back':0,'rhb_knee':0,'rhb_sho':0,'spt_climb':3,'spt_jump':4,'spt_pullup':3,'spt_pullup_plateau':3,'spt_run':3,'str_b3':3,'str_b4':3,'str_b5':4,'str_db3':3,'str_pb4':4,'str_ul4':4};
+var PROG_LEVEL_LABEL=['','Foundations','Beginner','Intermediate','Advanced'];
+function progLevelDots(key){
+  var lvl=PROG_LEVEL[key];
+  if(lvl===undefined)return'';
+  if(lvl===0)return'<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:4px;padding:1px 6px;white-space:nowrap">✚ Rehab</span>';
+  var dots='';
+  for(var i=1;i<=4;i++){
+    dots+='<span style="display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:2px;background:'+(i<=lvl?'var(--acc)':'var(--bg3)')+';border:0.5px solid '+(i<=lvl?'var(--acc-brd)':'var(--brd)')+'"></span>';
+  }
+  return dots;
+}
+function progLevelBadge(key){
+  var lvl=PROG_LEVEL[key];
+  if(lvl===undefined)return'';
+  if(lvl===0)return'<span style="font-size:10px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 8px;white-space:nowrap">✚ Rehab</span>';
+  var label=PROG_LEVEL_LABEL[lvl]||'';
+  return'<span style="font-size:10px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 8px;white-space:nowrap">Level '+lvl+' · '+label+'</span>';
+}
 function tplMap(){
   var m=JSON.parse(JSON.stringify(TPL_MAP));
   var cl=C();
@@ -4215,6 +4235,7 @@ function programsV(){
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+t.name+'</div>';
         h+='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin-top:2px">';
         h+='<span class="lbl" style="margin-right:2px">'+t.days.length+' days/wk · '+t.duration+'min</span>';
+        var _lvlDots=progLevelDots(t.key);if(_lvlDots)h+='<span style="display:inline-flex;align-items:center;gap:0;margin-right:2px">'+_lvlDots+'</span>';
         _shown.forEach(function(eq){h+='<span style="font-size:9px;font-weight:600;color:var(--mu);background:var(--bg2);border:0.5px solid var(--brd);border-radius:4px;padding:1px 5px">'+eq+'</span>';});
         if(_overflow)h+='<span style="font-size:9px;color:var(--mu)">'+_overflow+'</span>';
         h+='</div></div>';
@@ -4430,6 +4451,7 @@ function openProgPreview(key){
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
   h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 8px">'+tpl.days.length+' days/wk</span>';
   h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:2px 8px">~'+tpl.duration+' min</span>';
+  var _lvlBadge=progLevelBadge(tpl.key);if(_lvlBadge)h+=_lvlBadge;
   // Equipment tags in preview header
   var _pvEqSet={};
   (tpl.days||[]).forEach(function(d){(d.exercises||[]).forEach(function(e){var _x=EX_MAP[e.name];if(_x&&_x.equipment)_x.equipment.forEach(function(eq){_pvEqSet[eq]=true;});});});
