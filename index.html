@@ -491,19 +491,19 @@ var PLANS = [
     {label:'Phase 3 — Integrate',theme:'progress',rpe:8,rir:2,weightPct:92,volMod:1.0,block:2,tip:'Full integration. How does it feel compared to week 1? That comparison is the best progress marker you have.'},
     {label:'Phase 3 — Assess & Return',theme:'peak',rpe:8,rir:2,weightPct:95,volMod:1.0,block:2,tip:'Assessment week. Progression here is based on how you feel, not the calendar — if every exercise is pain-free through full range, you\'re ready to return to normal training or sport. If not, stay on Phase 3 for another 2-3 weeks and reassess. There\'s no rush.'}
   ]},
-  {key:'sport_12',name:'Sport Seasonal 12-week',desc:'Foundation → Strength → Power',cyclic:false,weeks:[
-    {label:'Foundation — Learn',theme:'learn',rpe:7,rir:3,weightPct:80,volMod:1.0,tip:'Master the movements. Speed and power come later.'},
-    {label:'Foundation — Build',theme:'learn',rpe:7,rir:3,weightPct:82,volMod:1.0,tip:'Small weight jumps. Keep form perfect.'},
-    {label:'Foundation — Build',theme:'build',rpe:7,rir:3,weightPct:85,volMod:1.0,tip:'Settling in. Your body is adapting.'},
-    {label:'Foundation — Deload',theme:'deload',rpe:6,rir:4,weightPct:82,volMod:0.5,tip:'Cut volume. Keep intensity. Recover before Phase 2.'},
-    {label:'Strength — Develop',theme:'build',rpe:8,rir:2,weightPct:88,volMod:1.0,tip:'Heavier now. This is where real strength builds.'},
-    {label:'Strength — Progress',theme:'build',rpe:8,rir:2,weightPct:90,volMod:1.0,tip:'Push the weight. Technique must not slip.'},
-    {label:'Strength — Overreach',theme:'progress',rpe:9,rir:1,weightPct:95,volMod:1.0,tip:'Hard week by design. You are supposed to feel it.'},
-    {label:'Strength — Deload',theme:'deload',rpe:6,rir:4,weightPct:90,volMod:0.5,tip:'Critical rest. Phase 3 needs you fresh.'},
-    {label:'Power — Introduce',theme:'progress',rpe:8,rir:2,weightPct:90,volMod:1.0,tip:'Explosive work added. Quality over quantity.'},
-    {label:'Power — Build',theme:'progress',rpe:8,rir:2,weightPct:92,volMod:1.0,tip:'Power and strength together. Best weeks coming.'},
-    {label:'Power — Peak',theme:'peak',rpe:9,rir:1,weightPct:95,volMod:1.0,tip:'Near-maximal power. Trust everything you have built.'},
-    {label:'Taper',theme:'deload',rpe:6,rir:4,weightPct:90,volMod:0.5,tip:'Back off. Arrive at your sport sharp and fresh.'}
+  {key:'sport_12',name:'Sport Seasonal 12-week',desc:'Foundation → Strength → Power. Three 4-week blocks: build the base, load it heavy, then convert it to explosive output.',cyclic:false,weeks:[
+    {label:'Foundation — Learn',theme:'learn',rpe:7,rir:3,weightPct:80,volMod:1.0,block:0,tip:'Master the movements. Speed and power come later — this week is about owning the pattern under control.'},
+    {label:'Foundation — Groove',theme:'learn',rpe:7,rir:3,weightPct:82,volMod:1.0,block:0,tip:'Small weight jumps. Keep form perfect — the goal is to make the pattern automatic before adding real load.'},
+    {label:'Foundation — Build',theme:'build',rpe:7,rir:3,weightPct:85,volMod:1.0,block:0,tip:'Settling in. Your body is adapting, and the lifts should be starting to feel more natural.'},
+    {label:'Foundation — Deload',theme:'deload',rpe:6,rir:4,weightPct:82,volMod:0.5,block:0,tip:'Cut volume, keep intensity, recover before Phase 2. If the movements still don\'t feel automatic, it\'s fine to repeat a week of Foundation rather than push into heavier loading before you\'re ready.'},
+    {label:'Strength — Develop',theme:'build',rpe:8,rir:2,weightPct:88,volMod:1.0,block:1,tip:'Heavier now. This is where real strength builds — technique should already be second nature from Foundation.'},
+    {label:'Strength — Progress',theme:'build',rpe:8,rir:2,weightPct:90,volMod:1.0,block:1,tip:'Push the weight. Technique must not slip — if it does, that\'s the load talking, not readiness for more.'},
+    {label:'Strength — Overreach',theme:'progress',rpe:9,rir:1,weightPct:95,volMod:1.0,block:1,tip:'Hard week by design. You are supposed to feel it — this is the heaviest stimulus before the deload.'},
+    {label:'Strength — Deload',theme:'deload',rpe:6,rir:4,weightPct:90,volMod:0.5,block:1,tip:'Critical rest. Phase 3 needs you fresh — power output depends on the nervous system being recovered, not just the muscles.'},
+    {label:'Power — Introduce',theme:'progress',rpe:8,rir:2,weightPct:90,volMod:1.0,block:2,tip:'Explosive work added. Quality over quantity — every rep should be fast, not just heavy.'},
+    {label:'Power — Build',theme:'progress',rpe:8,rir:2,weightPct:92,volMod:1.0,block:2,tip:'Power and strength together. Best weeks coming — this is where the Foundation and Strength work pays off.'},
+    {label:'Power — Peak',theme:'peak',rpe:9,rir:1,weightPct:95,volMod:1.0,block:2,tip:'Near-maximal power. Trust everything you have built over the last ten weeks.'},
+    {label:'Power — Taper',theme:'deload',rpe:6,rir:4,weightPct:90,volMod:0.5,block:2,tip:'Back off. Arrive at your sport sharp and fresh — the fitness is already banked, this week is about feeling explosive, not exhausted.'}
   ]}
   ,{key:'pull_12',name:'Pull-Up Progression 12-week',desc:'Skill-specific programme — stuck clients to unassisted pull-ups and beyond',cyclic:false,weeks:[
     {label:'Phase 1 — Activate',theme:'learn',rpe:6,rir:4,weightPct:60,volMod:0.7,tip:'Build the foundation. Scapular control and eccentric strength before anything else. No ego.'},
@@ -1500,94 +1500,304 @@ var TPL = [
 
 // ── SPORT ───────────────────────────────────────────────────
 
-{key:'spt_run',name:'Runners Strength',cat:'sport',desc:'2–3 sessions per week — schedule away from key run sessions',duration:50,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
-  {label:'Session A',focus:'Posterior Chain + Stability',exercises:[
-    exT('High Knees','1','3min',0,'warmup'),ex('Leg Swing (Forward)',2,10,20,'warmup'),ex('Leg Swing (Lateral)',2,10,20,'warmup'),ex('Hip Circle',2,8,20,'warmup'),
-    ex('Back Squat',4,6,150,'strength','Drive knees out. Bar over mid-foot. Brace before every rep. Runners need strength, not endurance reps — keep weight meaningful.'),
+{key:'spt_run',name:'Runners Strength',cat:'sport',desc:'2–3 sessions per week — schedule away from key run sessions. Three phases over 12 weeks: build the strength base, load it heavier, then convert it to reactive power.',duration:50,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
+  {label:'Phase 1 · Day A',focus:'Posterior Chain + Stability',block:0,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Leg Swing (Lateral)',2,10,20,'warmup'),
+    ex('Hip Circle',2,8,20,'warmup'),
+    ex('Back Squat',4,6,150,'strength','Drive knees out. Bar over mid-foot. Brace before every rep. Foundation phase — own the pattern before the weight gets heavy in Phase 2.'),
     ex('Romanian Deadlift (Barbell)',3,8,120,'strength','Push hips back to the wall. Feel the hamstrings load. This is your primary injury-prevention lift.'),
     ex('Step-Up (Dumbbell)',3,8,90,'strength','Drive through the heel. Single-leg strength transfers directly to running economy.'),
     ex('Copenhagen Plank',3,0,60,'core','Hip adductors are chronically weak in runners. This fixes that.','30s'),
     ex('Calf Raise (Standing, Machine)',3,15,60,'accessory','Full range — all the way up, all the way down. Slow eccentric.'),
     ex('Tibialis Raise',3,15,45,'accessory','Toes up against a wall or with band resistance. The single best shin splint prevention exercise.'),
     ex('Dead Bug',3,10,60,'core'),
-    ex('Kneeling Hip Flexor Stretch',2,0,0,'cooldown',null,'30s'),
-    ex('Standing Calf Stretch',2,0,0,'cooldown',null,'30s')
+    exT('Kneeling Hip Flexor Stretch',2,'30s',0,'cooldown'),
+    exT('Standing Calf Stretch',2,'30s',0,'cooldown')
   ]},
-  {label:'Session B',focus:'Unilateral + Power',exercises:[
-    exT('High Knees','1','3min',0,'warmup'),ex('Leg Swing (Forward)',2,10,20,'warmup'),ex('Hip Airplanes',2,6,30,'warmup'),
+  {label:'Phase 1 · Day B',focus:'Unilateral Strength',block:0,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Hip Airplanes',2,6,30,'warmup'),
     ex('Bulgarian Split Squat (Dumbbell)',4,8,90,'strength','Control the descent. Front shin stays vertical. This is your quad and glute builder.'),
     ex('Single-Leg RDL (Dumbbell)',3,8,90,'strength','Balance and posterior chain together. Go lighter than you think — form breaks fast when fatigued.'),
     ex('Hip Thrust (Barbell)',3,10,90,'strength','Full hip extension at the top. Running power starts here.'),
     ex('Calf Raise (Seated, Machine)',3,15,60,'accessory','Seated targets the soleus — critical for Achilles resilience. Different muscle to standing raises.'),
     ex('Tibialis Raise',3,15,45,'accessory'),
-    ex('Pogo Jump',3,0,90,'strength','10 reps, minimal ground contact. Tendon stiffness work. This is plyometrics — do it fresh.','10 reps'),
     ex('Side Plank',3,0,60,'core','Hip abductors stabilise every running stride. Hold solid.','30s'),
     ex('Pallof Press (Standing)',3,10,60,'core','Anti-rotation core. Press out slowly and hold 2 seconds.'),
-    ex('Standing Hamstring Stretch',2,0,0,'cooldown',null,'30s'),
-    ex('Standing Calf Stretch',2,0,0,'cooldown',null,'30s')
+    exT('Standing Hamstring Stretch',2,'30s',0,'cooldown'),
+    exT('Standing Calf Stretch',2,'30s',0,'cooldown')
   ]},
-  {label:'Session C (Optional)',focus:'Power + Mobility',exercises:[
-    exT('High Knees','1','3min',0,'warmup'),ex('Leg Swing (Forward)',2,10,20,'warmup'),ex('Spiderman Stretch',2,8,20,'warmup'),
-    ex('Pogo Jump',4,0,120,'strength','3–5 reps maximum per set. Quality of spring, not quantity.','5 reps'),
+  {label:'Phase 1 · Day C',focus:'Tendon Prep + Mobility',block:0,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Spiderman Stretch',2,8,20,'warmup'),
+    ex('Pogo Jump',3,10,90,'strength','Minimal ground contact, ankle-driven. This is tendon-stiffness work, not a max-effort jump — stay light and quick on your feet.'),
     ex('Single-Leg RDL (Dumbbell)',3,8,90,'strength'),
     ex('Lateral Lunge (Dumbbell)',3,8,90,'strength','Frontal plane loading. Runners almost never train this direction.'),
     ex('Calf Raise (Seated, Machine)',3,15,60,'accessory'),
     ex('Hanging Knee Raise',3,10,60,'core'),
-    ex('Banded Hamstring Stretch',2,0,0,'cooldown',null,'40s'),
-    ex('Hip 90/90 Stretch',2,0,0,'cooldown',null,'40s')
+    exT('Banded Hamstring Stretch',2,'40s',0,'cooldown'),
+    exT('Hip 90/90 Stretch',2,'40s',0,'cooldown')
+  ]},
+  {label:'Phase 2 · Day A',focus:'Posterior Chain + Stability',block:1,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Leg Swing (Lateral)',2,10,20,'warmup'),
+    ex('Hip Circle',2,8,20,'warmup'),
+    ex('Back Squat',4,5,150,'strength','Heavier than Foundation now. If the last rep of every set isn\'t genuinely hard, it\'s time to add weight.'),
+    ex('Romanian Deadlift (Barbell)',3,6,120,'strength','Same pattern as Foundation, more load. Push hips back to the wall, feel the hamstrings load.'),
+    ex('Step-Up (Dumbbell)',3,6,90,'strength','Heavier dumbbells, same crisp drive through the heel.'),
+    ex('Copenhagen Plank',3,0,60,'core',null,'35s'),
+    ex('Calf Raise (Standing, Machine)',4,12,60,'accessory'),
+    ex('Tibialis Raise',3,15,45,'accessory'),
+    ex('Dead Bug',3,10,60,'core'),
+    exT('Kneeling Hip Flexor Stretch',2,'30s',0,'cooldown'),
+    exT('Standing Calf Stretch',2,'30s',0,'cooldown')
+  ]},
+  {label:'Phase 2 · Day B',focus:'Unilateral Strength',block:1,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Hip Airplanes',2,6,30,'warmup'),
+    ex('Bulgarian Split Squat (Dumbbell)',4,6,90,'strength','Heavier than Foundation. Control still wins over weight — never sacrifice the vertical shin for more load.'),
+    ex('Single-Leg RDL (Dumbbell)',3,6,90,'strength'),
+    ex('Hip Thrust (Barbell)',3,8,90,'strength','Add load versus Foundation. Same full hip extension at the top.'),
+    ex('Calf Raise (Seated, Machine)',4,12,60,'accessory'),
+    ex('Tibialis Raise',3,15,45,'accessory'),
+    ex('Side Plank',3,0,60,'core',null,'40s'),
+    ex('Pallof Press (Standing)',3,12,60,'core'),
+    exT('Standing Hamstring Stretch',2,'30s',0,'cooldown'),
+    exT('Standing Calf Stretch',2,'30s',0,'cooldown')
+  ]},
+  {label:'Phase 2 · Day C',focus:'Reactive Strength',block:1,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Spiderman Stretch',2,8,20,'warmup'),
+    ex('Pogo Jump',3,15,90,'strength','Building on Foundation — same minimal-contact spring, a few more reps per set.'),
+    ex('Countermovement Jump',3,5,120,'strength','Your first real jump-and-land work. Soft, quiet landings — that\'s the skill, not the height.'),
+    ex('Lateral Lunge (Dumbbell)',3,8,90,'strength'),
+    ex('Single-Leg RDL (Dumbbell)',3,8,90,'strength'),
+    ex('Calf Raise (Seated, Machine)',3,15,60,'accessory'),
+    ex('Hanging Knee Raise',3,10,60,'core'),
+    exT('Banded Hamstring Stretch',2,'40s',0,'cooldown'),
+    exT('Hip 90/90 Stretch',2,'40s',0,'cooldown')
+  ]},
+  {label:'Phase 3 · Day A',focus:'Posterior Chain Power',block:2,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Leg Swing (Lateral)',2,10,20,'warmup'),
+    ex('Hip Circle',2,8,20,'warmup'),
+    ex('Back Squat',4,4,150,'strength','Heaviest of the three phases. Right after your top set, move straight into the countermovement jumps below — this pairing is what converts raw strength into running power.'),
+    ex('Countermovement Jump',3,3,90,'strength','Done immediately after Back Squat while the nervous system is primed. Maximum intent, soft landing.'),
+    ex('Romanian Deadlift (Barbell)',3,5,120,'strength'),
+    ex('Step-Up (Dumbbell)',3,6,90,'strength'),
+    ex('Copenhagen Plank',3,0,60,'core',null,'40s'),
+    ex('Calf Raise (Standing, Machine)',4,10,60,'accessory'),
+    ex('Tibialis Raise',3,15,45,'accessory'),
+    exT('Kneeling Hip Flexor Stretch',2,'30s',0,'cooldown'),
+    exT('Standing Calf Stretch',2,'30s',0,'cooldown')
+  ]},
+  {label:'Phase 3 · Day B',focus:'Unilateral Power',block:2,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Hip Airplanes',2,6,30,'warmup'),
+    ex('Bulgarian Split Squat (Dumbbell)',4,5,90,'strength','Heaviest single-leg work of the programme.'),
+    ex('Lateral Bound',3,6,120,'strength','Frontal-plane power. Land it clean and absorb fully before bounding back — control the landing first, chase distance second.'),
+    ex('Single-Leg RDL (Dumbbell)',3,6,90,'strength'),
+    ex('Hip Thrust (Barbell)',3,6,90,'strength'),
+    ex('Calf Raise (Seated, Machine)',4,10,60,'accessory'),
+    ex('Side Plank',3,0,60,'core',null,'45s'),
+    ex('Pallof Press (Standing)',3,12,60,'core'),
+    exT('Standing Hamstring Stretch',2,'30s',0,'cooldown'),
+    exT('Standing Calf Stretch',2,'30s',0,'cooldown')
+  ]},
+  {label:'Phase 3 · Day C',focus:'Peak Reactive Power',block:2,exercises:[
+    exT('High Knees',1,'3min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,20,'warmup'),
+    ex('Spiderman Stretch',2,8,20,'warmup'),
+    ex('Pogo Jump',4,15,90,'strength','Peak tendon-stiffness volume for the programme.'),
+    ex('Bounding',3,6,120,'strength','Full reactive power — long, powerful strides covering ground. This is the most demanding session of the programme; do it fresh, never fatigued.'),
+    ex('Lateral Lunge (Dumbbell)',3,8,90,'strength'),
+    ex('Calf Raise (Seated, Machine)',3,15,60,'accessory'),
+    ex('Hanging Knee Raise',3,10,60,'core'),
+    exT('Banded Hamstring Stretch',2,'40s',0,'cooldown'),
+    exT('Hip 90/90 Stretch',2,'40s',0,'cooldown')
   ]}
 ]},
-{key:'spt_jump',name:'Jump Sports Strength',cat:'sport',desc:'Soccer / Volleyball / Basketball — 3 sessions per week',duration:65,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
-  {label:'Session A',focus:'Lower Power + Strength',exercises:[
-    exT('Jump Rope','3','30s',30,'warmup'),exT('High Knees','1','5min',0,'warmup'),
+{key:'spt_jump',name:'Jump Sports Strength',cat:'sport',desc:'Soccer / Volleyball / Basketball — 3 sessions per week. Three phases over 12 weeks: landing mechanics and strength first, then progressively heavier jumps as your base builds.',duration:65,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
+  {label:'Phase 1 · Day A',focus:'Landing Mechanics + Lower Strength',block:0,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
     ex('Glute Bridge (Bodyweight)',2,10,30,'activation'),
-    ex('Pogo Jump',3,15,120,'strength','Minimal ground contact. Spring off toes.'),
-    ex('Box Jump',3,5,120,'strength','Land softly. Step down, never jump down.'),
-    ex('Lateral Bound',3,8,120,'strength'),
-    ex('Back Squat',4,5,180,'strength'),ex('Romanian Deadlift (Barbell)',4,5,180,'strength'),
+    ex('Depth Drop',3,5,90,'activation','Step off a low box and absorb the landing — soft knees, quiet feet. No jump back up yet. This is the single most important skill in the whole programme; everything else builds on it.'),
+    ex('Pogo Jump',3,15,90,'strength','Minimal ground contact, spring off the toes. Tendon-stiffness work, not a max-effort jump.'),
+    ex('Back Squat',4,6,150,'strength','Foundation phase — own the pattern. Heavier loading comes in Phase 2.'),
+    ex('Romanian Deadlift (Barbell)',3,8,150,'strength'),
     ex('Bulgarian Split Squat (Dumbbell)',3,8,120,'strength'),
-    ex('Calf Raise (Standing, Machine)',4,12,90,'accessory'),
-    ex('Dead Bug',3,10,60,'core'),ex('Pallof Press (Standing)',3,10,60,'core')
+    ex('Calf Raise (Standing, Machine)',3,12,60,'accessory'),
+    ex('Dead Bug',3,10,60,'core'),
+    ex('Pallof Press (Standing)',3,10,60,'core')
   ]},
-  {label:'Session B',focus:'Upper + Reactive',exercises:[
-    exT('Jump Rope','3','30s',30,'warmup'),exT('High Knees','1','5min',0,'warmup'),
-    ex('Countermovement Jump',3,5,120,'strength'),ex('Tuck Jump',3,8,120,'strength'),
-    ex('Barbell Bench Press (Flat)',4,5,180,'strength'),
+  {label:'Phase 1 · Day B',focus:'Upper Strength + Jump Introduction',block:0,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
+    ex('Countermovement Jump',3,5,120,'strength','Soft, quiet landings are the goal here — not how high you get. Height comes later once the landing is automatic.'),
+    ex('Barbell Bench Press (Flat)',4,6,150,'strength'),
     ex('Pull-Up',4,8,120,'strength'),
-    ex('Step-Up (Barbell)',3,6,120,'strength'),
-    ex('Plank',3,0,60,'core',null,'45s'),
+    ex('Step-Up (Barbell)',3,8,120,'strength'),
+    exT('Plank',3,'45s',60,'core'),
     ex('Pallof Press (Standing)',3,12,60,'core')
   ]},
-  {label:'Session C',focus:'Multi-Plane + Agility',exercises:[
-    exT('Jump Rope','3','30s',30,'warmup'),exT('High Knees','1','5min',0,'warmup'),
-    ex('Broad Jump',3,5,120,'strength'),ex('Lateral Bound',3,6,120,'strength'),
+  {label:'Phase 1 · Day C',focus:'Multi-Plane + Agility',block:0,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
+    ex('Jump Squat',3,6,90,'strength','Sub-maximal height — land soft and balanced every time. This is the bridge between the depth drops and the bigger jumps coming in Phase 2.'),
     ex('Conventional Deadlift',4,5,180,'strength'),
     ex('Reverse Lunge (Dumbbell)',3,8,90,'strength'),
     ex('Nordic Hamstring Curl',3,5,90,'strength'),
     ex('Calf Raise (Single-Leg, Dumbbell)',4,12,60,'accessory'),
-    exT('Agility Ladder (Linear)','3','30s',60,'cardio'),exT('Agility Ladder (Lateral)','3','30s',60,'cardio')
+    exT('Agility Ladder (Linear)',3,'30s',60,'cardio'),
+    exT('Agility Ladder (Lateral)',3,'30s',60,'cardio')
+  ]},
+  {label:'Phase 2 · Day A',focus:'Lower Power + Strength',block:1,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
+    ex('Glute Bridge (Bodyweight)',2,10,30,'activation'),
+    ex('Pogo Jump',3,15,120,'strength'),
+    ex('Box Jump',3,5,120,'strength','Step down between reps, never jump down — protect the tendons you\'ve been building. Modest box height; this is about clean takeoffs and landings, not maximum height.'),
+    ex('Back Squat',4,5,180,'strength','Heavier than Foundation. If the last rep of every set isn\'t genuinely hard, add weight.'),
+    ex('Romanian Deadlift (Barbell)',4,5,180,'strength'),
+    ex('Bulgarian Split Squat (Dumbbell)',3,8,120,'strength'),
+    ex('Calf Raise (Standing, Machine)',4,12,90,'accessory'),
+    ex('Dead Bug',3,10,60,'core'),
+    ex('Pallof Press (Standing)',3,10,60,'core')
+  ]},
+  {label:'Phase 2 · Day B',focus:'Upper + Reactive',block:1,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
+    ex('Countermovement Jump',3,5,120,'strength'),
+    ex('Tuck Jump',3,6,120,'strength','Your first true reactive jump. Quick ground contact — think bouncing off hot coals, not a slow squat-and-launch.'),
+    ex('Barbell Bench Press (Flat)',4,5,180,'strength'),
+    ex('Pull-Up',4,8,120,'strength'),
+    ex('Step-Up (Barbell)',3,6,120,'strength'),
+    exT('Plank',3,'45s',60,'core'),
+    ex('Pallof Press (Standing)',3,12,60,'core')
+  ]},
+  {label:'Phase 2 · Day C',focus:'Multi-Plane + Agility',block:1,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
+    ex('Broad Jump',3,5,120,'strength','Full effort forward, but the rep isn\'t complete until the landing is controlled and balanced.'),
+    ex('Lateral Bound',3,6,120,'strength','Stick the landing on one leg before bounding back the other way.'),
+    ex('Conventional Deadlift',4,5,180,'strength'),
+    ex('Reverse Lunge (Dumbbell)',3,8,90,'strength'),
+    ex('Nordic Hamstring Curl',3,5,90,'strength'),
+    ex('Calf Raise (Single-Leg, Dumbbell)',4,12,60,'accessory'),
+    exT('Agility Ladder (Linear)',3,'30s',60,'cardio'),
+    exT('Agility Ladder (Lateral)',3,'30s',60,'cardio')
+  ]},
+  {label:'Phase 3 · Day A',focus:'Lower Power + Strength',block:2,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
+    ex('Back Squat',4,4,180,'strength','Heaviest squat of the programme. Move straight into the box jumps below right after your top set — that pairing is what turns raw strength into game-speed power.'),
+    ex('Box Jump',4,5,120,'strength','Done right after Back Squat while the nervous system is primed. Maximum intent off the floor, controlled step down.'),
+    ex('Romanian Deadlift (Barbell)',4,4,180,'strength'),
+    ex('Bulgarian Split Squat (Dumbbell)',3,6,120,'strength'),
+    ex('Calf Raise (Standing, Machine)',4,10,90,'accessory'),
+    ex('Dead Bug',3,10,60,'core'),
+    ex('Pallof Press (Standing)',3,12,60,'core')
+  ]},
+  {label:'Phase 3 · Day B',focus:'Upper + Reactive',block:2,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
+    ex('Tuck Jump',4,6,120,'strength','Peak reactive intensity. Quality over fatigue — stop the set the moment ground contact starts getting slow or heavy.'),
+    ex('Countermovement Jump',3,5,120,'strength'),
+    ex('Barbell Bench Press (Flat)',4,4,180,'strength'),
+    ex('Pull-Up',4,8,120,'strength'),
+    ex('Step-Up (Barbell)',3,5,120,'strength'),
+    exT('Plank',3,'45s',60,'core'),
+    ex('Pallof Press (Standing)',3,12,60,'core')
+  ]},
+  {label:'Phase 3 · Day C',focus:'Multi-Plane + Agility',block:2,exercises:[
+    exT('Jump Rope',3,'30s',30,'warmup'),
+    exT('High Knees',1,'5min',0,'warmup'),
+    ex('Broad Jump',4,5,120,'strength','Peak distance, peak control. The set ends the moment your landings stop being clean — chasing distance past that point just builds bad habits.'),
+    ex('Lateral Bound',4,6,120,'strength'),
+    ex('Conventional Deadlift',4,4,180,'strength'),
+    ex('Reverse Lunge (Dumbbell)',3,6,90,'strength'),
+    ex('Nordic Hamstring Curl',3,5,90,'strength'),
+    ex('Calf Raise (Single-Leg, Dumbbell)',4,12,60,'accessory'),
+    exT('Agility Ladder (Linear)',3,'30s',60,'cardio'),
+    exT('Agility Ladder (Lateral)',3,'30s',60,'cardio')
   ]}
 ]},
-{key:'spt_climb',name:'Rock Climbing Strength',cat:'sport',desc:'Intermediate+ climbers only — 2 sessions per week',duration:45,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
-  {label:'Session A',focus:'Finger + Pull Strength',exercises:[
+{key:'spt_climb',name:'Rock Climbing Strength',cat:'sport',desc:'Intermediate+ climbers only — 2 sessions per week. Three phases over 12 weeks: open-hand base building, then max hangs and half-crimp, then peak load and one-arm work.',duration:45,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
+  {label:'Phase 1 · Day A',focus:'Finger Endurance + Pull Base',block:0,exercises:[
     ex('Arm Circles',1,0,0,'warmup',null,'5min'),
-    exT('Dead Hang','1','5min',0,'warmup','Thorough warm-up required. 3-4 easy sets open-hand before this session.'),
-    ex('Dead Hang (Hangboard)',3,0,180,'strength','Open hand, 20–25mm. 10s hang, 3 min rest.','10s'),
-    ex('Half Crimp Hang',3,0,180,'strength','10s hang, 3 min rest.','10s'),
-    ex('Pull-Up',3,5,180,'strength'),
+    exT('Wrist CARs',2,'30s',20,'warmup'),
+    ex('Dead Hang (Hangboard)',5,0,3,'strength','Repeater protocol, open hand only this phase: 5 hangs of 7s with 3s rest between, then rest 2-3 minutes and repeat the whole block 3 times. This builds tendon capacity safely before real max hangs in Phase 2.','7s'),
+    ex('Pull-Up',3,5,150,'strength'),
     ex('Push-Up',3,15,90,'strength','Antagonist work. Keep shoulders healthy.'),
     ex('Face Pull',3,15,60,'accessory'),
-    ex('Hanging Leg Raise',3,10,90,'core'),ex('Dead Bug',3,10,60,'core'),
-    exT('Wrist CARs','2','30s',20,'cooldown'),exT('Doorway Pec Stretch','2','30s',20,'cooldown')
+    ex('Hanging Knee Raise',3,10,60,'core'),
+    ex('Dead Bug',3,10,60,'core'),
+    exT('Doorway Pec Stretch',2,'30s',20,'cooldown')
   ]},
-  {label:'Session B',focus:'One-Arm + Antagonist',exercises:[
+  {label:'Phase 1 · Day B',focus:'Antagonist + Core',block:0,exercises:[
     ex('Arm Circles',1,0,0,'warmup',null,'5min'),
-    exT('Dead Hang','1','5min',0,'warmup'),
-    ex('One-Arm Hang',3,0,180,'strength','Assisted only — use a band or foot support. Prerequisite: solid 10s dead hang. 5s each side.','5s'),
-    ex('Barbell Overhead Press',3,10,90,'strength','Antagonist. Keep rotator cuff strong.'),
-    ex('Plank',3,0,60,'core',null,'45s'),
+    exT('Dead Hang',2,'10s',30,'warmup','Easy open-hand hangs just to feel the position — not training intensity yet.'),
+    ex('Scapular Pull-Up',3,10,60,'activation','The foundation movement under every pull-up. Shoulder blades do the work, arms stay relatively straight.'),
+    ex('Barbell Overhead Press',3,10,90,'strength','Antagonist. Keep the rotator cuff strong — climbers pull constantly and rarely push.'),
+    exT('Plank',3,'30s',60,'core'),
+    ex('Hanging Knee Raise',3,10,90,'core'),
+    exT('Wrist CARs',2,'30s',20,'cooldown'),
+    ex('Shoulder CARs',2,5,20,'cooldown')
+  ]},
+  {label:'Phase 2 · Day A',focus:'Max Hangs + Pull Strength',block:1,exercises:[
+    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    exT('Wrist CARs',2,'30s',20,'warmup'),
+    ex('Dead Hang (Hangboard)',3,0,150,'strength','True max hangs now — open hand, the heaviest load you can hold cleanly for 10 seconds. Add a little weight if last week felt easy.','10s'),
+    ex('Half Crimp Hang',2,0,150,'strength','First half-crimp work. Lighter load and shorter holds than the open-hand hangs above — this grip carries more tendon stress, so we ease in. Stop immediately if you feel anything sharp at the base of a finger.','7s'),
+    ex('Pull-Up',4,8,150,'strength'),
+    ex('Push-Up',3,15,90,'strength'),
+    ex('Face Pull',3,15,60,'accessory'),
+    ex('Hanging Leg Raise',3,10,90,'core'),
+    ex('Dead Bug',3,10,60,'core'),
+    exT('Doorway Pec Stretch',2,'30s',20,'cooldown')
+  ]},
+  {label:'Phase 2 · Day B',focus:'Antagonist + Stability',block:1,exercises:[
+    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    exT('Dead Hang',2,'10s',30,'warmup'),
+    ex('Scapular Pull-Up',3,12,60,'activation'),
+    ex('Barbell Overhead Press',3,8,90,'strength','Heavier than Phase 1. Same strong, healthy shoulders.'),
+    exT('Plank',3,'45s',60,'core'),
+    exT('Side Plank',3,'30s',60,'core','New this phase — climbing loads the trunk in rotation as much as flexion.'),
     ex('Hanging Knee Raise',3,12,90,'core'),
-    exT('Wrist CARs','2','30s',20,'cooldown'),ex('Shoulder CARs',2,5,20,'cooldown')
+    exT('Wrist CARs',2,'30s',20,'cooldown'),
+    ex('Shoulder CARs',2,5,20,'cooldown')
+  ]},
+  {label:'Phase 3 · Day A',focus:'Peak Hangs + One-Arm Prep',block:2,exercises:[
+    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    exT('Wrist CARs',2,'30s',20,'warmup'),
+    ex('Half Crimp Hang',3,0,180,'strength','Heaviest crimp load of the programme. If last session\'s reps all felt clean and pain-free, this is also a reasonable week to try the one-arm hang below.','8s'),
+    ex('One-Arm Hang',3,0,180,'strength','Assisted only — use a band or a foot on a chair. The goal is to feel the position under control, not to hang fully unassisted. Prerequisite: a clean, pain-free 10-second two-hand hang at bodyweight. If that\'s not solid yet, skip this and keep building Phase 2 work for a few more weeks instead.','5s'),
+    ex('Weighted Pull-Up',4,6,150,'strength','Add weight only if you already have 8+ clean unassisted reps. Otherwise stick with bodyweight Pull-Ups and focus on speed off every rep.'),
+    ex('Push-Up',3,15,90,'strength'),
+    ex('Face Pull',3,15,60,'accessory'),
+    ex('Hanging Leg Raise',3,12,90,'core'),
+    exT('Doorway Pec Stretch',2,'30s',20,'cooldown')
+  ]},
+  {label:'Phase 3 · Day B',focus:'Power Pull + Antagonist',block:2,exercises:[
+    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    exT('Dead Hang',2,'10s',30,'warmup'),
+    ex('Open Hand Hang',3,0,150,'strength','Heaviest open-hand load of the programme — the payoff for four weeks of repeaters and eight weeks of max hangs.','8s'),
+    ex('Barbell Overhead Press',3,6,90,'strength','Heaviest antagonist load of the programme.'),
+    exT('Plank',3,'60s',60,'core'),
+    exT('Side Plank',3,'45s',60,'core'),
+    ex('Hanging Knee Raise',3,12,60,'core'),
+    exT('Wrist CARs',2,'30s',20,'cooldown'),
+    ex('Shoulder CARs',2,5,20,'cooldown')
   ]}
 ]},
 {key:'spt_pullup',name:'Pull-Up Progression',cat:'sport',desc:'Stuck on the same reps for months? 12-week skill programme — 2 sessions per week',duration:40,defaultPlan:'pull_12',compatiblePlans:['pull_12'],days:[
