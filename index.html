@@ -3188,35 +3188,37 @@ function todayV(){
   var _sessionLocked=!S.wx&&isSessionLocked(day);
 
   var h='<div style="padding:max(14px,env(safe-area-inset-top)) 14px 0">';
-  // Eyebrow — with VIEW/PLAY mode indicator
-  h+='<div class="lbl lbl-acc" style="margin-bottom:4px">'+tpl.name+' · '+day.label+'</div>';
-  // Hero — heading is the session switcher (only when not in PLAY)
-  var _canSwitchSession=(!S.wx||!S.wx.playing)&&tpl.days.length>1;
-  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">';
-  if(_canSwitchSession){
-    h+='<div onclick="openSessionPicker()" style="cursor:pointer;display:flex;align-items:baseline;gap:6px">';
-    h+='<div class="h1" style="margin-bottom:0">'+day.focus+'</div>';
-    h+='<span style="font-size:16px;color:var(--acc);line-height:1.2">▾</span>';
-    h+='</div>';
-  } else {
-    h+='<div class="h1" style="margin-bottom:0">'+day.focus+'</div>';
-  }
-  h+='</div>';
+  // Eyebrow
+  h+='<div class="lbl lbl-acc" style="margin-bottom:4px">'+tpl.name+'</div>';
   // Subline
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:10px">'+day.exercises.length+' exercises · ~'+tpl.duration+' min</div>';
-  // Plan strip — left-aligned, richer info, tappable
+  // Session + Progression cards — equal width, side by side
+  var _canSwitchSession=(!S.wx||!S.wx.playing)&&tpl.days.length>1;
+  h+='<div style="display:flex;gap:8px;margin-bottom:14px">';
+  // Session card
+  h+='<div'+(_canSwitchSession?' onclick="openSessionPicker()"':'')+' style="flex:1;min-width:0;cursor:'+(_canSwitchSession?'pointer':'default')+';background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:14px;padding:10px 12px">';
+  h+='<div style="font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--mu);margin-bottom:3px">Session</div>';
+  h+='<div style="display:flex;align-items:baseline;justify-content:space-between;gap:4px">';
+  h+='<div style="font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+day.label+'</div>';
+  if(_canSwitchSession)h+='<span style="font-size:13px;color:var(--acc);flex-shrink:0">▾</span>';
+  h+='</div></div>';
+  // Progression card
   if(banner){
-    h+='<div onclick="openPlanSheet()" style="display:inline-flex;align-items:center;gap:0;margin-bottom:14px;cursor:pointer;background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:20px;padding:4px 10px 4px 12px">';
-    h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">'+banner.planName+'</span>';
-    h+='<span style="font-size:10px;color:var(--mu);margin:0 5px">·</span>';
-    h+='<span style="font-size:11px;font-weight:600;color:var(--tx)">Wk '+(banner.weekIndex+1)+'/'+banner.totalWeeks+'</span>';
-    h+='<span style="font-size:10px;color:var(--mu);margin:0 5px">·</span>';
-    h+='<span style="font-size:11px;font-weight:700;color:var(--acc)">RPE '+banner.rpe+'</span>';
-    h+='<span style="font-size:10px;color:var(--mu);margin:0 5px">·</span>';
-    h+='<span style="font-size:11px;font-weight:600;color:var(--tx2)">'+banner.rir+' RIR</span>';
-    h+='<span style="font-size:9px;color:var(--mu);padding-left:6px">▾</span>';
-    h+='</div>';
+    h+='<div onclick="openPlanSheet()" style="flex:1;min-width:0;cursor:pointer;background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:14px;padding:10px 12px">';
+    h+='<div style="font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--mu);margin-bottom:3px">Progression</div>';
+    h+='<div style="display:flex;align-items:baseline;justify-content:space-between;gap:4px">';
+    h+='<div style="font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Wk '+(banner.weekIndex+1)+' · '+(banner.weekLabel||'')+'</div>';
+    h+='<span style="font-size:13px;color:var(--acc);flex-shrink:0">▾</span>';
+    h+='</div></div>';
+  } else {
+    h+='<div onclick="openAttachPlanSheet()" style="flex:1;min-width:0;cursor:pointer;background:var(--bg3);border:0.5px dashed var(--brd);border-radius:14px;padding:10px 12px">';
+    h+='<div style="font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--mu);margin-bottom:3px">Progression</div>';
+    h+='<div style="display:flex;align-items:baseline;justify-content:space-between;gap:4px">';
+    h+='<div style="font-size:12px;font-weight:600;color:var(--mu)">Attach a plan</div>';
+    h+='<span style="font-size:13px;color:var(--mu);flex-shrink:0">+</span>';
+    h+='</div></div>';
   }
+  h+='</div>';
   h+='</div>';
 
   // Exercise list — custom programmes respect insertion order; pre-built use phase grouping
@@ -3375,13 +3377,16 @@ function openPlanSheet(){
   if(plan.desc)h+='<div style="font-size:12px;color:var(--mu)">'+plan.desc+'</div>';
   h+='</div>';
 
-  // Week list
+  // Week list — tap any week to select it directly. Client-driven, no auto-advance.
   plan.weeks.forEach(function(wk,wi){
     var isCur=wi===currentWeek;
-    h+='<div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;border:0.5px solid '+(isCur?'var(--acc-brd)':'var(--brd)')+';background:'+(isCur?'var(--acc-bg)':'var(--bg3)')+'">';
+    h+='<div onclick="selectPlanWeek('+wi+')" style="padding:10px 12px;border-radius:10px;margin-bottom:6px;cursor:pointer;border:0.5px solid '+(isCur?'var(--acc-brd)':'var(--brd)')+';background:'+(isCur?'var(--acc-bg)':'var(--bg3)')+'">';
     h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
-    h+='<div style="font-size:12px;font-weight:700;color:'+(isCur?'var(--acc)':'var(--tx)')+'">Week '+(wi+1)+(isCur?' — Current':'')+'</div>';
+    h+='<div style="font-size:12px;font-weight:700;color:'+(isCur?'var(--acc)':'var(--tx)')+'">Week '+(wi+1)+(isCur?' — Selected':'')+'</div>';
+    h+='<div style="display:flex;gap:4px;align-items:center">';
     if(wk.theme==='deload')h+='<span style="font-size:9px;font-weight:700;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:8px;padding:1px 6px">DELOAD</span>';
+    if(isCur)h+='<i class="ti ti-check" style="color:var(--acc);font-size:16px"></i>';
+    h+='</div>';
     h+='</div>';
     if(wk.label)h+='<div style="font-size:11px;color:var(--tx2);margin-bottom:4px">'+wk.label+'</div>';
     h+='<div style="display:flex;gap:6px">';
@@ -3394,7 +3399,40 @@ function openPlanSheet(){
   });
   h+='</div>';
   h+='</div>';
-  openSheet(h,null);
+  openSheet(h,'Progression Plan');
+}
+function selectPlanWeek(wi){
+  // Client-driven week selection. Read-only addition: simply sets the index,
+  // no auto-advance, no history math, no cycle preservation needed.
+  var cl=C();
+  if(!cl.plan)return;
+  cl.plan.weekIndex=wi;
+  if(!cl.plans)cl.plans={};
+  cl.plans[cl.tplKey]=cl.plan;
+  sv();closeSheet();draw();
+}
+function openAttachPlanSheet(){
+  var cl=C();var tpl=ACTIVE_TPL();
+  if(!tpl)return;
+  var compatible=(tpl.compatiblePlans||[]).map(function(k){return getPlanByKey(k);}).filter(Boolean);
+  var h='<div style="padding:0 20px 30px">';
+  if(compatible.length===0){
+    h+='<div class="card"><div style="color:var(--mu);text-align:center;padding:20px 0;font-size:13px">No progression plans are available for this programme yet.</div></div>';
+  } else {
+    h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Pick a progression plan to track weekly RPE, intensity and tips alongside this programme. You can change or remove it anytime.</div>';
+    compatible.forEach(function(p){
+      h+='<div onclick="attachPlanFromSheet(\''+p.key+'\')" style="padding:12px;border-radius:10px;margin-bottom:8px;cursor:pointer;border:0.5px solid var(--brd);background:var(--bg3)">';
+      h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px">'+p.name+'</div>';
+      if(p.desc)h+='<div style="font-size:11px;color:var(--mu)">'+p.desc+'</div>';
+      h+='</div>';
+    });
+  }
+  h+='</div>';
+  openSheet(h,'Attach Progression Plan');
+}
+function attachPlanFromSheet(planKey){
+  attachPlan(planKey);
+  closeSheet();draw();
 }
 
 // ═══════════════════════════════════════════════════════════════
