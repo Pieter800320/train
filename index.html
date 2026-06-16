@@ -477,19 +477,19 @@ var PLANS = [
     {label:'Week 7 — Peak & Deload',theme:'peakdeload',rpe:9,rir:1,weightPct:100,volMod:0.5,tip:'Heavy but brief. Top singles or doubles.'},
     {label:'Week 8 — Taper',theme:'deload',rpe:6,rir:4,weightPct:90,volMod:0.5,tip:'Back off. Arrive fresh. Trust the process.'}
   ]},
-  {key:'rehab_12',name:'Rehab Progression 12-week',desc:'Three-phase rehabilitation block',cyclic:false,weeks:[
-    {label:'Phase 1 — Activate',theme:'learn',rpe:5,rir:5,weightPct:60,volMod:0.7,tip:'Pain is a warning sign. Stop if pain is more than 2 out of 10.'},
-    {label:'Phase 1 — Activate',theme:'learn',rpe:5,rir:5,weightPct:65,volMod:0.7,tip:'Movement quality only. Weight is irrelevant right now.'},
-    {label:'Phase 1 — Activate',theme:'learn',rpe:6,rir:4,weightPct:70,volMod:0.75,tip:'Things should feel easier by now. That is a good sign.'},
-    {label:'Phase 2 — Build',theme:'build',rpe:6,rir:4,weightPct:75,volMod:0.85,tip:'Progressive load begins. Stay within pain-free range.'},
-    {label:'Phase 2 — Build',theme:'build',rpe:7,rir:3,weightPct:80,volMod:0.9,tip:'Small weight increases only. Form first, always.'},
-    {label:'Phase 2 — Build',theme:'build',rpe:7,rir:3,weightPct:82,volMod:0.9,tip:'Strength improving. Notice the difference?'},
-    {label:'Phase 2 — Strengthen',theme:'build',rpe:7,rir:3,weightPct:85,volMod:1.0,tip:'Full volume now. Keep pulling more than pushing.'},
-    {label:'Phase 2 — Deload',theme:'deload',rpe:5,rir:5,weightPct:75,volMod:0.4,tip:'Mid-programme reset. This is deliberate recovery, not regression — you are stronger than Phase 1. Half the sets, notice how the movements feel compared to week 1.'},
-    {label:'Phase 3 — Function',theme:'progress',rpe:7,rir:3,weightPct:87,volMod:1.0,tip:'Functional movements introduced. Control everything.'},
-    {label:'Phase 3 — Function',theme:'progress',rpe:8,rir:2,weightPct:90,volMod:1.0,tip:'Getting strong. Respect the process.'},
-    {label:'Phase 3 — Integrate',theme:'progress',rpe:8,rir:2,weightPct:92,volMod:1.0,tip:'Full integration. How does it feel compared to week 1?'},
-    {label:'Phase 3 — Assess',theme:'peak',rpe:8,rir:2,weightPct:95,volMod:1.0,tip:'Assessment week. Return to activity if fully pain-free.'}
+  {key:'rehab_12',name:'Rehab Progression 12-week',desc:'Three-phase rehabilitation block — calm and restore, rebuild strength, return to function. Progress when you\'re ready, not by the calendar.',cyclic:false,weeks:[
+    {label:'Phase 1 — Calm the Tissue',theme:'learn',rpe:5,rir:5,weightPct:60,volMod:0.7,block:0,tip:'Pain is a warning sign. Stop if pain is more than 2 out of 10, and don\'t chase a burn or a stretch sensation — calm and controlled is the entire goal this week.'},
+    {label:'Phase 1 — Rebuild the Pattern',theme:'learn',rpe:5,rir:5,weightPct:65,volMod:0.7,block:0,tip:'Movement quality only. Weight is irrelevant right now — focus on doing every rep exactly the same way, pain-free, every time.'},
+    {label:'Phase 1 — Confirm Readiness',theme:'learn',rpe:6,rir:4,weightPct:70,volMod:0.75,block:0,tip:'Things should feel easier by now. If every exercise this week is pain-free and the movement feels confident, you\'re ready for Phase 2. If not, repeat this week rather than push forward — there\'s no penalty for taking more time.'},
+    {label:'Phase 2 — Begin Loading',theme:'build',rpe:6,rir:4,weightPct:75,volMod:0.85,block:1,tip:'Progressive load begins. Stay within pain-free range — a small amount of effort is fine, sharp or lingering pain is not.'},
+    {label:'Phase 2 — Add Load',theme:'build',rpe:7,rir:3,weightPct:80,volMod:0.9,block:1,tip:'Small weight increases only. Form first, always — if technique slips, the weight was too much.'},
+    {label:'Phase 2 — Steady Build',theme:'build',rpe:7,rir:3,weightPct:82,volMod:0.9,block:1,tip:'Strength is improving. Notice the difference compared to two weeks ago — that\'s real tissue capacity coming back.'},
+    {label:'Phase 2 — Full Volume',theme:'build',rpe:7,rir:3,weightPct:85,volMod:1.0,block:1,tip:'Full volume now. This is the most demanding week before the deload — trust the work you\'ve put in so far.'},
+    {label:'Phase 2 — Deload',theme:'deload',rpe:5,rir:5,weightPct:75,volMod:0.4,block:1,tip:'Mid-programme reset. This is deliberate recovery, not regression — you are stronger than Phase 1, even with half the sets. Notice how the movements feel compared to week 1. If anything still feels off going into Phase 3, it\'s fine to repeat this week.'},
+    {label:'Phase 3 — Reintroduce Function',theme:'progress',rpe:7,rir:3,weightPct:87,volMod:1.0,block:2,tip:'Functional, fuller-range movements introduced. Control everything — speed and load come later, not now.'},
+    {label:'Phase 3 — Build Capacity',theme:'progress',rpe:8,rir:2,weightPct:90,volMod:1.0,block:2,tip:'Getting strong. Respect the process — you\'re training capacity for real life and activity, not just for the session.'},
+    {label:'Phase 3 — Integrate',theme:'progress',rpe:8,rir:2,weightPct:92,volMod:1.0,block:2,tip:'Full integration. How does it feel compared to week 1? That comparison is the best progress marker you have.'},
+    {label:'Phase 3 — Assess & Return',theme:'peak',rpe:8,rir:2,weightPct:95,volMod:1.0,block:2,tip:'Assessment week. Progression here is based on how you feel, not the calendar — if every exercise is pain-free through full range, you\'re ready to return to normal training or sport. If not, stay on Phase 3 for another 2-3 weeks and reassess. There\'s no rush.'}
   ]},
   {key:'sport_12',name:'Sport Seasonal 12-week',desc:'Foundation → Strength → Power',cyclic:false,weeks:[
     {label:'Foundation — Learn',theme:'learn',rpe:7,rir:3,weightPct:80,volMod:1.0,tip:'Master the movements. Speed and power come later.'},
@@ -1715,128 +1715,213 @@ var TPL = [
 
 // ── REHAB ───────────────────────────────────────────────────
 
-{key:'rhb_sho',name:'Shoulder Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10. Three phases over 12 weeks.',duration:35,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
-  {label:'Phase 1 — Daily',focus:'Activate + Restore',exercises:[
-    ex('Foam Roller Thoracic Extension',2,10,30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
+{key:'rhb_sho',name:'Shoulder Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10. Three phases over 12 weeks — calm and restore, rebuild strength, return to overhead function.',duration:38,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
+  {label:'Phase 1 · Day A',focus:'Calm & Activate',block:0,exercises:[
+    ex('Foam Roller Thoracic Extension',2,10,30,'mobility','Open the upper back so the shoulder isn\'t doing all the work.'),
+    ex('Cat-Cow',2,10,30,'warmup'),
     ex('Open Book',2,8,30,'mobility'),
-    ex('Scapular Push-Up',2,12,45,'activation'),ex('Wall Slide',2,12,45,'activation'),
-    ex('Band Pull-Apart',2,15,45,'activation'),ex('External Rotation (Cable)',2,15,45,'activation'),
-    exT('Doorway Pec Stretch','2','30s',20,'mobility'),exT('Kneeling Lat Stretch','2','30s',20,'mobility'),
-    ex('Push-Up',2,10,45,'strength','Pain-free range only. Stop immediately if pain.'),
-    exT('Plank','2','30s',45,'core')
+    ex('Wall Slide',2,12,30,'activation','Low back flat against the wall. Slide only as high as feels comfortable today.'),
+    ex('Scapular Push-Up',2,12,30,'activation'),
+    ex('Band Pull-Apart',2,15,30,'activation'),
+    ex('External Rotation (Cable)',2,15,30,'activation','Elbow stays at your side, light band or cable. This is the single most important exercise in this programme — do it every session.'),
+    exT('Banded Chest Opener',2,'30s',20,'mobility'),
+    ex('Incline Push-Up',2,10,45,'strength','Hands on a bench or counter — an easier angle than a floor push-up. Should feel completely pain-free.'),
+    exT('Plank',2,'30s',45,'core')
   ]},
-  {label:'Phase 1B — Daily',focus:'Activate + Restore',exercises:[
-    ex('Foam Roller Thoracic Extension',2,10,30,'mobility'),ex('Cat-Cow',2,10,30,'warmup'),
-    ex('Open Book',2,8,30,'mobility'),
-    ex('Scapular Push-Up',2,12,45,'activation'),ex('Wall Slide',2,12,45,'activation'),
-    ex('Band Pull-Apart',2,15,45,'activation'),ex('External Rotation (Cable)',2,15,45,'activation'),
-    exT('Doorway Pec Stretch','2','30s',20,'mobility'),exT('Kneeling Lat Stretch','2','30s',20,'mobility'),
-    ex('Push-Up',2,10,45,'strength'),exT('Plank','2','30s',45,'core')
+  {label:'Phase 1 · Day B',focus:'Mobility & Posture',block:0,exercises:[
+    ex('Arm Circles',2,20,20,'warmup'),
+    ex('Shoulder CARs',1,5,20,'warmup'),
+    exT('Banded Chest Opener',2,'30s',20,'mobility'),
+    ex('Wall Slide',2,12,30,'activation'),
+    ex('Scapular Push-Up',2,12,30,'activation'),
+    ex('Band Pull-Apart',2,15,30,'activation'),
+    ex('External Rotation (Cable)',2,15,30,'activation','Same cue as Day A — light load, perfect form, every session.'),
+    ex('Prone Cobra',2,12,30,'activation'),
+    exT('Kneeling Lat Stretch',2,'30s',20,'cooldown'),
+    ex('Dead Bug',2,8,45,'core')
   ]},
-  {label:'Phase 2 — Workout A',focus:'Progressive Load',exercises:[
-    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
-    ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),ex('Face Pull',3,15,60,'activation'),
-    ex('Prone Cobra',3,12,60,'activation'),
-    ex('Push-Up',3,12,60,'strength'),ex('Lat Pulldown (Wide Grip)',3,15,60,'strength'),
+  {label:'Phase 2 · Day A',focus:'Push + Pull Balance',block:1,exercises:[
+    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),
+    ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),
+    ex('Face Pull',3,15,60,'activation'),
+    ex('Prone Cobra',3,12,45,'activation'),
+    ex('Push-Up',3,12,60,'strength','Full push-up now. Still pain-free range only — if it hurts, drop back to the incline version for another week.'),
+    ex('Straight-Arm Pulldown',3,15,60,'accessory'),
     ex('Seated Cable Row',3,15,60,'strength'),
-    exT('Plank','3','30s',60,'core'),ex('Shoulder Taps',3,8,60,'core')
+    exT('Plank',3,'30s',60,'core'),
+    ex('Dead Bug',3,10,45,'core')
   ]},
-  {label:'Phase 2B — Workout B',focus:'Progressive Load',exercises:[
-    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
-    ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),ex('Face Pull',3,15,60,'activation'),
-    ex('Landmine Shoulder Press',3,12,60,'strength'),
-    ex('Seated Cable Row',3,15,60,'strength'),ex('Lat Pulldown (Wide Grip)',3,15,60,'strength'),
-    exT('Plank','3','30s',60,'core')
+  {label:'Phase 2 · Day B',focus:'Press + Row Progression',block:1,exercises:[
+    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),
+    ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Rear Delt Fly (Dumbbell)',3,12,60,'activation'),
+    ex('Face Pull',3,15,60,'activation'),
+    ex('External Rotation (Cable)',2,15,45,'activation','Add a little resistance versus Phase 1 if every rep has been clean and pain-free.'),
+    ex('Landmine Shoulder Press',3,12,60,'strength','The angled path of a landmine press is friendlier on the joint than pressing straight overhead — a good bridge before Phase 3.'),
+    ex('Seated Cable Row',3,15,60,'strength'),
+    ex('Straight-Arm Pulldown',3,15,60,'accessory'),
+    ex('Bird Dog',3,10,45,'core'),
+    exT('Plank',3,'30s',60,'core')
   ]},
-  {label:'Phase 3 — Workout A',focus:'Full Strength Integration',exercises:[
-    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),ex('Band Pull-Apart',2,15,30,'warmup'),
-    ex('Dumbbell Overhead Press (Seated)',3,10,90,'strength','Scapular plane — 30° forward. Check pain before adding weight.'),
-    ex('Landmine Shoulder Press',3,10,90,'strength'),
-    ex('Rear Delt Fly (Dumbbell)',3,15,60,'activation'),ex('Face Pull',3,15,60,'activation'),
+  {label:'Phase 3 · Day A',focus:'Overhead + Pull Strength',block:2,exercises:[
+    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),
+    ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Dumbbell Overhead Press (Seated)',3,10,90,'strength','Scapular plane — about 30° in front of the body, not straight up. This is your first true overhead test: stop the set the moment pain shows up, not after.'),
+    ex('Rear Delt Fly (Dumbbell)',3,15,60,'accessory'),
+    ex('Face Pull',3,15,60,'accessory'),
     ex('Barbell Row (Overhand)',3,12,75,'strength'),
-    ex('Pull-Up',3,8,90,'strength'),ex('Lat Pulldown (Wide Grip)',3,12,75,'strength'),
-    ex('Push-Up',3,10,75,'strength'),exT('Plank','3','45s',60,'core')
+    ex('Lat Pulldown (Wide Grip)',3,12,75,'strength'),
+    ex('Push-Up',3,10,75,'strength'),
+    exT('Doorway Pec Stretch',2,'30s',20,'cooldown'),
+    exT('Plank',3,'45s',60,'core')
+  ]},
+  {label:'Phase 3 · Day B',focus:'Return-to-Activity Test',block:2,exercises:[
+    ex('Foam Roller Thoracic Extension',2,10,30,'warmup'),
+    ex('Band Pull-Apart',2,15,30,'warmup'),
+    ex('Landmine Shoulder Press',3,10,75,'strength'),
+    ex('Rear Delt Fly (Dumbbell)',3,15,60,'accessory'),
+    ex('Face Pull',3,15,60,'accessory'),
+    ex('Seated Cable Row',3,12,75,'strength'),
+    ex('Assisted Pull-Up',3,8,90,'strength','Use enough assistance to move through full range with zero pain — the goal this week is clean range of motion, not raw rep count.'),
+    ex('Push-Up',3,10,75,'strength','Full pain-free range, full set. Compare to how this felt back in Phase 1.'),
+    exT('Plank',3,'45s',60,'core')
   ]}
 ]},
-{key:'rhb_knee',name:'Knee Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10 or swelling increases.',duration:40,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
-  {label:'Phase 1 — Daily',focus:'Activate + Restore',exercises:[
-    exT('Assault Bike (Steady State)','1','8min',0,'warmup'),ex('High Knees',2,20,20,'warmup'),
-    exT('Standing Calf Stretch','2','30s',20,'mobility'),exT('Standing Hamstring Stretch','2','30s',20,'mobility'),
-    ex('Glute Bridge (Bodyweight)',2,10,45,'activation'),
-    ex('Clamshell',2,15,45,'activation'),ex('Single-Leg Glute Bridge',2,10,45,'activation'),
-    ex('Step-Up (Bodyweight)',2,10,60,'strength','Small step only — 4 to 6 inches.'),
-    ex('Calf Raise (Standing, Machine)',2,10,45,'strength'),
-    exT('Single-Leg Balance Reach','2','20s',30,'strength')
+{key:'rhb_knee',name:'Knee Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10 or swelling increases. Three phases over 12 weeks — calm and activate, progressive loading, return to function.',duration:38,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
+  {label:'Phase 1 · Day A',focus:'Activate Hip & Glute',block:0,exercises:[
+    exT('Assault Bike (Steady State)',1,'8min',0,'warmup'),
+    ex('High Knees',2,20,20,'warmup'),
+    exT('Standing Calf Stretch',2,'30s',20,'mobility'),
+    exT('Standing Hamstring Stretch',2,'30s',20,'mobility'),
+    ex('Glute Bridge (Bodyweight)',2,12,45,'activation'),
+    ex('Clamshell',2,15,45,'activation'),
+    ex('Single-Leg Glute Bridge',2,10,45,'activation'),
+    exT('Single-Leg Balance Reach',2,'20s',30,'accessory'),
+    ex('Calf Raise (Standing, Machine)',2,12,45,'accessory'),
+    ex('Tibialis Raise',2,15,30,'accessory')
   ]},
-  {label:'Phase 2 — Workout A',focus:'Progressive Load',exercises:[
-    exT('Assault Bike (Steady State)','1','8min',0,'warmup'),ex('Leg Swing (Forward)',2,10,30,'warmup'),
-    ex('Goblet Squat (Dumbbell)',3,10,90,'strength','20–30° bend only. Never go past pain-free range.'),
-    ex('Step-Up (Dumbbell)',3,10,75,'strength'),ex('Romanian Deadlift (Dumbbell)',3,10,75,'strength'),
-    ex('Single-Leg Glute Bridge',3,10,75,'strength'),
-    ex('Leg Curl (Machine, Prone)',3,12,60,'accessory'),ex('Calf Raise (Standing, Machine)',3,15,60,'accessory'),
-    exT('Single-Leg Balance Reach','3','30s',45,'strength')
+  {label:'Phase 1 · Day B',focus:'Low-Impact Conditioning',block:0,exercises:[
+    exT('Assault Bike (Steady State)',1,'8min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,30,'warmup'),
+    exT('Standing Calf Stretch',2,'30s',20,'mobility'),
+    ex('Glute Bridge (Bodyweight)',2,12,45,'activation'),
+    ex('Lateral Band Walk',2,10,45,'activation','Band just above the knees. This is the exercise most directly tied to keeping your knee tracking well — don\'t skip it.'),
+    ex('Single-Leg Glute Bridge',2,10,45,'activation'),
+    ex('Step-Up (Bodyweight)',2,10,60,'accessory','Small step only — 4 to 6 inches.'),
+    exT('Single-Leg Balance Reach',2,'20s',30,'accessory'),
+    ex('Calf Raise (Standing, Machine)',2,12,45,'accessory')
   ]},
-  {label:'Phase 3 — Workout A',focus:'Full Function + Return',exercises:[
-    exT('Assault Bike (Steady State)','1','10min',0,'warmup'),
-    ex('Goblet Squat (Dumbbell)',3,10,90,'strength','Progress depth as pain allows.'),
-    ex('Reverse Lunge (Dumbbell)',3,8,90,'strength'),ex('Bulgarian Split Squat (Dumbbell)',3,8,90,'strength'),
-    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
-    ex('Nordic Hamstring Curl',3,5,90,'strength','Eccentric only. Control the lowering.'),
-    ex('Hip Thrust (Barbell)',3,10,75,'strength'),ex('Step-Up (Dumbbell)',3,10,75,'strength'),
-    ex('Countermovement Jump',3,8,90,'strength','Only if fully pain-free. Start small.')
-  ]},
-  {label:'Phase 1B — Daily',focus:'Activate + Restore',exercises:[
-    exT('Assault Bike (Steady State)','1','8min',0,'warmup'),
-    exT('Standing Calf Stretch','2','30s',20,'mobility'),exT('Standing Hamstring Stretch','2','30s',20,'mobility'),
-    ex('Glute Bridge (Bodyweight)',2,10,45,'activation'),ex('Clamshell',2,15,45,'activation'),
-    ex('Step-Up (Bodyweight)',2,10,60,'strength'),ex('Calf Raise (Standing, Machine)',2,10,45,'strength')
-  ]},
-  {label:'Phase 2B — Workout B',focus:'Progressive Load',exercises:[
-    exT('Assault Bike (Steady State)','1','8min',0,'warmup'),ex('Leg Swing (Forward)',2,10,30,'warmup'),
-    ex('Goblet Squat (Dumbbell)',3,10,90,'strength'),ex('Single-Leg Glute Bridge',3,10,75,'strength'),
+  {label:'Phase 2 · Day A',focus:'Closed-Chain Strength A',block:1,exercises:[
+    exT('Assault Bike (Steady State)',1,'8min',0,'warmup'),
+    ex('Leg Swing (Forward)',2,10,30,'warmup'),
+    exT('Spanish Squat (Banded)',3,'30s',60,'strength','Band anchored low behind you, lean back into it. Isometric hold — adjust your stance to control how much knee bend you load. Build toward 45-second holds over the next few weeks.'),
+    ex('Goblet Squat (Dumbbell)',3,10,90,'strength','20–30° bend only at first. Depth increases over the coming weeks as it feels comfortable.'),
+    ex('Step-Up (Dumbbell)',3,10,75,'strength'),
     ex('Romanian Deadlift (Dumbbell)',3,10,75,'strength'),
-    ex('Leg Curl (Machine, Prone)',3,12,60,'accessory'),ex('Calf Raise (Standing, Machine)',3,15,60,'accessory')
+    ex('Single-Leg Glute Bridge',3,10,75,'accessory'),
+    ex('Calf Raise (Standing, Machine)',3,15,60,'accessory'),
+    exT('Single-Leg Balance Reach',3,'30s',45,'accessory')
+  ]},
+  {label:'Phase 2 · Day B',focus:'Closed-Chain Strength B',block:1,exercises:[
+    exT('Assault Bike (Steady State)',1,'8min',0,'warmup'),
+    ex('Lateral Band Walk',2,10,30,'warmup'),
+    ex('Goblet Squat (Dumbbell)',3,10,90,'strength'),
+    ex('Reverse Lunge (Dumbbell)',3,8,90,'strength','Shorter step than you might expect keeps the front knee tracking safely. Push back to standing through the front heel.'),
+    ex('Single-Leg Glute Bridge',3,10,75,'strength'),
+    ex('Romanian Deadlift (Dumbbell)',3,10,75,'strength'),
+    ex('Calf Raise (Standing, Machine)',3,15,60,'accessory'),
+    exT('Single-Leg Balance Reach',3,'30s',45,'accessory')
+  ]},
+  {label:'Phase 3 · Day A',focus:'Full Strength + Eccentric Control',block:2,exercises:[
+    exT('Assault Bike (Steady State)',1,'10min',0,'warmup'),
+    ex('Goblet Squat (Dumbbell)',3,10,90,'strength','Depth as pain allows — most clients are back to full range by now.'),
+    ex('Bulgarian Split Squat (Dumbbell)',3,8,90,'strength'),
+    ex('Step-Down (Eccentric)',3,8,75,'strength','Slow 3-4 second lowering, low step height at first. This is one of the best real-world tests of how the knee is doing — if it\'s smooth and pain-free, that\'s a great sign.'),
+    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
+    ex('Nordic Hamstring Curl',3,5,90,'accessory','Eccentric only — control the lowering and stop well short of failure. Hands ready to catch yourself.'),
+    ex('Hip Thrust (Barbell)',3,10,75,'strength'),
+    ex('Calf Raise (Standing, Machine)',3,15,60,'accessory')
+  ]},
+  {label:'Phase 3 · Day B',focus:'Return-to-Activity Test',block:2,exercises:[
+    exT('Assault Bike (Steady State)',1,'10min',0,'warmup'),
+    ex('Reverse Lunge (Dumbbell)',3,8,90,'strength'),
+    ex('Step-Up (Dumbbell)',3,10,75,'strength'),
+    exT('Single-Leg Balance Reach',3,'30s',45,'accessory'),
+    ex('Countermovement Jump',3,8,90,'strength','Only if everything above has been fully pain-free. Start small and check your landing control before going bigger — this is your return-to-sport test.'),
+    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
+    ex('Hip Thrust (Barbell)',3,10,75,'strength'),
+    ex('Calf Raise (Standing, Machine)',3,15,60,'accessory')
   ]}
 ]},
-{key:'rhb_back',name:'Lower Back Rehab 12-week',cat:'rehab',desc:'No deadlifts, sit-ups or toe touches until Phase 3.',duration:35,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
-  {label:'Phase 1 — Daily',focus:'Restore + Activate',exercises:[
-    ex('Cat-Cow',3,10,30,'mobility','Gentle. Never push into pain.'),
-    exT('Child\'s Pose','2','30s',20,'mobility'),exT('Hip 90/90 Stretch','2','30s',20,'mobility'),
-    ex('Glute Bridge (Bodyweight)',3,12,60,'activation'),ex('Dead Bug',3,8,60,'core'),
+{key:'rhb_back',name:'Lower Back Rehab 12-week',cat:'rehab',desc:'STOP if pain exceeds 2/10. No barbell deadlifts, sit-ups or toe touches until Phase 3 clears them. Three phases over 12 weeks — motor control, hip-dominant strength, return to loaded lifting.',duration:36,defaultPlan:'rehab_12',compatiblePlans:['rehab_12'],days:[
+  {label:'Phase 1 · Day A',focus:'Motor Control: The Big 3',block:0,exercises:[
+    exT('Walking',1,'8min',0,'warmup','Daily walking is one of the best things you can do for your back — try to add this most days, not just training days.'),
+    ex('Cat-Cow',2,10,30,'warmup','Gentle. Never push into pain.'),
+    exT('Hip 90/90 Stretch',2,'30s',20,'mobility'),
+    ex('Glute Bridge (Bodyweight)',3,12,60,'activation'),
+    ex('Bird Dog',3,10,60,'core','Big 3 exercise #1. Dead-flat back throughout — no arching, no sagging.'),
+    ex('Dead Bug',3,8,60,'core','Same bracing pattern as the curl-up below, just an easier entry point.'),
+    ex('McGill Curl-Up',3,8,60,'core','Big 3 exercise #2. Tiny range of motion — this is about bracing your core, not crunching your spine.'),
+    exT('Side Plank',2,'20s',60,'core','Big 3 exercise #3. Build toward 30-45 second holds each side over the next few weeks.'),
+    ex('Single-Leg Glute Bridge',2,10,60,'accessory'),
+    exT('Kneeling Hip Flexor Stretch',2,'30s',20,'cooldown')
+  ]},
+  {label:'Phase 1 · Day B',focus:'Hip Hinge Pattern',block:0,exercises:[
+    exT('Walking',1,'8min',0,'warmup'),
+    ex('Cat-Cow',2,10,30,'warmup'),
+    ex('Hip Hinge (Wall Drill)',3,10,45,'activation','This is the movement pattern that protects your back for life — hips travel back, knees stay soft, spine stays flat. Tap your glutes to the wall behind you, not your back.'),
+    ex('Glute Bridge (Bodyweight)',3,12,60,'activation'),
     ex('Bird Dog',3,10,60,'core'),
-    ex('Single-Leg Glute Bridge',2,10,60,'activation'),
-    exT('Standing Hamstring Stretch','2','30s',20,'cooldown'),
-    exT('Kneeling Hip Flexor Stretch','2','30s',20,'cooldown')
+    ex('McGill Curl-Up',3,8,60,'core'),
+    exT('Side Plank',2,'20s',60,'core'),
+    ex('Pallof Press (Standing)',3,10,60,'core','Resist the rotation — that\'s the whole exercise. Light band tension is plenty to start.'),
+    ex('Single-Leg Glute Bridge',2,10,60,'accessory'),
+    exT('Child\'s Pose',2,'30s',20,'cooldown')
   ]},
-  {label:'Phase 2 — Workout A',focus:'Progressive Load',exercises:[
-    exT('Walking','1','8min',0,'warmup'),ex('Cat-Cow',2,10,30,'warmup'),
-    exT('Plank','3','30s',60,'core'),ex('Dead Bug',3,10,60,'core'),ex('Bird Dog',3,10,60,'core'),
+  {label:'Phase 2 · Day A',focus:'Hinge + Brace A',block:1,exercises:[
+    exT('Walking',1,'8min',0,'warmup'),
+    ex('Cat-Cow',2,10,30,'warmup'),
+    ex('Bird Dog',3,10,60,'core'),
+    ex('McGill Curl-Up',3,10,60,'core'),
+    exT('Side Plank',3,'30s',60,'core'),
+    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength','Hips back first, exactly like the wall drill. Dumbbells stay close to your legs. Back stays flat — never round it to chase extra depth.'),
     ex('Single-Leg Glute Bridge',3,12,75,'strength'),
-    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength','Strict form. Never round the lower back.'),
     ex('Pallof Press (Standing)',3,10,60,'core'),
-    ex('Goblet Squat (Dumbbell)',3,10,90,'strength'),
-    ex('Farmer\'s Carry (Dumbbell)',3,0,60,'strength','45 seconds. Brace your core throughout.','45s')
+    ex('Goblet Squat (Dumbbell)',3,10,90,'strength')
   ]},
-  {label:'Phase 3 — Workout A',focus:'Return to Full Function',exercises:[
-    exT('Walking','1','10min',0,'warmup'),ex('Cat-Cow',2,10,30,'warmup'),ex('Bird Dog',2,10,30,'warmup'),
-    exT('Plank','3','45s',60,'core'),exT('Side Plank','3','45s',60,'core'),
-    ex('Dead Bug',3,10,60,'core'),ex('Pallof Press (Standing)',3,12,60,'core'),
-    ex('Conventional Deadlift',3,10,120,'strength','Only if fully pain-free. Perfect form, light weight.'),
-    ex('Romanian Deadlift (Barbell)',3,10,90,'strength'),
+  {label:'Phase 2 · Day B',focus:'Hinge + Brace B',block:1,exercises:[
+    exT('Walking',1,'8min',0,'warmup'),
+    ex('Cat-Cow',2,10,30,'warmup'),
+    ex('Bird Dog',3,10,60,'core'),
+    ex('McGill Curl-Up',3,10,60,'core'),
+    exT('Side Plank',3,'30s',60,'core'),
+    ex('Hip Thrust (Dumbbell)',3,12,75,'strength','Drive through your heels and squeeze the glutes hard at the top — that\'s the muscle that should be doing the work, not your lower back.'),
+    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
+    ex('Pallof Press (Standing)',3,10,60,'core'),
+    ex('Goblet Squat (Dumbbell)',3,10,90,'strength')
+  ]},
+  {label:'Phase 3 · Day A',focus:'Full Function A',block:2,exercises:[
+    exT('Walking',1,'10min',0,'warmup'),
+    ex('Cat-Cow',2,10,30,'warmup'),
+    ex('Bird Dog',2,10,30,'warmup'),
+    exT('Plank',3,'45s',60,'core'),
+    exT('Side Plank',3,'45s',60,'core'),
+    ex('Pallof Press (Standing)',3,12,60,'core'),
+    ex('Romanian Deadlift (Barbell)',3,10,90,'strength','The same hinge you\'ve been drilling for nine weeks, now with a bar. If anything feels off, drop back to dumbbells for another week — there\'s no rush to load up.'),
     ex('Hip Thrust (Barbell)',3,12,75,'strength'),
     ex('Goblet Squat (Dumbbell)',3,10,90,'strength')
   ]},
-  {label:'Phase 1B — Daily',focus:'Restore + Activate',exercises:[
-    ex('Cat-Cow',3,10,30,'mobility'),exT('Child\'s Pose','2','30s',20,'mobility'),
-    ex('Glute Bridge (Bodyweight)',3,12,60,'activation'),ex('Dead Bug',3,8,60,'core'),
-    ex('Bird Dog',3,10,60,'core'),exT('Standing Hamstring Stretch','2','30s',20,'cooldown')
-  ]},
-  {label:'Phase 2B — Workout B',focus:'Progressive Load',exercises:[
-    exT('Walking','1','8min',0,'warmup'),ex('Cat-Cow',2,10,30,'warmup'),
-    exT('Plank','3','30s',60,'core'),ex('Dead Bug',3,10,60,'core'),
-    ex('Single-Leg Glute Bridge',3,12,75,'strength'),
-    ex('Romanian Deadlift (Dumbbell)',3,10,90,'strength'),
-    ex('Pallof Press (Standing)',3,10,60,'core'),ex('Goblet Squat (Dumbbell)',3,10,90,'strength')
+  {label:'Phase 3 · Day B',focus:'Return-to-Activity Test',block:2,exercises:[
+    exT('Walking',1,'10min',0,'warmup'),
+    ex('Cat-Cow',2,10,30,'warmup'),
+    ex('Bird Dog',2,10,30,'warmup'),
+    exT('Plank',3,'45s',60,'core'),
+    ex('Dead Bug',3,10,60,'core'),
+    ex('Conventional Deadlift',3,10,120,'strength','Only if you\'ve been fully pain-free through everything else. Perfect form, light weight — this is a test of movement quality, not a max-effort lift.'),
+    ex('Hip Thrust (Barbell)',3,12,75,'strength'),
+    ex('Farmer\'s Carry (Dumbbell)',3,0,60,'strength','Brace your core exactly like the Pallof press. Walk tall — same anti-rotation skill you\'ve been building, just loaded and moving now.','45s'),
+    ex('Goblet Squat (Dumbbell)',3,10,90,'strength')
   ]}
 ]},
 
