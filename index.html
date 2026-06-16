@@ -3461,7 +3461,7 @@ function openPlanSheet(){
   // In that case the plan is fixed by design, not a client choice.
   var _tplLocked=isSinglePlanProgramme(ACTIVE_TPL());
   if(!_tplLocked){
-    h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 8px 0">';
+    h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 28px 0">';
     h+='<div style="display:flex;gap:8px">';
     h+='<button class="btn btn-ghost" style="flex:1" onclick="openAttachPlanSheet()">Change Plan</button>';
     h+='<button class="btn btn-ghost" style="flex:1" onclick="confirmDetachPlan()">Remove Plan</button>';
