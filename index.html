@@ -3398,8 +3398,19 @@ function openPlanSheet(){
     h+='</div>';
   });
   h+='</div>';
+
+  // Change / remove — always reachable, lets the client undo a plan choice
+  h+='<div style="display:flex;gap:8px;margin-top:6px">';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="openAttachPlanSheet()">Change Plan</button>';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--coral)" onclick="confirmDetachPlan()">Remove Plan</button>';
+  h+='</div>';
   h+='</div>';
   openSheet(h,'Progression Plan');
+}
+function confirmDetachPlan(){
+  appConfirm('Remove this progression plan? You can attach a new one anytime.',function(){
+    detachPlan();closeSheet();draw();
+  },function(){openPlanSheet();});
 }
 function selectPlanWeek(wi){
   // Client-driven week selection. Read-only addition: simply sets the index,
@@ -3415,15 +3426,20 @@ function openAttachPlanSheet(){
   var cl=C();var tpl=ACTIVE_TPL();
   if(!tpl)return;
   var compatible=(tpl.compatiblePlans||[]).map(function(k){return getPlanByKey(k);}).filter(Boolean);
+  var activeKey=cl.plan?cl.plan.key:null;
   var h='<div style="padding:0 20px 30px">';
   if(compatible.length===0){
     h+='<div class="card"><div style="color:var(--mu);text-align:center;padding:20px 0;font-size:13px">No progression plans are available for this programme yet.</div></div>';
   } else {
     h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Pick a progression plan to track weekly RPE, intensity and tips alongside this programme. You can change or remove it anytime.</div>';
     compatible.forEach(function(p){
-      h+='<div onclick="attachPlanFromSheet(\''+p.key+'\')" style="padding:12px;border-radius:10px;margin-bottom:8px;cursor:pointer;border:0.5px solid var(--brd);background:var(--bg3)">';
-      h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px">'+p.name+'</div>';
-      if(p.desc)h+='<div style="font-size:11px;color:var(--mu)">'+p.desc+'</div>';
+      var isActive=p.key===activeKey;
+      h+='<div'+(isActive?'':' onclick="attachPlanFromSheet(\''+p.key+'\')"')+' style="padding:12px;border-radius:10px;margin-bottom:8px;cursor:'+(isActive?'default':'pointer')+';border:0.5px solid '+(isActive?'var(--acc-brd)':'var(--brd)')+';background:'+(isActive?'var(--acc-bg)':'var(--bg3)')+'">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      h+='<div style="font-size:13px;font-weight:700;color:'+(isActive?'var(--acc)':'var(--tx)')+'">'+p.name+'</div>';
+      if(isActive)h+='<i class="ti ti-check" style="color:var(--acc);font-size:16px"></i>';
+      h+='</div>';
+      if(p.desc)h+='<div style="font-size:11px;color:var(--mu);margin-top:2px">'+p.desc+'</div>';
       h+='</div>';
     });
   }
