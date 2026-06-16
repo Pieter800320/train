@@ -3461,12 +3461,13 @@ function openPlanSheet(){
   // In that case the plan is fixed by design, not a client choice.
   var _tplLocked=isSinglePlanProgramme(ACTIVE_TPL());
   if(!_tplLocked){
-    h+='<div style="display:flex;gap:8px;margin-top:6px">';
-    h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="openAttachPlanSheet()">Change Plan</button>';
-    h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--acc)" onclick="confirmDetachPlan()">Remove Plan</button>';
+    h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 8px 0">';
+    h+='<div style="display:flex;gap:8px">';
+    h+='<button class="btn btn-ghost" style="flex:1" onclick="openAttachPlanSheet()">Change Plan</button>';
+    h+='<button class="btn btn-ghost" style="flex:1" onclick="confirmDetachPlan()">Remove Plan</button>';
+    h+='</div>';
     h+='</div>';
   }
-  h+='</div>';
   openSheet(h,'Progression Plan');
 }
 function confirmDetachPlan(){
@@ -4557,7 +4558,7 @@ function openPlanPreview(key){
   });
 
   // Action
-  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 0 0">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 8px 0">';
   if(isActive){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:8px 0 4px">✓ Currently active</div>';
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadPlan(this.dataset.key)">Edit in Build</button>';
@@ -4636,7 +4637,7 @@ function openProgPreview(key){
   });
 
   // Action buttons
-  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 0 0">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 8px 0">';
   if(isDraft){
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="buildResumeDraft(this.dataset.key)">Resume Draft</button>';
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete</button>';
@@ -4649,10 +4650,10 @@ function openProgPreview(key){
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadTemplate(this.dataset.key)">Edit in Build</button>';
     // Export + Archive + Delete row
     h+='<div style="display:flex;gap:8px;margin-top:8px">';
-    h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" data-key="'+key+'" onclick="exportProgramme(this.dataset.key)">Export</button>';
+    h+='<button class="btn btn-ghost" style="flex:1" data-key="'+key+'" onclick="exportProgramme(this.dataset.key)">Export</button>';
     if(isCustom){
-      h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" data-key="'+key+'" onclick="archiveProgramme(this.dataset.key)">Archive</button>';
-      h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete</button>';
+      h+='<button class="btn btn-ghost" style="flex:1" data-key="'+key+'" onclick="archiveProgramme(this.dataset.key)">Archive</button>';
+      h+='<button class="btn btn-ghost" style="flex:1" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete</button>';
     }
     h+='</div>';
   }
