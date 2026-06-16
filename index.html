@@ -1900,6 +1900,26 @@ function attachPlan(planKey){
   cl.plan=newPlan;
   sv();
 }
+// If a programme has exactly one compatible progression plan (true for every
+// rehab and sport-specific programme, plus several foundation/fat-loss ones
+// that share 'maintenance'), it auto-attaches with no client choice involved.
+// Mirrors attachPlan()'s shape but writes directly to a given tplKey, since
+// this runs as part of switching programmes rather than as a standalone action.
+function isSinglePlanProgramme(tpl){
+  return !!(tpl&&tpl.compatiblePlans&&tpl.compatiblePlans.length===1);
+}
+function autoAttachSolePlan(cl,tplKey){
+  var tpl=TPL_MAP&&TPL_MAP[tplKey];
+  if(!tpl&&cl.customPrograms)tpl=cl.customPrograms.find(function(p){return p.key===tplKey;});
+  if(!isSinglePlanProgramme(tpl))return cl.plans?cl.plans[tplKey]||null:null;
+  var planKey=tpl.compatiblePlans[0];
+  if(!cl.plans)cl.plans={};
+  var existing=cl.plans[tplKey];
+  if(existing&&existing.key===planKey)return existing;
+  var newPlan={key:planKey,weekIndex:0,startDate:Date.now()};
+  cl.plans[tplKey]=newPlan;
+  return newPlan;
+}
 function detachPlan(){
   var cl=C();
   if(cl.plans)delete cl.plans[cl.tplKey];
@@ -3436,11 +3456,16 @@ function openPlanSheet(){
   });
   h+='</div>';
 
-  // Change / remove — always reachable, lets the client undo a plan choice
-  h+='<div style="display:flex;gap:8px;margin-top:6px">';
-  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="openAttachPlanSheet()">Change Plan</button>';
-  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--acc)" onclick="confirmDetachPlan()">Remove Plan</button>';
-  h+='</div>';
+  // Change / remove — hidden when the programme only has one compatible
+  // plan (rehab, sport-specific, and several shared-maintenance programmes).
+  // In that case the plan is fixed by design, not a client choice.
+  var _tplLocked=isSinglePlanProgramme(ACTIVE_TPL());
+  if(!_tplLocked){
+    h+='<div style="display:flex;gap:8px;margin-top:6px">';
+    h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="openAttachPlanSheet()">Change Plan</button>';
+    h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--acc)" onclick="confirmDetachPlan()">Remove Plan</button>';
+    h+='</div>';
+  }
   h+='</div>';
   openSheet(h,'Progression Plan');
 }
@@ -3564,6 +3589,12 @@ function selectSession(idx){
   // Preserves the cycle counter so plan-week advancement stays accurate.
   var cycleStart=Math.floor((cl.day||0)/len)*len;
   cl.day=cycleStart+idx;
+  // dayCounters[tplKey] is what every reader (todayV, homeV, startSession,
+  // openSessionPicker) actually checks first — cl.day is only a fallback.
+  // Without updating this too, a manual session pick is silently overwritten
+  // on the next render once a dayCounters entry exists for this programme.
+  if(!cl.dayCounters)cl.dayCounters={};
+  cl.dayCounters[cl.tplKey]=cl.day;
   S.wx=null; // clear session so exercises re-initialise for the new day
   sv();closeSheet();draw();
 }
@@ -4682,7 +4713,7 @@ function switchTPL(key){
     if(!cl.plans)cl.plans={};
     cl.tplKey=key;
     cl.day=cl.dayCounters[key]||0;
-    cl.plan=cl.plans[key]||null;
+    cl.plan=autoAttachSolePlan(cl,key);
     S.wx=null;sv();draw();
   });
   },350);
@@ -6176,7 +6207,7 @@ function buildSave(){
     var cl=C();
     if(!cl.dayCounters)cl.dayCounters={};
     if(!cl.plans)cl.plans={};
-    cl.tplKey=key;cl.day=cl.dayCounters[key]||0;cl.plan=cl.plans[key]||null;
+    cl.tplKey=key;cl.day=cl.dayCounters[key]||0;cl.plan=autoAttachSolePlan(cl,key);
     S.wx=null;sv();draw();
   },function(){draw();});
 }
