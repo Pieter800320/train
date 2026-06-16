@@ -100,7 +100,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .toggle-on{background:var(--acc)}.toggle-off{background:var(--brd)}
 .toggle-knob{position:absolute;top:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:left .2s}
 .toggle-on .toggle-knob{left:calc(100% - 25px)}.toggle-off .toggle-knob{left:3px}
-.ex-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg2);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:3px;cursor:pointer}
+.ex-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;background:var(--bg2);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:3px;cursor:pointer}
 .ex-row.active-ex{background:var(--acc-bg);border-color:var(--acc-brd);border-left:3px solid var(--acc)}
 .ex-row.done{background:var(--bg3);border-color:var(--brd);opacity:.6}
 .ex-name{font-size:13px;font-weight:600;color:var(--tx)}
@@ -522,9 +522,9 @@ var PLANS = [
 
   ,{key:'pull_plateau_6',name:'Pull-Up Plateau Breaker — 6 Week',desc:'For clients stuck at the same rep count. Volume → weighted overload → peak → deload.',cyclic:false,orderSensitive:true,weeks:[
     {label:'Week 1 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:60,volMod:0.8,block:0,tip:'Sub-maximal only. No failure. Accumulate more total reps than the client is used to — that\'s the whole point of this week. Controlled tempo: 2 sec up, 1 hold, 3 sec down.'},
-    {label:'Week 2 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:65,volMod:0.9,block:0,tip:'Add 1 rep per set across all three days versus last week. Still no grinding. If it feels easy, good — that\'s correct.'},
-    {label:'Week 3 — Strength Layer',theme:'build',rpe:7,rir:3,weightPct:80,volMod:1.0,block:1,tip:'Weighted pull-ups start now. 4–6 kg added. Keep every rep clean — this is an introduction, not a test. The bodyweight sets will start feeling lighter, that\'s the signal it\'s working. Eccentric reps: jump up, lower 6 seconds.'},
-    {label:'Week 4 — Strength Layer',theme:'build',rpe:8,rir:2,weightPct:85,volMod:1.0,block:1,tip:'Add 2 kg to weighted days if all reps were clean last week. Top holds and slow eccentrics remain. Quality over speed.'},
+    {label:'Week 2 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:65,volMod:0.9,block:0,tip:'Add a rep or two per set across all three days versus last week if it felt easy. Still no grinding.'},
+    {label:'Week 3 — Strength Layer',theme:'build',rpe:7,rir:3,weightPct:80,volMod:1.0,block:1,tip:'Weighted pull-ups start now. Add a small weight. Keep every rep clean — this is an introduction, not a test. The bodyweight sets will start feeling lighter, that\'s the signal it\'s working. Eccentric reps: jump up, lower 6 seconds.'},
+    {label:'Week 4 — Strength Layer',theme:'build',rpe:8,rir:2,weightPct:85,volMod:1.0,block:1,tip:'Add a little more weight to weighted days if all reps were clean last week. Top holds and slow eccentrics remain. Quality over speed.'},
     {label:'Week 5 — Intensification',theme:'peak',rpe:9,rir:1,weightPct:95,volMod:1.0,block:2,tip:'Peak effort. Work up to a heavy 1–2 rep weighted pull-up on Day A. Max rep test on Day B — this is the new baseline. Rest fully between every set (3 min minimum).'},
     {label:'Week 6 — Deload + Retest',theme:'deload',rpe:5,rir:5,weightPct:65,volMod:0.5,block:2,tip:'Do not skip this. Adaptation consolidates during rest, not during work. Easy sessions Monday and Wednesday, then a full retest Friday. Compare to Week 5 Day B numbers.'}
   ]}
@@ -1620,7 +1620,7 @@ var TPL = [
     ex('Band Pull-Apart',2,10,30,'warmup','2 rounds of the warm-up circuit — do not rush this.'),
     ex('Scapular Pull-Up',2,5,30,'activation','Dead hang. Depress and retract the scaps. No elbow bend. This is the foundation.'),
     exT('Dead Hang','1','10s',30,'activation','Passive hang. Breathe into the lats.'),
-    ex('Pull-Up',5,3,90,'strength','Controlled tempo: 2 sec up, 1 sec hold at top, 3 sec down. Stop well short of failure — sub-maximal is the goal this phase. Week 2: add 1 rep per set.'),
+    ex('Pull-Up',5,3,90,'strength','Controlled tempo: 2 sec up, 1 sec hold at top, 3 sec down. Stop well short of failure — sub-maximal is the goal this phase. Week 2: add a rep or two per set if it felt easy.'),
     ex('Lat Pulldown (Wide Grip)',3,12,75,'accessory','Volume without fatigue cost. Full stretch at top, pull elbows to pockets.'),
     ex('Band Pull-Apart',3,15,30,'accessory'),
     ex('Face Pull',3,15,45,'accessory','Shoulder integrity. Light weight, full range.')
@@ -1629,16 +1629,16 @@ var TPL = [
     ex('Band Pull-Apart',2,10,30,'warmup'),
     ex('Scapular Pull-Up',2,5,30,'activation'),
     exT('Dead Hang','1','10s',30,'activation'),
-    ex('Pull-Up',1,1,45,'strength','Ladder rung 1 of 2: 1 rep. Rest 45 sec, then continue the climb.'),
-    ex('Pull-Up',1,2,45,'strength','Ladder rung 2: 2 reps. Controlled throughout — no kipping.'),
-    ex('Pull-Up',1,3,45,'strength','Ladder rung 3 — the peak: 3 reps. Rest 45 sec before descending.'),
-    ex('Pull-Up',1,2,45,'strength','Ladder rung 4: 2 reps, descending.'),
-    ex('Pull-Up',1,1,45,'strength','Ladder rung 5: 1 rep. That completes one full ladder — 1→2→3→2→1.'),
-    ex('Pull-Up',1,1,45,'strength','Second ladder, rung 1. Repeat the full climb once more: 1→2→3→2→1.'),
+    ex('Pull-Up',1,1,45,'strength','Ladder rung 1: Rest 45 sec, then continue climbing. Scale the peak rung up or down to match current strength.'),
+    ex('Pull-Up',1,2,45,'strength','Ladder rung 2: Controlled throughout — no kipping.'),
+    ex('Pull-Up',1,3,45,'strength','Ladder rung 3 — the peak. Rest 45 sec before descending. Stronger clients can climb higher before descending.'),
+    ex('Pull-Up',1,2,45,'strength','Ladder rung 4: descending.'),
+    ex('Pull-Up',1,1,45,'strength','Ladder rung 5 — ladder complete.'),
+    ex('Pull-Up',1,1,45,'strength','Second ladder, rung 1. Repeat the same climb pattern once more.'),
     ex('Pull-Up',1,2,45,'strength','Second ladder, rung 2.'),
     ex('Pull-Up',1,3,45,'strength','Second ladder, rung 3 — the peak.'),
     ex('Pull-Up',1,2,45,'strength','Second ladder, rung 4.'),
-    ex('Pull-Up',1,1,45,'strength','Second ladder, rung 5 — ladder complete. 18 total reps across both ladders.'),
+    ex('Pull-Up',1,1,45,'strength','Second ladder, rung 5 — ladder complete.'),
     exT('Dead Hang',3,'25s',45,'accessory','Grip and shoulder decompression. 20–30 seconds per set.'),
     ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
     ex('Face Pull',3,15,45,'accessory')
@@ -1647,7 +1647,7 @@ var TPL = [
     ex('Band Pull-Apart',2,10,30,'warmup'),
     ex('Scapular Pull-Up',2,5,30,'activation'),
     exT('Dead Hang','1','10s',30,'activation'),
-    ex('Pull-Up',4,4,90,'strength','Same controlled tempo as Day A. Rest 90 sec. Week 2: add 1 rep per set.'),
+    ex('Pull-Up',4,4,90,'strength','Same controlled tempo as Day A. Rest 90 sec. Week 2: add a rep or two per set if it felt easy.'),
     ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
     ex('Band Pull-Apart',3,15,30,'accessory'),
     ex('Face Pull',3,15,45,'accessory'),
@@ -1657,7 +1657,7 @@ var TPL = [
     ex('Band Pull-Apart',2,10,30,'warmup'),
     ex('Scapular Pull-Up',2,5,30,'activation'),
     exT('Dead Hang','1','10s',30,'activation'),
-    ex('Pull-Up',4,3,120,'strength','Weighted: add 4–6kg this week, +2kg in Week 4 if all reps were clean. Log the added weight. The bodyweight sets should start feeling lighter — that\u2019s the signal it\u2019s working.'),
+    ex('Pull-Up',4,3,120,'strength','Weighted pull-ups start now. Add a small weight you can manage for clean reps — increase slightly in Week 4 if all reps were clean. Log the added weight. The bodyweight sets should start feeling lighter — that\u2019s the signal it\u2019s working.'),
     ex('Pull-Up',2,4,90,'accessory','Max eccentric — jump to the top, lower for 6 seconds. Stop at 4 reps per set.'),
     ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
     ex('Band Pull-Apart',3,15,30,'accessory'),
@@ -3244,7 +3244,7 @@ function todayV(){
     h+='<div onclick="openPlanSheet()" style="flex:1;min-width:0;cursor:pointer;background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:14px;padding:10px 12px">';
     h+='<div style="font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--mu);margin-bottom:3px">Progression</div>';
     h+='<div style="display:flex;align-items:baseline;justify-content:space-between;gap:4px">';
-    h+='<div style="font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Wk '+(banner.weekIndex+1)+' · '+(banner.weekLabel||'')+'</div>';
+    h+='<div style="font-size:13px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(banner.weekLabel||'')+'</div>';
     h+='<span style="font-size:13px;color:var(--acc);flex-shrink:0">▾</span>';
     h+='</div></div>';
   } else {
@@ -3296,7 +3296,7 @@ function todayV(){
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
       h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">'+
-         '<div style="flex:1">'+
+         '<div style="flex:1;min-width:0">'+
          '<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+'">'+
          (isDone?'\u2713 ':'')+(isActive?'\u25b6 ':'')+exEntry.name+'</div>';
       if(exEntry.cue)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+exEntry.cue+'</div>';
@@ -3343,7 +3343,7 @@ function todayV(){
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
       h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">'+
-         '<div style="flex:1">'+
+         '<div style="flex:1;min-width:0">'+
          '<div class="ex-name" style="'+(isActive?'color:var(--acc);font-weight:700':'')+'">'+
          (isDone?'\u2713 ':'')+(isActive?'\u25b6 ':'')+exEntry.name+'</div>';
       if(exEntry.cue)h+='<div style="font-size:10px;color:var(--mu);margin-top:1px">'+exEntry.cue+'</div>';
@@ -3439,7 +3439,7 @@ function openPlanSheet(){
   // Change / remove — always reachable, lets the client undo a plan choice
   h+='<div style="display:flex;gap:8px;margin-top:6px">';
   h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="openAttachPlanSheet()">Change Plan</button>';
-  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--coral)" onclick="confirmDetachPlan()">Remove Plan</button>';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--acc)" onclick="confirmDetachPlan()">Remove Plan</button>';
   h+='</div>';
   h+='</div>';
   openSheet(h,'Progression Plan');
