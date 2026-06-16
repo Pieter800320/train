@@ -520,13 +520,13 @@ var PLANS = [
     {label:'Phase 3 — Peak',theme:'peak',rpe:9,rir:1,weightPct:100,volMod:1.0,tip:'Test your max set. Record it. You\'ve earned it.'}
   ]}
 
-  ,{key:'pull_plateau_6',name:'Pull-Up Plateau Breaker — 6 Week',desc:'For clients stuck at the same rep count. Volume → weighted overload → peak → deload.',cyclic:false,weeks:[
-    {label:'Week 1 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:60,volMod:0.8,tip:'Sub-maximal only. No failure. Accumulate more total reps than the client is used to — that\'s the whole point of this week. Controlled tempo: 2 sec up, 1 hold, 3 sec down.'},
-    {label:'Week 2 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:65,volMod:0.9,tip:'Add 1 rep per set across all three days versus last week. Still no grinding. If it feels easy, good — that\'s correct.'},
-    {label:'Week 3 — Strength Layer',theme:'build',rpe:8,rir:2,weightPct:80,volMod:1.0,tip:'Weighted pull-ups start now. 4–6 kg added. The bodyweight sets will start feeling lighter — that\'s the signal it\'s working. Eccentric reps: jump up, lower 6 seconds.'},
-    {label:'Week 4 — Strength Layer',theme:'build',rpe:8,rir:2,weightPct:85,volMod:1.0,tip:'Add 2 kg to weighted days if all reps were clean last week. Top holds and slow eccentrics remain. Quality over speed.'},
-    {label:'Week 5 — Intensification',theme:'peak',rpe:9,rir:1,weightPct:95,volMod:1.0,tip:'Peak effort. Work up to a heavy 1–2 rep weighted pull-up on Day A. Max rep test on Day B — this is the new baseline. Rest fully between every set (3 min minimum).'},
-    {label:'Week 6 — Deload + Retest',theme:'deload',rpe:5,rir:5,weightPct:65,volMod:0.5,tip:'Do not skip this. Adaptation consolidates during rest, not during work. Easy sessions Monday and Wednesday, then a full retest Friday. Compare to Week 5 Day B numbers.'}
+  ,{key:'pull_plateau_6',name:'Pull-Up Plateau Breaker — 6 Week',desc:'For clients stuck at the same rep count. Volume → weighted overload → peak → deload.',cyclic:false,orderSensitive:true,weeks:[
+    {label:'Week 1 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:60,volMod:0.8,block:0,tip:'Sub-maximal only. No failure. Accumulate more total reps than the client is used to — that\'s the whole point of this week. Controlled tempo: 2 sec up, 1 hold, 3 sec down.'},
+    {label:'Week 2 — Volume Foundation',theme:'learn',rpe:6,rir:4,weightPct:65,volMod:0.9,block:0,tip:'Add 1 rep per set across all three days versus last week. Still no grinding. If it feels easy, good — that\'s correct.'},
+    {label:'Week 3 — Strength Layer',theme:'build',rpe:7,rir:3,weightPct:80,volMod:1.0,block:1,tip:'Weighted pull-ups start now. 4–6 kg added. Keep every rep clean — this is an introduction, not a test. The bodyweight sets will start feeling lighter, that\'s the signal it\'s working. Eccentric reps: jump up, lower 6 seconds.'},
+    {label:'Week 4 — Strength Layer',theme:'build',rpe:8,rir:2,weightPct:85,volMod:1.0,block:1,tip:'Add 2 kg to weighted days if all reps were clean last week. Top holds and slow eccentrics remain. Quality over speed.'},
+    {label:'Week 5 — Intensification',theme:'peak',rpe:9,rir:1,weightPct:95,volMod:1.0,block:2,tip:'Peak effort. Work up to a heavy 1–2 rep weighted pull-up on Day A. Max rep test on Day B — this is the new baseline. Rest fully between every set (3 min minimum).'},
+    {label:'Week 6 — Deload + Retest',theme:'deload',rpe:5,rir:5,weightPct:65,volMod:0.5,block:2,tip:'Do not skip this. Adaptation consolidates during rest, not during work. Easy sessions Monday and Wednesday, then a full retest Friday. Compare to Week 5 Day B numbers.'}
   ]}
 
   ,{key:'upper_lower_wave',name:'Upper/Lower Wave',desc:'4-week wave cycle — designed for Upper/Lower splits',cyclic:true,weeks:[
@@ -1616,30 +1616,96 @@ var TPL = [
   ]}
 ]},
 {key:'spt_pullup_plateau',name:'Pull-Up Plateau Breaker',cat:'sport',desc:'Stuck at the same rep count for months? 6-week protocol — 3 sessions per week, bolts onto existing training',duration:25,defaultPlan:'pull_plateau_6',compatiblePlans:['pull_plateau_6'],days:[
-  {label:'Day A — Volume',focus:'Sub-Maximal Pull-Up Volume',exercises:[
+  {label:'Week 1-2 · Day A',focus:'Sub-Maximal Pull-Up Volume',block:0,exercises:[
     ex('Band Pull-Apart',2,10,30,'warmup','2 rounds of the warm-up circuit — do not rush this.'),
     ex('Scapular Pull-Up',2,5,30,'activation','Dead hang. Depress and retract the scaps. No elbow bend. This is the foundation.'),
     exT('Dead Hang','1','10s',30,'activation','Passive hang. Breathe into the lats.'),
-    ex('Pull-Up',5,3,90,'strength','Controlled tempo: 2 sec up, 1 sec hold at top, 3 sec down. Stop well short of failure — sub-maximal is the goal this phase.'),
+    ex('Pull-Up',5,3,90,'strength','Controlled tempo: 2 sec up, 1 sec hold at top, 3 sec down. Stop well short of failure — sub-maximal is the goal this phase. Week 2: add 1 rep per set.'),
     ex('Lat Pulldown (Wide Grip)',3,12,75,'accessory','Volume without fatigue cost. Full stretch at top, pull elbows to pockets.'),
     ex('Band Pull-Apart',3,15,30,'accessory'),
     ex('Face Pull',3,15,45,'accessory','Shoulder integrity. Light weight, full range.')
   ]},
-  {label:'Day B — Ladder',focus:'Pull-Up Ladder + Grip',exercises:[
+  {label:'Week 1-2 · Day B',focus:'Pull-Up Ladder + Grip',block:0,exercises:[
     ex('Band Pull-Apart',2,10,30,'warmup'),
     ex('Scapular Pull-Up',2,5,30,'activation'),
     exT('Dead Hang','1','10s',30,'activation'),
-    ex('Pull-Up',1,1,45,'strength','Ladder: 1 → 2 → 3 → 2 → 1, rest 45 sec between rungs. Repeat the ladder twice. Controlled reps throughout — no kipping.'),
-    ex('Dead Hang',3,0,45,'accessory','Grip and shoulder decompression. 20–30 seconds per set.','25s'),
+    ex('Pull-Up',1,1,45,'strength','Ladder rung 1 of 2: 1 rep. Rest 45 sec, then continue the climb.'),
+    ex('Pull-Up',1,2,45,'strength','Ladder rung 2: 2 reps. Controlled throughout — no kipping.'),
+    ex('Pull-Up',1,3,45,'strength','Ladder rung 3 — the peak: 3 reps. Rest 45 sec before descending.'),
+    ex('Pull-Up',1,2,45,'strength','Ladder rung 4: 2 reps, descending.'),
+    ex('Pull-Up',1,1,45,'strength','Ladder rung 5: 1 rep. That completes one full ladder — 1→2→3→2→1.'),
+    ex('Pull-Up',1,1,45,'strength','Second ladder, rung 1. Repeat the full climb once more: 1→2→3→2→1.'),
+    ex('Pull-Up',1,2,45,'strength','Second ladder, rung 2.'),
+    ex('Pull-Up',1,3,45,'strength','Second ladder, rung 3 — the peak.'),
+    ex('Pull-Up',1,2,45,'strength','Second ladder, rung 4.'),
+    ex('Pull-Up',1,1,45,'strength','Second ladder, rung 5 — ladder complete. 18 total reps across both ladders.'),
+    exT('Dead Hang',3,'25s',45,'accessory','Grip and shoulder decompression. 20–30 seconds per set.'),
     ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
     ex('Face Pull',3,15,45,'accessory')
   ]},
-  {label:'Day C — Eccentric',focus:'Tempo Pull-Ups + Accessory',exercises:[
+  {label:'Week 1-2 · Day C',focus:'Volume Pull-Ups + Accessory',block:0,exercises:[
     ex('Band Pull-Apart',2,10,30,'warmup'),
     ex('Scapular Pull-Up',2,5,30,'activation'),
     exT('Dead Hang','1','10s',30,'activation'),
-    ex('Pull-Up',4,4,90,'strength','Same controlled tempo as Day A. Rest 90 sec. In Weeks 3–4 this becomes weighted.'),
-    ex('Pull-Up',2,0,90,'accessory','Slow eccentrics only — jump to the top position, lower for 6–8 seconds. Stop at 4 reps per set.','neg'),
+    ex('Pull-Up',4,4,90,'strength','Same controlled tempo as Day A. Rest 90 sec. Week 2: add 1 rep per set.'),
+    ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
+    ex('Band Pull-Apart',3,15,30,'accessory'),
+    ex('Face Pull',3,15,45,'accessory'),
+    exT('Dead Hang','2','20s',30,'cooldown','End every session here. Spinal decompression.')
+  ]},
+  {label:'Week 3-4 · Day A',focus:'Weighted Pull-Ups + Eccentrics',block:1,exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup'),
+    ex('Scapular Pull-Up',2,5,30,'activation'),
+    exT('Dead Hang','1','10s',30,'activation'),
+    ex('Pull-Up',4,3,120,'strength','Weighted: add 4–6kg this week, +2kg in Week 4 if all reps were clean. Log the added weight. The bodyweight sets should start feeling lighter — that\u2019s the signal it\u2019s working.'),
+    ex('Pull-Up',2,4,90,'accessory','Max eccentric — jump to the top, lower for 6 seconds. Stop at 4 reps per set.'),
+    ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
+    ex('Band Pull-Apart',3,15,30,'accessory'),
+    ex('Face Pull',3,15,45,'accessory')
+  ]},
+  {label:'Week 3-4 · Day B',focus:'Bodyweight Quality + Top Holds',block:1,exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup'),
+    ex('Scapular Pull-Up',2,5,30,'activation'),
+    exT('Dead Hang','1','10s',30,'activation'),
+    ex('Pull-Up',4,5,90,'strength','Bodyweight only this session. Push for clean reps, no grinding.'),
+    exT('Pull-Up',3,'10s',60,'accessory','Top hold — chin over bar, isometric. Hold 10 seconds per set.'),
+    ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
+    ex('Face Pull',3,15,45,'accessory')
+  ]},
+  {label:'Week 3-4 · Day C',focus:'Weighted Pull-Ups + Slow Eccentrics',block:1,exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup'),
+    ex('Scapular Pull-Up',2,5,30,'activation'),
+    exT('Dead Hang','1','10s',30,'activation'),
+    ex('Pull-Up',3,3,120,'strength','Weighted — same load as Monday. Rest 2 min between sets.'),
+    ex('Pull-Up',3,5,90,'accessory','Slow eccentrics: 6–8 sec lowering on every rep.'),
+    ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
+    ex('Band Pull-Apart',3,15,30,'accessory'),
+    ex('Face Pull',3,15,45,'accessory'),
+    exT('Dead Hang','2','20s',30,'cooldown','End every session here. Spinal decompression.')
+  ]},
+  {label:'Week 5-6 · Day A',focus:'Peak Weighted Effort',block:2,exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup'),
+    ex('Scapular Pull-Up',2,5,30,'activation'),
+    exT('Dead Hang','1','10s',30,'activation'),
+    ex('Pull-Up',1,2,180,'strength','Work up to a heavy 1–2 rep weighted pull-up — test your strength ceiling. Rest fully, 3 min minimum, before continuing.'),
+    ex('Pull-Up',3,3,180,'strength','Drop to roughly 70% of the weight you just tested. 3 sets of 3, full rest between every set.'),
+    ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
+    ex('Face Pull',3,15,45,'accessory')
+  ]},
+  {label:'Week 5-6 · Day B',focus:'Max Rep Test',block:2,exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup'),
+    ex('Scapular Pull-Up',2,5,30,'activation'),
+    exT('Dead Hang','1','10s',30,'activation'),
+    ex('Pull-Up',3,0,180,'strength','Max rep test — 3 sets to technical failure. Full rest between every set (3 min). Record every number; this is the new baseline to compare Week 6\u2019s retest against.'),
+    ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
+    ex('Face Pull',3,15,45,'accessory')
+  ]},
+  {label:'Week 5-6 · Day C',focus:'Fast Concentric, Slow Eccentric',block:2,exercises:[
+    ex('Band Pull-Apart',2,10,30,'warmup'),
+    ex('Scapular Pull-Up',2,5,30,'activation'),
+    exT('Dead Hang','1','10s',30,'activation'),
+    ex('Pull-Up',5,3,90,'strength','Bodyweight. Fast on the way up, slow and controlled on the way down.'),
+    ex('Pull-Up',2,8,90,'accessory','Eccentric-only — jump to the top, lower under full control. 8 reps per set.'),
     ex('Lat Pulldown (Wide Grip)',3,10,75,'accessory'),
     ex('Band Pull-Apart',3,15,30,'accessory'),
     ex('Face Pull',3,15,45,'accessory'),
@@ -1826,17 +1892,6 @@ function planBannerData(){
   var wk=weeks[wi];
   return{planName:plan.name,weekLabel:wk.label,theme:wk.theme,rpe:wk.rpe,rir:wk.rir,weightPct:wk.weightPct,volMod:wk.volMod,tip:wk.tip,weekIndex:wi,totalWeeks:weeks.length};
 }
-function advancePlanWeek(){
-  var cl=C();
-  if(!cl.plan)return;
-  var plan=getPlanByKey(cl.plan.key);
-  if(!plan)return;
-  cl.plan.weekIndex=(cl.plan.weekIndex||0)+1;
-  if(!plan.cyclic&&cl.plan.weekIndex>=plan.weeks.length){
-    cl.plan.weekIndex=plan.weeks.length-1;
-  }
-  sv();
-}
 function attachPlan(planKey){
   var cl=C();
   if(!cl.plans)cl.plans={};
@@ -1987,24 +2042,6 @@ function finishSession(){
     if(!cl.dayCounters)cl.dayCounters={};
     cl.dayCounters[cl.tplKey]=(cl.dayCounters[cl.tplKey]||0)+1;
     cl.day=cl.dayCounters[cl.tplKey];
-    // Advance plan week after completing a full programme cycle
-    if(!cl.plans)cl.plans={};
-    var _curPlan=cl.plans[cl.tplKey]||cl.plan;
-    if(_curPlan){
-      var _tpl=ACTIVE_TPL();
-      var _cycleLen=_tpl&&_tpl.days&&_tpl.days.length>0?_tpl.days.length:7;
-      var _plan=getPlanByKey(_curPlan.key);
-      var _autoAdvanceOk=!(_tpl&&(_tpl.cat==='rehab'||_tpl.key==='spt_pullup'||_tpl.key==='spt_pullup_plateau'));
-      if(_plan&&_autoAdvanceOk){
-        var _sessionsOnPlan=cl.hist.filter(function(s){return s.date>=(_curPlan.startDate||0);}).length;
-        if(_sessionsOnPlan>0&&_sessionsOnPlan%_cycleLen===0){
-          _curPlan.weekIndex=(_curPlan.weekIndex||0)+1;
-          if(!_plan.cyclic&&_curPlan.weekIndex>=_plan.weeks.length)_curPlan.weekIndex=_plan.weeks.length-1;
-          cl.plans[cl.tplKey]=_curPlan;
-          cl.plan=_curPlan;
-        }
-      }
-    }
     sv();
   }
   window._cancelWx=S.wx; // store globally for cancel restore
@@ -3464,12 +3501,37 @@ function isSessionLocked(day){
   // A session is locked if it defines minSessions and the client hasn't reached that count yet
   return day&&day.minSessions&&sessionsOnProg()<day.minSessions;
 }
-function openSessionPicker(){
+function openSessionPicker(showAllBlocks){
   var cl=C();var tpl=ACTIVE_TPL();
   var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
   var h='<div style="padding:0 20px 30px">';
   var _doneSoFar=sessionsOnProg();
+
+  // Block-aware filtering: if the attached plan's current week declares a block,
+  // and the days themselves carry a block field, show only that block's days by
+  // default. This keeps a 9-day, 3-block programme (e.g. Pull-Up Plateau Breaker)
+  // from presenting all 9 sessions as one flat list. Always client-overridable.
+  var banner=planBannerData();
+  var plan=cl.plan?getPlanByKey(cl.plan.key):null;
+  var curWeek=plan&&plan.weeks?plan.weeks[banner?banner.weekIndex:0]:null;
+  var hasBlocks=tpl.days.some(function(d){return d.block!==undefined;});
+  var activeBlock=(curWeek&&curWeek.block!==undefined)?curWeek.block:null;
+  var filtering=hasBlocks&&activeBlock!==null&&!showAllBlocks;
+
+  var visibleDays=[];
   tpl.days.forEach(function(day,i){
+    if(filtering&&day.block!==activeBlock)return;
+    visibleDays.push(i);
+  });
+
+  if(filtering){
+    h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Showing sessions for your current week. <span style="color:var(--acc);cursor:pointer" onclick="openSessionPicker(true)">See all '+tpl.days.length+' sessions</span></div>';
+  } else if(hasBlocks){
+    h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Showing all sessions. <span style="color:var(--acc);cursor:pointer" onclick="openSessionPicker(false)">Show only this week’s block</span></div>';
+  }
+
+  visibleDays.forEach(function(i){
+    var day=tpl.days[i];
     var isActive=i===dayIdx;
     var locked=isSessionLocked(day);
     var remaining=locked?(day.minSessions-_doneSoFar):0;
