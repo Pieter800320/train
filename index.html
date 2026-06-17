@@ -1500,7 +1500,7 @@ var TPL = [
 
 // ── SPORT ───────────────────────────────────────────────────
 
-{key:'spt_run',name:'Runners Strength',cat:'sport',desc:'2–3 sessions per week — schedule away from key run sessions. Three phases over 12 weeks: build the strength base, load it heavier, then convert it to reactive power.',duration:50,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
+{key:'spt_run',name:'Runners Strength',cat:'sport',desc:'3 sessions per week — schedule away from key run sessions. Three phases over 12 weeks: build the strength base, load it heavier, then convert it to reactive power.',duration:50,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
   {label:'Phase 1 · Day A',focus:'Posterior Chain + Stability',block:0,exercises:[
     exT('High Knees',1,'3min',0,'warmup'),
     ex('Leg Swing (Forward)',2,10,20,'warmup'),
@@ -1734,7 +1734,7 @@ var TPL = [
 ]},
 {key:'spt_climb',name:'Rock Climbing Strength',cat:'sport',desc:'Intermediate+ climbers only — 2 sessions per week. Three phases over 12 weeks: open-hand base building, then max hangs and half-crimp, then peak load and one-arm work.',duration:45,defaultPlan:'sport_12',compatiblePlans:['sport_12'],days:[
   {label:'Phase 1 · Day A',focus:'Finger Endurance + Pull Base',block:0,exercises:[
-    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    ex('Arm Circles',2,20,20,'warmup'),
     exT('Wrist CARs',2,'30s',20,'warmup'),
     ex('Dead Hang (Hangboard)',5,0,3,'strength','Repeater protocol, open hand only this phase: 5 hangs of 7s with 3s rest between, then rest 2-3 minutes and repeat the whole block 3 times. This builds tendon capacity safely before real max hangs in Phase 2.','7s'),
     ex('Pull-Up',3,5,150,'strength'),
@@ -1745,7 +1745,7 @@ var TPL = [
     exT('Doorway Pec Stretch',2,'30s',20,'cooldown')
   ]},
   {label:'Phase 1 · Day B',focus:'Antagonist + Core',block:0,exercises:[
-    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    ex('Arm Circles',2,20,20,'warmup'),
     exT('Dead Hang',2,'10s',30,'warmup','Easy open-hand hangs just to feel the position — not training intensity yet.'),
     ex('Scapular Pull-Up',3,10,60,'activation','The foundation movement under every pull-up. Shoulder blades do the work, arms stay relatively straight.'),
     ex('Barbell Overhead Press',3,10,90,'strength','Antagonist. Keep the rotator cuff strong — climbers pull constantly and rarely push.'),
@@ -1755,7 +1755,7 @@ var TPL = [
     ex('Shoulder CARs',2,5,20,'cooldown')
   ]},
   {label:'Phase 2 · Day A',focus:'Max Hangs + Pull Strength',block:1,exercises:[
-    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    ex('Arm Circles',2,20,20,'warmup'),
     exT('Wrist CARs',2,'30s',20,'warmup'),
     ex('Dead Hang (Hangboard)',3,0,150,'strength','True max hangs now — open hand, the heaviest load you can hold cleanly for 10 seconds. Add a little weight if last week felt easy.','10s'),
     ex('Half Crimp Hang',2,0,150,'strength','First half-crimp work. Lighter load and shorter holds than the open-hand hangs above — this grip carries more tendon stress, so we ease in. Stop immediately if you feel anything sharp at the base of a finger.','7s'),
@@ -1767,7 +1767,7 @@ var TPL = [
     exT('Doorway Pec Stretch',2,'30s',20,'cooldown')
   ]},
   {label:'Phase 2 · Day B',focus:'Antagonist + Stability',block:1,exercises:[
-    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    ex('Arm Circles',2,20,20,'warmup'),
     exT('Dead Hang',2,'10s',30,'warmup'),
     ex('Scapular Pull-Up',3,12,60,'activation'),
     ex('Barbell Overhead Press',3,8,90,'strength','Heavier than Phase 1. Same strong, healthy shoulders.'),
@@ -1778,7 +1778,7 @@ var TPL = [
     ex('Shoulder CARs',2,5,20,'cooldown')
   ]},
   {label:'Phase 3 · Day A',focus:'Peak Hangs + One-Arm Prep',block:2,exercises:[
-    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    ex('Arm Circles',2,20,20,'warmup'),
     exT('Wrist CARs',2,'30s',20,'warmup'),
     ex('Half Crimp Hang',3,0,180,'strength','Heaviest crimp load of the programme. If last session\'s reps all felt clean and pain-free, this is also a reasonable week to try the one-arm hang below.','8s'),
     ex('One-Arm Hang',3,0,180,'strength','Assisted only — use a band or a foot on a chair. The goal is to feel the position under control, not to hang fully unassisted. Prerequisite: a clean, pain-free 10-second two-hand hang at bodyweight. If that\'s not solid yet, skip this and keep building Phase 2 work for a few more weeks instead.','5s'),
@@ -1789,7 +1789,7 @@ var TPL = [
     exT('Doorway Pec Stretch',2,'30s',20,'cooldown')
   ]},
   {label:'Phase 3 · Day B',focus:'Power Pull + Antagonist',block:2,exercises:[
-    ex('Arm Circles',1,0,0,'warmup',null,'5min'),
+    ex('Arm Circles',2,20,20,'warmup'),
     exT('Dead Hang',2,'10s',30,'warmup'),
     ex('Open Hand Hang',3,0,150,'strength','Heaviest open-hand load of the programme — the payoff for four weeks of repeaters and eight weeks of max hangs.','8s'),
     ex('Barbell Overhead Press',3,6,90,'strength','Heaviest antagonist load of the programme.'),
@@ -3095,6 +3095,7 @@ function openModal(html){
   var m=document.getElementById('modal');
   var o=document.getElementById('modal-overlay');
   if(!m||!o)return;
+  o.onclick=closeModal; // default tap-outside behavior; specific callers may override after this returns
   document.getElementById('modal-body').innerHTML=html;
   o.style.display='block';
   m.style.display='block';
@@ -3203,11 +3204,12 @@ function openNoteEditorModal(id){
   if(id)note=(S.notes||[]).find(function(n){return String(n.id)===String(id);});
   var isNew=!note;
   if(!note)note={id:null,title:'',body:'',updated:0};
+  _noteEditorOrigTitle=note.title||'';
   var h='<div style="padding:20px 20px 28px">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
   h+='<button onclick="openNotesListModal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--mu);line-height:1;padding:0">←</button>';
   h+='<div style="flex:1;font-size:16px;font-weight:800;color:var(--tx)">'+(isNew?'New Note':'Edit Note')+'</div>';
-  h+='<button onclick="closeModal()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--mu);line-height:1">&times;</button>';
+  h+='<button onclick="discardNoteEditor()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--mu);line-height:1">&times;</button>';
   h+='</div>';
   h+='<input type="text" id="note-title" value="'+(note.title||'').replace(/"/g,'&quot;')+'" placeholder="Heading" '
     +'style="margin-bottom:10px;font-size:16px;font-weight:700">';
@@ -3220,11 +3222,24 @@ function openNoteEditorModal(id){
     +'padding:12px;border-radius:10px;border:0.5px solid var(--brd);background:var(--bg3);color:var(--tx);'
     +'resize:vertical;font-family:inherit;line-height:1.5;box-sizing:border-box"></textarea>';
   h+='<button class="btn btn-acc" style="margin-top:14px" data-id="'+(note.id||'')+'" onclick="saveNoteModal(this.dataset.id)">Save</button>';
+  h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="discardNoteEditor()">Discard</button>';
   if(!isNew){
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-id="'+note.id+'" onclick="deleteNoteModal(this.dataset.id)">Delete Note</button>';
   }
   h+='</div>';
   openModal(h);
+  var ov=document.getElementById('modal-overlay');
+  if(ov)ov.onclick=discardNoteEditor; // tapping outside the editor is also a discard, not a silent close
+}
+var _noteEditorOrigTitle='';
+function discardNoteEditor(){
+  var titleEl=document.getElementById('note-title');
+  var bodyEl=document.getElementById('note-body');
+  var title=titleEl?titleEl.value.trim():'';
+  var body=bodyEl?bodyEl.value.trim():'';
+  var hasUnsaved=!!body||title!==_noteEditorOrigTitle;
+  if(!hasUnsaved){closeModal();return;}
+  appConfirm('Discard this note? Your unsaved changes will be lost.',function(){closeModal();});
 }
 function saveNoteModal(id){
   var title=document.getElementById('note-title').value.trim();
@@ -4412,8 +4427,11 @@ function doLogSet(globalIdx){
   var allDoneNow=wx.sets.filter(function(s){return s.exIdx===exIdx;}).every(function(s){return s.done;});
   if(allDoneNow){wx.exDone[exIdx]=true;if(wx.skipped)wx.skipped[exIdx]=false;}
 
-  // Set rest timer
-  var restSecs=(wx.exercises[exIdx].rest)||60;
+  // Set rest timer — skipped if this was the last undone set in the whole
+  // session, since there's nothing left to rest before (avoids the rest
+  // circle popping up over the Finish Session flow).
+  var sessionComplete=wx.sets.every(function(s){return s.done;});
+  var restSecs=sessionComplete?0:((wx.exercises[exIdx].rest)||60);
   if(restSecs>0){
     wx.restActive=true;
     wx.restEnd=Date.now()+restSecs*1000;
@@ -4487,7 +4505,8 @@ function logTimedSet(exIdx){
     // Reset timedEx so the next tap starts fresh
     wx.timedEx=null;
     wx._pendingTime=undefined;
-    var restSecs=(wx.exercises[exIdx].rest)||30;
+    var sessionComplete=wx.sets.every(function(s){return s.done;});
+    var restSecs=sessionComplete?0:((wx.exercises[exIdx].rest)||30);
     if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=exIdx;}
     sv();
     closeSheet();
@@ -4527,6 +4546,7 @@ function startExTimer(exIdx,totalSecs){
     if(rem<=0){
       wx.timedEx.running=false;sv();
       clearInterval(_exTimerTick);_exTimerTick=null;
+      timerBeepEnd();
     }
   },500);
   // Refresh window
@@ -5449,9 +5469,10 @@ function buildStep0(){
      'oninput="S.customEdit.name=this.value;sv();buildUpdateNavState()" style="margin-bottom:20px;font-size:16px;font-weight:700">';
 
   // Days picker
-  h+='<div class="lbl" style="margin-bottom:8px">SESSIONS PER WEEK</div>';
-  h+='<div style="display:flex;gap:6px;margin-bottom:16px">';
-  [1,2,3,4,5,6,7].forEach(function(n){
+  h+='<div class="lbl" style="margin-bottom:4px">SESSIONS</div>';
+  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:8px">How many day templates make up this programme. They repeat in sequence — they don\'t have to match a calendar week.</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">';
+  [1,2,3,4,5,6,7,8,9,10,11,12,13,14].forEach(function(n){
     var sel=e.days.length===n;
     h+='<button class="btn tap btn-pill'+(sel?' btn-acc':' btn-ghost')+'" onclick="buildSetDayCount('+n+')">'+n+'</button>';
   });
@@ -6536,11 +6557,15 @@ function buildSave(){
   var totalDuration=Math.round(tplDays.reduce(function(sum,d){
     return sum+(d.exercises.length*4);
   },0)/tplDays.length)||45;
+  // "N sessions/week" only reads correctly for week-length rotations; longer
+  // custom builds (e.g. a 10-day block rotation) get a phrasing that doesn't
+  // falsely imply a weekly cadence.
+  var sessionDesc=tplDays.length<=7?(tplDays.length+' sessions/week'):(tplDays.length+'-day rotation');
   cl.customPrograms.push({
-    key:key,name:e.name,cat:'custom',desc:e.days.length+' sessions/week',
+    key:key,name:e.name,cat:'custom',desc:sessionDesc,
     days:tplDays.length,duration:totalDuration,defaultPlan:'linear',
     compatiblePlans:['linear','return_training'],
-    tpl:{key:key,name:e.name,cat:'custom',desc:e.days.length+' sessions/week',
+    tpl:{key:key,name:e.name,cat:'custom',desc:sessionDesc,
          days:tplDays,duration:totalDuration,
          compatiblePlans:['linear','return_training']}
   });
