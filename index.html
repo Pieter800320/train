@@ -3525,8 +3525,12 @@ function _doExportProgramme(){
       h+='</div>';
       exs.forEach(function(ex){
         var vol='';
+        var _expTrack=ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol);
         if(ex.vol)vol=ex.vol;
-        if(ex.reps>0&&!ex.vol)vol=(vol?vol+' \u00b7 ':'')+ex.sets+'\u00d7'+ex.reps;
+        else if(_expTrack.indexOf('distance')>=0&&ex.reps>0)vol=ex.reps+'m';
+        else if(_expTrack.indexOf('calories')>=0&&ex.reps>0)vol=ex.reps+' cal';
+        else if(_expTrack.indexOf('rounds')>=0&&ex.reps>0)vol=ex.reps+' rounds';
+        else if(ex.reps>0)vol=ex.sets+'\u00d7'+ex.reps;
         var exEntry=getEx(ex.name);
         var vidUrl=getExVideo(exEntry||{name:ex.name});
         var isCurated=exEntry&&exEntry.video;
@@ -3670,9 +3674,17 @@ function todayV(){
       var _adj=(!isPlaying&&S.wx&&S.wx.viewAdj)?S.wx.viewAdj[origIdx]:null;
       var _dispReps=_adj?_adj.reps:exEntry.reps;
       var _dispKg=_adj?_adj.kg:null;
+      // Track type — same detection openExWindow (PLAY mode) uses, so
+      // distance/calories/rounds exercises don't wrongly fall back to
+      // "sets×reps" just because vol happens to be empty (v204 item 6 fix —
+      // root cause was buildExFromKey leaving vol empty for these types).
+      var _rowTrack=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
       var volStr='';
       if(vol)volStr=fmtSecs(parseVolToSecs(vol));
-      if(_dispReps>0&&!vol)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+_dispReps;
+      else if(_rowTrack.indexOf('distance')>=0&&_dispReps>0)volStr=_dispReps+'m';
+      else if(_rowTrack.indexOf('calories')>=0&&_dispReps>0)volStr=_dispReps+' cal';
+      else if(_rowTrack.indexOf('rounds')>=0&&_dispReps>0)volStr=_dispReps+' rounds';
+      else if(_dispReps>0)volStr=exEntry.sets+'\xd7'+_dispReps;
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
       h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">'+
@@ -3717,9 +3729,17 @@ function todayV(){
       var _adj=(!isPlaying&&S.wx&&S.wx.viewAdj)?S.wx.viewAdj[origIdx]:null;
       var _dispReps=_adj?_adj.reps:exEntry.reps;
       var _dispKg=_adj?_adj.kg:null;
+      // Track type — same detection openExWindow (PLAY mode) uses, so
+      // distance/calories/rounds exercises don't wrongly fall back to
+      // "sets×reps" just because vol happens to be empty (v204 item 6 fix —
+      // root cause was buildExFromKey leaving vol empty for these types).
+      var _rowTrack=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
       var volStr='';
       if(vol)volStr=fmtSecs(parseVolToSecs(vol));
-      if(_dispReps>0&&!vol)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+_dispReps;
+      else if(_rowTrack.indexOf('distance')>=0&&_dispReps>0)volStr=_dispReps+'m';
+      else if(_rowTrack.indexOf('calories')>=0&&_dispReps>0)volStr=_dispReps+' cal';
+      else if(_rowTrack.indexOf('rounds')>=0&&_dispReps>0)volStr=_dispReps+' rounds';
+      else if(_dispReps>0)volStr=exEntry.sets+'\xd7'+_dispReps;
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
       h+='<div class="'+rowClass+'" onclick="openExWindow('+origIdx+')">'+
@@ -4111,7 +4131,10 @@ function openExWindow(exIdx){
   // Volume + set counter + PB badge
   var volStr='';
   if(exEntry.vol)volStr=exEntry.vol;
-  if(exEntry.reps>0&&!exEntry.vol)volStr=(volStr?volStr+' \xb7 ':'')+exEntry.sets+'\xd7'+exEntry.reps;
+  else if(isDistance&&exEntry.reps>0)volStr=exEntry.reps+'m';
+  else if(isCalories&&exEntry.reps>0)volStr=exEntry.reps+' cal';
+  else if(isRounds&&exEntry.reps>0)volStr=exEntry.reps+' rounds';
+  else if(exEntry.reps>0)volStr=exEntry.sets+'\xd7'+exEntry.reps;
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(volStr)h+='<span style="font-size:14px;font-weight:700;color:var(--tx2)">'+volStr+'</span>';
   if(totalSets>0){
