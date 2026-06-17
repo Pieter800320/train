@@ -5526,7 +5526,7 @@ function buildStep0(){
   h+='<div class="lbl" style="margin-bottom:8px">SESSIONS</div>';
   h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:16px">';
   h+='<button class="tap" onclick="buildAdjDayCount(-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-  h+='<div style="flex:1;height:48px;max-width:80px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center">';
+  h+='<div style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center">';
   h+='<input id="build-daycount" type="text" inputmode="numeric" value="'+e.days.length+'" '
     +'onfocus="this.select()" '
     +'onchange="buildCommitDayCount(this.value)" '
@@ -6990,10 +6990,16 @@ function buildPlanV(){
   h+='<input type="text" value="'+e.name+'" oninput="S.planEdit.name=this.value;sv()" style="margin-bottom:16px">';
 
   h+='<div class="lbl" style="margin-bottom:6px">NUMBER OF WEEKS</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
-  [2,4,6,8,12,16].forEach(function(n){
-    h+='<button class="btn btn-pill'+(e.targetWeeks===n?' btn-acc':' btn-ghost')+'" onclick="setBuildPlanWeeks('+n+')">'+n+'wk</button>';
-  });
+  h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:14px">';
+  h+='<button class="tap" onclick="buildAdjPlanWeeks(-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+  h+='<div style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center">';
+  h+='<input id="build-planweeks" type="text" inputmode="numeric" value="'+e.targetWeeks+'" '
+    +'onfocus="this.select()" '
+    +'onchange="buildCommitPlanWeeks(this.value)" '
+    +'onkeydown="if(event.key===\'Enter\')this.blur()" '
+    +'style="width:40px;text-align:center;background:transparent;border:none;outline:none;font-size:22px;font-weight:800;color:var(--acc);padding:0">';
+  h+='</div>';
+  h+='<button class="tap" onclick="buildAdjPlanWeeks(1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
   h+='</div>';
 
   h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--brd);margin-bottom:16px">';
@@ -7080,6 +7086,15 @@ function setBuildPlanWeeks(n){
   });
   S.planEdit.weeks=S.planEdit.weeks.slice(0,n);
   sv();draw();
+}
+function buildAdjPlanWeeks(delta){
+  var n=Math.max(2,Math.min(16,(S.planEdit.targetWeeks||4)+delta));
+  setBuildPlanWeeks(n);
+}
+function buildCommitPlanWeeks(raw){
+  var val=parseInt(raw,10);
+  var n=isNaN(val)?S.planEdit.targetWeeks:Math.max(2,Math.min(16,val));
+  setBuildPlanWeeks(n);
 }
 function saveBuildPlan(){
   var e=S.planEdit;
