@@ -4190,7 +4190,7 @@ function openExWindow(exIdx){
     h+='<div class="lbl" style="margin-bottom:8px">DURATION</div>';
     h+='<div style="display:flex;align-items:center;gap:0">';
     h+='<button onclick="adjustVal(\'time\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-time" onclick="editVal(\'time\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer;min-width:80px">'+fmtSecs(wx._pendingTime)+'</div>';
+    h+=playTimeFieldHTML('val-time',wx._pendingTime);
     h+='<button onclick="adjustVal(\'time\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div></div>';
     h+='<div style="text-align:center;padding:8px 0 20px">';
@@ -4212,7 +4212,7 @@ function openExWindow(exIdx){
     h+='<div class="lbl" style="margin-bottom:8px">ROUNDS COMPLETED</div>';
     h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:16px">';
     h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'</div>';
+    h+=playValHTML('val-reps','reps',wx._pendingReps,'');
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
@@ -4229,14 +4229,14 @@ function openExWindow(exIdx){
     h+='<div class="lbl" style="margin-bottom:8px">DISTANCE (metres)</div>';
     h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:10px">';
     h+='<button onclick="adjustVal(\'reps\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'m</div>';
+    h+=playValHTML('val-reps','reps',wx._pendingReps,'m');
     h+='<button onclick="adjustVal(\'reps\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     if(isRepsWeight||track.indexOf('weight')>=0){
       h+='<div class="lbl" style="margin-bottom:8px">WEIGHT</div>';
       h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
       h+='<button onclick="adjustVal(\'kg\',-2.5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-      h+='<div id="val-kg" onclick="editVal(\'kg\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+(wx._pendingKg+'kg')+'</div>';
+      h+=playValHTML('val-kg','kg',wx._pendingKg,'kg');
       h+='<button onclick="adjustVal(\'kg\',2.5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
       h+='</div>';
     }
@@ -4255,37 +4255,25 @@ function openExWindow(exIdx){
     h+='<div class="lbl" style="margin-bottom:8px">CALORIES</div>';
     h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:10px">';
     h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+' cal</div>';
+    h+=playValHTML('val-reps','reps',wx._pendingReps,' cal');
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
     if(_playing){h+='<button class="btn btn-acc" style="margin-bottom:8px" onclick="logSetFromWindow('+gi+')">Done</button>';}
     else{h+='<button class="btn btn-ghost" style="margin-bottom:8px" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';}
-  // ── Calories ──
-  } else if(isCalories&&nextSet){
-    h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
-    h+='<div class="lbl" style="margin-bottom:8px">CALORIES</div>';
-    h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
-    h+='<button onclick="adjustVal(\'reps\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+' cal</div>';
-    h+='<button onclick="adjustVal(\'reps\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
-    h+='</div>';
-    var gi=wx.sets.indexOf(nextSet);
-    if(_playing){h+='<button class="btn btn-acc" onclick="logSetFromWindow('+gi+')">Done</button>';}
-    else{h+='<button class="btn btn-ghost" onclick="saveViewAdjust('+exIdx+');closeSheet()">Save adjustments</button>';}
   // ── Height (box jumps etc) ──
   } else if(isHeight&&nextSet){
     h+='<div style="border-top:0.5px solid var(--brd);margin-bottom:16px"></div>';
     h+='<div class="lbl" style="margin-bottom:8px">REPS</div>';
     h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:10px">';
     h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'</div>';
+    h+=playValHTML('val-reps','reps',wx._pendingReps,'');
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     h+='<div class="lbl" style="margin-bottom:8px">BOX HEIGHT (cm)</div>';
     h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
     h+='<button onclick="adjustVal(\'kg\',-5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-kg" onclick="editVal(\'kg\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+(wx._pendingKg||50)+'cm</div>';
+    h+=playValHTML('val-kg','kg',(wx._pendingKg||50),'cm');
     h+='<button onclick="adjustVal(\'kg\',5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
@@ -4303,7 +4291,7 @@ function openExWindow(exIdx){
     h+='<div class="lbl" style="margin-bottom:8px">REPS</div>';
     h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:20px">';
     h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer">'+wx._pendingReps+'</div>';
+    h+=playValHTML('val-reps','reps',wx._pendingReps,'');
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div>';
     var gi=wx.sets.indexOf(nextSet);
@@ -4319,7 +4307,7 @@ function openExWindow(exIdx){
     h+='<div class="lbl" style="margin-bottom:8px">REPS</div>';
     h+='<div style="display:flex;align-items:center;gap:0">';
     h+='<button onclick="adjustVal(\'reps\',-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-reps" onclick="editVal(\'reps\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer;min-width:60px">'+wx._pendingReps+'</div>';
+    h+=playValHTML('val-reps','reps',wx._pendingReps,'');
     h+='<button onclick="adjustVal(\'reps\',1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div></div>';
 
@@ -4328,7 +4316,7 @@ function openExWindow(exIdx){
     h+='<div class="lbl" style="margin-bottom:8px">WEIGHT</div>';
     h+='<div style="display:flex;align-items:center;gap:0">';
     h+='<button onclick="adjustVal(\'kg\',-2.5)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<div id="val-kg" onclick="editVal(\'kg\')" style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--acc);cursor:pointer;min-width:80px">'+(wx._pendingKg+'kg')+'</div>';
+    h+=playValHTML('val-kg','kg',wx._pendingKg,'kg');
     h+='<button onclick="adjustVal(\'kg\',2.5)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
     h+='</div></div>';
 
@@ -4370,33 +4358,75 @@ function adjustVal(field,delta){
   if(field==='reps'){
     S.wx._pendingReps=Math.max(1,Math.round((S.wx._pendingReps||10)+delta));
     var el=document.getElementById('val-reps');
-    if(el)el.textContent=S.wx._pendingReps;
+    if(el)el.value=S.wx._pendingReps;
   } else if(field==='time'){
     var cur=S.wx._pendingTime||30;
     var next=Math.max(5,Math.round(cur+delta));
     S.wx._pendingTime=next;
     var el=document.getElementById('val-time');
-    if(el)el.textContent=fmtSecs(next);
+    if(el)el.value=next;
+    var hintEl=document.getElementById('val-time-hint');
+    if(hintEl)hintEl.textContent=next>=60?('('+fmtSecs(next)+')'):'';
   } else {
     var cur=S.wx._pendingKg||0;
     var next=Math.max(0,Math.round((cur+delta)*10)/10);
     S.wx._pendingKg=next;
     var el=document.getElementById('val-kg');
-    if(el)el.textContent=next+'kg';
+    if(el)el.value=next;
   }
 }
-function editVal(field){
-  if(!S.wx)return;
-  var cur=field==='reps'?S.wx._pendingReps:field==='time'?S.wx._pendingTime:S.wx._pendingKg;
-  var prompt_text=field==='reps'?'Enter reps:':field==='time'?'Enter duration (seconds):':'Enter weight (kg, 0=BW):';
-  var input=prompt(prompt_text,cur);
-  if(input===null)return;
-  var val=parseFloat(input);
-  if(isNaN(val)||val<0)return;
-  if(field==='reps'){S.wx._pendingReps=Math.max(1,Math.floor(val));var el=document.getElementById('val-reps');if(el)el.textContent=S.wx._pendingReps;}
-  else if(field==='time'){S.wx._pendingTime=Math.max(5,Math.round(val));var el=document.getElementById('val-time');if(el)el.textContent=fmtSecs(S.wx._pendingTime);}
-  else{S.wx._pendingKg=val;var el=document.getElementById('val-kg');if(el)el.textContent=val+'kg';}
+// ── Inline-editable value fields (item 7) ──────────────────────
+// Replaces the old tap-to-prompt() editVal() flow, which broke the dark
+// theme with the native browser dialog. These render actual <input>
+// elements styled to match the stepper, in the same flex:1 + suffix-span
+// pattern already established in buildWizardStepper for BUILD's config UI.
+function playValHTML(id,field,value,suffix){
+  return '<div style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center">'
+    +'<input id="'+id+'" type="text" inputmode="decimal" value="'+value+'" '
+    +'onfocus="this.select()" '
+    +'onchange="commitPlayVal(\''+field+'\',this.value)" '
+    +'onkeydown="if(event.key===\'Enter\')this.blur()" '
+    +'style="width:70px;text-align:right;background:transparent;border:none;outline:none;font-size:22px;font-weight:800;color:var(--acc);padding:0">'
+    +(suffix?'<span style="font-size:22px;font-weight:800;color:var(--acc);margin-left:2px">'+suffix+'</span>':'')
+    +'</div>';
 }
+function playTimeFieldHTML(id,secs){
+  var hint=secs>=60?('('+fmtSecs(secs)+')'):'';
+  return '<div style="flex:1;height:48px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center;gap:4px;min-width:80px">'
+    +'<input id="'+id+'" type="text" inputmode="numeric" value="'+secs+'" '
+    +'onfocus="this.select()" '
+    +'onchange="commitPlayVal(\'time\',this.value)" '
+    +'onkeydown="if(event.key===\'Enter\')this.blur()" '
+    +'style="width:50px;text-align:right;background:transparent;border:none;outline:none;font-size:22px;font-weight:800;color:var(--acc);padding:0">'
+    +'<span style="font-size:22px;font-weight:800;color:var(--acc)">s</span>'
+    +'<span id="val-time-hint" style="font-size:11px;color:var(--mu);margin-left:4px">'+hint+'</span>'
+    +'</div>';
+}
+function commitPlayVal(field,raw){
+  if(!S.wx)return;
+  var val=parseFloat(raw);
+  var el=document.getElementById('val-'+field);
+  if(isNaN(val)||val<0){
+    // Invalid or cleared input — restore the last known good value
+    if(field==='reps'){if(el)el.value=S.wx._pendingReps;}
+    else if(field==='time'){if(el)el.value=S.wx._pendingTime;}
+    else{if(el)el.value=S.wx._pendingKg;}
+    return;
+  }
+  if(field==='reps'){
+    S.wx._pendingReps=Math.max(1,Math.floor(val));
+    if(el)el.value=S.wx._pendingReps;
+  } else if(field==='time'){
+    S.wx._pendingTime=Math.max(5,Math.round(val));
+    if(el)el.value=S.wx._pendingTime;
+    var hintEl=document.getElementById('val-time-hint');
+    if(hintEl)hintEl.textContent=S.wx._pendingTime>=60?('('+fmtSecs(S.wx._pendingTime)+')'):'';
+  } else {
+    S.wx._pendingKg=Math.round(val*10)/10;
+    if(el)el.value=S.wx._pendingKg;
+  }
+}
+
 
 function parseVolToSecs(vol){
   if(!vol)return 30;
@@ -5450,7 +5480,7 @@ function buildWizardV(){
   else if(step===2)result=buildStep2();
   else if(step===3)result=buildStep3();
   else if(step===4)result=buildStep4();
-  var _stepHints=["Name your programme and pick a starting structure.",
+  var _stepHints=["Name your programme and pick a starting structure — how many sessions do you want to build per week?",
     "Set the focus and movement pattern for each training day.",
     "Choose which phases each day includes — e.g. warm-up, strength, core.",
     "Add exercises to each phase for each day.",
@@ -5491,14 +5521,19 @@ function buildStep0(){
   h+='<input type="text" id="build-name" value="'+e.name+'" placeholder="e.g. My Strength Plan" '+
      'oninput="S.customEdit.name=this.value;sv();buildUpdateNavState()" style="margin-bottom:20px;font-size:16px;font-weight:700">';
 
-  // Days picker
-  h+='<div class="lbl" style="margin-bottom:4px">SESSIONS</div>';
-  h+='<div style="font-size:11px;color:var(--mu);margin-bottom:8px">How many day templates make up this programme. They repeat in sequence — they don\'t have to match a calendar week.</div>';
-  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">';
-  [1,2,3,4,5,6,7,8,9,10,11,12,13,14].forEach(function(n){
-    var sel=e.days.length===n;
-    h+='<button class="btn tap btn-pill'+(sel?' btn-acc':' btn-ghost')+'" onclick="buildSetDayCount('+n+')">'+n+'</button>';
-  });
+  // Days picker — a stepper reads cleaner than 14 separate pills, and the
+  // speech bubble above already explains what it counts (Pieter's call).
+  h+='<div class="lbl" style="margin-bottom:8px">SESSIONS</div>';
+  h+='<div style="display:flex;align-items:center;gap:0;margin-bottom:16px">';
+  h+='<button class="tap" onclick="buildAdjDayCount(-1)" style="width:48px;height:48px;border-radius:10px 0 0 10px;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+  h+='<div style="flex:1;height:48px;max-width:80px;background:var(--bg2);border-top:0.5px solid var(--brd);border-bottom:0.5px solid var(--brd);display:flex;align-items:center;justify-content:center">';
+  h+='<input id="build-daycount" type="text" inputmode="numeric" value="'+e.days.length+'" '
+    +'onfocus="this.select()" '
+    +'onchange="buildCommitDayCount(this.value)" '
+    +'onkeydown="if(event.key===\'Enter\')this.blur()" '
+    +'style="width:40px;text-align:center;background:transparent;border:none;outline:none;font-size:22px;font-weight:800;color:var(--acc);padding:0">';
+  h+='</div>';
+  h+='<button class="tap" onclick="buildAdjDayCount(1)" style="width:48px;height:48px;border-radius:0 10px 10px 0;background:var(--bg3);border:0.5px solid var(--brd);color:var(--tx);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
   h+='</div>';
 
   // Next always active — validation message shown inline on press
@@ -5529,6 +5564,15 @@ function buildSetDayCount(n){
     S.customEdit.days.push({label:'Day '+(S.customEdit.days.length+1),focus:'',split:[],phases:['warmup','strength'],exercises:[]});
   S.customEdit.days=S.customEdit.days.slice(0,n);
   sv();draw();
+}
+function buildAdjDayCount(delta){
+  var n=Math.max(1,Math.min(14,(S.customEdit.days.length||1)+delta));
+  buildSetDayCount(n);
+}
+function buildCommitDayCount(raw){
+  var val=parseInt(raw,10);
+  var n=isNaN(val)?S.customEdit.days.length:Math.max(1,Math.min(14,val));
+  buildSetDayCount(n);
 }
 
 function buildStep0Next(){
