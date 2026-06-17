@@ -2168,6 +2168,18 @@ function tplMap(){
 }
 function getTPL(key){return tplMap()[key]||null;}
 function ACTIVE_TPL(){return getTPL(C().tplKey)||TPL[1];}
+function sessionsPerWeek(tpl){
+  // tpl.days.length is the TOTAL day-template count, which only equals the
+  // weekly session count for flat (non-block) templates. For block-tagged
+  // templates (periodized programmes split into phases), the weekly count
+  // is however many day templates exist within a single block — every
+  // block is built with the same count, so the first block's count is used.
+  if(!tpl||!tpl.days||!tpl.days.length)return 0;
+  var hasBlocks=tpl.days.some(function(d){return d.block!==undefined;});
+  if(!hasBlocks)return tpl.days.length;
+  var firstBlock=tpl.days[0].block;
+  return tpl.days.filter(function(d){return d.block===firstBlock;}).length;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // PLAN SYSTEM
@@ -2748,14 +2760,14 @@ function obShowRecommendation(recKey,ans){
   var tpl=getTPL(recKey);
   if(!tpl)return;
   var requestedDays=parseInt((ans.days||'3 days').split(' ')[0])||3;
-  var actualDays=tpl.days.length;
+  var actualDays=sessionsPerWeek(tpl);
   var daysMismatch=actualDays!==requestedDays;
 
   // Other good fits: same category, sorted by proximity to requested days
   var others=TPL.filter(function(t){
     return t.key!==recKey&&t.cat===tpl.cat&&t.days&&t.days.length>0;
   }).sort(function(a,b){
-    return Math.abs(a.days.length-requestedDays)-Math.abs(b.days.length-requestedDays);
+    return Math.abs(sessionsPerWeek(a)-requestedDays)-Math.abs(sessionsPerWeek(b)-requestedDays);
   }).slice(0,3);
 
   var h='<div style="padding:0 20px 30px">';
@@ -2789,7 +2801,7 @@ function obShowRecommendation(recKey,ans){
     others.forEach(function(t){
       h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:6px">';
       h+='<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+t.name+'</div>';
-      h+='<div style="font-size:11px;color:var(--mu)">'+t.days.length+' days · '+t.duration+'min</div></div>';
+      h+='<div style="font-size:11px;color:var(--mu)">'+sessionsPerWeek(t)+' days · '+t.duration+'min</div></div>';
       h+='<button class="btn btn-ghost btn-sm" data-key="'+t.key+'" onclick="switchTPL(this.dataset.key);closeSheet()">Load</button>';
       h+='</div>';
     });
@@ -3441,7 +3453,7 @@ function _doExportProgramme(){
   h+='<div class="card">';
   h+='<h3>'+tpl.name+'</h3>';
   var durLabel=customDuration?(/^\d+$/.test(customDuration.trim())?customDuration.trim()+' min':customDuration):(tpl.duration+' min');
-  h+='<div class="lbl">'+tpl.days.length+' days / week · ~'+durLabel+' · '+tpl.desc+'</div>';
+  h+='<div class="lbl">'+sessionsPerWeek(tpl)+' days / week · ~'+durLabel+' · '+tpl.desc+'</div>';
   h+='</div>';
 
   var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
@@ -3846,7 +3858,7 @@ function openSessionPicker(showAllBlocks){
   });
 
   if(filtering){
-    h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Showing sessions for your current week. <span style="color:var(--acc);cursor:pointer" onclick="openSessionPicker(true)">See all '+tpl.days.length+' sessions</span></div>';
+    h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Showing sessions for your current week. <span style="color:var(--acc);cursor:pointer" onclick="openSessionPicker(true)">See all '+tpl.days.length+' sessions across every phase</span></div>';
   } else if(hasBlocks){
     h+='<div style="font-size:11px;color:var(--mu);margin-bottom:10px">Showing all sessions. <span style="color:var(--acc);cursor:pointer" onclick="openSessionPicker(false)">Show only this week’s block</span></div>';
   }
@@ -4677,7 +4689,7 @@ function programsV(){
         var _overflow=_eqList.length>3?(' +'+(_eqList.length-3)):'';
         h+='<div><div style="font-size:13px;font-weight:600'+(isActive?';color:var(--acc)':'')+'">'+t.name+'</div>';
         h+='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin-top:2px">';
-        h+='<span class="lbl" style="margin-right:2px">'+t.days.length+' days/wk · '+t.duration+'min</span>';
+        h+='<span class="lbl" style="margin-right:2px">'+sessionsPerWeek(t)+' days/wk · '+t.duration+'min</span>';
         var _lvlDots=progLevelDots(t.key);if(_lvlDots)h+='<span style="display:inline-flex;align-items:center;gap:0;margin-right:2px">'+_lvlDots+'</span>';
         _shown.forEach(function(eq){h+='<span style="font-size:9px;font-weight:600;color:var(--mu);background:var(--bg2);border:0.5px solid var(--brd);border-radius:4px;padding:1px 5px">'+eq+'</span>';});
         if(_overflow)h+='<span style="font-size:9px;color:var(--mu)">'+_overflow+'</span>';
@@ -4892,7 +4904,7 @@ function openProgPreview(key){
   h+='<div style="margin-bottom:16px">';
   h+='<div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:4px">'+tpl.name+'</div>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
-  h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 8px">'+tpl.days.length+' days/wk</span>';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:6px;padding:2px 8px">'+sessionsPerWeek(tpl)+' days/wk</span>';
   h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:6px;padding:2px 8px">~'+tpl.duration+' min</span>';
   var _lvlBadge=progLevelBadge(tpl.key);if(_lvlBadge)h+=_lvlBadge;
   // Equipment tags in preview header
@@ -4965,7 +4977,7 @@ function openActiveProgramSheet(){
   h+='<div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:4px">'+tpl.name+'</div>';
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">'+tpl.desc+'</div>';
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
-  h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:8px;padding:2px 9px">'+tpl.days.length+' days/wk</span>';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--acc);background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:8px;padding:2px 9px">'+sessionsPerWeek(tpl)+' days/wk</span>';
   h+='<span style="font-size:10px;font-weight:600;color:var(--tx2);background:var(--bg3);border:0.5px solid var(--brd);border-radius:8px;padding:2px 9px">~'+tpl.duration+' min</span>';
   h+='</div>';
   // Sessions list
@@ -5075,7 +5087,7 @@ function openArchivedPreview(idx){
   h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:12px;padding:12px;margin-bottom:16px">';
   h+='<div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Archived '+d+'</div>';
   h+='<div style="font-size:15px;font-weight:800;color:var(--tx)">'+tpl.name+'</div>';
-  h+='<div style="font-size:12px;color:var(--mu);margin-top:2px)">'+tpl.days.length+' days · '+tpl.desc+'</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-top:2px)">'+sessionsPerWeek(tpl)+' days · '+tpl.desc+'</div>';
   h+='</div>';
   // Show each day's exercises
   tpl.days.forEach(function(day,di){
