@@ -2180,6 +2180,44 @@ function sessionsPerWeek(tpl){
   var firstBlock=tpl.days[0].block;
   return tpl.days.filter(function(d){return d.block===firstBlock;}).length;
 }
+function activeBlockFor(tpl,cl){
+  // Returns the block number declared by the plan week currently active for
+  // this programme, or null if there's no plan/week context or the active
+  // week doesn't declare a block. Resolves the per-programme plan the same
+  // way planBannerData() does (cl.plans[tplKey] first, cl.plan as legacy
+  // fallback) so this never disagrees with what the plan banner shows.
+  var activePlan=(cl.plans&&cl.plans[cl.tplKey])?cl.plans[cl.tplKey]:cl.plan;
+  if(!activePlan)return null;
+  var plan=getPlanByKey(activePlan.key);
+  if(!plan||!plan.weeks||!plan.weeks.length)return null;
+  var wi=activePlan.weekIndex||0;
+  if(wi>=plan.weeks.length)wi=plan.cyclic?wi%plan.weeks.length:plan.weeks.length-1;
+  var wk=plan.weeks[wi];
+  return(wk&&wk.block!==undefined)?wk.block:null;
+}
+function currentDayIdx(tpl,cl){
+  // Single source of truth for "which day template is next" for a given
+  // programme. Flat templates: raw session counter mod the day count, as
+  // before. Block-tagged templates: filtered to the days belonging to the
+  // plan's currently active block first (same filtering the session picker
+  // already applies) before applying the counter, so quick-start paths
+  // (FAB tap, Home card, Today view) never serve a different phase's
+  // content than what the plan banner says the client is on. Every
+  // block-tagged programme today splits evenly across its blocks, so the
+  // same ever-incrementing counter just continues Day A→B→C→A→B→C… straight
+  // through block changes too — no separate per-block tracking needed, and
+  // a fresh block is always entered at its Day A.
+  if(!tpl||!tpl.days||!tpl.days.length)return 0;
+  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);
+  var hasBlocks=tpl.days.some(function(d){return d.block!==undefined;});
+  if(!hasBlocks)return _pd%tpl.days.length;
+  var activeBlock=activeBlockFor(tpl,cl);
+  if(activeBlock===null)return _pd%tpl.days.length;
+  var filtered=[];
+  tpl.days.forEach(function(d,i){if(d.block===activeBlock)filtered.push(i);});
+  if(!filtered.length)return _pd%tpl.days.length;
+  return filtered[_pd%filtered.length];
+}
 
 // ═══════════════════════════════════════════════════════════════
 // PLAN SYSTEM
@@ -2277,7 +2315,7 @@ function startSession(){
     if(!isSessionLocked(tpl.days[_checkIdx]))break;
     cl.day=(cl.day||0)+1;
   }
-  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
+  var dayIdx=currentDayIdx(tpl,cl);
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
   // Sort exercises into canonical phase display order so the player queue
@@ -2897,7 +2935,7 @@ function homeV(){
 
   // Today card (dominant)
   var tpl=ACTIVE_TPL();
-  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
+  var dayIdx=currentDayIdx(tpl,cl);
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
   var inProgress=!!S.wx;
@@ -3531,7 +3569,7 @@ function _doExportProgramme(){
 
 function todayV(){
   var cl=C();var tpl=ACTIVE_TPL();
-  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
+  var dayIdx=currentDayIdx(tpl,cl);
   var day=tpl.days[dayIdx];
   var banner=planBannerData();
 
@@ -3836,7 +3874,7 @@ function isSessionLocked(day){
 }
 function openSessionPicker(showAllBlocks){
   var cl=C();var tpl=ACTIVE_TPL();
-  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
+  var dayIdx=currentDayIdx(tpl,cl);
   var h='<div style="padding:0 20px 30px">';
   var _doneSoFar=sessionsOnProg();
 
@@ -3844,11 +3882,8 @@ function openSessionPicker(showAllBlocks){
   // and the days themselves carry a block field, show only that block's days by
   // default. This keeps a 9-day, 3-block programme (e.g. Pull-Up Plateau Breaker)
   // from presenting all 9 sessions as one flat list. Always client-overridable.
-  var banner=planBannerData();
-  var plan=cl.plan?getPlanByKey(cl.plan.key):null;
-  var curWeek=plan&&plan.weeks?plan.weeks[banner?banner.weekIndex:0]:null;
   var hasBlocks=tpl.days.some(function(d){return d.block!==undefined;});
-  var activeBlock=(curWeek&&curWeek.block!==undefined)?curWeek.block:null;
+  var activeBlock=activeBlockFor(tpl,cl);
   var filtering=hasBlocks&&activeBlock!==null&&!showAllBlocks;
 
   var visibleDays=[];
@@ -4982,7 +5017,7 @@ function openActiveProgramSheet(){
   h+='</div>';
   // Sessions list
   h+='<div class="lbl" style="margin-bottom:8px">SESSIONS</div>';
-  var _pd=(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined)?cl.dayCounters[cl.tplKey]:(cl.day||0);var dayIdx=_pd%tpl.days.length;
+  var dayIdx=currentDayIdx(tpl,cl);
   tpl.days.forEach(function(day,i){
     var isCurrent=i===dayIdx;
     h+='<div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;border:0.5px solid '+(isCurrent?'var(--acc-brd)':'var(--brd)')+';background:'+(isCurrent?'var(--acc-bg)':'var(--bg3)')+'">';
