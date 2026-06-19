@@ -335,6 +335,7 @@ function dayToStorage(d){
               weight:ex.weight||0,
               track:ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol)};
       if(ex.unilateral!==undefined)_exOut.unilateral=ex.unilateral;
+      if(ex.steps&&ex.steps.length)_exOut.steps=ex.steps.slice();
       return _exOut;
     })
   };
@@ -2402,7 +2403,7 @@ function startSession(){
   if(cdExs.length){
     var cdCfg=(day.phaseConfig||{}).countdown||{};
     cdPhases.countdown={config:{duration:cdCfg.duration||15,name:cdCfg.name||'Countdown'},
-      steps:cdExs.map(function(o){return o.e.name;}),
+      steps:cdExs.reduce(function(acc,o){return acc.concat(o.e.steps&&o.e.steps.length?o.e.steps:[o.e.name]);},[]),
       exercises:cdExs.map(function(o){return o.i;}),
       remaining:(cdCfg.duration||15)*60,running:false,paused:false,done:false};
   }
@@ -5235,7 +5236,7 @@ function openCountdownSheet(){
     var _day2=_tpl2?_tpl2.days[wx.dayIdx]:null;
     var _cfg2=(_day2&&_day2.phaseConfig&&_day2.phaseConfig.countdown)||{duration:15,name:'Countdown'};
     wx.countdownPhases.countdown={config:{duration:_cfg2.duration||15,name:_cfg2.name||'Countdown'},
-      steps:_cdExs.map(function(o){return o.e.name;}),
+      steps:_cdExs.reduce(function(acc,o){return acc.concat(o.e.steps&&o.e.steps.length?o.e.steps:[o.e.name]);},[]),
       exercises:_cdExs.map(function(o){return o.i;}),
       remaining:(_cfg2.duration||15)*60,running:false,paused:false,done:false};
     cdp=wx.countdownPhases.countdown;
