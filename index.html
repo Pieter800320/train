@@ -321,7 +321,7 @@ function clients(){return Object.keys(S.clients).map(function(k){return S.client
 //                  used by customEdit only. phases drives section rendering.
 // All boundary crossings MUST go through one of these two functions.
 // ═══════════════════════════════════════════════════════════════
-var _PH_ORDER=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
+var _PH_ORDER=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
 
 // Builder → Storage  (call before writing to localStorage)
 function dayToStorage(d){
@@ -2353,7 +2353,7 @@ function startSession(){
   var setsData=[];
   orderedExercises.forEach(function(exEntry,ei){
     // Tabata-phase exercises are tracked at phase level — skip individual sets
-    if(exEntry.ph==='tabata'||exEntry.ph==='emom')return;
+    if(exEntry.ph==='tabata'||exEntry.ph==='emom'||exEntry.ph==='countdown')return;
     var volMod=banner?banner.volMod:1;
     var sets=Math.max(1,Math.round((exEntry.sets||1)*volMod));
     // Detect unilateral: exercise entry flag takes priority, then EX_MAP lookup
@@ -2396,7 +2396,17 @@ function startSession(){
         round:0,phase:'work',remaining:cfg.interval||60,running:false,done:false};
     }
   });
-  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:orderedExercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},skipped:{},playing:false,tabataPhases:tabPhases};
+  // Build countdown phase state
+  var cdPhases={};
+  var cdExs=orderedExercises.map(function(e,i){return{e:e,i:i};}).filter(function(o){return o.e.ph==='countdown';});
+  if(cdExs.length){
+    var cdCfg=(day.phaseConfig||{}).countdown||{};
+    cdPhases.countdown={config:{duration:cdCfg.duration||15,name:cdCfg.name||'Countdown'},
+      steps:cdExs.map(function(o){return o.e.name;}),
+      exercises:cdExs.map(function(o){return o.i;}),
+      remaining:(cdCfg.duration||15)*60,running:false,paused:false,done:false};
+  }
+  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:orderedExercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},skipped:{},playing:false,tabataPhases:tabPhases,countdownPhases:cdPhases};
   sv();draw();
 }
 function enterPlayMode(){
@@ -3567,8 +3577,8 @@ function _doExportProgramme(){
   h+='<div class="lbl">'+sessionsPerWeek(tpl)+' days / week · ~'+durLabel+' · '+tpl.desc+'</div>';
   h+='</div>';
 
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',countdown:'Countdown',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
   tpl.days.forEach(function(day,di){
     h+='<div class="card">';
     h+='<h3>'+day.focus+'</h3>';
@@ -3701,13 +3711,13 @@ function todayV(){
   h+='</div>';
 
   // Exercise list — custom programmes respect insertion order; pre-built use phase grouping
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',countdown:'Countdown',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
   var _isCustomTpl=!!(cl.customPrograms&&cl.customPrograms.some(function(cp){return cp.key===cl.tplKey;}));
 
   if(_isCustomTpl){
     // Custom programme: render sorted by canonical phase order (non-destructive copy)
-    var _phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
+    var _phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
     var sortedExercises=day.exercises.slice().sort(function(a,b){
       var ai=_phOrder.indexOf(a.ph||'strength'); var bi=_phOrder.indexOf(b.ph||'strength');
       if(ai<0)ai=_phOrder.length; if(bi<0)bi=_phOrder.length;
@@ -3719,6 +3729,34 @@ function todayV(){
       var origIdx=sortedIdx;
       var _curPh=exEntry.ph||'strength';
 
+      // Countdown: render as single tappable block
+      if(_curPh==='countdown'){
+        if(!_tabataRendered['countdown']){
+          _tabataRendered['countdown']=true;
+          if(_curPh!==_lastPh){h+='<div class="phase-head">'+phaseLabels['countdown']+'</div>';_lastPh=_curPh;}
+          var _cdState=isPlaying&&S.wx.countdownPhases&&S.wx.countdownPhases.countdown;
+          var _cdDone=_cdState&&_cdState.done;
+          var _cdRunning=_cdState&&_cdState.running;
+          var _cdCfg=_cdState?_cdState.config:{duration:15,name:'Countdown'};
+          var _cdSteps=sortedExercises.filter(function(e){return(e.ph||'strength')==='countdown';});
+          var _cdRowClass='ex-row'+(_cdDone?' done':'')+((!_cdDone&&_cdRunning)?' active-ex':'');
+          h+='<div class="'+_cdRowClass+'" onclick="openCountdownSheet()">';
+          h+='<div style="flex:1;min-width:0">';
+          h+='<div class="ex-name" style="'+(_cdRunning&&!_cdDone?'color:var(--acc);font-weight:700':'')+'">'+(_cdDone?'✓ ':(_cdRunning?'▶ ':''))+(_cdCfg.name||'Countdown')+'</div>';
+          h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">';
+          _cdSteps.forEach(function(te){h+='<span style="font-size:9px;background:var(--bg2);border:0.5px solid var(--brd);border-radius:4px;padding:2px 5px;color:var(--mu)">'+te.name+'</span>';});
+          h+='</div>';
+          if(isPlaying&&_cdState&&_cdState.running){
+            h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">'+fmtSecs(_cdState.remaining)+' remaining</div>';
+          } else if(isPlaying&&_cdDone){
+            h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">Complete</div>';
+          }
+          h+='</div>';
+          h+='<div class="ex-vol">'+(_cdCfg.duration||15)+'min</div>';
+          h+='</div>';
+        }
+        return;
+      }
       // Tabata/EMOM: render ONE phase block for the whole phase, skip individual rows
       if(_curPh==='tabata'||_curPh==='emom'){
         if(!_tabataRendered[_curPh]){
@@ -3808,6 +3846,28 @@ function todayV(){
     phases.forEach(function(ph){
       var exsInPhase=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
       if(exsInPhase.length===0)return;
+      // Countdown phase block
+      if(ph==='countdown'){
+        if(!_tabataRenderedPB['countdown']){
+          _tabataRenderedPB['countdown']=true;
+          h+='<div class="phase-head">'+phaseLabels['countdown']+'</div>';
+          var _cdStateB=isPlaying&&S.wx.countdownPhases&&S.wx.countdownPhases.countdown;
+          var _cdDoneB=_cdStateB&&_cdStateB.done;
+          var _cdRunningB=_cdStateB&&_cdStateB.running;
+          var _cdCfgB=_cdStateB?_cdStateB.config:{duration:15,name:'Countdown'};
+          var _cdRowClassB='ex-row'+(_cdDoneB?' done':'')+((!_cdDoneB&&_cdRunningB)?' active-ex':'');
+          h+='<div class="'+_cdRowClassB+'" onclick="openCountdownSheet()">';
+          h+='<div style="flex:1;min-width:0">';
+          h+='<div class="ex-name">'+(_cdDoneB?'✓ ':(_cdRunningB?'▶ ':''))+(_cdCfgB.name||'Countdown')+'</div>';
+          h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">';
+          exsInPhase.forEach(function(te){h+='<span style="font-size:9px;background:var(--bg2);border:0.5px solid var(--brd);border-radius:4px;padding:2px 5px;color:var(--mu)">'+te.name+'</span>';});
+          h+='</div></div>';
+          h+='<div class="ex-vol">'+(_cdCfgB.duration||15)+'min</div>';
+          h+='</div>';
+        }
+        _runningIdx+=exsInPhase.length;
+        return;
+      }
       // Tabata/EMOM: render phase block once, skip individual rows
       if(ph==='tabata'||ph==='emom'){
         if(!_tabataRenderedPB[ph]){
@@ -4769,7 +4829,9 @@ function isSessionComplete(wx){
   // Guard: if there are tabata/emom exercises not tracked in tabataPhases, not complete
   var hasBadTabata=wx.exercises.some(function(e){return e.ph==='tabata'&&(!tp.tabata||!tp.tabata.done);});
   var hasBadEmom=wx.exercises.some(function(e){return e.ph==='emom'&&(!tp.emom||!tp.emom.done);});
-  if(hasBadTabata||hasBadEmom)return false;
+  var cdp=wx.countdownPhases||{};
+  var hasBadCd=wx.exercises.some(function(e){return e.ph==='countdown'&&(!cdp.countdown||!cdp.countdown.done);});
+  if(hasBadTabata||hasBadEmom||hasBadCd)return false;
   return Object.keys(tp).every(function(k){return tp[k].done;});
 }
 
@@ -5113,6 +5175,9 @@ function stopTabataPhase(){
     Object.keys(wx.tabataPhases).forEach(function(k){wx.tabataPhases[k].running=false;});
   }
   if(_tabataPhaseTick){clearInterval(_tabataPhaseTick);_tabataPhaseTick=null;}
+  // Also stop any running countdown
+  if(wx&&wx.countdownPhases&&wx.countdownPhases.countdown)wx.countdownPhases.countdown.running=false;
+  if(_countdownTick){clearInterval(_countdownTick);_countdownTick=null;}
   sv();
 }
 
@@ -5131,6 +5196,205 @@ function logTabataPhase(phKey){
   closeSheet();
   if(restSecs>0)startRestCircle(restSecs);
   setTimeout(function(){draw();},300);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COUNTDOWN PHASE — single timed block with static reference list
+// ═══════════════════════════════════════════════════════════════
+var _countdownTick=null;
+
+function openCountdownSheet(){
+  var wx=S.wx;
+  // VIEW mode — show info-only sheet from TPL
+  if(!wx){
+    var _tpl=ACTIVE_TPL();var _cl=C();
+    var _day=_tpl?_tpl.days[currentDayIdx(_tpl,_cl)]:null;
+    if(!_day)return;
+    var _vExs=(_day.exercises||[]).filter(function(e){return e.ph==='countdown';});
+    if(!_vExs.length)return;
+    var _vCfg=((_day.phaseConfig||{}).countdown)||{duration:15,name:'Countdown'};
+    var _vH='<div style="padding:0 20px 30px">';
+    _vH+='<div class="lbl" style="margin-bottom:10px">'+(_vCfg.name||'Countdown').toUpperCase()+' — '+(_vCfg.duration||15)+' min</div>';
+    _vH+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:8px 12px;margin-bottom:16px">';
+    _vExs.forEach(function(e,i){
+      _vH+='<div style="font-size:13px;padding:5px 0;color:var(--tx);'+(i>0?'border-top:0.5px solid var(--brd)':'')+'">'+e.name+'</div>';
+    });
+    _vH+='</div>';
+    _vH+='<button class="btn btn-ghost" onclick="closeSheet()">Close</button>';
+    _vH+='</div>';
+    openSheet(_vH,_vCfg.name||'Countdown');
+    return;
+  }
+  var cdp=wx.countdownPhases&&wx.countdownPhases.countdown;
+  // On-the-fly rebuild if missing
+  if(!cdp){
+    var _cdExs=wx.exercises.map(function(e,i){return{e:e,i:i};}).filter(function(o){return o.e.ph==='countdown';});
+    if(!_cdExs.length)return;
+    if(!wx.countdownPhases)wx.countdownPhases={};
+    var _tpl2=ACTIVE_TPL();var _cl2=C();
+    var _day2=_tpl2?_tpl2.days[wx.dayIdx]:null;
+    var _cfg2=(_day2&&_day2.phaseConfig&&_day2.phaseConfig.countdown)||{duration:15,name:'Countdown'};
+    wx.countdownPhases.countdown={config:{duration:_cfg2.duration||15,name:_cfg2.name||'Countdown'},
+      steps:_cdExs.map(function(o){return o.e.name;}),
+      exercises:_cdExs.map(function(o){return o.i;}),
+      remaining:(_cfg2.duration||15)*60,running:false,paused:false,done:false};
+    cdp=wx.countdownPhases.countdown;
+    sv();
+  }
+  var cfg=cdp.config;
+  var totalSecs=(cfg.duration||15)*60;
+  var h='<div style="padding:0 20px 30px">';
+  if(!cdp.done){
+    h+='<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--mu);margin-bottom:10px">'+(cfg.name||'COUNTDOWN').toUpperCase()+'</div>';
+    h+='<div style="text-align:center;padding:8px 0 16px">';
+    h+='<div id="cdp-timer" style="font-size:64px;font-weight:900;letter-spacing:-2px;color:var(--acc);line-height:1">'+fmtSecs(cdp.remaining||totalSecs)+'</div>';
+    h+='</div>';
+  } else {
+    h+='<div style="text-align:center;padding:16px 0">';
+    h+='<div style="font-size:40px;color:var(--acc);margin-bottom:6px">✓</div>';
+    h+='<div style="font-size:16px;font-weight:700;color:var(--tx)">Complete!</div>';
+    h+='<div style="font-size:13px;color:var(--mu);margin-top:4px">'+(cfg.duration||15)+' minutes done</div>';
+    h+='</div>';
+  }
+  // Reference list
+  h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:8px 12px;margin-bottom:16px">';
+  (cdp.steps||[]).forEach(function(s,i){
+    h+='<div style="font-size:13px;padding:5px 0;color:var(--tx2);'+(i>0?'border-top:0.5px solid var(--brd)':'')+'">'+s+'</div>';
+  });
+  h+='</div>';
+  // Buttons
+  if(!cdp.done&&wx.playing){
+    if(cdp.running){
+      h+='<div style="display:flex;gap:8px">';
+      h+='<button class="btn btn-ghost" style="flex:1" onclick="pauseCountdownPhase()">Pause</button>';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="logCountdownPhase()">Done Early</button>';
+      h+='</div>';
+    } else if(cdp.paused){
+      h+='<div style="display:flex;gap:8px">';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="startCountdownPhase()">Resume</button>';
+      h+='<button class="btn btn-ghost" style="flex:1" onclick="logCountdownPhase()">Done Early</button>';
+      h+='</div>';
+    } else {
+      h+='<button class="btn btn-acc" style="width:100%" onclick="startCountdownPhase()">Start '+(cfg.name||'Countdown')+'</button>';
+    }
+  } else if(cdp.done){
+    h+='<button class="btn btn-ghost" onclick="closeSheet()">Close</button>';
+  }
+  h+='</div>';
+  openSheet(h,cfg.name||'Countdown');
+}
+
+function startCountdownPhase(){
+  var wx=S.wx;if(!wx||!wx.countdownPhases||!wx.countdownPhases.countdown)return;
+  var cdp=wx.countdownPhases.countdown;
+  var cfg=cdp.config;
+  if(!cdp.paused){
+    cdp.remaining=(cfg.duration||15)*60;
+  }
+  cdp.running=true;cdp.paused=false;
+  sv();timerBeepStart();
+  if(_countdownTick)clearInterval(_countdownTick);
+  _countdownTick=setInterval(function(){
+    var wx=S.wx;if(!wx||!wx.countdownPhases||!wx.countdownPhases.countdown){clearInterval(_countdownTick);_countdownTick=null;return;}
+    var cdp=wx.countdownPhases.countdown;
+    if(!cdp.running){clearInterval(_countdownTick);_countdownTick=null;return;}
+    if(cdp.remaining>0){
+      cdp.remaining--;
+      if(cdp.remaining===10)timerBeepWarn();
+      sv();
+      var el=document.getElementById('cdp-timer');
+      if(el)el.textContent=fmtSecs(cdp.remaining);
+    } else {
+      timerBeepEnd();
+      cdp.running=false;sv();
+      clearInterval(_countdownTick);_countdownTick=null;
+      logCountdownPhase();
+    }
+  },1000);
+  closeSheet();setTimeout(function(){openCountdownSheet();},200);
+}
+
+function pauseCountdownPhase(){
+  var wx=S.wx;if(!wx||!wx.countdownPhases||!wx.countdownPhases.countdown)return;
+  var cdp=wx.countdownPhases.countdown;
+  cdp.running=false;cdp.paused=true;
+  if(_countdownTick){clearInterval(_countdownTick);_countdownTick=null;}
+  sv();
+  closeSheet();setTimeout(function(){openCountdownSheet();},200);
+}
+
+function stopCountdownPhase(){
+  var wx=S.wx;if(wx&&wx.countdownPhases&&wx.countdownPhases.countdown){
+    wx.countdownPhases.countdown.running=false;
+  }
+  if(_countdownTick){clearInterval(_countdownTick);_countdownTick=null;}
+  sv();
+}
+
+function logCountdownPhase(){
+  var wx=S.wx;if(!wx||!wx.playing)return;
+  stopCountdownPhase();
+  var cdp=wx.countdownPhases&&wx.countdownPhases.countdown;if(!cdp)return;
+  cdp.done=true;
+  if(!wx.exDone)wx.exDone={};
+  (cdp.exercises||[]).forEach(function(i){wx.exDone[i]=true;});
+  var sessionComplete=isSessionComplete(wx);
+  var restSecs=sessionComplete?0:60;
+  if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;}
+  sv();
+  closeSheet();
+  if(restSecs>0)startRestCircle(restSecs);
+  setTimeout(function(){draw();},300);
+}
+
+// ─── buildCountdownConfigSheet ────────────────────────────────
+function buildCountdownConfigSheet(di,fromConfig){
+  var day=S.customEdit.days[di];
+  if(!day.phaseConfig)day.phaseConfig={};
+  if(!day.phaseConfig.countdown)day.phaseConfig.countdown={duration:15,name:'Countdown'};
+  sv();
+  var cfg=day.phaseConfig.countdown;
+  function stepperRow(label,field,val,step,min,max){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--brd)">'
+      +'<span style="font-size:13px;font-weight:600;color:var(--tx)">'+label+'</span>'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<button onclick="buildCdStep(\''+di+'\',\''+field+'\','+(-step)+','+min+','+max+')" style="width:32px;height:32px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--brd);font-size:18px;color:var(--tx);cursor:pointer">−</button>'
+      +'<span id="cd-val-'+field+'" style="font-size:16px;font-weight:700;color:var(--acc);min-width:40px;text-align:center">'+val+'</span>'
+      +'<button onclick="buildCdStep(\''+di+'\',\''+field+'\','+step+','+min+','+max+')" style="width:32px;height:32px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--brd);font-size:18px;color:var(--tx);cursor:pointer">+</button>'
+      +'</div></div>';
+  }
+  var h='<div style="padding:0 20px 30px">';
+  h+='<div style="margin-bottom:12px">';
+  h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--mu);margin-bottom:4px">NAME</div>';
+  h+='<input id="cd-name-input" type="text" value="'+(cfg.name||'Countdown')+'" '
+    +'style="width:100%;background:var(--bg3);border:0.5px solid var(--brd);border-radius:8px;padding:8px 12px;font-size:14px;color:var(--tx);box-sizing:border-box" '
+    +'oninput="buildCdNameChange('+di+',this.value)" placeholder="e.g. KB Flow">';
+  h+='</div>';
+  h+=stepperRow('Duration (min)','duration',cfg.duration||15,1,1,120);
+  h+='<div style="padding:16px 0 8px">';
+  h+='<button class="btn btn-acc" onclick="'+( fromConfig?'closeSheet();setTimeout(function(){buildOpenConfigSheet('+di+')},200)':'closeSheet();setTimeout(function(){buildOpenExSheet('+di+')},200)')+'">Done</button>';
+  h+='</div>';
+  h+='</div>';
+  openSheet(h,'Countdown Config');
+}
+
+function buildCdStep(di,field,delta,min,max){
+  var day=S.customEdit.days[di];
+  if(!day.phaseConfig)day.phaseConfig={};
+  if(!day.phaseConfig.countdown)day.phaseConfig.countdown={duration:15,name:'Countdown'};
+  var v=Math.min(max,Math.max(min,(day.phaseConfig.countdown[field]||15)+delta));
+  day.phaseConfig.countdown[field]=v;
+  sv();
+  var el=document.getElementById('cd-val-'+field);
+  if(el)el.textContent=v;
+}
+
+function buildCdNameChange(di,val){
+  var day=S.customEdit.days[di];
+  if(!day.phaseConfig)day.phaseConfig={};
+  if(!day.phaseConfig.countdown)day.phaseConfig.countdown={duration:15,name:'Countdown'};
+  day.phaseConfig.countdown.name=val;
+  sv();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -5273,6 +5537,13 @@ function autoOpenNextEx(){
     if(_nextPhase){
       setTimeout(function(){openTabataPhaseSheet(_nextPhase);},200);
     } else {
+      // Check countdown phase
+      var _cdp=wx.countdownPhases||{};
+      var _hasCd=wx.exercises.some(function(e){return e.ph==='countdown';});
+      if(_hasCd&&(!_cdp.countdown||!_cdp.countdown.done)){
+        setTimeout(function(){openCountdownSheet();},200);
+        return;
+      }
       draw(); // all done
     }
   }
@@ -5565,8 +5836,8 @@ function openProgPreview(key){
   h+='</div></div>';
 
   // Sessions
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',countdown:'Countdown',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
   var days=tpl.days||[];
   days.forEach(function(day,di){
     h+='<div style="margin-bottom:16px">';
@@ -5746,7 +6017,7 @@ function openArchivedPreview(idx){
       phases[ex.ph||'strength'].push(ex);
     });
     var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
-    var phLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
+    var phLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',countdown:'Countdown',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
     phOrder.forEach(function(ph){
       if(!phases[ph]||!phases[ph].length)return;
       h+='<div style="font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 4px">'+phLabels[ph]+'</div>';
@@ -5837,6 +6108,7 @@ var BUILD_PHASES=[
   {key:'accessory', label:'Accessory',  icon:'◇', sets:3, reps:12, rest:60,  defOn:false},
   {key:'core',      label:'Core',       icon:'◉', sets:3, reps:10, rest:45,  defOn:false},
   {key:'cardio',    label:'Cardio',     icon:'▷', sets:1, reps:0,  rest:0,   defOn:false},
+  {key:'countdown', label:'Countdown',  icon:'⏱', sets:1, reps:0,  rest:0,   defOn:false},
   {key:'cooldown',  label:'Cool Down',  icon:'◯', sets:1, reps:0,  rest:0,   defOn:false},
   {key:'tabata',    label:'Tabata',    icon:'⊛', sets:1, reps:0,  rest:60,  defOn:false},
   {key:'emom',      label:'EMOM',      icon:'⊡', sets:1, reps:0,  rest:0,   defOn:false}
@@ -6348,6 +6620,8 @@ function buildTogglePhaseSheet(di,phKey){
       day.phaseConfig.tabata={rounds:8,work:20,rest:10};
     if(phKey==='emom'&&!day.phaseConfig.emom)
       day.phaseConfig.emom={interval:60,duration:20};
+    if(phKey==='countdown'&&!day.phaseConfig.countdown)
+      day.phaseConfig.countdown={duration:15,name:'Countdown'};
   }
   sv();
   // Update row in place
@@ -6475,7 +6749,8 @@ function buildOpenPicker(di,phKey){
     cardio:['finisher'],
     cooldown:['cooldown'],
     tabata:['kpi','finisher','accessory','activation'],
-    emom:['kpi','accessory']
+    emom:['kpi','accessory'],
+    countdown:['kpi','accessory','activation','warmup','cardio']
   };
   var validPhases=phaseFilter[phKey]||['kpi','accessory'];
 
@@ -6714,7 +6989,7 @@ function buildConfigEx(di,ei){
     accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
   var trackLabels={reps:'Reps',weight:'Weight',time:'Time',distance:'Distance',calories:'Calories',rounds:'Rounds',height:'Height'};
   var allTrack=['reps','weight','time','distance','calories','rounds','height'];
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
 
   var h='<div style="padding:0 20px 30px">';
 
@@ -7114,6 +7389,9 @@ function buildOpenExSheet(di){
     } else if(phKey==='emom'){
       var ec=(day.phaseConfig||{}).emom||{interval:60,duration:20};
       h+='<span style="font-size:10px;color:var(--mu)">'+ec.interval+'s · '+ec.duration+'min</span>';
+    } else if(phKey==='countdown'){
+      var cdc=(day.phaseConfig||{}).countdown||{duration:15,name:'Countdown'};
+      h+='<span style="font-size:10px;color:var(--mu)">'+(cdc.name||'Countdown')+' · '+cdc.duration+'min</span>';
     } else {
       h+='<span style="font-size:10px;color:var(--mu)">'+phExs.length+' exercise'+(phExs.length!==1?'s':'')+'</span>';
     }
@@ -7160,6 +7438,24 @@ function buildOpenConfigSheet(di){
     hasAny=true;
     h+='<div class="phase-head">'+phConf.label+'</div>';
 
+    // Countdown: show config row + static step list
+    if(phKey==='countdown'){
+      var cdc2=(day.phaseConfig||{}).countdown||{duration:15,name:'Countdown'};
+      h+='<div onclick="buildCountdownConfigSheet('+di+',true)" style="'        +'display:flex;align-items:center;padding:12px 14px;'        +'background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:10px;margin-bottom:10px;cursor:pointer">';
+      h+='<div style="flex:1;min-width:0">';
+      h+='<div style="font-size:12px;font-weight:700;color:var(--acc)">Phase Config</div>';
+      h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+(cdc2.name||'Countdown')+' · '+(cdc2.duration||15)+'min</div>';
+      h+='</div>';
+      h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
+      h+='</div>';
+      phExs.forEach(function(ex){
+        h+='<div style="display:flex;align-items:center;padding:9px 14px;'          +'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
+        h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
+        h+='<span style="font-size:10px;color:var(--mu)">reference</span>';
+        h+='</div>';
+      });
+      return;
+    }
     // Tabata/EMOM: show phase-level config row + exercise list (no per-exercise Edit)
     if(phKey==='tabata'||phKey==='emom'){
       var tc=(day.phaseConfig||{})[phKey]||{};
