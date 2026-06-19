@@ -329,6 +329,7 @@ function dayToStorage(d){
     label:d.label||'Day 1',
     focus:d.focus||d.label||'',
     phaseConfig:d.phaseConfig||null,
+    phaseOrder:d.phaseOrder&&d.phaseOrder.length?d.phaseOrder.slice():null,
     exercises:(d.exercises||[]).map(function(ex){
       var _exOut={name:ex.name,sets:ex.sets||1,reps:ex.reps||0,vol:ex.vol||'',
               rest:ex.rest||60,ph:ex.ph||'strength',cue:ex.cue||'',
@@ -348,6 +349,8 @@ function dayToBuilder(d){
   exs.forEach(function(ex){phSet[ex.ph||'strength']=true;});
   var phases=_PH_ORDER.filter(function(ph){return phSet[ph];});
   if(!phases.length)phases=['strength'];
+  var phaseOrder=d.phaseOrder&&d.phaseOrder.length?d.phaseOrder.filter(function(p){return phases.indexOf(p)>=0;}):phases.slice();
+  phases.forEach(function(p){if(phaseOrder.indexOf(p)<0)phaseOrder.push(p);});
   // Infer split from exercise patterns if not already set
   var split=d.split&&d.split.length?d.split.slice():[];
   if(!split.length&&exs.length){
@@ -367,7 +370,7 @@ function dayToBuilder(d){
   }
   var focus=d.focus||'';
   if(!focus&&split.length)focus=buildAutoFocus(split);
-  return {label:d.label||'Day 1',focus:focus,split:split,phases:phases,exercises:exs};
+  return {label:d.label||'Day 1',focus:focus,split:split,phases:phases,phaseOrder:phaseOrder,phaseConfig:d.phaseConfig||{},exercises:exs};
 }
 
 // Dev guard: warn if a builder day is missing its phases array
@@ -2345,10 +2348,11 @@ function startSession(){
   var banner=planBannerData();
   // Sort exercises into canonical phase display order so the player queue
   // matches what todayV renders. Non-destructive — does not mutate the TPL.
+  var _sessPhOrder=day.phaseOrder&&day.phaseOrder.length?day.phaseOrder:_PH_ORDER;
   var orderedExercises=day.exercises.slice().sort(function(a,b){
-    var ai=_PH_ORDER.indexOf(a.ph||'strength');
-    var bi=_PH_ORDER.indexOf(b.ph||'strength');
-    if(ai<0)ai=_PH_ORDER.length;if(bi<0)bi=_PH_ORDER.length;
+    var ai=_sessPhOrder.indexOf(a.ph||'strength');var bi=_sessPhOrder.indexOf(b.ph||'strength');
+    if(ai<0)ai=_PH_ORDER.indexOf(a.ph||'strength');if(bi<0)bi=_PH_ORDER.indexOf(b.ph||'strength');
+    if(ai<0)ai=_sessPhOrder.length;if(bi<0)bi=_sessPhOrder.length;
     return ai-bi;
   });
   var setsData=[];
@@ -6658,30 +6662,63 @@ function buildToggleSplitPicker(di,pat){
 function buildOpenPhasePicker(di){
   S.customEdit.activeDay=di;sv();
   var day=S.customEdit.days[di];
+  var phases=day.phases||[];
+  var po=day.phaseOrder||[];
+  var FIXED=['warmup','cooldown'];
+  if(!po.length){po=phases.slice();day.phaseOrder=po;sv();}
+  var activeMiddle=po.filter(function(k){return FIXED.indexOf(k)<0&&phases.indexOf(k)>=0;});
+  phases.forEach(function(k){if(FIXED.indexOf(k)<0&&activeMiddle.indexOf(k)<0)activeMiddle.push(k);});
+  var inactive=BUILD_PHASES.filter(function(ph){return phases.indexOf(ph.key)<0;});
   var h='<div style="padding:0 20px 30px">';
-  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:16px">Select which phases this session contains. Strength is required.</div>';
-  h+='<div style="display:flex;flex-direction:column;gap:8px">';
-  BUILD_PHASES.forEach(function(ph){
-    var active=(day.phases||[]).indexOf(ph.key)>=0;
-    var exCount=(day.exercises||[]).filter(function(e){return e.ph===ph.key;}).length;
-    var subline=active?(exCount>0?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet'):
-      (ph.sets+'×'+ph.reps+(ph.reps>0?' reps':ph.reps===0?'timed':'')+(ph.rest>0?' · '+ph.rest+'s rest':''));
-    h+='<div onclick="buildTogglePhaseSheet('+di+',\''+ph.key+'\')" id="phase-row-'+ph.key+'" style="'+
-       'display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;cursor:pointer;'+
-       'border:1.5px solid '+(active?'var(--acc-brd)':'var(--brd)')+';'+
-       'background:'+(active?'var(--acc-bg)':'var(--bg3)')+'">';
-    h+='<div style="flex:1">';
-    h+='<div id="phase-lbl-'+ph.key+'" style="font-size:13px;font-weight:600;color:'+(active?'var(--acc)':'var(--tx)')+'">'+(active?'✓ ':'')+ph.label+'</div>';
-    h+='<div id="phase-sub-'+ph.key+'" style="font-size:11px;color:var(--mu);margin-top:1px">'+subline+'</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Tap x to remove. Drag handle to reorder. Warm-Up and Cool Down are fixed.</div>';
+  if(phases.length){
+    h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--acc);margin-bottom:6px">ACTIVE</div>';
+    h+='<div id="phase-order-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px">';
+    if(phases.indexOf('warmup')>=0){
+      var wu=BUILD_PHASE_MAP['warmup'];
+      var wuEx=(day.exercises||[]).filter(function(e){return e.ph==='warmup';}).length;
+      h+='<div style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px">';
+      h+='<span style="font-size:10px;color:var(--mu);min-width:28px;text-align:center;padding-right:8px"></span>';
+      h+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">'+wu.label+'</div>';
+      h+='<div style="font-size:11px;color:var(--mu)">'+(wuEx?wuEx+' exercise'+(wuEx>1?'s':''):'no exercises yet')+' \u00b7 always first</div></div></div>';
+    }
+    activeMiddle.forEach(function(phKey){
+      var ph=BUILD_PHASE_MAP[phKey];if(!ph)return;
+      var exCount=(day.exercises||[]).filter(function(e){return e.ph===phKey;}).length;
+      h+='<div class="phase-drag-row" data-di="'+di+'" data-phkey="'+phKey+'" style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px">';
+      h+='<span class="phase-drag-handle" style="cursor:grab;color:var(--mu);font-size:18px;touch-action:none;user-select:none;min-width:28px;text-align:center">\u283f</span>';
+      h+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">'+ph.label+'</div>';
+      h+='<div style="font-size:11px;color:var(--mu)">'+(exCount?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet')+'</div></div>';
+      h+='<button onclick="event.stopPropagation();buildTogglePhaseSheet('+di+',\''+phKey+'\')" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">\u00d7</button>';
+      h+='</div>';
+    });
+    if(phases.indexOf('cooldown')>=0){
+      var cd=BUILD_PHASE_MAP['cooldown'];
+      var cdEx=(day.exercises||[]).filter(function(e){return e.ph==='cooldown';}).length;
+      h+='<div style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px">';
+      h+='<span style="font-size:10px;color:var(--mu);min-width:28px;text-align:center;padding-right:8px"></span>';
+      h+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">'+cd.label+'</div>';
+      h+='<div style="font-size:11px;color:var(--mu)">'+(cdEx?cdEx+' exercise'+(cdEx>1?'s':''):'no exercises yet')+' \u00b7 always last</div></div></div>';
+    }
     h+='</div>';
+  }
+  if(inactive.length){
+    h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--mu);margin-bottom:6px">ADD PHASE</div>';
+    h+='<div style="display:flex;flex-direction:column;gap:5px">';
+    inactive.forEach(function(ph){
+      h+='<div onclick="buildTogglePhaseSheet('+di+',\''+ph.key+'\')" style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;cursor:pointer">';
+      h+='<span style="min-width:28px"></span>';
+      h+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">'+ph.label+'</div></div>';
+      h+='<span style="color:var(--acc);font-size:22px;font-weight:300;padding:0 6px;line-height:1">+</span>';
+      h+='</div>';
+    });
     h+='</div>';
-  });
-  h+='</div>';
+  }
   h+='<button class="btn btn-acc" style="margin-top:20px" onclick="closeSheet();draw()">Done</button>';
   h+='</div>';
   openSheet(h,'Phases',function(){draw();});
+  setTimeout(initPhaseDrag,60);
 }
-
 function buildTogglePhaseSheet(di,phKey){
   buildEnsureDay(di);
   var phases=S.customEdit.days[di].phases;
@@ -6692,10 +6729,14 @@ function buildTogglePhaseSheet(di,phKey){
       appConfirm('Remove '+BUILD_PHASE_MAP[phKey].label+' and its '+exCount+' exercise'+(exCount>1?'s':'')+' from this session?',function(){S.customEdit.days[di].exercises=S.customEdit.days[di].exercises.filter(function(e){return e.ph!==phKey;});phases.splice(idx,1);sv();buildEnsureDay(di);draw();});return;
     }
     phases.splice(idx,1);
+    var _poD=S.customEdit.days[di];if(_poD.phaseOrder){var _poi=_poD.phaseOrder.indexOf(phKey);if(_poi>=0)_poD.phaseOrder.splice(_poi,1);}
   } else {
     phases.push(phKey);
     var order=BUILD_PHASES.map(function(p){return p.key;});
     phases.sort(function(a,b){return order.indexOf(a)-order.indexOf(b);});
+    var day2=S.customEdit.days[di];
+    if(!day2.phaseOrder)day2.phaseOrder=phases.slice();
+    else if(day2.phaseOrder.indexOf(phKey)<0){var cdIdx=day2.phaseOrder.indexOf('cooldown');if(cdIdx>=0)day2.phaseOrder.splice(cdIdx,0,phKey);else day2.phaseOrder.push(phKey);}
     // Init phase-level config for timer phases
     var day=S.customEdit.days[di];
     if(!day.phaseConfig)day.phaseConfig={};
@@ -6707,25 +6748,8 @@ function buildTogglePhaseSheet(di,phKey){
       day.phaseConfig.countdown={duration:15,name:'Countdown'};
   }
   sv();
-  // Update row in place
-  var active=phases.indexOf(phKey)>=0;
-  var row=document.getElementById('phase-row-'+phKey);
-  var lbl=document.getElementById('phase-lbl-'+phKey);
-  var sub=document.getElementById('phase-sub-'+phKey);
-  if(row){
-    row.style.border='1.5px solid '+(active?'var(--acc-brd)':'var(--brd)');
-    row.style.background=active?'var(--acc-bg)':'var(--bg3)';
-  }
-  if(lbl){lbl.style.color=active?'var(--acc)':'var(--tx)';lbl.textContent=(active?'✓ ':'')+BUILD_PHASE_MAP[phKey].label;}
-  if(sub){
-    var exCount=S.customEdit.days[di].exercises.filter(function(e){return e.ph===phKey;}).length;
-    var ph=BUILD_PHASE_MAP[phKey];
-    var day2=S.customEdit.days[di];
-    var _subActive='';
-    if(phKey==='tabata'){var tc=(day2.phaseConfig||{}).tabata||{rounds:8,work:20,rest:10};_subActive=(exCount>0?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet')+' · '+tc.rounds+'×'+tc.work+'s/'+tc.rest+'s';}
-    else _subActive=exCount>0?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet';
-    sub.textContent=active?_subActive:(ph.sets+'×'+ph.reps+(ph.reps>0?' reps':ph.reps===0?'timed':'')+(ph.rest>0?' · '+ph.rest+'s rest':''));
-  }
+  // Re-render the phase picker to reflect the change
+  buildOpenPhasePicker(di);
 }
 
 function buildAddDay(){
@@ -7489,7 +7513,7 @@ function buildOpenExSheet(di){
   var day=e.days[di];
   buildEnsureDay(di);
   var phases=day.phases||['strength'];
-  var phOrder=BUILD_PHASES.map(function(p){return p.key;});
+  var phOrder=day.phaseOrder||BUILD_PHASES.map(function(p){return p.key;});
   var sortedPhases=phases.slice().sort(function(a,b){return phOrder.indexOf(a)-phOrder.indexOf(b);});
   var h='<div style="padding:0 20px 30px">';
   h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:16px">'+(day.label||'Session '+(di+1))+(day.focus?' — '+day.focus:'')+'</div>';
@@ -7544,7 +7568,7 @@ function buildOpenConfigSheet(di){
   var day=e.days[di];
   buildEnsureDay(di);
   var phases=day.phases||['strength'];
-  var phOrder=BUILD_PHASES.map(function(p){return p.key;});
+  var phOrder=day.phaseOrder||BUILD_PHASES.map(function(p){return p.key;});
   var sortedPhases=phases.slice().sort(function(a,b){return phOrder.indexOf(a)-phOrder.indexOf(b);});
   var h='<div style="padding:0 20px 30px">';
   h+='<div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:16px">'+(day.label||'Session '+(di+1))+(day.focus?' — '+day.focus:'')+'</div>';
@@ -7956,6 +7980,74 @@ function buildLoadPlan(key){
 
 
 // ─── BUILD: drag-to-reorder within phase ─────────────────────
+var _phaseDrag={active:false,srcEl:null};
+function initPhaseDrag(){
+  var rows=document.querySelectorAll('.phase-drag-row');
+  if(!rows.length)return;
+  var _pd={active:false,clone:null,srcRow:null,startY:0,cloneTop:0};
+  rows.forEach(function(row){
+    var handle=row.querySelector('.phase-drag-handle');if(!handle)return;
+    function onStart(clientY){
+      _pd.active=true;_pd.srcRow=row;_pd.startY=clientY;
+      var rect=row.getBoundingClientRect();
+      var clone=row.cloneNode(true);
+      clone.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;z-index:9999;opacity:0.92;box-shadow:0 8px 24px rgba(0,0,0,0.4);border-radius:10px;pointer-events:none;background:var(--bg2);border:1px solid var(--acc-brd);display:flex;align-items:center;padding:10px 12px;';
+      document.body.appendChild(clone);
+      _pd.clone=clone;_pd.cloneTop=rect.top;
+      row.style.opacity='0.3';handle.style.cursor='grabbing';
+    }
+    function onMove(clientY){
+      if(!_pd.active||!_pd.clone)return;
+      var dy=clientY-_pd.startY;
+      _pd.clone.style.top=(_pd.cloneTop+dy)+'px';
+      var midY=_pd.cloneTop+dy+_pd.clone.offsetHeight/2;
+      document.querySelectorAll('.phase-drag-row').forEach(function(r){
+        if(r===_pd.srcRow)return;
+        var rr=r.getBoundingClientRect();
+        var hit=midY>=rr.top&&midY<=rr.bottom;
+        r.style.background=hit?'var(--bg2)':'var(--bg3)';
+        r.style.border=hit?'0.5px solid var(--acc)':'0.5px solid var(--brd)';
+      });
+    }
+    function onEnd(clientY){
+      if(!_pd.active)return;
+      _pd.active=false;
+      if(_pd.clone){_pd.clone.remove();_pd.clone=null;}
+      _pd.srcRow.style.opacity='';handle.style.cursor='grab';
+      var dy=clientY-_pd.startY;
+      var midY=_pd.cloneTop+dy+_pd.srcRow.offsetHeight/2;
+      var targetRow=null;
+      document.querySelectorAll('.phase-drag-row').forEach(function(r){
+        if(r===_pd.srcRow)return;
+        var rr=r.getBoundingClientRect();
+        if(midY>=rr.top&&midY<=rr.bottom)targetRow=r;
+        r.style.background='var(--bg3)';r.style.border='0.5px solid var(--brd)';
+      });
+      if(targetRow){
+        var list=document.getElementById('phase-order-list');
+        var all=Array.from(list.querySelectorAll('.phase-drag-row'));
+        var si=all.indexOf(_pd.srcRow),ti=all.indexOf(targetRow);
+        if(si<ti)targetRow.parentNode.insertBefore(_pd.srcRow,targetRow.nextSibling);
+        else targetRow.parentNode.insertBefore(_pd.srcRow,targetRow);
+        var newAll=Array.from(list.querySelectorAll('.phase-drag-row'));
+        var di=parseInt(newAll[0]&&newAll[0].dataset.di);
+        if(!isNaN(di)){S.customEdit.days[di].phaseOrder=newAll.map(function(r){return r.dataset.phkey;});sv();}
+      }
+    }
+    handle.addEventListener('mousedown',function(e){
+      e.preventDefault();onStart(e.clientY);
+      function mm(e){onMove(e.clientY);}
+      function mu(e){onEnd(e.clientY);document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);}
+      document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu);
+    });
+    handle.addEventListener('touchstart',function(e){
+      e.preventDefault();onStart(e.touches[0].clientY);
+      function tm(e){onMove(e.touches[0].clientY);}
+      function tu(e){onEnd(e.changedTouches[0].clientY);document.removeEventListener('touchmove',tm);document.removeEventListener('touchend',tu);}
+      document.addEventListener('touchmove',tm,{passive:false});document.addEventListener('touchend',tu);
+    },{passive:false});
+  });
+}
 function initBuildDrag(){
   var rows=document.querySelectorAll('.build-drag-row');
   if(!rows.length)return;
