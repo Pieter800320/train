@@ -251,7 +251,7 @@ function ld(){
   // Also fixes reps:0 on non-timed exercises (BUILD's mobility/cardio/cooldown
   // phase defaults previously set reps:0 even for rep-tracked exercises,
   // making them display as empty until manually edited)
-  var _phMigOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var _phMigOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom','tabata','emom'];
   function _fixZeroReps(d){
     (d.exercises||[]).forEach(function(ex){
       var track=ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol);
@@ -319,13 +319,14 @@ function clients(){return Object.keys(S.clients).map(function(k){return S.client
 //                  used by customEdit only. phases drives section rendering.
 // All boundary crossings MUST go through one of these two functions.
 // ═══════════════════════════════════════════════════════════════
-var _PH_ORDER=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+var _PH_ORDER=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
 
 // Builder → Storage  (call before writing to localStorage)
 function dayToStorage(d){
   return {
     label:d.label||'Day 1',
     focus:d.focus||d.label||'',
+    phaseConfig:d.phaseConfig||null,
     exercises:(d.exercises||[]).map(function(ex){
       var _exOut={name:ex.name,sets:ex.sets||1,reps:ex.reps||0,vol:ex.vol||'',
               rest:ex.rest||60,ph:ex.ph||'strength',cue:ex.cue||'',
@@ -2347,6 +2348,8 @@ function startSession(){
   });
   var setsData=[];
   orderedExercises.forEach(function(exEntry,ei){
+    // Tabata-phase exercises are tracked at phase level — skip individual sets
+    if(exEntry.ph==='tabata'||exEntry.ph==='emom')return;
     var volMod=banner?banner.volMod:1;
     var sets=Math.max(1,Math.round((exEntry.sets||1)*volMod));
     // Detect unilateral: exercise entry flag takes priority, then EX_MAP lookup
@@ -2371,7 +2374,25 @@ function startSession(){
     }
   });
   _restCirclePos={x:null,y:null}; // reset to default position for each new session
-  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:orderedExercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},skipped:{},playing:false};
+  // Build per-phase Tabata state for any tabata phases in this day
+  var tabPhases={};
+  var tabPhaseKeys=['tabata','emom'];
+  tabPhaseKeys.forEach(function(phKey){
+    var phExs=orderedExercises.map(function(e,i){return {e:e,i:i};}).filter(function(o){return o.e.ph===phKey;});
+    if(!phExs.length)return;
+    var cfg=(day.phaseConfig||{})[phKey]||{};
+    if(phKey==='tabata'){
+      tabPhases[phKey]={config:{rounds:cfg.rounds||8,work:cfg.work||20,rest:cfg.rest||10},
+        exercises:phExs.map(function(o){return o.i;}),
+        round:0,phase:'work',remaining:cfg.work||20,running:false,done:false};
+    }
+    if(phKey==='emom'){
+      tabPhases[phKey]={config:{interval:cfg.interval||60,duration:cfg.duration||20},
+        exercises:phExs.map(function(o){return o.i;}),
+        round:0,phase:'work',remaining:cfg.interval||60,running:false,done:false};
+    }
+  });
+  S.wx={tplKey:cl.tplKey,dayIdx:dayIdx,dayLabel:day.label,focus:day.focus,exercises:orderedExercises,sets:setsData,currentSet:0,startTime:null,restActive:false,restEnd:0,exDone:{},skipped:{},playing:false,tabataPhases:tabPhases};
   sv();draw();
 }
 function enterPlayMode(){
@@ -3528,8 +3549,8 @@ function _doExportProgramme(){
   h+='<div class="lbl">'+sessionsPerWeek(tpl)+' days / week · ~'+durLabel+' · '+tpl.desc+'</div>';
   h+='</div>';
 
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
   tpl.days.forEach(function(day,di){
     h+='<div class="card">';
     h+='<h3>'+day.focus+'</h3>';
@@ -3549,7 +3570,6 @@ function _doExportProgramme(){
         else if(_expTrack.indexOf('distance')>=0&&ex.reps>0)vol=ex.reps+'m';
         else if(_expTrack.indexOf('calories')>=0&&ex.reps>0)vol=ex.reps+' cal';
         else if(_expTrack.indexOf('rounds')>=0&&ex.reps>0)vol=ex.reps+' rounds';
-        else if(_expTrack.indexOf('tabata')>=0)vol=(ex.tabRounds||8)+' rounds';
         else if(ex.reps>0)vol=ex.sets+'\u00d7'+ex.reps;
         var exEntry=getEx(ex.name);
         var vidUrl=getExVideo(exEntry||{name:ex.name});
@@ -3663,29 +3683,60 @@ function todayV(){
   h+='</div>';
 
   // Exercise list — custom programmes respect insertion order; pre-built use phase grouping
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
   var _isCustomTpl=!!(cl.customPrograms&&cl.customPrograms.some(function(cp){return cp.key===cl.tplKey;}));
 
   if(_isCustomTpl){
     // Custom programme: render sorted by canonical phase order (non-destructive copy)
-    var _phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+    var _phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
     var sortedExercises=day.exercises.slice().sort(function(a,b){
       var ai=_phOrder.indexOf(a.ph||'strength'); var bi=_phOrder.indexOf(b.ph||'strength');
       if(ai<0)ai=_phOrder.length; if(bi<0)bi=_phOrder.length;
       return ai-bi;
     });
     var _lastPh=null;
+    var _tabataRendered={};
     sortedExercises.forEach(function(exEntry,sortedIdx){
-      // origIdx is the exercise's position in phase-sorted order — this is
-      // the index space used by S.wx.exercises (created via startSession,
-      // which sorts by the same _PH_ORDER), S.wx.exDone, S.wx.viewAdj, etc.
-      // Using this unconditionally (not just when isPlaying) ensures
-      // openExWindow() opens the correct exercise even in VIEW mode, and
-      // correctly distinguishes duplicate-named exercises (e.g. two calf
-      // stretches in cooldown).
       var origIdx=sortedIdx;
       var _curPh=exEntry.ph||'strength';
+
+      // Tabata/EMOM: render ONE phase block for the whole phase, skip individual rows
+      if(_curPh==='tabata'||_curPh==='emom'){
+        if(!_tabataRendered[_curPh]){
+          _tabataRendered[_curPh]=true;
+          if(_curPh!==_lastPh){h+='<div class="phase-head">'+phaseLabels[_curPh]+'</div>';_lastPh=_curPh;}
+          var _tabState=isPlaying&&S.wx.tabataPhases&&S.wx.tabataPhases[_curPh];
+          var _tabDone=_tabState&&_tabState.done;
+          var _tabRunning=_tabState&&_tabState.running;
+          var _tabCfg=_tabState?_tabState.config:{rounds:8,work:20,rest:10};
+          var _tabExsInPhase=sortedExercises.filter(function(e){return(e.ph||'strength')===_curPh;});
+          var _tabRowClass='ex-row'+(_tabDone?' done':'')+((!_tabDone&&_tabRunning)?' active-ex':'');
+          h+='<div class="'+_tabRowClass+'" onclick="openTabataPhaseSheet(\''+_curPh+'\')">';
+          h+='<div style="flex:1;min-width:0">';
+          h+='<div class="ex-name" style="'+(_tabRunning&&!_tabDone?'color:var(--acc);font-weight:700':'')+'">'+(_tabDone?'✓ ':(_tabRunning?'▶ ':''))+(phaseLabels[_curPh])+' Circuit</div>';
+          // Chips showing all movements
+          h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">';
+          _tabExsInPhase.forEach(function(te){
+            h+='<span style="font-size:9px;background:var(--bg2);border:0.5px solid var(--brd);border-radius:4px;padding:2px 5px;color:var(--mu)">'+te.name+'</span>';
+          });
+          h+='</div>';
+          if(isPlaying&&_tabState&&_tabState.running){
+            var _curExIdx=_tabState.exercises[_tabState.round%_tabState.exercises.length];
+            var _curExName=S.wx.exercises[_curExIdx]?S.wx.exercises[_curExIdx].name:'';
+            h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">Round '+(_tabState.round+1)+'/'+_tabCfg.rounds+' · '+(_tabState.phase==='work'?'WORK':'REST')+' · '+_curExName+'</div>';
+          } else if(isPlaying&&_tabDone){
+            h+='<div style="font-size:9px;color:var(--acc);margin-top:2px">Complete — '+_tabCfg.rounds+' rounds done</div>';
+          }
+          h+='</div>';
+          h+='<div style="display:flex;align-items:center;gap:6px">';
+          h+='<div class="ex-vol">'+(_tabCfg.rounds||8)+'×</div>';
+          h+='</div>';
+          h+='</div>';
+        }
+        return; // skip individual exercise rows for tabata/emom phase
+      }
+
       if(_curPh!==_lastPh){h+='<div class="phase-head">'+phaseLabels[_curPh]+'</div>';_lastPh=_curPh;}
       var isDone=isPlaying&&S.wx.exDone&&S.wx.exDone[origIdx];
       var isActive=isPlaying&&origIdx===activeExIdx&&!isDone;
@@ -3704,7 +3755,6 @@ function todayV(){
       else if(_rowTrack.indexOf('distance')>=0&&_dispReps>0)volStr=_dispReps+'m';
       else if(_rowTrack.indexOf('calories')>=0&&_dispReps>0)volStr=_dispReps+' cal';
       else if(_rowTrack.indexOf('rounds')>=0&&_dispReps>0)volStr=_dispReps+' rounds';
-      else if(_rowTrack.indexOf('tabata')>=0)volStr=(exEntry.tabRounds||8)+' rounds';
       else if(_dispReps>0)volStr=exEntry.sets+'\xd7'+_dispReps;
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
@@ -3736,9 +3786,32 @@ function todayV(){
     // each exercise occupies in S.wx.exercises (sorted by the same phase
     // order), correctly distinguishing duplicate-named exercises.
     var _runningIdx=0;
+    var _tabataRenderedPB={};
     phases.forEach(function(ph){
       var exsInPhase=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
       if(exsInPhase.length===0)return;
+      // Tabata/EMOM: render phase block once, skip individual rows
+      if(ph==='tabata'||ph==='emom'){
+        if(!_tabataRenderedPB[ph]){
+          _tabataRenderedPB[ph]=true;
+          h+='<div class="phase-head">'+phaseLabels[ph]+'</div>';
+          var _tabStateB=isPlaying&&S.wx.tabataPhases&&S.wx.tabataPhases[ph];
+          var _tabDoneB=_tabStateB&&_tabStateB.done;
+          var _tabRunningB=_tabStateB&&_tabStateB.running;
+          var _tabCfgB=_tabStateB?_tabStateB.config:{rounds:8,work:20,rest:10};
+          var _tabRowClassB='ex-row'+(_tabDoneB?' done':'')+((!_tabDoneB&&_tabRunningB)?' active-ex':'');
+          h+='<div class="'+_tabRowClassB+'" onclick="openTabataPhaseSheet(\''+ph+'\')">';
+          h+='<div style="flex:1;min-width:0">';
+          h+='<div class="ex-name">'+(_tabDoneB?'✓ ':(_tabRunningB?'▶ ':'')+phaseLabels[ph]+' Circuit')+'</div>';
+          h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">';
+          exsInPhase.forEach(function(te){h+='<span style="font-size:9px;background:var(--bg2);border:0.5px solid var(--brd);border-radius:4px;padding:2px 5px;color:var(--mu)">'+te.name+'</span>';});
+          h+='</div></div>';
+          h+='<div class="ex-vol">'+(_tabCfgB.rounds||8)+'×</div>';
+          h+='</div>';
+        }
+        _runningIdx+=exsInPhase.length;
+        return;
+      }
       h+='<div class="phase-head">'+phaseLabels[ph]+'</div>';
       exsInPhase.forEach(function(exEntry){
         var origIdx=_runningIdx;
@@ -3760,7 +3833,6 @@ function todayV(){
       else if(_rowTrack.indexOf('distance')>=0&&_dispReps>0)volStr=_dispReps+'m';
       else if(_rowTrack.indexOf('calories')>=0&&_dispReps>0)volStr=_dispReps+' cal';
       else if(_rowTrack.indexOf('rounds')>=0&&_dispReps>0)volStr=_dispReps+' rounds';
-      else if(_rowTrack.indexOf('tabata')>=0)volStr=(exEntry.tabRounds||8)+' rounds';
       else if(_dispReps>0)volStr=exEntry.sets+'\xd7'+_dispReps;
       if(_adj&&_dispKg>0)volStr+=' · '+_dispKg+'kg';
       var rowClass='ex-row'+(isDone?' done':'')+(isActive?' active-ex':'');
@@ -4074,7 +4146,12 @@ function openExWindow(exIdx){
   var isCalories=track.indexOf('calories')>=0;
   var isRounds=track.indexOf('rounds')>=0;
   var isHeight=track.indexOf('height')>=0;
-  var isTabata=track.indexOf('tabata')>=0;
+  // Phase-based tabata/emom: redirect to the phase-level sheet
+  if(exEntry.ph==='tabata'||exEntry.ph==='emom'){
+    openTabataPhaseSheet(exEntry.ph);
+    return;
+  }
+  var isTabata=false; // per-exercise tabata track-field superseded by phase-based tabata
 
   // Find sets for this exercise
   var exSets=wx.sets.filter(function(s){return s.exIdx===exIdx;});
@@ -4543,7 +4620,7 @@ function doLogSet(globalIdx){
   // Set rest timer — skipped if this was the last undone set in the whole
   // session, since there's nothing left to rest before (avoids the rest
   // circle popping up over the Finish Session flow).
-  var sessionComplete=wx.sets.every(function(s){return s.done;});
+  var sessionComplete=isSessionComplete(wx);
   var restSecs=sessionComplete?0:((wx.exercises[exIdx].rest)||60);
   if(restSecs>0){
     wx.restActive=true;
@@ -4618,7 +4695,7 @@ function logTimedSet(exIdx){
     // Reset timedEx so the next tap starts fresh
     wx.timedEx=null;
     wx._pendingTime=undefined;
-    var sessionComplete=wx.sets.every(function(s){return s.done;});
+    var sessionComplete=isSessionComplete(wx);
     var restSecs=sessionComplete?0:((wx.exercises[exIdx].rest)||30);
     if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=exIdx;}
     sv();
@@ -4665,6 +4742,19 @@ function startExTimer(exIdx,totalSecs){
   // Refresh window
   closeSheet();setTimeout(function(){openExWindow(exIdx);},300);
 }
+// Session is complete when all regular sets are done AND all tabata phases are done
+function isSessionComplete(wx){
+  if(!wx)return false;
+  var regularDone=wx.sets.every(function(s){return s.done;});
+  if(!regularDone)return false;
+  var tp=wx.tabataPhases||{};
+  // Guard: if there are tabata/emom exercises not tracked in tabataPhases, not complete
+  var hasBadTabata=wx.exercises.some(function(e){return e.ph==='tabata'&&(!tp.tabata||!tp.tabata.done);});
+  var hasBadEmom=wx.exercises.some(function(e){return e.ph==='emom'&&(!tp.emom||!tp.emom.done);});
+  if(hasBadTabata||hasBadEmom)return false;
+  return Object.keys(tp).every(function(k){return tp[k].done;});
+}
+
 function stopExTimer(){
   if(S.wx&&S.wx.timedEx)S.wx.timedEx.running=false;
   if(_exTimerTick){clearInterval(_exTimerTick);_exTimerTick=null;}
@@ -4732,7 +4822,7 @@ function logTabataSet(exIdx){
     var allDoneNow=exSets.every(function(s){return s.done;});
     if(allDoneNow){wx.exDone[exIdx]=true;if(wx.skipped)wx.skipped[exIdx]=false;}
     wx.tabataEx=null;
-    var sessionComplete=wx.sets.every(function(s){return s.done;});
+    var sessionComplete=isSessionComplete(wx);
     var restSecs=sessionComplete?0:((wx.exercises[exIdx].rest)||60);
     if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=exIdx;}
     sv();
@@ -4740,6 +4830,290 @@ function logTabataSet(exIdx){
     if(restSecs>0)startRestCircle(restSecs);
     setTimeout(function(){draw();},300);
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABATA PHASE — phase-level circuit execution
+// ═══════════════════════════════════════════════════════════════
+var _tabataPhaseTick=null;
+
+function openTabataPhaseSheet(phKey){
+  var wx=S.wx;
+  // ── VIEW mode (no active session) — show info-only sheet from TPL ──
+  if(!wx){
+    var _tpl=ACTIVE_TPL();var _cl=C();
+    var _day=_tpl?_tpl.days[currentDayIdx(_tpl,_cl)]:null;
+    if(!_day)return;
+    var _vExs=(_day.exercises||[]).filter(function(e){return e.ph===phKey;});
+    if(!_vExs.length)return;
+    var _vCfg=((_day.phaseConfig||{})[phKey])||{};
+    var _vH='<div style="padding:0 20px 30px">';
+    if(phKey==='tabata'){
+      _vH+='<div class="lbl" style="margin-bottom:10px">TABATA — '+((_vCfg.rounds||8)+'× '+(_vCfg.work||20)+'s work / '+(_vCfg.rest||10)+'s rest')+'</div>';
+    } else {
+      _vH+='<div class="lbl" style="margin-bottom:10px">EMOM — '+((_vCfg.interval||60)+'s interval · '+(_vCfg.duration||20)+' min')+'</div>';
+    }
+    _vH+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:8px 12px;margin-bottom:16px">';
+    _vExs.forEach(function(e,i){
+      _vH+='<div style="font-size:13px;padding:5px 0;color:var(--tx);'+(i>0?'border-top:0.5px solid var(--brd)':'')+'">'+e.name+'</div>';
+    });
+    _vH+='</div>';
+    _vH+='<button class="btn btn-ghost" onclick="closeSheet()">Close</button>';
+    _vH+='</div>';
+    openSheet(_vH, phKey==='tabata'?'Tabata Circuit':'EMOM Circuit');
+    return;
+  }
+  var tp=wx.tabataPhases&&wx.tabataPhases[phKey];
+  // On-the-fly rebuild for sessions started before tabataPhases existed
+  if(!tp){
+    var phExs=wx.exercises.map(function(e,i){return{e:e,i:i};}).filter(function(o){return o.e.ph===phKey;});
+    if(!phExs.length){
+      openSheet('<div style="padding:20px 20px 30px;text-align:center"><div style="font-size:13px;color:var(--mu)">No exercises found in this phase.</div><button class="btn btn-ghost" style="margin-top:12px" onclick="closeSheet()">Close</button></div>','Error');
+      return;
+    }
+    if(!wx.tabataPhases)wx.tabataPhases={};
+    if(phKey==='tabata'){
+      wx.tabataPhases[phKey]={config:{rounds:8,work:20,rest:10},
+        exercises:phExs.map(function(o){return o.i;}),
+        round:0,phase:'work',remaining:20,running:false,done:false};
+    } else if(phKey==='emom'){
+      wx.tabataPhases[phKey]={config:{interval:60,duration:20},
+        exercises:phExs.map(function(o){return o.i;}),
+        round:0,phase:'work',remaining:60,running:false,done:false};
+    }
+    tp=wx.tabataPhases[phKey];
+    sv();
+  }
+  // EMOM: proper timer sheet (same UI structure as Tabata, no work/rest phase)
+  if(phKey==='emom'){
+    var ec=tp.config;
+    var eTotalRounds=ec.duration||20;
+    var eExList=tp.exercises.map(function(i){return wx.exercises[i]?wx.exercises[i].name:'?';});
+    var eRunning=tp.running;
+    var eDone=tp.done;
+    var eRound=tp.round;
+    var eRem=tp.remaining;
+    var eCurRelIdx=tp.exercises.length?eRound%tp.exercises.length:0;
+    var eCurExIdx=tp.exercises[eCurRelIdx];
+    var eCurExName=wx.exercises[eCurExIdx]?wx.exercises[eCurExIdx].name:'';
+    var eh='<div style="padding:0 20px 30px">';
+    if(!eDone){
+      eh+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+      eh+='<span id="tbp-round" class="lbl">ROUND '+(eRound+1)+' OF '+eTotalRounds+'</span>';
+      eh+='<span style="font-size:11px;font-weight:800;letter-spacing:0.5px;color:var(--acc)">GO</span>';
+      eh+='</div>';
+      eh+='<div id="tbp-step" style="font-size:16px;font-weight:700;color:var(--tx);text-align:center;margin-bottom:6px">'+(eRunning?eCurExName:(eTotalRounds+'× · '+(ec.interval||60)+'s'))+'</div>';
+      eh+='<div style="text-align:center;padding:8px 0 16px">';
+      eh+='<div id="tbp-timer" style="font-size:64px;font-weight:900;letter-spacing:-2px;color:var(--acc);line-height:1">'+(eRunning?fmtSecs(eRem):fmtSecs(ec.interval||60))+'</div>';
+      eh+='</div>';
+    } else {
+      eh+='<div style="text-align:center;padding:16px 0">';
+      eh+='<div style="font-size:40px;color:var(--acc);margin-bottom:6px">✓</div>';
+      eh+='<div style="font-size:16px;font-weight:700;color:var(--tx)">EMOM Complete!</div>';
+      eh+='<div style="font-size:13px;color:var(--mu);margin-top:4px">'+eTotalRounds+' rounds finished</div>';
+      eh+='</div>';
+    }
+    eh+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:8px 12px;margin-bottom:16px">';
+    eExList.forEach(function(name,i){
+      var eActive=eRunning&&(eCurRelIdx===i);
+      eh+='<div id="tbp-ex-'+i+'" style="font-size:13px;padding:5px 0;color:'+(eActive?'var(--acc)':'var(--tx2)')+';font-weight:'+(eActive?'700':'400')+';'+(i>0?'border-top:0.5px solid var(--brd)':'')+'">'+name+'</div>';
+    });
+    eh+='</div>';
+    if(!eDone&&wx.playing){
+      if(eRunning){
+        eh+='<div style="display:flex;gap:8px">';
+        eh+='<button class="btn btn-ghost" style="flex:1" onclick="pauseTabataPhase(\'emom\')">Pause</button>';
+        eh+='<button class="btn btn-acc" style="flex:1" onclick="logTabataPhase(\'emom\')">Done Early</button>';
+        eh+='</div>';
+      } else if(tp.paused){
+        eh+='<div style="display:flex;gap:8px">';
+        eh+='<button class="btn btn-acc" style="flex:1" onclick="startTabataPhase(\'emom\')">Resume</button>';
+        eh+='<button class="btn btn-ghost" style="flex:1" onclick="logTabataPhase(\'emom\')">Done Early</button>';
+        eh+='</div>';
+      } else {
+        eh+='<button class="btn btn-acc" onclick="startTabataPhase(\'emom\')">Start EMOM</button>';
+      }
+    } else if(eDone){
+      eh+='<button class="btn btn-ghost" onclick="closeSheet()">Close</button>';
+    }
+    eh+='</div>';
+    openSheet(eh,'EMOM Circuit');
+    return;
+  }
+  var cfg=tp.config;
+  var exList=tp.exercises.map(function(i){return wx.exercises[i]?wx.exercises[i].name:'?';});
+  var running=tp.running;
+  var done=tp.done;
+  var round=tp.round;
+  var phase=tp.phase;
+  var rem=tp.remaining;
+  var curExIdx=tp.exercises[round%tp.exercises.length];
+  var curExName=wx.exercises[curExIdx]?wx.exercises[curExIdx].name:'';
+  var h='<div style="padding:0 20px 30px">';
+  // Phase status header
+  if(!done){
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+    h+='<span id="tbp-round" class="lbl">ROUND '+(round+1)+' OF '+cfg.rounds+'</span>';
+    h+='<span id="tbp-phase" style="font-size:11px;font-weight:800;letter-spacing:0.5px;color:'+(phase==='work'?'var(--acc)':'var(--mu)')+'">'+(phase==='work'?'WORK':'REST')+'</span>';
+    h+='</div>';
+    h+='<div id="tbp-step" style="font-size:16px;font-weight:700;color:var(--tx);text-align:center;margin-bottom:6px">'+(running?curExName:(cfg.rounds+'× · '+cfg.work+'s/'+cfg.rest+'s'))+'</div>';
+    h+='<div style="text-align:center;padding:8px 0 16px">';
+    h+='<div id="tbp-timer" style="font-size:64px;font-weight:900;letter-spacing:-2px;color:'+(phase==='work'?'var(--acc)':'var(--tx2)')+';line-height:1">'+(running?fmtSecs(rem):fmtSecs(cfg.work))+'</div>';
+    h+='</div>';
+  } else {
+    h+='<div style="text-align:center;padding:16px 0">';
+    h+='<div style="font-size:40px;color:var(--acc);margin-bottom:6px">✓</div>';
+    h+='<div style="font-size:16px;font-weight:700;color:var(--tx)">Tabata Complete!</div>';
+    h+='<div style="font-size:13px;color:var(--mu);margin-top:4px">'+cfg.rounds+' rounds finished</div>';
+    h+='</div>';
+  }
+  // Exercise cycle list
+  h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:8px 12px;margin-bottom:16px">';
+  exList.forEach(function(name,i){
+    var isActive=running&&(round%exList.length===i);
+    h+='<div id="tbp-ex-'+i+'" style="font-size:13px;padding:5px 0;color:'+(isActive?'var(--acc)':'var(--tx2)')+';font-weight:'+(isActive?'700':'400')+';'+(i>0?'border-top:0.5px solid var(--brd)':'')+'">'+name+'</div>';
+  });
+  h+='</div>';
+  // Buttons
+  if(!done&&wx.playing){
+    if(running){
+      h+='<div style="display:flex;gap:8px">';
+      h+='<button class="btn btn-ghost" style="flex:1" onclick="pauseTabataPhase(\''+phKey+'\')">Pause</button>';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="logTabataPhase(\''+phKey+'\')">Done Early</button>';
+      h+='</div>';
+    } else if(tp.paused){
+      h+='<div style="display:flex;gap:8px">';
+      h+='<button class="btn btn-acc" style="flex:1" onclick="startTabataPhase(\''+phKey+'\')">Resume</button>';
+      h+='<button class="btn btn-ghost" style="flex:1" onclick="logTabataPhase(\''+phKey+'\')">Done Early</button>';
+      h+='</div>';
+    } else {
+      h+='<button class="btn btn-acc" onclick="startTabataPhase(\''+phKey+'\')">Start '+(phKey==='tabata'?'Tabata':'EMOM')+'</button>';
+    }
+  } else if(done){
+    h+='<button class="btn btn-ghost" onclick="closeSheet()">Close</button>';
+  }
+  h+='</div>';
+  openSheet(h,'Tabata Circuit');
+}
+
+function startTabataPhase(phKey){
+  var wx=S.wx;if(!wx||!wx.tabataPhases||!wx.tabataPhases[phKey])return;
+  var tp=wx.tabataPhases[phKey];
+  var cfg=tp.config;
+  // Resume from paused state — don't reset; fresh start — reset to beginning
+  if(!tp.paused){
+    tp.round=0;tp.phase='work';
+    if(phKey==='emom') tp.remaining=cfg.interval||60;
+    else tp.remaining=cfg.work||20;
+  }
+  tp.running=true;tp.paused=false;
+  sv();timerBeepStart();
+  if(_tabataPhaseTick)clearInterval(_tabataPhaseTick);
+  _tabataPhaseTick=setInterval(function(){
+    var wx=S.wx;if(!wx||!wx.tabataPhases||!wx.tabataPhases[phKey]){clearInterval(_tabataPhaseTick);_tabataPhaseTick=null;return;}
+    var tp=wx.tabataPhases[phKey];
+    if(!tp.running){clearInterval(_tabataPhaseTick);_tabataPhaseTick=null;return;}
+    var cfg=tp.config;
+    var exCount=tp.exercises.length;
+
+    if(phKey==='emom'){
+      // EMOM: single countdown per round, no work/rest phases
+      if(tp.remaining>0){
+        tp.remaining--;
+        if(tp.remaining===10)timerBeepWarn();
+      } else {
+        timerBeepEnd();
+        tp.round++;
+        if(tp.round>=(cfg.duration||20)){
+          tp.running=false;sv();
+          clearInterval(_tabataPhaseTick);_tabataPhaseTick=null;
+          logTabataPhase(phKey);
+          return;
+        }
+        tp.remaining=cfg.interval||60;
+        timerBeepStart();
+      }
+      sv();
+      // DOM updates
+      var eRelIdx=tp.round%exCount;
+      var eCurIdx=tp.exercises[eRelIdx];
+      var eName=wx.exercises[eCurIdx]?wx.exercises[eCurIdx].name:'';
+      var er=document.getElementById('tbp-round');if(er)er.textContent='ROUND '+(tp.round+1)+' OF '+(cfg.duration||20);
+      var es=document.getElementById('tbp-step');if(es)es.textContent=eName;
+      var et=document.getElementById('tbp-timer');if(et)et.textContent=fmtSecs(tp.remaining);
+      for(var i=0;i<exCount;i++){
+        var li=document.getElementById('tbp-ex-'+i);
+        if(li){li.style.color=(i===eRelIdx)?'var(--acc)':'var(--tx2)';li.style.fontWeight=(i===eRelIdx)?'700':'400';}
+      }
+    } else {
+      // Tabata: work/rest phase cycling
+      if(tp.remaining>0){
+        tp.remaining--;
+        if(tp.remaining===10)timerBeepWarn();
+      } else {
+        timerBeepEnd();
+        if(tp.phase==='work'){
+          if(tp.round>=cfg.rounds-1){
+            tp.running=false;sv();
+            clearInterval(_tabataPhaseTick);_tabataPhaseTick=null;
+            logTabataPhase(phKey);
+            return;
+          }
+          tp.phase='rest';tp.remaining=cfg.rest;
+        } else {
+          tp.round++;tp.phase='work';tp.remaining=cfg.work;
+        }
+      }
+      sv();
+      var curRelIdx=tp.round%exCount;
+      var curExIdx=tp.exercises[curRelIdx];
+      var curExName=wx.exercises[curExIdx]?wx.exercises[curExIdx].name:'';
+      var el=document.getElementById('tbp-round');if(el)el.textContent='ROUND '+(tp.round+1)+' OF '+cfg.rounds;
+      var ep=document.getElementById('tbp-phase');if(ep){ep.textContent=tp.phase==='work'?'WORK':'REST';ep.style.color=tp.phase==='work'?'var(--acc)':'var(--mu)';}
+      var esl=document.getElementById('tbp-step');if(esl)esl.textContent=curExName;
+      var etl=document.getElementById('tbp-timer');if(etl){etl.textContent=fmtSecs(tp.remaining);etl.style.color=tp.phase==='work'?'var(--acc)':'var(--tx2)';}
+      for(var i=0;i<exCount;i++){
+        var li=document.getElementById('tbp-ex-'+i);
+        if(li){li.style.color=(i===curRelIdx)?'var(--acc)':'var(--tx2)';li.style.fontWeight=(i===curRelIdx)?'700':'400';}
+      }
+    }
+  },1000);
+  // Re-open the sheet to show the running state
+  closeSheet();setTimeout(function(){openTabataPhaseSheet(phKey);},200);
+}
+
+function pauseTabataPhase(phKey){
+  var wx=S.wx;if(!wx||!wx.tabataPhases||!wx.tabataPhases[phKey])return;
+  var tp=wx.tabataPhases[phKey];
+  tp.running=false;tp.paused=true;
+  if(_tabataPhaseTick){clearInterval(_tabataPhaseTick);_tabataPhaseTick=null;}
+  sv();
+  closeSheet();setTimeout(function(){openTabataPhaseSheet(phKey);},200);
+}
+
+function stopTabataPhase(){
+  var wx=S.wx;if(wx&&wx.tabataPhases){
+    Object.keys(wx.tabataPhases).forEach(function(k){wx.tabataPhases[k].running=false;});
+  }
+  if(_tabataPhaseTick){clearInterval(_tabataPhaseTick);_tabataPhaseTick=null;}
+  sv();
+}
+
+function logTabataPhase(phKey){
+  var wx=S.wx;if(!wx||!wx.playing)return;
+  stopTabataPhase();
+  var tp=wx.tabataPhases&&wx.tabataPhases[phKey];if(!tp)return;
+  tp.done=true;
+  // Mark all exercises in this phase as done in exDone
+  if(!wx.exDone)wx.exDone={};
+  (tp.exercises||[]).forEach(function(i){wx.exDone[i]=true;});
+  var sessionComplete=isSessionComplete(wx);
+  var restSecs=sessionComplete?0:60;
+  if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;}
+  sv();
+  closeSheet();
+  if(restSecs>0)startRestCircle(restSecs);
+  setTimeout(function(){draw();},300);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4866,8 +5240,25 @@ function autoOpenNextEx(){
   for(var k=0;k<wx.sets.length;k++){
     if(!wx.sets[k].done){nextIdx=wx.sets[k].exIdx;break;}
   }
-  if(nextIdx>=0)openExWindow(nextIdx);
-  else draw(); // all done
+  if(nextIdx>=0){
+    openExWindow(nextIdx);
+  } else {
+    // All regular sets done — auto-open first undone tabata/emom phase
+    var tp=wx.tabataPhases||{};
+    var _phaseOrder=['tabata','emom'];
+    var _nextPhase=null;
+    for(var _pi=0;_pi<_phaseOrder.length;_pi++){
+      var _pk=_phaseOrder[_pi];
+      // Also check wx.exercises in case tabataPhases wasn't built yet
+      var _hasEx=wx.exercises.some(function(e){return e.ph===_pk;});
+      if(_hasEx&&(!tp[_pk]||!tp[_pk].done)){_nextPhase=_pk;break;}
+    }
+    if(_nextPhase){
+      setTimeout(function(){openTabataPhaseSheet(_nextPhase);},200);
+    } else {
+      draw(); // all done
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -5157,8 +5548,8 @@ function openProgPreview(key){
   h+='</div></div>';
 
   // Sessions
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
-  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
+  var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
   var days=tpl.days||[];
   days.forEach(function(day,di){
     h+='<div style="margin-bottom:16px">';
@@ -5337,8 +5728,8 @@ function openArchivedPreview(idx){
       if(!phases[ex.ph||'strength'])phases[ex.ph||'strength']=[];
       phases[ex.ph||'strength'].push(ex);
     });
-    var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
-    var phLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
+    var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
+    var phLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
     phOrder.forEach(function(ph){
       if(!phases[ph]||!phases[ph].length)return;
       h+='<div style="font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 4px">'+phLabels[ph]+'</div>';
@@ -5429,7 +5820,9 @@ var BUILD_PHASES=[
   {key:'accessory', label:'Accessory',  icon:'◇', sets:3, reps:12, rest:60,  defOn:false},
   {key:'core',      label:'Core',       icon:'◉', sets:3, reps:10, rest:45,  defOn:false},
   {key:'cardio',    label:'Cardio',     icon:'▷', sets:1, reps:0,  rest:0,   defOn:false},
-  {key:'cooldown',  label:'Cool Down',  icon:'◯', sets:1, reps:0,  rest:0,   defOn:false}
+  {key:'cooldown',  label:'Cool Down',  icon:'◯', sets:1, reps:0,  rest:0,   defOn:false},
+  {key:'tabata',    label:'Tabata',    icon:'⊛', sets:1, reps:0,  rest:60,  defOn:false},
+  {key:'emom',      label:'EMOM',      icon:'⊡', sets:1, reps:0,  rest:0,   defOn:false}
 ];
 var BUILD_PHASE_MAP={};
 BUILD_PHASES.forEach(function(p){BUILD_PHASE_MAP[p.key]=p;});
@@ -5931,6 +6324,13 @@ function buildTogglePhaseSheet(di,phKey){
     phases.push(phKey);
     var order=BUILD_PHASES.map(function(p){return p.key;});
     phases.sort(function(a,b){return order.indexOf(a)-order.indexOf(b);});
+    // Init phase-level config for timer phases
+    var day=S.customEdit.days[di];
+    if(!day.phaseConfig)day.phaseConfig={};
+    if(phKey==='tabata'&&!day.phaseConfig.tabata)
+      day.phaseConfig.tabata={rounds:8,work:20,rest:10};
+    if(phKey==='emom'&&!day.phaseConfig.emom)
+      day.phaseConfig.emom={interval:60,duration:20};
   }
   sv();
   // Update row in place
@@ -5946,8 +6346,11 @@ function buildTogglePhaseSheet(di,phKey){
   if(sub){
     var exCount=S.customEdit.days[di].exercises.filter(function(e){return e.ph===phKey;}).length;
     var ph=BUILD_PHASE_MAP[phKey];
-    sub.textContent=active?(exCount>0?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet'):
-      (ph.sets+'×'+ph.reps+(ph.reps>0?' reps':ph.reps===0?'timed':'')+(ph.rest>0?' · '+ph.rest+'s rest':''));
+    var day2=S.customEdit.days[di];
+    var _subActive='';
+    if(phKey==='tabata'){var tc=(day2.phaseConfig||{}).tabata||{rounds:8,work:20,rest:10};_subActive=(exCount>0?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet')+' · '+tc.rounds+'×'+tc.work+'s/'+tc.rest+'s';}
+    else _subActive=exCount>0?exCount+' exercise'+(exCount>1?'s':''):'no exercises yet';
+    sub.textContent=active?_subActive:(ph.sets+'×'+ph.reps+(ph.reps>0?' reps':ph.reps===0?'timed':'')+(ph.rest>0?' · '+ph.rest+'s rest':''));
   }
 }
 
@@ -6053,7 +6456,9 @@ function buildOpenPicker(di,phKey){
     accessory:['accessory','kpi'],
     core:['accessory','kpi'],
     cardio:['finisher'],
-    cooldown:['cooldown']
+    cooldown:['cooldown'],
+    tabata:['kpi','finisher','accessory','activation'],
+    emom:['kpi','accessory']
   };
   var validPhases=phaseFilter[phKey]||['kpi','accessory'];
 
@@ -6144,7 +6549,7 @@ function buildAddExercise(exKey){
   if(!ex)return;
   // Insert exercise in correct phase position (not just append to end)
   var exs=S.customEdit.days[di].exercises;
-  var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
   var phIdx=phOrder.indexOf(phKey);
   // Find last exercise of same or earlier phase
   var insertAt=exs.length;
@@ -6166,7 +6571,8 @@ function buildAddExercise(exKey){
       var day=S.customEdit.days[di];var split=day?day.split||[]:[];
       var phaseFilter={warmup:['warmup','activation'],activation:['warmup','activation'],
         mobility:['warmup','cooldown'],strength:['kpi','primer'],accessory:['accessory','kpi'],
-        core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown']};
+        core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown'],
+        tabata:['kpi','finisher','accessory','activation'],emom:['kpi','accessory']};
       var validPhases=phaseFilter[phKey]||['kpi','accessory'];
       var suggested=EX.filter(function(e){
         return e.phases&&e.phases.some(function(p){return validPhases.indexOf(p)>=0;})&&
@@ -6214,7 +6620,8 @@ function buildOpenLibrary(di,phKey){
   var phaseFilter={
     warmup:['warmup','activation'],activation:['warmup','activation'],
     mobility:['warmup','cooldown'],strength:['kpi','primer'],accessory:['accessory','kpi'],
-    core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown']
+    core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown'],
+    tabata:['kpi','finisher','accessory','activation'],emom:['kpi','accessory']
   };
   var validPhases=phaseFilter[phKey]||['kpi','accessory'];
   var h='<div style="padding:0 20px 30px">';
@@ -6288,9 +6695,9 @@ function buildConfigEx(di,ei){
   var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
   var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',
     accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
-  var trackLabels={reps:'Reps',weight:'Weight',time:'Time',distance:'Distance',calories:'Calories',rounds:'Rounds',height:'Height',tabata:'Tabata'};
-  var allTrack=['reps','weight','time','distance','calories','rounds','height','tabata'];
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var trackLabels={reps:'Reps',weight:'Weight',time:'Time',distance:'Distance',calories:'Calories',rounds:'Rounds',height:'Height'};
+  var allTrack=['reps','weight','time','distance','calories','rounds','height'];
+  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
 
   var h='<div style="padding:0 20px 30px">';
 
@@ -6359,13 +6766,6 @@ function buildConfigEx(di,ei){
   if(track.indexOf('height')>=0)
     h+=buildWizardStepper(di,ei,'height',exEntry.height||0,'HEIGHT','cm',5,0,200);
 
-  // Tabata circuit config (if in track)
-  if(track.indexOf('tabata')>=0){
-    h+=buildWizardStepper(di,ei,'tabRounds',exEntry.tabRounds||8,'ROUNDS','',1,1,50);
-    h+=buildWizardStepper(di,ei,'tabWork',exEntry.tabWork||20,'WORK','s',5,5,300);
-    h+=buildWizardStepper(di,ei,'tabRest',exEntry.tabRest||10,'REST BETWEEN ROUNDS','s',5,0,300);
-  }
-
   // Rest
   h+=buildWizardStepper(di,ei,'rest',exEntry.rest||60,'REST (seconds)','s',5,0,300);
 
@@ -6386,10 +6786,8 @@ function buildConfigEx(di,ei){
   h+='<input type="text" value="'+(exEntry.cue||'')+'" placeholder="e.g. Keep chest up" '+
      'oninput="S.customEdit.days['+di+'].exercises['+ei+'].cue=this.value;sv()" style="margin-bottom:20px">';
 
-  // Steps — sequence list. For Countdown/Flow-Grind this is a static
-  // reference list shown in full; for a Tabata circuit each line becomes
-  // one round's instruction, cycling automatically as rounds tick over.
-  if(track.indexOf('time')>=0||track.indexOf('tabata')>=0){
+  // Steps — sequence list for timed (Flow/Grind) exercises
+  if(track.indexOf('time')>=0){
     h+='<div class="lbl" style="margin-bottom:6px">STEPS (one per line, optional)</div>';
     h+='<textarea rows="6" placeholder="e.g.\nSwing\nClean\nSquat" '+
        'oninput="buildSetSteps('+di+','+ei+',this.value)" '+
@@ -6431,9 +6829,6 @@ function buildAdjEx(di,ei,field,delta){
   else if(field==='calories')ex.calories=Math.max(0,Math.min(1000,(ex.calories||0)+delta));
   else if(field==='rounds')ex.rounds=Math.max(1,Math.min(50,(ex.rounds||1)+delta));
   else if(field==='height')ex.height=Math.max(0,Math.min(200,(ex.height||0)+delta));
-  else if(field==='tabRounds')ex.tabRounds=Math.max(1,Math.min(50,(ex.tabRounds||8)+delta));
-  else if(field==='tabWork')ex.tabWork=Math.max(5,Math.min(300,(ex.tabWork||20)+delta));
-  else if(field==='tabRest')ex.tabRest=Math.max(0,Math.min(300,(ex.tabRest||10)+delta));
   var id='bcfg-'+field+'-'+di+'-'+ei;
   var el=document.getElementById(id);
   if(el){
@@ -6518,7 +6913,6 @@ function buildToggleTrack(di,ei,field){
     if(field==='calories'&&(!ex.calories||ex.calories===0))ex.calories=10;
     if(field==='rounds'&&(!ex.rounds||ex.rounds===0))ex.rounds=3;
     if(field==='height'&&(!ex.height||ex.height===0))ex.height=30;
-    if(field==='tabata'&&!ex.tabRounds){ex.tabRounds=8;ex.tabWork=20;ex.tabRest=10;}
   }
   sv();buildConfigEx(di,ei);
 }
@@ -6541,7 +6935,8 @@ function buildDrillToLibrary(di,phKey){
   var split=day.split||[];
   var phaseFilter={warmup:['warmup','activation'],activation:['warmup','activation'],
     mobility:['warmup','cooldown'],strength:['kpi','primer'],accessory:['accessory','kpi'],
-    core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown']};
+    core:['accessory','kpi'],cardio:['finisher'],cooldown:['cooldown'],
+    tabata:['kpi','finisher','accessory','activation'],emom:['kpi','accessory']};
   var validPhases=phaseFilter[phKey]||['kpi','accessory'];
 
   var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer" onclick="buildOpenExSheet('+di+')">'
@@ -6658,7 +7053,7 @@ function buildAddCustomExDrill(di,phKey,q){
     ph:phKey,cue:'',vol:phConf.reps===0?(defaultDur+'s'):'',
     track:phConf.reps===0?['time']:['reps','weight'],weight:0};
   var exs=S.customEdit.days[di].exercises;
-  var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown'];
+  var phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom'];
   var phIdx=phOrder.indexOf(phKey);
   var insertAt=exs.length;
   for(var _i=exs.length-1;_i>=0;_i--){
@@ -6695,7 +7090,16 @@ function buildOpenExSheet(di){
     h+='<div style="margin-bottom:16px">';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
     h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--acc)">'+phConf.label.toUpperCase()+'</div>';
-    h+='<span style="font-size:10px;color:var(--mu)">'+phExs.length+' exercise'+(phExs.length!==1?'s':'')+'</span>';
+    // For tabata/emom: show config summary as read-only label (editable in step 4)
+    if(phKey==='tabata'){
+      var tc=(day.phaseConfig||{}).tabata||{rounds:8,work:20,rest:10};
+      h+='<span style="font-size:10px;color:var(--mu)">'+tc.rounds+'× '+tc.work+'s/'+tc.rest+'s</span>';
+    } else if(phKey==='emom'){
+      var ec=(day.phaseConfig||{}).emom||{interval:60,duration:20};
+      h+='<span style="font-size:10px;color:var(--mu)">'+ec.interval+'s · '+ec.duration+'min</span>';
+    } else {
+      h+='<span style="font-size:10px;color:var(--mu)">'+phExs.length+' exercise'+(phExs.length!==1?'s':'')+'</span>';
+    }
     h+='</div>';
     phExs.forEach(function(ex){
       var globalEi=day.exercises.indexOf(ex);
@@ -6738,6 +7142,32 @@ function buildOpenConfigSheet(di){
     if(!phExs.length)return;
     hasAny=true;
     h+='<div class="phase-head">'+phConf.label+'</div>';
+
+    // Tabata/EMOM: show phase-level config row + exercise list (no per-exercise Edit)
+    if(phKey==='tabata'||phKey==='emom'){
+      var tc=(day.phaseConfig||{})[phKey]||{};
+      var configLine=phKey==='tabata'
+        ? ((tc.rounds||8)+'× '+((tc.work||20)+'s work / '+(tc.rest||10)+'s rest'))
+        : (((tc.interval||60)+'s interval · '+(tc.duration||20)+'min'));
+      h+='<div onclick="buildTabataConfigSheet('+di+',\''+phKey+'\',true)" style="'
+        +'display:flex;align-items:center;padding:12px 14px;'
+        +'background:var(--acc-bg);border:0.5px solid var(--acc-brd);border-radius:10px;margin-bottom:10px;cursor:pointer">';
+      h+='<div style="flex:1;min-width:0">';
+      h+='<div style="font-size:12px;font-weight:700;color:var(--acc)">Phase Config</div>';
+      h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+configLine+'</div>';
+      h+='</div>';
+      h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
+      h+='</div>';
+      phExs.forEach(function(ex){
+        h+='<div style="display:flex;align-items:center;padding:9px 14px;'
+          +'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
+        h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
+        h+='<span style="font-size:10px;color:var(--mu)">cycles</span>';
+        h+='</div>';
+      });
+      return;
+    }
+
     phExs.forEach(function(ex){
       var globalEi=day.exercises.indexOf(ex);
       var track=ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol);
@@ -6773,6 +7203,40 @@ function buildOpenConfigSheet(di){
 // ─────────────────────────────────────────────────────────────
 // SAVE
 // ─────────────────────────────────────────────────────────────
+// ─── Tabata / EMOM Phase Config Sheet ────────────────────────
+function buildTabataConfigSheet(di,phKey,fromConfig){
+  var day=S.customEdit.days[di];
+  if(!day.phaseConfig)day.phaseConfig={};
+  if(phKey==='tabata'&&!day.phaseConfig.tabata)day.phaseConfig.tabata={rounds:8,work:20,rest:10};
+  if(phKey==='emom'&&!day.phaseConfig.emom)day.phaseConfig.emom={interval:60,duration:20};
+  sv();
+  function stepperRow(label,field,val,step,min,max){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--brd)">'
+      +'<span style="font-size:13px;color:var(--tx)">'+label+'</span>'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<button class="btn btn-ghost" style="width:32px;height:32px;padding:0;font-size:18px" '
+      +'onclick="var cfg=S.customEdit.days['+di+'].phaseConfig[\''+phKey+'\'];cfg[\''+field+'\']=Math.max('+min+',Math.min('+max+',cfg[\''+field+'\']-'+step+'));sv();document.getElementById(\'bts-'+field+'\').textContent=cfg[\''+field+'\']">−</button>'
+      +'<span id="bts-'+field+'" style="font-size:15px;font-weight:700;min-width:28px;text-align:center">'+val+'</span>'
+      +'<button class="btn btn-ghost" style="width:32px;height:32px;padding:0;font-size:18px" '
+      +'onclick="var cfg=S.customEdit.days['+di+'].phaseConfig[\''+phKey+'\'];cfg[\''+field+'\']=Math.max('+min+',Math.min('+max+',cfg[\''+field+'\']+'+step+'));sv();document.getElementById(\'bts-'+field+'\').textContent=cfg[\''+field+'\']">+</button>'
+      +'</div></div>';
+  }
+  var h='<div style="padding:0 20px 30px">';
+  if(phKey==='tabata'){
+    var tc=day.phaseConfig.tabata;
+    h+=stepperRow('Rounds',       'rounds',  tc.rounds, 1, 1, 50);
+    h+=stepperRow('Work (seconds)','work',   tc.work,   5, 5, 300);
+    h+=stepperRow('Rest (seconds)','rest',   tc.rest,   5, 0, 300);
+  } else {
+    var ec=day.phaseConfig.emom;
+    h+=stepperRow('Interval (s)',  'interval',ec.interval,5,5,300);
+    h+=stepperRow('Duration (min)','duration',ec.duration,1,1,60);
+  }
+  h+='<button class="btn btn-acc" style="margin-top:20px" onclick="closeSheet();'+(fromConfig?'buildOpenConfigSheet('+di+')':'buildOpenExSheet('+di+')')+'">Done</button>';
+  h+='</div>';
+  openSheet(h, (phKey==='tabata'?'Tabata Config':'EMOM Config'));
+}
+
 function buildSave(){
   var e=S.customEdit;
   if(!e.name.trim()||!e.days.length){alert('Add a name and at least one session.');return;}
@@ -7451,9 +7915,9 @@ function draw(){
     function fabUp(cx,cy){
       if(!_fabDragging)return;_fabDragging=false;fab.style.transition='';
       if(!_fabMoved){
-        // Tap
-        if(!S.wx){startSession();draw();} // enters VIEW mode
-        else{enterPlayMode();}           // S.wx exists but not playing → start PLAY
+        // Single tap — create session if needed, then enter play mode immediately
+        if(!S.wx){ startSession(); }
+        enterPlayMode();
       }
     }
     fab.addEventListener('touchstart',function(e){fabDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
