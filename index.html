@@ -6985,6 +6985,26 @@ function buildStep4(){
 function buildConfigEx(di,ei){
   var exEntry=S.customEdit.days[di].exercises[ei];
   if(!exEntry)return;
+
+  // Countdown-phase exercises get a focused config — steps + optional weight, no track machinery
+  if(exEntry.ph==='countdown'){
+    var h='<div style="padding:0 20px 30px">';
+    h+='<div class="lbl" style="margin-bottom:6px">DESCRIPTION (one item per line)</div>';
+    h+='<textarea rows="8" placeholder="e.g. Clean / Squat / Snatch" '+
+       'oninput="buildSetSteps('+di+','+ei+',this.value)" '+
+       'style="width:100%;font-size:14px;line-height:1.5;margin-bottom:16px;resize:vertical">'+
+       (exEntry.steps||[]).join('\n')+'</textarea>';
+    h+='<div class="lbl" style="margin-bottom:6px">WEIGHT (optional)</div>';
+    h+=buildWizardStepper(di,ei,'weight',exEntry.weight||0,'WEIGHT','kg',2.5,0,300);
+    h+='<div class="lbl" style="margin-bottom:6px">COACHING CUE (optional)</div>';
+    h+='<input type="text" value="'+(exEntry.cue||'')+'" placeholder="e.g. Never put the bell down" '+
+       'oninput="S.customEdit.days['+di+'].exercises['+ei+'].cue=this.value;sv()" style="margin-bottom:20px">';
+    h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">← Back to session</button>';
+    h+='</div>';
+    openSheet(h, exEntry.name, function(){buildOpenConfigSheet(di);});
+    return;
+  }
+
   var track=exEntry.track||resolveTrack(exEntry.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
   var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',
     accessory:'Accessory',core:'Core',cardio:'Cardio',cooldown:'Cool Down'};
@@ -7357,6 +7377,11 @@ function buildAddCustomExDrill(di,phKey,q){
   }
   exs.splice(insertAt,0,newEx);
   sv();
+  // Countdown-phase exercises are configured in Step 5, not here — just return to exercise list
+  if(phKey==='countdown'){
+    buildOpenExSheet(di);
+    return;
+  }
   // Open config sheet for the new exercise immediately so trainer can set unilateral etc.
   var newEi=S.customEdit.days[di].exercises.indexOf(newEx);
   if(newEi>=0){
@@ -7450,9 +7475,11 @@ function buildOpenConfigSheet(di){
       h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
       h+='</div>';
       phExs.forEach(function(ex){
-        h+='<div style="display:flex;align-items:center;padding:9px 14px;'          +'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
+        var globalEi=day.exercises.indexOf(ex);
+        var stepCount=(ex.steps&&ex.steps.length)?ex.steps.length+' steps':(ex.weight>0?ex.weight+'kg':'tap to configure');
+        h+='<div onclick="buildConfigEx('+di+','+globalEi+')" style="display:flex;align-items:center;padding:9px 14px;cursor:pointer;'+          'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
         h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
-        h+='<span style="font-size:10px;color:var(--mu)">reference</span>';
+        h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
         h+='</div>';
       });
       return;
