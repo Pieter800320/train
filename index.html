@@ -6670,7 +6670,7 @@ function buildOpenPhasePicker(di){
   phases.forEach(function(k){if(FIXED.indexOf(k)<0&&activeMiddle.indexOf(k)<0)activeMiddle.push(k);});
   var inactive=BUILD_PHASES.filter(function(ph){return phases.indexOf(ph.key)<0;});
   var h='<div style="padding:0 20px 30px">';
-  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Tap x to remove. Drag handle to reorder. Warm-Up and Cool Down are fixed.</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:14px">Tap x to remove. Drag handle to reorder.</div>';
   if(phases.length){
     h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--acc);margin-bottom:6px">ACTIVE</div>';
     h+='<div id="phase-order-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px">';
@@ -6678,9 +6678,11 @@ function buildOpenPhasePicker(di){
       var wu=BUILD_PHASE_MAP['warmup'];
       var wuEx=(day.exercises||[]).filter(function(e){return e.ph==='warmup';}).length;
       h+='<div style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px">';
-      h+='<span style="font-size:10px;color:var(--mu);min-width:28px;text-align:center;padding-right:8px"></span>';
+      h+='<span style="min-width:28px"></span>';
       h+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">'+wu.label+'</div>';
-      h+='<div style="font-size:11px;color:var(--mu)">'+(wuEx?wuEx+' exercise'+(wuEx>1?'s':''):'no exercises yet')+' \u00b7 always first</div></div></div>';
+      h+='<div style="font-size:11px;color:var(--mu)">'+(wuEx?wuEx+' exercise'+(wuEx>1?'s':''):'no exercises yet')+' \u00b7 always first</div></div>';
+      h+='<button onclick="event.stopPropagation();buildTogglePhaseSheet('+di+',\'warmup\')" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">\u00d7</button>';
+      h+='</div>';
     }
     activeMiddle.forEach(function(phKey){
       var ph=BUILD_PHASE_MAP[phKey];if(!ph)return;
@@ -6696,9 +6698,11 @@ function buildOpenPhasePicker(di){
       var cd=BUILD_PHASE_MAP['cooldown'];
       var cdEx=(day.exercises||[]).filter(function(e){return e.ph==='cooldown';}).length;
       h+='<div style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px">';
-      h+='<span style="font-size:10px;color:var(--mu);min-width:28px;text-align:center;padding-right:8px"></span>';
+      h+='<span style="min-width:28px"></span>';
       h+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">'+cd.label+'</div>';
-      h+='<div style="font-size:11px;color:var(--mu)">'+(cdEx?cdEx+' exercise'+(cdEx>1?'s':''):'no exercises yet')+' \u00b7 always last</div></div></div>';
+      h+='<div style="font-size:11px;color:var(--mu)">'+(cdEx?cdEx+' exercise'+(cdEx>1?'s':''):'no exercises yet')+' \u00b7 always last</div></div>';
+      h+='<button onclick="event.stopPropagation();buildTogglePhaseSheet('+di+',\'cooldown\')" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">\u00d7</button>';
+      h+='</div>';
     }
     h+='</div>';
   }
@@ -8100,15 +8104,7 @@ function initBuildDrag(){
         var rr=r.getBoundingClientRect();
         if(midY>=rr.top&&midY<=rr.bottom){target=r;}
       });
-      // Highlight only same-phase rows; leave cross-phase rows untouched
-      document.querySelectorAll('.build-drag-row').forEach(function(r){
-        if(r===_drag.srcRow)return;
-        if(r.dataset.phase!==_drag.srcPhase){
-          r.style.background='var(--bg3)';r.style.border='0.5px solid var(--brd)';return;
-        }
-        r.style.border=r===target?'0.5px solid var(--acc)':'0.5px solid var(--brd)';
-        r.style.background=r===target?'var(--bg2)':'var(--bg3)';
-      });
+      // No target-row highlighting — the floating clone border is the visual indicator
     }
 
     function onEnd(){
@@ -8117,11 +8113,7 @@ function initBuildDrag(){
       if(_drag.clone){_drag.clone.remove();_drag.clone=null;}
       _drag.srcRow.style.opacity='';
       handle.style.cursor='grab';
-      // Restore all rows to their default visual state explicitly
-      document.querySelectorAll('.build-drag-row').forEach(function(r){
-        r.style.background='var(--bg3)';
-        r.style.border='0.5px solid var(--brd)';
-      });
+      // (rows were never highlighted during drag, nothing to restore)
 
       // Find drop target — same as onMove
       var dy=_drag.lastY-_drag.startY;
