@@ -4975,6 +4975,18 @@ function openTabataPhaseSheet(phKey){
     tp=wx.tabataPhases[phKey];
     sv();
   }
+  // Re-sync config.mode from live TPL so changes take effect without session restart
+  if(phKey==='tabata'&&!tp.running&&!tp.done){
+    var _tplSync=ACTIVE_TPL();var _clSync=C();
+    var _daySync=_tplSync?_tplSync.days[wx.dayIdx]:null;
+    var _cfgSync=(_daySync&&_daySync.phaseConfig&&_daySync.phaseConfig.tabata)||null;
+    if(_cfgSync&&_cfgSync.mode&&_cfgSync.mode!==tp.config.mode){
+      tp.config.mode=_cfgSync.mode;
+      tp.config.rounds=_cfgSync.rounds||tp.config.rounds;
+      tp.config.rest=_cfgSync.rest||tp.config.rest;
+      sv();
+    }
+  }
   // EMOM: proper timer sheet (same UI structure as Tabata, no work/rest phase)
   if(phKey==='emom'){
     var ec=tp.config;
@@ -7432,7 +7444,16 @@ function buildAddCustomExDrill(di,phKey,q){
   if(!q.trim())return;
   var phConf=BUILD_PHASE_MAP[phKey]||BUILD_PHASE_MAP['strength'];
   var defaultDur=phConf.rest>0?phConf.rest:30;
-  var newEx={name:q.trim(),sets:phConf.sets,reps:phConf.reps,rest:phConf.rest,
+  // For Tabata in Reps mode: override defaults to 3x5 reps+weight
+  var _tabRepsMode=(phKey==='tabata'&&S.customEdit.days[di]&&(S.customEdit.days[di].phaseConfig||{}).tabata&&(S.customEdit.days[di].phaseConfig.tabata.mode==='reps'));
+  var newEx={name:q.trim(),
+    sets:_tabRepsMode?3:phConf.sets,
+    reps:_tabRepsMode?5:phConf.reps,
+    rest:_tabRepsMode?0:phConf.rest,
+    ph:phKey,cue:'',
+    vol:(!_tabRepsMode&&phConf.reps===0)?(defaultDur+'s'):'',
+    track:_tabRepsMode?['reps','weight']:(phConf.reps===0?['time']:['reps','weight']),
+    weight:0};  var newEx={name:q.trim(),sets:phConf.sets,reps:phConf.reps,rest:phConf.rest,
     ph:phKey,cue:'',vol:phConf.reps===0?(defaultDur+'s'):'',
     track:phConf.reps===0?['time']:['reps','weight'],weight:0};
   var exs=S.customEdit.days[di].exercises;
@@ -7555,11 +7576,12 @@ function buildOpenConfigSheet(di){
       });
       return;
     }
-    // Tabata/EMOM: show phase-level config row + exercise list (no per-exercise Edit)
+    // Tabata/EMOM: show phase-level config row + exercise list
     if(phKey==='tabata'||phKey==='emom'){
       var tc=(day.phaseConfig||{})[phKey]||{};
+      var isRepsPhase=(phKey==='tabata'&&tc.mode==='reps');
       var configLine=phKey==='tabata'
-        ? ((tc.rounds||8)+'× '+((tc.work||20)+'s work / '+(tc.rest||10)+'s rest'))
+        ? (isRepsPhase?((tc.rounds||5)+' rounds · reps'):((tc.rounds||8)+'× '+((tc.work||20)+'s work / '+(tc.rest||10)+'s rest')))
         : (((tc.interval||60)+'s interval · '+(tc.duration||20)+'min'));
       h+='<div onclick="buildTabataConfigSheet('+di+',\''+phKey+'\',true)" style="'
         +'display:flex;align-items:center;padding:12px 14px;'
@@ -7571,11 +7593,25 @@ function buildOpenConfigSheet(di){
       h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
       h+='</div>';
       phExs.forEach(function(ex){
-        h+='<div style="display:flex;align-items:center;padding:9px 14px;'
-          +'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
-        h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
-        h+='<span style="font-size:10px;color:var(--mu)">cycles</span>';
-        h+='</div>';
+        var globalEi=day.exercises.indexOf(ex);
+        if(isRepsPhase){
+          var sets=ex.sets||3;var reps=ex.reps||ex.vol||5;
+          var weight=ex.weight>0?(' · '+ex.weight+'kg'):'';
+          h+='<div onclick="buildConfigEx('+di+','+globalEi+')" style="display:flex;align-items:center;padding:9px 14px;cursor:pointer;'
+            +'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
+          h+='<div style="flex:1;min-width:0">';
+          h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
+          h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+sets+'×'+reps+weight+'</div>';
+          h+='</div>';
+          h+='<span style="font-size:12px;color:var(--acc);font-weight:700">Edit ›</span>';
+          h+='</div>';
+        } else {
+          h+='<div style="display:flex;align-items:center;padding:9px 14px;'
+            +'background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
+          h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
+          h+='<span style="font-size:10px;color:var(--mu)">cycles</span>';
+          h+='</div>';
+        }
       });
       return;
     }
