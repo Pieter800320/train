@@ -2455,10 +2455,19 @@ function finishSession(){
   var doneSets=S.wx.sets.filter(function(s){return s.done;}).length;
   var duration=Math.max(1,Math.round((Date.now()-S.wx.startTime)/60000));
   var focus=S.wx.focus||'Session';
+  // Count completed phase-based sessions (tabata, emom, countdown)
+  var tp=S.wx.tabataPhases||{};
+  var cdp=S.wx.countdownPhases||{};
+  var doneTabata=Object.keys(tp).filter(function(k){return tp[k].done;}).length;
+  var doneCountdown=Object.keys(cdp).filter(function(k){return cdp[k].done;}).length;
+  var donePhases=doneTabata+doneCountdown;
+  var isTimerSession=(doneSets===0&&donePhases>0);
+  var hasAnyWork=(doneSets>0||donePhases>0);
   // Save to history
-  if(doneSets>0){
+  if(hasAnyWork){
     cl.hist.push({date:Date.now(),tplKey:S.wx.tplKey,dayIdx:S.wx.dayIdx,label:S.wx.dayLabel,
-      focus:focus,sets:doneSets,duration:duration,plan:banner?banner.weekLabel:null});
+      focus:focus,sets:doneSets,phases:donePhases,duration:duration,
+      plan:banner?banner.weekLabel:null,timerSession:isTimerSession});
     if(!cl.dayCounters)cl.dayCounters={};
     cl.dayCounters[cl.tplKey]=(cl.dayCounters[cl.tplKey]||0)+1;
     cl.day=cl.dayCounters[cl.tplKey];
@@ -2472,7 +2481,8 @@ function finishSession(){
   h+='<div style="font-size:72px;font-weight:900;color:var(--acc);line-height:1;margin-bottom:8px">✓</div>';
   h+='<div style="font-size:22px;font-weight:800;color:var(--tx);margin-bottom:8px">Session Complete!</div>';
   h+='<div style="font-size:14px;font-weight:600;color:var(--acc);margin-bottom:6px">'+focus+'</div>';
-  h+='<div style="font-size:13px;color:var(--tx2);margin-bottom:16px">'+doneSets+' sets · '+duration+' min</div>';
+  var _sumLine=isTimerSession?(donePhases+' phase'+(donePhases!==1?'s':'')):doneSets+' sets';
+  h+='<div style="font-size:13px;color:var(--tx2);margin-bottom:16px">'+_sumLine+' · '+duration+' min</div>';
   h+='<div style="font-size:16px;color:var(--tx);font-style:italic;margin-bottom:24px;line-height:1.5">“'+msg+'”</div>';
   h+='<button class="btn btn-acc" onclick="window._cancelWx=null;closeSheet();S.tab=\'home\';sv();draw()">Back to Home</button>';
   h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="cancelFinishSession()">Cancel</button>';
@@ -3064,7 +3074,7 @@ function homeV(){
       h+='<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+s.focus+'</div>';
       h+='<div class="lbl" style="margin-top:1px">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+'</div></div>';
       h+='<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:var(--acc)">'+s.duration+' min</div>';
-      h+='<div class="lbl">'+s.sets+' sets</div></div>';
+      h+='<div class="lbl">'+(s.timerSession?'⏱ timer':s.sets+' sets')+'</div></div>';
       h+='</div>';
     });
   }
@@ -5021,65 +5031,107 @@ function openTabataPhaseSheet(phKey){
     return;
   }
   var cfg=tp.config;
-  var exList=tp.exercises.map(function(i){return wx.exercises[i]?wx.exercises[i].name:'?';});
+  var isRepsMode=cfg.mode==='reps';
+  var exList=tp.exercises.map(function(i){return wx.exercises[i]||null;});
   var running=tp.running;
   var done=tp.done;
   var round=tp.round;
   var phase=tp.phase;
   var rem=tp.remaining;
-  var curExIdx=tp.exercises[round%tp.exercises.length];
-  var curExName=wx.exercises[curExIdx]?wx.exercises[curExIdx].name:'';
+  var totalRounds=cfg.rounds||8;
   var h='<div style="padding:0 20px 30px">';
-  // Phase status header
-  if(!done){
-    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
-    h+='<span id="tbp-round" class="lbl">ROUND '+(round+1)+' OF '+cfg.rounds+'</span>';
-    h+='<span id="tbp-phase" style="font-size:11px;font-weight:800;letter-spacing:0.5px;color:'+(phase==='work'?'var(--acc)':'var(--mu)')+'">'+(phase==='work'?'WORK':'REST')+'</span>';
-    h+='</div>';
-    h+='<div id="tbp-step" style="font-size:16px;font-weight:700;color:var(--tx);text-align:center;margin-bottom:6px">'+(running?curExName:(cfg.rounds+'× · '+cfg.work+'s/'+cfg.rest+'s'))+'</div>';
-    h+='<div style="text-align:center;padding:8px 0 16px">';
-    h+='<div id="tbp-timer" style="font-size:64px;font-weight:900;letter-spacing:-2px;color:'+(phase==='work'?'var(--acc)':'var(--tx2)')+';line-height:1">'+((running||tp.paused)?fmtSecs(rem):fmtSecs(cfg.work))+'</div>';
-    h+='</div>';
-  } else {
-    h+='<div style="text-align:center;padding:16px 0">';
-    h+='<div style="font-size:40px;color:var(--acc);margin-bottom:6px">✓</div>';
-    h+='<div style="font-size:16px;font-weight:700;color:var(--tx)">Tabata Complete!</div>';
-    h+='<div style="font-size:13px;color:var(--mu);margin-top:4px">'+cfg.rounds+' rounds finished</div>';
-    h+='</div>';
-  }
-  // Exercise cycle list
-  h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:8px 12px;margin-bottom:16px">';
-  exList.forEach(function(name,i){
-    var isActive=running&&(round%exList.length===i);
-    h+='<div id="tbp-ex-'+i+'" style="font-size:13px;padding:5px 0;color:'+(isActive?'var(--acc)':'var(--tx2)')+';font-weight:'+(isActive?'700':'400')+';'+(i>0?'border-top:0.5px solid var(--brd)':'')+'">'+name+'</div>';
-  });
-  h+='</div>';
-  // Buttons
-  if(!done&&wx.playing){
-    if(running){
-      h+='<div style="display:flex;gap:8px">';
-      h+='<button class="btn btn-ghost" style="flex:1" onclick="pauseTabataPhase(\''+phKey+'\')">Pause</button>';
-      h+='<button class="btn btn-acc" style="flex:1" onclick="logTabataPhase(\''+phKey+'\')">Done Early</button>';
+
+  if(isRepsMode){
+    // ── REPS MODE ──────────────────────────────────────────────
+    if(!done){
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+      h+='<span class="lbl">ROUND '+(round+1)+' OF '+totalRounds+'</span>';
       h+='</div>';
-    } else if(tp.paused){
-      h+='<div style="display:flex;gap:8px">';
-      h+='<button class="btn btn-acc" style="flex:1" onclick="startTabataPhase(\''+phKey+'\')">Resume</button>';
-      h+='<button class="btn btn-ghost" style="flex:1" onclick="logTabataPhase(\''+phKey+'\')">Done Early</button>';
+      h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:8px 12px;margin-bottom:16px">';
+      exList.forEach(function(ex,i){
+        if(!ex)return;
+        var sets=ex.sets||3;var reps=ex.reps||ex.vol||'';
+        var weight=ex.weight>0?(ex.weight+'kg · '):'';
+        h+='<div style="display:flex;align-items:center;padding:7px 0;'+(i>0?'border-top:0.5px solid var(--brd)':'')+'">';
+        h+='<div style="flex:1;min-width:0">';
+        h+='<div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
+        h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+weight+sets+'×'+reps+'</div>';
+        h+='</div></div>';
+      });
       h+='</div>';
     } else {
-      h+='<button class="btn btn-acc" onclick="startTabataPhase(\''+phKey+'\')">Start '+(phKey==='tabata'?'Tabata':'EMOM')+'</button>';
+      h+='<div style="text-align:center;padding:16px 0">';
+      h+='<div style="font-size:40px;color:var(--acc);margin-bottom:6px">✓</div>';
+      h+='<div style="font-size:16px;font-weight:700;color:var(--tx)">Circuit Complete!</div>';
+      h+='<div style="font-size:13px;color:var(--mu);margin-top:4px">'+totalRounds+' rounds done</div>';
+      h+='</div>';
     }
-  } else if(done){
-    h+='<button class="btn btn-ghost" onclick="closeSheet()">Close</button>';
+    if(!done&&wx.playing){
+      h+='<button class="btn btn-acc" style="width:100%;margin-bottom:8px" onclick="tabataRepsRoundDone(\''+phKey+'\')">'+(round+1<totalRounds?'Round '+(round+1)+' Done — Next Round':'Finish Circuit')+'</button>';
+      h+='<button class="btn btn-ghost" style="width:100%" onclick="logTabataPhase(\''+phKey+'\')">Done Early</button>';
+    } else if(done){
+      h+='<button class="btn btn-ghost" onclick="closeSheet()">Close</button>';
+    }
+  } else {
+    // ── TIME MODE (original Tabata) ────────────────────────
+    var curExIdx=tp.exercises[round%tp.exercises.length];
+    var curExName=wx.exercises[curExIdx]?wx.exercises[curExIdx].name:'';
+    if(!done){
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+      h+='<span id="tbp-round" class="lbl">ROUND '+(round+1)+' OF '+cfg.rounds+'</span>';
+      h+='<span id="tbp-phase" style="font-size:11px;font-weight:800;letter-spacing:0.5px;color:'+(phase==='work'?'var(--acc)':'var(--mu)')+'">'+(phase==='work'?'WORK':'REST')+'</span>';
+      h+='</div>';
+      h+='<div id="tbp-step" style="font-size:16px;font-weight:700;color:var(--tx);text-align:center;margin-bottom:6px">'+(running?curExName:(cfg.rounds+'× · '+cfg.work+'s/'+cfg.rest+'s'))+'</div>';
+      h+='<div style="text-align:center;padding:8px 0 16px">';
+      h+='<div id="tbp-timer" style="font-size:64px;font-weight:900;letter-spacing:-2px;color:'+(phase==='work'?'var(--acc)':'var(--tx2)')+';line-height:1">'+((running||tp.paused)?fmtSecs(rem):fmtSecs(cfg.work))+'</div>';
+      h+='</div>';
+    } else {
+      h+='<div style="text-align:center;padding:16px 0">';
+      h+='<div style="font-size:40px;color:var(--acc);margin-bottom:6px">✓</div>';
+      h+='<div style="font-size:16px;font-weight:700;color:var(--tx)">Tabata Complete!</div>';
+      h+='<div style="font-size:13px;color:var(--mu);margin-top:4px">'+cfg.rounds+' rounds finished</div>';
+      h+='</div>';
+    }
+    h+='<div style="background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;padding:8px 12px;margin-bottom:16px">';
+    exList.forEach(function(ex,i){
+      if(!ex)return;
+      var isActive=running&&(round%exList.length===i);
+      h+='<div id="tbp-ex-'+i+'" style="font-size:13px;padding:5px 0;color:'+(isActive?'var(--acc)':'var(--tx2)')+';font-weight:'+(isActive?'700':'400')+';'+(i>0?'border-top:0.5px solid var(--brd)':'')+'">'+ex.name+'</div>';
+    });
+    h+='</div>';
+    if(!done&&wx.playing){
+      if(running){
+        h+='<div style="display:flex;gap:8px">';
+        h+='<button class="btn btn-ghost" style="flex:1" onclick="pauseTabataPhase(\''+phKey+'\')">Pause</button>';
+        h+='<button class="btn btn-acc" style="flex:1" onclick="logTabataPhase(\''+phKey+'\')">Done Early</button>';
+        h+='</div>';
+      } else if(tp.paused){
+        h+='<div style="display:flex;gap:8px">';
+        h+='<button class="btn btn-acc" style="flex:1" onclick="startTabataPhase(\''+phKey+'\')">Resume</button>';
+        h+='<button class="btn btn-ghost" style="flex:1" onclick="logTabataPhase(\''+phKey+'\')">Done Early</button>';
+        h+='</div>';
+      } else {
+        h+='<button class="btn btn-acc" onclick="startTabataPhase(\''+phKey+'\')">Start Tabata</button>';
+      }
+    } else if(done){
+      h+='<button class="btn btn-ghost" onclick="closeSheet()">Close</button>';
+    }
   }
   h+='</div>';
-  openSheet(h,'Tabata Circuit');
+  openSheet(h,isRepsMode?'Circuit':'Tabata Circuit');
 }
 
 function startTabataPhase(phKey){
   var wx=S.wx;if(!wx||!wx.tabataPhases||!wx.tabataPhases[phKey])return;
   var tp=wx.tabataPhases[phKey];
   var cfg=tp.config;
+  // Reps mode: no timer, just track rounds manually
+  if(phKey==='tabata'&&cfg.mode==='reps'){
+    if(!tp.paused)tp.round=0;
+    tp.running=true;tp.paused=false;sv();
+    closeSheet();setTimeout(function(){openTabataPhaseSheet(phKey);},200);
+    return;
+  }
   // Resume from paused state — don't reset; fresh start — reset to beginning
   if(!tp.paused){
     tp.round=0;tp.phase='work';
@@ -5197,6 +5249,24 @@ function logTabataPhase(phKey){
   closeSheet();
   if(restSecs>0)startRestCircle(restSecs);
   setTimeout(function(){draw();},300);
+}
+
+function tabataRepsRoundDone(phKey){
+  var wx=S.wx;if(!wx||!wx.tabataPhases||!wx.tabataPhases[phKey])return;
+  var tp=wx.tabataPhases[phKey];
+  var cfg=tp.config;
+  tp.round++;
+  if(tp.round>=(cfg.rounds||5)){
+    logTabataPhase(phKey);
+    return;
+  }
+  if(cfg.rest>0){
+    wx.restActive=true;wx.restEnd=Date.now()+cfg.rest*1000;
+    sv();closeSheet();startRestCircle(cfg.rest);
+    setTimeout(function(){openTabataPhaseSheet(phKey);},(cfg.rest*1000)+400);
+  } else {
+    sv();closeSheet();setTimeout(function(){openTabataPhaseSheet(phKey);},200);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -7411,7 +7481,8 @@ function buildOpenExSheet(di){
     // For tabata/emom: show config summary as read-only label (editable in step 4)
     if(phKey==='tabata'){
       var tc=(day.phaseConfig||{}).tabata||{rounds:8,work:20,rest:10};
-      h+='<span style="font-size:10px;color:var(--mu)">'+tc.rounds+'× '+tc.work+'s/'+tc.rest+'s</span>';
+      var tcLabel=tc.mode==='reps'?(tc.rounds+' rounds · reps'):(tc.rounds+'× '+tc.work+'s/'+tc.rest+'s');
+      h+='<span style="font-size:10px;color:var(--mu)">'+tcLabel+'</span>';
     } else if(phKey==='emom'){
       var ec=(day.phaseConfig||{}).emom||{interval:60,duration:20};
       h+='<span style="font-size:10px;color:var(--mu)">'+ec.interval+'s · '+ec.duration+'min</span>';
@@ -7565,9 +7636,22 @@ function buildTabataConfigSheet(di,phKey,fromConfig){
   var h='<div style="padding:0 20px 30px">';
   if(phKey==='tabata'){
     var tc=day.phaseConfig.tabata;
-    h+=stepperRow('Rounds',       'rounds',  tc.rounds, 1, 1, 50);
-    h+=stepperRow('Work (seconds)','work',   tc.work,   5, 5, 300);
-    h+=stepperRow('Rest (seconds)','rest',   tc.rest,   5, 0, 300);
+    if(!tc.mode){tc.mode='time';sv();}
+    var tcMode=tc.mode;
+    // Mode toggle
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--brd);margin-bottom:4px">';
+    h+='<span style="font-size:13px;font-weight:600;color:var(--tx)">Mode</span>';
+    h+='<div style="display:flex;gap:6px">';
+    h+='<button class="btn btn-pill '+(tcMode==='time'?'btn-acc':'btn-ghost')+'" onclick="S.customEdit.days['+di+'].phaseConfig.tabata.mode=\'time\';sv();buildTabataConfigSheet('+di+',\'tabata\','+fromConfig+')">Time</button>';
+    h+='<button class="btn btn-pill '+(tcMode==='reps'?'btn-acc':'btn-ghost')+'" onclick="S.customEdit.days['+di+'].phaseConfig.tabata.mode=\'reps\';sv();buildTabataConfigSheet('+di+',\'tabata\','+fromConfig+')">Reps</button>';
+    h+='</div></div>';
+    h+=stepperRow('Rounds','rounds',tc.rounds,1,1,50);
+    if(tcMode==='time'){
+      h+=stepperRow('Work (seconds)','work',tc.work,5,5,300);
+      h+=stepperRow('Rest (seconds)','rest',tc.rest,5,0,300);
+    } else {
+      h+=stepperRow('Rest between rounds (s)','rest',tc.rest,5,0,300);
+    }
   } else {
     var ec=day.phaseConfig.emom;
     h+=stepperRow('Interval (s)',  'interval',ec.interval,5,5,300);
