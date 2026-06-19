@@ -15,7 +15,7 @@
     var themes={amber:{dark:'#E07B2A',light:'#B85510'},teal:{dark:'#1D9E75',light:'#0F6E56'},
       blue:{dark:'#3B82F6',light:'#1D4ED8'},coral:{dark:'#E05A3A',light:'#B83E20'},
       violet:{dark:'#7C6FD4',light:'#5548B0'},forest:{dark:'#4A8C5C',light:'#2D6B42'},
-      slate:{dark:'#64748B',light:'#475569'}};
+      slate:{dark:'#64748B',light:'#475569'},mono:{dark:'#D4D4D4',light:'#1a1a1a'}};
     var key=s.colourTheme||'amber';var isDark=s.theme!=='light';
     var colour=(themes[key]||themes.amber)[isDark?'dark':'light'];
     document.getElementById('theme-meta').setAttribute('content',colour);
@@ -147,6 +147,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .t-forest.light{--acc:#2D6B42;--acc-bg:#f0fdf4;--acc-brd:#bbf7d0}
 .t-slate{--acc:#64748B;--acc-bg:#0e1018;--acc-brd:#1a1e2c}
 .t-slate.light{--acc:#475569;--acc-bg:#f8fafc;--acc-brd:#cbd5e1}
+.t-mono{--acc:#D4D4D4;--acc-bg:#141414;--acc-brd:#2a2a2a}
+.t-mono.light{--acc:#1a1a1a;--acc-bg:#f4f4f4;--acc-brd:#d0d0d0}
 /* light mode base tokens */
 .light{
   --teal:#0F6E56;--teal-bg:#e8f7f2;--teal-brd:#a8dece;
@@ -2280,14 +2282,16 @@ function autoAttachSolePlan(cl,tplKey){
   var planKey=tpl.compatiblePlans[0];
   if(!cl.plans)cl.plans={};
   var existing=cl.plans[tplKey];
-  if(existing&&existing.key===planKey)return existing;
+  // undefined = never been set → auto-attach; null = user explicitly detached → respect that
+  if(existing!==undefined)return existing;
   var newPlan={key:planKey,weekIndex:0,startDate:Date.now()};
   cl.plans[tplKey]=newPlan;
   return newPlan;
 }
 function detachPlan(){
   var cl=C();
-  if(cl.plans)delete cl.plans[cl.tplKey];
+  if(!cl.plans)cl.plans={};
+  cl.plans[cl.tplKey]=null; // null = explicitly detached (vs undefined = never set)
   cl.plan=null;
   sv();
 }
@@ -2923,7 +2927,8 @@ var THEMES={
   coral:{name:'Coral',dark:'#E05A3A',light:'#B83E20'},
   violet:{name:'Violet',dark:'#7C6FD4',light:'#5548B0'},
   forest:{name:'Forest',dark:'#4A8C5C',light:'#2D6B42'},
-  slate:{name:'Slate',dark:'#64748B',light:'#475569'}
+  slate:{name:'Slate',dark:'#64748B',light:'#475569'},
+  mono:{name:'Mono',dark:'#D4D4D4',light:'#1a1a1a'}
 };
 function applyTheme(){
   var key=S.colourTheme||'amber';
@@ -3262,9 +3267,9 @@ function openNoteEditorModal(id){
     +'padding:12px;border-radius:10px;border:0.5px solid var(--brd);background:var(--bg3);color:var(--tx);'
     +'resize:vertical;font-family:inherit;line-height:1.5;box-sizing:border-box"></textarea>';
   h+='<button class="btn btn-acc" style="margin-top:14px" data-id="'+(note.id||'')+'" onclick="saveNoteModal(this.dataset.id)">Save</button>';
-  h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="discardNoteEditor()">Discard</button>';
+  h+='<button id="note-discard-btn" class="btn btn-ghost" style="margin-top:8px" onclick="discardNoteEditor()">Discard</button>';
   if(!isNew){
-    h+='<button class="btn btn-ghost" style="margin-top:8px" data-id="'+note.id+'" onclick="deleteNoteModal(this.dataset.id)">Delete Note</button>';
+    h+='<button id="note-delete-btn" class="btn btn-ghost" style="margin-top:8px" data-id="'+note.id+'" onclick="deleteNoteModal(this.dataset.id)">Delete Note</button>';
   }
   h+='</div>';
   openModal(h);
@@ -3279,7 +3284,14 @@ function discardNoteEditor(){
   var body=bodyEl?bodyEl.value.trim():'';
   var hasUnsaved=!!body||title!==_noteEditorOrigTitle;
   if(!hasUnsaved){closeModal();return;}
-  appConfirm('Discard this note? Your unsaved changes will be lost.',function(){closeModal();});
+  var btn=document.getElementById('note-discard-btn');
+  if(!btn){closeModal();return;}
+  if(btn.dataset.confirming==='1'){closeModal();return;}
+  btn.dataset.confirming='1';
+  btn.textContent='Tap again to discard';
+  btn.style.color='var(--acc)';
+  btn.style.borderColor='var(--acc-brd)';
+  btn.style.background='var(--acc-bg)';
 }
 function saveNoteModal(id){
   var title=document.getElementById('note-title').value.trim();
@@ -3304,11 +3316,17 @@ function saveNoteModal(id){
   openNotesListModal();
 }
 function deleteNoteModal(id){
-  appConfirm('Delete this note? This cannot be undone.',function(){
+  var btn=document.getElementById('note-delete-btn');
+  if(!btn)return;
+  if(btn.dataset.confirming==='1'){
     S.notes=(S.notes||[]).filter(function(n){return String(n.id)!==String(id);});
-    sv();
-    openNotesListModal();
-  });
+    sv();openNotesListModal();return;
+  }
+  btn.dataset.confirming='1';
+  btn.textContent='Tap again to delete';
+  btn.style.color='var(--acc)';
+  btn.style.borderColor='var(--acc-brd)';
+  btn.style.background='var(--acc-bg)';
 }
 // Legacy aliases (kept for any existing calls)
 function openNotesListSheet(){openNotesListModal();}
@@ -4523,7 +4541,7 @@ function playValHTML(id,field,value,suffix){
     +'onfocus="this.select()" '
     +'onchange="commitPlayVal(\''+field+'\',this.value)" '
     +'onkeydown="if(event.key===\'Enter\')this.blur()" '
-    +'style="width:70px;text-align:right;background:transparent;border:none;outline:none;font-size:22px;font-weight:800;color:var(--acc);padding:0">'
+    +'style="width:70px;text-align:center;background:transparent;border:none;outline:none;font-size:22px;font-weight:800;color:var(--acc);padding:0">'
     +(suffix?'<span style="font-size:22px;font-weight:800;color:var(--acc);margin-left:2px">'+suffix+'</span>':'')
     +'</div>';
 }
@@ -4534,7 +4552,7 @@ function playTimeFieldHTML(id,secs){
     +'onfocus="this.select()" '
     +'onchange="commitPlayVal(\'time\',this.value)" '
     +'onkeydown="if(event.key===\'Enter\')this.blur()" '
-    +'style="width:50px;text-align:right;background:transparent;border:none;outline:none;font-size:22px;font-weight:800;color:var(--acc);padding:0">'
+    +'style="width:50px;text-align:center;background:transparent;border:none;outline:none;font-size:22px;font-weight:800;color:var(--acc);padding:0">'
     +'<span style="font-size:22px;font-weight:800;color:var(--acc)">s</span>'
     +'<span id="val-time-hint" style="font-size:11px;color:var(--mu);margin-left:4px">'+hint+'</span>'
     +'</div>';
@@ -4900,7 +4918,6 @@ function openTabataPhaseSheet(phKey){
     if(!eDone){
       eh+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
       eh+='<span id="tbp-round" class="lbl">ROUND '+(eRound+1)+' OF '+eTotalRounds+'</span>';
-      eh+='<span style="font-size:11px;font-weight:800;letter-spacing:0.5px;color:var(--acc)">GO</span>';
       eh+='</div>';
       eh+='<div id="tbp-step" style="font-size:16px;font-weight:700;color:var(--tx);text-align:center;margin-bottom:6px">'+(eRunning?eCurExName:(eTotalRounds+'× · '+(ec.interval||60)+'s'))+'</div>';
       eh+='<div style="text-align:center;padding:8px 0 16px">';
@@ -4958,7 +4975,7 @@ function openTabataPhaseSheet(phKey){
     h+='</div>';
     h+='<div id="tbp-step" style="font-size:16px;font-weight:700;color:var(--tx);text-align:center;margin-bottom:6px">'+(running?curExName:(cfg.rounds+'× · '+cfg.work+'s/'+cfg.rest+'s'))+'</div>';
     h+='<div style="text-align:center;padding:8px 0 16px">';
-    h+='<div id="tbp-timer" style="font-size:64px;font-weight:900;letter-spacing:-2px;color:'+(phase==='work'?'var(--acc)':'var(--tx2)')+';line-height:1">'+(running?fmtSecs(rem):fmtSecs(cfg.work))+'</div>';
+    h+='<div id="tbp-timer" style="font-size:64px;font-weight:900;letter-spacing:-2px;color:'+(phase==='work'?'var(--acc)':'var(--tx2)')+';line-height:1">'+((running||tp.paused)?fmtSecs(rem):fmtSecs(cfg.work))+'</div>';
     h+='</div>';
   } else {
     h+='<div style="text-align:center;padding:16px 0">';
@@ -5499,7 +5516,7 @@ function openPlanPreview(key){
   if(isActive){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:8px 0 4px">✓ Currently active</div>';
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadPlan(this.dataset.key)">Edit in Build</button>';
-    h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="C().plan=null;sv();draw();closeSheet()">Remove plan</button>';
+    h+='<button class="btn btn-ghost" style="margin-top:8px" onclick="detachPlan();draw();closeSheet()">Remove plan</button>';
   } else if(isIncompatible){
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadPlan(this.dataset.key)">Edit in Build</button>';
   } else {
