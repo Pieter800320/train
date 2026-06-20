@@ -6136,13 +6136,14 @@ function openProgPreview(key){
   h+='</div></div>';
 
   // Sessions
-  var phases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
+  var _allPhases=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
   var phaseLabels={warmup:'Warm-Up',activation:'Activation',mobility:'Mobility',primer:'Primer',strength:'Strength',accessory:'Accessory',core:'Core',cardio:'Cardio',countdown:'Countdown',cooldown:'Cool Down',tabata:'Tabata',emom:'EMOM'};
   var days=tpl.days||[];
   days.forEach(function(day,di){
     h+='<div style="margin-bottom:16px">';
     h+='<div style="font-size:14px;font-weight:800;color:var(--tx);margin-bottom:2px">'+day.focus+'</div>';
     h+='<div class="lbl" style="margin-bottom:8px">'+day.label+' · '+day.exercises.length+' exercises</div>';
+    var phases=(day.phaseOrder&&day.phaseOrder.length)?day.phaseOrder:_allPhases;
     phases.forEach(function(ph){
       var exs=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
       if(exs.length===0)return;
