@@ -2204,207 +2204,172 @@ var TPL = [
 ]},
 
 // ─── FULL CIRCLE ─────────────────────────────────────────────────────────────
-{key:'full_circle',name:'Full Circle',cat:'sport',
-  desc:'7-day KB programme — Flow & Grind, Strength, Rotation, and Agility built around the park bell.',
-  duration:45,defaultPlan:'maintenance',compatiblePlans:['maintenance'],
+{key:'full_circle',name:'Full Circle — 5-Day Athletic',cat:'sport',
+  desc:'Flow & Grind, Strength, Rotation, and Agility. Five structured training days with daily mobility.',
+  duration:70,defaultPlan:'maintenance',compatiblePlans:['maintenance'],
   days:[
 
   // MON — Flow & Grind + Cossack Squat
   {label:'Mon — Flow & Grind',focus:'Flow & Grind',
-   phaseOrder:['mobility','countdown'],
-   phaseConfig:{countdown:{duration:15,name:'KB Flow'}},
+   phaseOrder:['warmup','mobility','activation','countdown','tabata'],
+   phaseConfig:{tabata:{rounds:5,work:0,rest:0,mode:'reps'}},
    exercises:[
-    ex('Cossack Squat',2,6,0,'mobility','Slow and controlled. Full range both sides.'),
-    // Daily Mobility
-    exT('Foam Rolling',1,'2min',0,'mobility'),
-    exT('Cat-Cow',1,'45s',0,'mobility'),
-    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
-    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
-    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
-    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
-    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
-    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
-    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
-    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
-    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
-    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT("Child's Pose",1,'45s',0,'mobility'),
-    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
-    // KB Flow — 15-minute continuous bell loop (reference list)
+    // Warm-Up
+    exT('Foam Rolling',1,'3min',0,'warmup','Work through calves, hamstrings, glutes, and thoracic spine.'),
+    ex('Cat-Cow',1,8,0,'warmup','Exhale to round, inhale to extend. Slow.'),
+    exT('Down Dog Bicycle',1,'1min',0,'warmup','Alternate knee drives. Keep hips high.'),
+    ex('Leg Swing (Forward)',1,10,0,'warmup','Hold something stable. Swing from the hip, not the knee.','unilateral'),
+    ex('Leg Swing (Lateral)',1,10,0,'warmup','Tall posture. Let the leg swing freely.','unilateral'),
+    ex("World's Greatest Stretch",1,6,0,'warmup','Lunge, rotate, reach. 6/side.','unilateral'),
+    ex('Good Morning (Banded)',1,10,0,'warmup','Hinge at the hips. Soft knees. Neutral spine.'),
+    exT('Kettlebell Halo',1,'1min',0,'warmup','5 each direction. Shoulder packed.'),
+    ex('Scapular Pull-Up',2,5,15,'warmup','Dead hang start. Depress and retract — no elbow bend.'),
+    // Mobility
+    exT('Hip 90/90 Stretch',1,'40s',0,'mobility','Both positions. Breathe into the hips.','unilateral'),
+    exT('Seated Hip Rotation',1,'40s',0,'mobility','Slow circles. Feel the hip capsule open.','unilateral'),
+    exT('Pigeon Stretch',1,'40s',0,'mobility','40s each side. Relax the glute.','unilateral'),
+    exT('Kneeling Hip Flexor Stretch',1,'40s',0,'mobility','Posterior pelvic tilt. 40s each side.','unilateral'),
+    exT("Child's Pose",1,'40s',0,'mobility','Arms long. Breathe into the lower back.'),
+    exT('Deep Goblet Squat Hold',1,'1min',0,'mobility','Elbows inside knees. Breathe into the hips.'),
+    // Activation — after mobility
+    ex('Cossack Squat',2,6,30,'activation','Slow and controlled. Full range both sides.','unilateral'),
+    // KB Flow — 15min continuous bell loop
     {name:'KB Flow',sets:1,reps:0,vol:'15min',rest:0,ph:'countdown',
      cue:'Never put the bell down. Move at your own pace.',
      steps:['Park Bell','Swing','Park Bell','Clean','2× Squat','Swing','Figure-8','Push Press','2× Snatch','Rack','Swing + Goblet Grip','Left Halo-Twist Lunge','Right Halo-Twist Lunge','Swing + Snatch','Swing + Park'],
      track:['time']},
-    // KB Grind — 5 rounds of the circuit (15 min)
-    {name:'KB Grind',sets:5,reps:0,vol:'15min',rest:0,ph:'countdown',
-     cue:'5 rounds. Move with intent — no rest between exercises, short reset between rounds.',
-     steps:['Swing × 5','Snatch × 5/side','Rack Squat × 5','Rack Back Lunge + Twist × 5/side','Clean + Press × 5/side'],
-     track:['time']},
+    // KB Grind — 5 rounds reps circuit
+    ex('KB Swing',5,5,0,'tabata','Drive hips — power from the hinge, not the arms.'),
+    ex('KB Snatch',5,5,0,'tabata','5/side. Hip snap, punch through at the top.','unilateral'),
+    ex('Rack Squat',5,5,0,'tabata','Rack position. Elbows up. Full depth.'),
+    ex('Rack Back Lunge + Twist',5,5,0,'tabata','5/side. Rack on lunge side. Rotate over front knee.','unilateral'),
+    ex('Clean + Press',5,5,0,'tabata','5/side. Clean into press — one fluid movement.','unilateral'),
   ]},
 
   // TUE — Strength & Hypertrophy
   {label:'Tue — Strength & Hypertrophy',focus:'KB Strength & Hypertrophy',
-   phaseOrder:['mobility','strength','accessory'],
+   phaseOrder:['warmup','mobility','strength','accessory'],
    exercises:[
-    // Daily Mobility
-    exT('Foam Rolling',1,'2min',0,'mobility'),
-    exT('Cat-Cow',1,'45s',0,'mobility'),
-    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
-    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
-    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
-    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
-    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
-    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
-    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
-    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
-    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
-    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT("Child's Pose",1,'45s',0,'mobility'),
-    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
-    // Strength
+    // Warm-Up
+    exT('Foam Rolling',1,'3min',0,'warmup','Work through calves, hamstrings, glutes, and thoracic spine.'),
+    ex('Cat-Cow',1,8,0,'warmup','Exhale to round, inhale to extend. Slow.'),
+    exT('Down Dog Bicycle',1,'1min',0,'warmup','Alternate knee drives. Keep hips high.'),
+    ex('Leg Swing (Forward)',1,10,0,'warmup','Hold something stable. Swing from the hip, not the knee.','unilateral'),
+    ex('Leg Swing (Lateral)',1,10,0,'warmup','Tall posture. Let the leg swing freely.','unilateral'),
+    ex("World's Greatest Stretch",1,6,0,'warmup','Lunge, rotate, reach. 6/side.','unilateral'),
+    ex('Good Morning (Banded)',1,10,0,'warmup','Hinge at the hips. Soft knees. Neutral spine.'),
+    exT('Kettlebell Halo',1,'1min',0,'warmup','5 each direction. Shoulder packed.'),
+    ex('Scapular Pull-Up',2,5,15,'warmup','Dead hang start. Depress and retract — no elbow bend.'),
+    // Mobility
+    exT('Hip 90/90 Stretch',1,'40s',0,'mobility','Both positions. Breathe into the hips.','unilateral'),
+    exT('Seated Hip Rotation',1,'40s',0,'mobility','Slow circles. Feel the hip capsule open.','unilateral'),
+    exT('Pigeon Stretch',1,'40s',0,'mobility','40s each side. Relax the glute.','unilateral'),
+    exT('Kneeling Hip Flexor Stretch',1,'40s',0,'mobility','Posterior pelvic tilt. 40s each side.','unilateral'),
+    exT("Child's Pose",1,'40s',0,'mobility','Arms long. Breathe into the lower back.'),
+    exT('Deep Goblet Squat Hold',1,'1min',0,'mobility','Elbows inside knees. Breathe into the hips.'),
+    // Strength — compound primary
     ex('Double KB Front Squat',4,5,120,'strength','Rack position tight. Elbows up. Full depth.'),
-    ex('Kickstand KB Swing',3,8,90,'strength','Hip hinge — drive through the standing leg. 8/side.'),
+    ex('Kickstand KB Swing',3,12,90,'strength','Hip hinge — drive through the standing leg. 12/side.','unilateral'),
     ex('KB Offset Push Up',3,12,75,'strength','Place one hand on the bell. Tight plank throughout.'),
     ex('Pull-Up',3,4,90,'strength','Dead hang start. Chin over bar.'),
-    // Accessory
-    ex('Rear Delt Fly (Dumbbell)',3,12,60,'accessory'),
+    // Accessory — isolation secondary
+    ex('Rear Delt Fly (Dumbbell)',3,12,60,'accessory','Slight bend in elbow. Lead with the elbows.'),
     ex('KB Crush Grip Chest Press',3,16,60,'accessory','Squeeze the bell hard between your palms throughout.'),
     ex('Towel Bicep Curls',3,12,60,'accessory','Loop towel through KB handle. Slow eccentric.'),
-    ex('Dumbbell Lateral Raise',3,12,60,'accessory'),
-    ex('KB Renegade Row',3,8,75,'accessory','Brace hard. 8/side. No hip rotation.'),
-    ex('Calf Raise (Standing, Machine)',3,16,45,'accessory'),
-    ex('Skull Crusher (Dumbbell)',3,8,60,'accessory'),
-    ex('KB Offset Carry',4,6,60,'accessory','4 sets × 6 steps/side. Hips level throughout.','30s'),
+    ex('Dumbbell Lateral Raise',3,12,60,'accessory','Slight forward lean. Lead with pinkies.'),
+    ex('KB Renegade Row',3,12,75,'accessory','Brace hard. 12/side. No hip rotation.','unilateral'),
+    ex('Calf Raise (Standing, Machine)',3,16,45,'accessory','Full range. Pause at top and bottom.'),
+    ex('Skull Crusher (Dumbbell)',3,8,60,'accessory','Elbows fixed. Lower to forehead. Slow.'),
+    ex('KB Offset Carry',3,0,60,'accessory','Hips level throughout. Switch sides each set.','40m/side'),
   ]},
 
-  // WED — Rest + Mobility
+  // WED — Rest + Mobility + Cossack Squat
   {label:'Wed — Rest',focus:'Rest + Mobility',
-   phaseOrder:['mobility'],
+   phaseOrder:['warmup','mobility','activation'],
    exercises:[
-    // Daily Mobility
-    exT('Foam Rolling',1,'2min',0,'mobility'),
-    exT('Cat-Cow',1,'45s',0,'mobility'),
-    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
-    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
-    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
-    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
-    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
-    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
-    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
-    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
-    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
-    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT("Child's Pose",1,'45s',0,'mobility'),
-    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
+    // Warm-Up
+    exT('Foam Rolling',1,'3min',0,'warmup','Work through calves, hamstrings, glutes, and thoracic spine.'),
+    ex('Cat-Cow',1,8,0,'warmup','Exhale to round, inhale to extend. Slow.'),
+    exT('Down Dog Bicycle',1,'1min',0,'warmup','Alternate knee drives. Keep hips high.'),
+    ex('Leg Swing (Forward)',1,10,0,'warmup','Hold something stable. Swing from the hip, not the knee.','unilateral'),
+    ex('Leg Swing (Lateral)',1,10,0,'warmup','Tall posture. Let the leg swing freely.','unilateral'),
+    ex("World's Greatest Stretch",1,6,0,'warmup','Lunge, rotate, reach. 6/side.','unilateral'),
+    ex('Good Morning (Banded)',1,10,0,'warmup','Hinge at the hips. Soft knees. Neutral spine.'),
+    exT('Kettlebell Halo',1,'1min',0,'warmup','5 each direction. Shoulder packed.'),
+    ex('Scapular Pull-Up',2,5,15,'warmup','Dead hang start. Depress and retract — no elbow bend.'),
+    // Mobility
+    exT('Hip 90/90 Stretch',1,'40s',0,'mobility','Both positions. Breathe into the hips.','unilateral'),
+    exT('Seated Hip Rotation',1,'40s',0,'mobility','Slow circles. Feel the hip capsule open.','unilateral'),
+    exT('Pigeon Stretch',1,'40s',0,'mobility','40s each side. Relax the glute.','unilateral'),
+    exT('Kneeling Hip Flexor Stretch',1,'40s',0,'mobility','Posterior pelvic tilt. 40s each side.','unilateral'),
+    exT("Child's Pose",1,'40s',0,'mobility','Arms long. Breathe into the lower back.'),
+    exT('Deep Goblet Squat Hold',1,'1min',0,'mobility','Elbows inside knees. Breathe into the hips.'),
+    // Activation — after mobility
+    ex('Cossack Squat',2,6,30,'activation','Slow and controlled. Full range both sides.','unilateral'),
   ]},
 
-  // THU — Agility & Quickness + Cossack Squat
-  {label:'Thu — Agility & Quickness',focus:'Agility & Quickness',
-   phaseOrder:['mobility','countdown'],
-   phaseConfig:{countdown:{duration:15,name:'Agility Circuit'}},
+  // THU — Rotation & Anti-Rotation
+  {label:'Thu — Rotation & Anti-Rotation',focus:'KB Rotation & Anti-Rotation',
+   phaseOrder:['warmup','mobility','strength','accessory'],
    exercises:[
-    ex('Cossack Squat',2,6,0,'mobility','Slow and controlled. Full range both sides.'),
-    // Daily Mobility
-    exT('Foam Rolling',1,'2min',0,'mobility'),
-    exT('Cat-Cow',1,'45s',0,'mobility'),
-    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
-    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
-    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
-    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
-    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
-    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
-    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
-    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
-    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
-    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT("Child's Pose",1,'45s',0,'mobility'),
-    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
-    // Agility Circuit — timed rounds
-    {name:'Agility Circuit',sets:3,reps:0,vol:'15min',rest:0,ph:'countdown',
-     cue:'Minimal rest between exercises. Full reset between rounds.',
-     steps:['Jump Rope × 1min','Lateral Bounds × 25sec','180° Jump Turns × 25sec','Lateral Quick-Step Shuffle × 25sec','Broad Jump × 25sec'],
-     track:['time']},
-  ]},
-
-  // FRI — Rotation & Anti-Rotation
-  {label:'Fri — Rotation & Anti-Rotation',focus:'KB Rotation & Anti-Rotation',
-   phaseOrder:['mobility','strength','accessory'],
-   exercises:[
-    // Daily Mobility
-    exT('Foam Rolling',1,'2min',0,'mobility'),
-    exT('Cat-Cow',1,'45s',0,'mobility'),
-    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
-    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
-    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
-    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
-    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
-    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
-    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
-    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
-    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
-    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT("Child's Pose",1,'45s',0,'mobility'),
-    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
+    // Warm-Up
+    exT('Foam Rolling',1,'3min',0,'warmup','Work through calves, hamstrings, glutes, and thoracic spine.'),
+    ex('Cat-Cow',1,8,0,'warmup','Exhale to round, inhale to extend. Slow.'),
+    exT('Down Dog Bicycle',1,'1min',0,'warmup','Alternate knee drives. Keep hips high.'),
+    ex('Leg Swing (Forward)',1,10,0,'warmup','Hold something stable. Swing from the hip, not the knee.','unilateral'),
+    ex('Leg Swing (Lateral)',1,10,0,'warmup','Tall posture. Let the leg swing freely.','unilateral'),
+    ex("World's Greatest Stretch",1,6,0,'warmup','Lunge, rotate, reach. 6/side.','unilateral'),
+    ex('Good Morning (Banded)',1,10,0,'warmup','Hinge at the hips. Soft knees. Neutral spine.'),
+    exT('Kettlebell Halo',1,'1min',0,'warmup','5 each direction. Shoulder packed.'),
+    ex('Scapular Pull-Up',2,5,15,'warmup','Dead hang start. Depress and retract — no elbow bend.'),
+    // Mobility
+    exT('Hip 90/90 Stretch',1,'40s',0,'mobility','Both positions. Breathe into the hips.','unilateral'),
+    exT('Seated Hip Rotation',1,'40s',0,'mobility','Slow circles. Feel the hip capsule open.','unilateral'),
+    exT('Pigeon Stretch',1,'40s',0,'mobility','40s each side. Relax the glute.','unilateral'),
+    exT('Kneeling Hip Flexor Stretch',1,'40s',0,'mobility','Posterior pelvic tilt. 40s each side.','unilateral'),
+    exT("Child's Pose",1,'40s',0,'mobility','Arms long. Breathe into the lower back.'),
+    exT('Deep Goblet Squat Hold',1,'1min',0,'mobility','Elbows inside knees. Breathe into the hips.'),
     // Rotation — strength
     ex('Around-the-World-and-Reverse',3,20,60,'strength','Control the arc. Shoulder packed. 20 total.'),
-    ex('Half-Kneeling KB Chop',3,8,45,'strength','Front knee stacked. 8/side.'),
-    ex('Landmine Twist',4,8,75,'strength','Explosive hip snap into rotation. 8/side.'),
-    ex('Chucky Twist',4,10,90,'strength','Hike between legs. Hip snap into rotation. 10/side.'),
-    ex('KB Shotput',4,8,90,'strength','Full hip extension before the throw. 8/side.'),
+    ex('Half-Kneeling KB Chop',3,8,45,'strength','Front knee stacked. 8/side.','unilateral'),
+    ex('Landmine Twist',3,8,75,'strength','Explosive hip snap into rotation. 8/side.','unilateral'),
+    ex('Chucky Twist',4,8,90,'strength','Hike between legs. Hip snap into rotation. 8/side.','unilateral'),
+    ex('KB Shotput',4,8,90,'strength','Full hip extension before the throw. 8/side.','unilateral'),
     // Anti-Rotation — accessory
-    ex('Pallof Press (Standing)',3,10,60,'accessory','Exhale on press. Hold 2s at extension. 10/side.'),
+    ex('Pallof Press (Standing)',3,8,60,'accessory','Exhale on press. Hold 2s at extension. 8/side.','unilateral'),
     ex('Powerbag Overboard Throw',4,8,90,'accessory','From hinge — explosive extension and throw. 8/side.'),
-    ex('Half-Kneeling KB Chop',3,8,60,'accessory','Anti-rotation focus. 8/side.'),
   ]},
 
-  // SAT — Rest + Mobility + Cossack Squat
-  {label:'Sat — Rest',focus:'Rest + Mobility',
-   phaseOrder:['mobility'],
+  // FRI — Agility & Quickness + Cossack Squat
+  {label:'Fri — Agility & Quickness',focus:'Agility & Quickness',
+   phaseOrder:['warmup','mobility','activation','tabata'],
+   phaseConfig:{tabata:{rounds:5,work:25,rest:10,mode:'time'}},
    exercises:[
-    ex('Cossack Squat',2,6,0,'mobility','Slow and controlled. Full range both sides.'),
-    // Daily Mobility
-    exT('Foam Rolling',1,'2min',0,'mobility'),
-    exT('Cat-Cow',1,'45s',0,'mobility'),
-    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
-    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
-    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
-    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
-    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
-    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
-    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
-    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
-    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
-    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT("Child's Pose",1,'45s',0,'mobility'),
-    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
-  ]},
-
-  // SUN — Rest + Mobility
-  {label:'Sun — Rest',focus:'Rest + Mobility',
-   phaseOrder:['mobility'],
-   exercises:[
-    // Daily Mobility
-    exT('Foam Rolling',1,'2min',0,'mobility'),
-    exT('Cat-Cow',1,'45s',0,'mobility'),
-    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
-    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
-    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
-    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
-    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
-    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
-    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
-    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
-    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
-    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
-    exT("Child's Pose",1,'45s',0,'mobility'),
-    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
+    // Warm-Up
+    exT('Foam Rolling',1,'3min',0,'warmup','Work through calves, hamstrings, glutes, and thoracic spine.'),
+    ex('Cat-Cow',1,8,0,'warmup','Exhale to round, inhale to extend. Slow.'),
+    exT('Down Dog Bicycle',1,'1min',0,'warmup','Alternate knee drives. Keep hips high.'),
+    ex('Leg Swing (Forward)',1,10,0,'warmup','Hold something stable. Swing from the hip, not the knee.','unilateral'),
+    ex('Leg Swing (Lateral)',1,10,0,'warmup','Tall posture. Let the leg swing freely.','unilateral'),
+    ex("World's Greatest Stretch",1,6,0,'warmup','Lunge, rotate, reach. 6/side.','unilateral'),
+    ex('Good Morning (Banded)',1,10,0,'warmup','Hinge at the hips. Soft knees. Neutral spine.'),
+    exT('Kettlebell Halo',1,'1min',0,'warmup','5 each direction. Shoulder packed.'),
+    ex('Scapular Pull-Up',2,5,15,'warmup','Dead hang start. Depress and retract — no elbow bend.'),
+    // Mobility
+    exT('Hip 90/90 Stretch',1,'40s',0,'mobility','Both positions. Breathe into the hips.','unilateral'),
+    exT('Seated Hip Rotation',1,'40s',0,'mobility','Slow circles. Feel the hip capsule open.','unilateral'),
+    exT('Pigeon Stretch',1,'40s',0,'mobility','40s each side. Relax the glute.','unilateral'),
+    exT('Kneeling Hip Flexor Stretch',1,'40s',0,'mobility','Posterior pelvic tilt. 40s each side.','unilateral'),
+    exT("Child's Pose",1,'40s',0,'mobility','Arms long. Breathe into the lower back.'),
+    exT('Deep Goblet Squat Hold',1,'1min',0,'mobility','Elbows inside knees. Breathe into the hips.'),
+    // Activation — after mobility
+    ex('Cossack Squat',2,6,30,'activation','Slow and controlled. Full range both sides.','unilateral'),
+    // Agility & Quickness — Tabata 25sec work / 10sec rest / 5 rounds
+    ex('Jump Rope',5,0,10,'tabata','Fast feet. Stay on the balls of your feet.'),
+    ex('Lateral Bounds',5,0,10,'tabata','Stick the landing. Absorb through the hip.'),
+    ex('180° Jump Turns',5,0,10,'tabata','Explosive rotation. Soft landing.'),
+    ex('Lateral Quick-Step Shuffle',5,0,10,'tabata','Low hips. Fast feet. Stay athletic.'),
+    ex('Broad Jump',5,0,10,'tabata','Full hip extension on take-off. Stick the landing.'),
   ]},
 
 ]}
@@ -8336,10 +8301,11 @@ function initBuildDrag(){
     function onEnd(clientY){
       if(!_drag.active)return;
       _drag.active=false;
+      var dy=clientY-_drag.startY;
+      var cloneH=_drag.clone?_drag.clone.offsetHeight:row.offsetHeight;
+      var midY=_drag.cloneTop+dy+cloneH/2;
       if(_drag.clone){_drag.clone.remove();_drag.clone=null;}
       row.style.opacity='';handle.style.cursor='grab';
-      var dy=clientY-_drag.startY;
-      var midY=_drag.cloneTop+dy+row.offsetHeight/2;
       var phase=row.dataset.phase;
       var tgtRow=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
