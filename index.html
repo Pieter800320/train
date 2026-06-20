@@ -2204,154 +2204,210 @@ var TPL = [
 ]},
 
 // ─── FULL CIRCLE ─────────────────────────────────────────────────────────────
-{key:'full_circle',name:'Full Circle',cat:'kettlebell',
-  desc:'A complete 7-day KB programme: Flow & Grind, Strength & Hypertrophy, Rotation, and Agility — built around the park bell.',
+{key:'full_circle',name:'Full Circle',cat:'sport',
+  desc:'7-day KB programme — Flow & Grind, Strength, Rotation, and Agility built around the park bell.',
   duration:45,defaultPlan:'maintenance',compatiblePlans:['maintenance'],
   days:[
 
   // MON — Flow & Grind + Cossack Squat
   {label:'Mon — Flow & Grind',focus:'Flow & Grind',
-   phaseConfig:{countdown:{duration:15,name:'KB Flow'},tabata:{rounds:5,work:20,rest:60,mode:'reps'}},
-   phaseOrder:['mobility','countdown','tabata','cooldown'],
+   phaseOrder:['mobility','countdown'],
+   phaseConfig:{countdown:{duration:15,name:'KB Flow'}},
    exercises:[
-    ex('Cossack Squat',2,8,30,'mobility','Move slowly through the full range. Use the KB as a counterbalance if needed.'),
-    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
-    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
-    exT('T-Spine Rotation',1,'45s',10,'mobility'),
-    exT('Hamstring Sweep',1,'45s',10,'mobility'),
-    exT('Ankle Circles',1,'30s',0,'mobility'),
-    // KB Flow — 15-minute continuous bell work (steps list shown as reference)
-    {name:'KB Flow',sets:1,reps:0,vol:'15min',rest:0,ph:'countdown',cue:'Never put the bell down. Move at your own pace.',
-     steps:['Clean L/R × 3','Press L/R × 3','Swing × 10','Goblet Squat × 5','Snatch L/R × 3','Halo × 5 each direction','Figure-8 × 10','Clean & Press L/R × 3','Swing × 10'],
+    ex('Cossack Squat',2,6,0,'mobility','Slow and controlled. Full range both sides.'),
+    // Daily Mobility
+    exT('Foam Rolling',1,'2min',0,'mobility'),
+    exT('Cat-Cow',1,'45s',0,'mobility'),
+    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
+    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
+    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
+    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
+    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
+    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
+    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
+    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
+    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
+    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT("Child's Pose",1,'45s',0,'mobility'),
+    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
+    // KB Flow — 15-minute continuous bell loop (reference list)
+    {name:'KB Flow',sets:1,reps:0,vol:'15min',rest:0,ph:'countdown',
+     cue:'Never put the bell down. Move at your own pace.',
+     steps:['Park Bell','Swing','Park Bell','Clean','2× Squat','Swing','Figure-8','Push Press','2× Snatch','Rack','Swing + Goblet Grip','Left Halo-Twist Lunge','Right Halo-Twist Lunge','Swing + Snatch','Swing + Park'],
      track:['time']},
-    // KB Grind — 5-round reps-based circuit
-    {name:'KB Snatch',sets:3,reps:5,rest:0,ph:'tabata',cue:'Hike, hip snap, punch through. L/R each round.',track:['reps','weight'],weight:0},
-    {name:'Goblet Squat (Kettlebell)',sets:3,reps:6,rest:0,ph:'tabata',cue:'Elbows inside knees at the bottom.',track:['reps','weight'],weight:0},
-    {name:'KB Renegade Row',sets:3,reps:5,rest:0,ph:'tabata',cue:'Brace hard. No hip rotation.',track:['reps','weight'],weight:0},
-    {name:'Kickstand KB Swing',sets:3,reps:8,rest:0,ph:'tabata',cue:'Drive through the heel. Hinge, not squat.',track:['reps','weight'],weight:0},
-    {name:'Kettlebell Clean',sets:3,reps:5,rest:60,ph:'tabata',cue:'Zip the bell up the body. Soft catch.',track:['reps','weight'],weight:0},
+    // KB Grind — 5 rounds of the circuit (15 min)
+    {name:'KB Grind',sets:5,reps:0,vol:'15min',rest:0,ph:'countdown',
+     cue:'5 rounds. Move with intent — no rest between exercises, short reset between rounds.',
+     steps:['Swing × 5','Snatch × 5/side','Rack Squat × 5','Rack Back Lunge + Twist × 5/side','Clean + Press × 5/side'],
+     track:['time']},
   ]},
 
-  // TUE — KB Strength & Hypertrophy
-  {label:'Tue — KB Strength',focus:'Strength & Hypertrophy',
-   phaseOrder:['mobility','warmup','activation','strength','accessory','cooldown'],
+  // TUE — Strength & Hypertrophy
+  {label:'Tue — Strength & Hypertrophy',focus:'KB Strength & Hypertrophy',
+   phaseOrder:['mobility','strength','accessory'],
    exercises:[
-    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
-    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
-    exT('T-Spine Rotation',1,'45s',10,'mobility'),
-    exT('Hamstring Sweep',1,'45s',10,'mobility'),
-    exT('Ankle Circles',1,'30s',0,'mobility'),
-    exT('Kettlebell Halo',2,'45s',15,'warmup','Slow and controlled. Feel the shoulder open.'),
-    ex('Band Pull-Apart',2,15,15,'warmup'),
-    ex('Prying Goblet Squat',2,8,30,'activation','Take your time at the bottom. Breathe into the hips.'),
-    exT("World's Greatest Stretch",1,'45s',10,'activation'),
+    // Daily Mobility
+    exT('Foam Rolling',1,'2min',0,'mobility'),
+    exT('Cat-Cow',1,'45s',0,'mobility'),
+    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
+    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
+    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
+    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
+    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
+    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
+    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
+    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
+    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
+    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT("Child's Pose",1,'45s',0,'mobility'),
+    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
     // Strength
     ex('Double KB Front Squat',4,5,120,'strength','Rack position tight. Elbows up. Full depth.'),
-    ex('Kickstand KB Swing',4,10,90,'strength','Hip hinge — not a squat. Drive through the standing leg.'),
-    ex('KB Offset Push Up',3,8,75,'strength','Place one hand on the bell. Tight plank throughout.'),
-    ex('Pull-Up',3,5,90,'strength','Dead hang start. Chin over bar.'),
+    ex('Kickstand KB Swing',3,8,90,'strength','Hip hinge — drive through the standing leg. 8/side.'),
+    ex('KB Offset Push Up',3,12,75,'strength','Place one hand on the bell. Tight plank throughout.'),
+    ex('Pull-Up',3,4,90,'strength','Dead hang start. Chin over bar.'),
     // Accessory
     ex('Rear Delt Fly (Dumbbell)',3,12,60,'accessory'),
-    ex('KB Crush Grip Chest Press',3,10,60,'accessory','Squeeze the bell hard between your palms throughout.'),
-    ex('Towel Bicep Curls',3,10,60,'accessory','Loop towel through KB handle. Slow eccentric.'),
+    ex('KB Crush Grip Chest Press',3,16,60,'accessory','Squeeze the bell hard between your palms throughout.'),
+    ex('Towel Bicep Curls',3,12,60,'accessory','Loop towel through KB handle. Slow eccentric.'),
     ex('Dumbbell Lateral Raise',3,12,60,'accessory'),
-    ex('KB Renegade Row',3,6,75,'accessory'),
-    ex('Calf Raise (Standing, Machine)',3,15,45,'accessory'),
-    ex('Skull Crusher (Dumbbell)',3,10,60,'accessory'),
-    ex('KB Offset Carry',2,0,60,'accessory','Walk 30m each side. Keep hips level.','30s'),
-    // Cooldown
-    exT('Kneeling Lat Stretch',1,'45s',10,'cooldown'),
-    exT('Doorway Pec Stretch',1,'45s',10,'cooldown'),
-    exT('Triceps Overhead Stretch',1,'30s',10,'cooldown'),
+    ex('KB Renegade Row',3,8,75,'accessory','Brace hard. 8/side. No hip rotation.'),
+    ex('Calf Raise (Standing, Machine)',3,16,45,'accessory'),
+    ex('Skull Crusher (Dumbbell)',3,8,60,'accessory'),
+    ex('KB Offset Carry',4,6,60,'accessory','4 sets × 6 steps/side. Hips level throughout.','30s'),
   ]},
 
-  // WED — Rest
-  {label:'Wed — Rest',focus:'Rest',
-   phaseOrder:['mobility','cardio'],
+  // WED — Rest + Mobility
+  {label:'Wed — Rest',focus:'Rest + Mobility',
+   phaseOrder:['mobility'],
    exercises:[
-    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
-    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
-    exT('T-Spine Rotation',1,'45s',10,'mobility'),
-    exT('Hamstring Sweep',1,'45s',10,'mobility'),
-    exT('Ankle Circles',1,'30s',0,'mobility'),
-    exT('Walking',1,'20min',0,'cardio','Easy pace. No pace targets. Just move.'),
+    // Daily Mobility
+    exT('Foam Rolling',1,'2min',0,'mobility'),
+    exT('Cat-Cow',1,'45s',0,'mobility'),
+    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
+    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
+    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
+    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
+    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
+    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
+    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
+    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
+    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
+    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT("Child's Pose",1,'45s',0,'mobility'),
+    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
   ]},
 
   // THU — Agility & Quickness + Cossack Squat
   {label:'Thu — Agility & Quickness',focus:'Agility & Quickness',
-   phaseConfig:{tabata:{rounds:8,work:20,rest:10,mode:'time'}},
-   phaseOrder:['mobility','tabata','cooldown'],
+   phaseOrder:['mobility','countdown'],
+   phaseConfig:{countdown:{duration:15,name:'Agility Circuit'}},
    exercises:[
-    ex('Cossack Squat',2,8,30,'mobility','Move slowly through the full range.'),
-    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
-    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
-    exT('T-Spine Rotation',1,'45s',10,'mobility'),
-    exT('Hamstring Sweep',1,'45s',10,'mobility'),
-    exT('Ankle Circles',1,'30s',0,'mobility'),
-    // Agility Tabata — 8 rounds 20s/10s
-    {name:'Jump Rope',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
-    {name:'Pogo Hops',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
-    {name:'Powerbag Lateral Bounds',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
-    {name:'180° Rotational Jump Turn',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
-    {name:'Lateral Quick-Step Shuffle',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
-    // Cooldown
-    exT('Standing Calf Stretch',1,'45s',10,'cooldown'),
-    exT('Standing Hamstring Stretch',1,'45s',10,'cooldown'),
-    exT('Hip 90/90 Stretch',1,'60s',10,'cooldown'),
+    ex('Cossack Squat',2,6,0,'mobility','Slow and controlled. Full range both sides.'),
+    // Daily Mobility
+    exT('Foam Rolling',1,'2min',0,'mobility'),
+    exT('Cat-Cow',1,'45s',0,'mobility'),
+    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
+    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
+    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
+    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
+    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
+    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
+    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
+    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
+    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
+    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT("Child's Pose",1,'45s',0,'mobility'),
+    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
+    // Agility Circuit — timed rounds
+    {name:'Agility Circuit',sets:3,reps:0,vol:'15min',rest:0,ph:'countdown',
+     cue:'Minimal rest between exercises. Full reset between rounds.',
+     steps:['Jump Rope × 1min','Lateral Bounds × 25sec','180° Jump Turns × 25sec','Lateral Quick-Step Shuffle × 25sec','Broad Jump × 25sec'],
+     track:['time']},
   ]},
 
-  // FRI — KB Rotation & Anti-Rotation
+  // FRI — Rotation & Anti-Rotation
   {label:'Fri — Rotation & Anti-Rotation',focus:'KB Rotation & Anti-Rotation',
-   phaseOrder:['mobility','warmup','activation','strength','accessory','cooldown'],
+   phaseOrder:['mobility','strength','accessory'],
    exercises:[
-    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
-    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
-    exT('T-Spine Rotation',1,'45s',10,'mobility'),
-    exT('Hamstring Sweep',1,'45s',10,'mobility'),
-    exT('Ankle Circles',1,'30s',0,'mobility'),
-    exT('Arm Circles',1,'30s',10,'warmup'),
-    ex('Band Pull-Apart',2,15,15,'warmup'),
-    exT('Thoracic Rotation (Quadruped)',1,'45s',10,'warmup'),
-    ex('Band External Rotation',2,12,15,'activation'),
-    ex('Half-Kneeling KB Chop',2,8,45,'activation','Front knee stacked over ankle. Brace the core like a Pallof press.'),
-    ex('Around-the-World-and-Reverse',2,5,30,'activation','Control the arc. Shoulder packed.'),
-    // Strength — rotation work
-    ex('Landmine Twist',3,10,75,'strength','Explosive hip snap into rotation. Control the return.'),
-    ex('Chucky Twist',3,8,90,'strength','Hike between legs. Explosive hip snap into rotation.'),
-    ex('KB Shotput',3,5,90,'strength','L/R each set. Full hip extension before the throw.'),
-    // Accessory — anti-rotation
-    ex('Half-Kneeling KB Chop',3,8,60,'accessory'),
-    ex('Pallof Press (Standing)',3,10,60,'accessory','Exhale on press. Hold 2 seconds at full extension.'),
-    ex('Powerbag Overboard Throw',3,6,90,'accessory','From hinge — explosive extension and throw.'),
-    // Cooldown
-    exT('Lying Spinal Twist',1,'45s',10,'cooldown'),
-    exT('Thread the Needle',1,'45s',10,'cooldown'),
+    // Daily Mobility
+    exT('Foam Rolling',1,'2min',0,'mobility'),
+    exT('Cat-Cow',1,'45s',0,'mobility'),
+    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
+    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
+    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
+    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
+    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
+    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
+    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
+    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
+    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
+    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT("Child's Pose",1,'45s',0,'mobility'),
+    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
+    // Rotation — strength
+    ex('Around-the-World-and-Reverse',3,20,60,'strength','Control the arc. Shoulder packed. 20 total.'),
+    ex('Half-Kneeling KB Chop',3,8,45,'strength','Front knee stacked. 8/side.'),
+    ex('Landmine Twist',4,8,75,'strength','Explosive hip snap into rotation. 8/side.'),
+    ex('Chucky Twist',4,10,90,'strength','Hike between legs. Hip snap into rotation. 10/side.'),
+    ex('KB Shotput',4,8,90,'strength','Full hip extension before the throw. 8/side.'),
+    // Anti-Rotation — accessory
+    ex('Pallof Press (Standing)',3,10,60,'accessory','Exhale on press. Hold 2s at extension. 10/side.'),
+    ex('Powerbag Overboard Throw',4,8,90,'accessory','From hinge — explosive extension and throw. 8/side.'),
+    ex('Half-Kneeling KB Chop',3,8,60,'accessory','Anti-rotation focus. 8/side.'),
   ]},
 
-  // SAT — Rest + Cossack Squat
+  // SAT — Rest + Mobility + Cossack Squat
   {label:'Sat — Rest',focus:'Rest + Mobility',
+   phaseOrder:['mobility'],
    exercises:[
-    ex('Cossack Squat',3,10,30,'mobility','Slow and controlled. Use KB as counterbalance.'),
-    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
-    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
-    exT('T-Spine Rotation',1,'45s',10,'mobility'),
-    exT('Hamstring Sweep',1,'45s',10,'mobility'),
-    exT('Ankle Circles',1,'30s',0,'mobility'),
+    ex('Cossack Squat',2,6,0,'mobility','Slow and controlled. Full range both sides.'),
+    // Daily Mobility
+    exT('Foam Rolling',1,'2min',0,'mobility'),
+    exT('Cat-Cow',1,'45s',0,'mobility'),
+    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
+    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
+    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
+    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
+    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
+    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
+    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
+    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
+    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
+    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT("Child's Pose",1,'45s',0,'mobility'),
+    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
   ]},
 
-  // SUN — Rest
-  {label:'Sun — Rest',focus:'Rest',
-   phaseOrder:['mobility','cooldown'],
+  // SUN — Rest + Mobility
+  {label:'Sun — Rest',focus:'Rest + Mobility',
+   phaseOrder:['mobility'],
    exercises:[
-    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
-    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
-    exT('T-Spine Rotation',1,'45s',10,'mobility'),
-    exT('Hamstring Sweep',1,'45s',10,'mobility'),
-    exT('Ankle Circles',1,'30s',0,'mobility'),
-    exT('Foam Rolling',1,'10min',0,'cooldown','Full body. Spend extra time on anything that worked hard this week.'),
+    // Daily Mobility
+    exT('Foam Rolling',1,'2min',0,'mobility'),
+    exT('Cat-Cow',1,'45s',0,'mobility'),
+    exT('Down Dog Bicycle',1,'45s',0,'mobility'),
+    exT('Leg Swing (Forward)',1,'30s',0,'mobility','10 reps each leg'),
+    exT('Leg Swing (Lateral)',1,'30s',0,'mobility','10 reps each leg'),
+    exT("World's Greatest Stretch",1,'45s',0,'mobility'),
+    exT('Good Morning (Banded)',1,'45s',0,'mobility','10 slow reps. Hinge, not squat.'),
+    exT('Kettlebell Halo',1,'45s',0,'mobility','5 each direction.'),
+    exT('Scapular Pull-Up',1,'30s',0,'mobility','10 reps. Dead hang start.'),
+    exT('Hip 90/90 Stretch',1,'60s',0,'mobility'),
+    exT('Seated Hip Rotation',1,'45s',0,'mobility'),
+    exT('Pigeon Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT('Kneeling Hip Flexor Stretch',1,'60s',0,'mobility','60s each side.'),
+    exT("Child's Pose",1,'45s',0,'mobility'),
+    exT('Deep Goblet Squat Hold',1,'60s',0,'mobility','Breathe into the hips.'),
   ]},
 
-]},
+]}
 
 ]; // end TPL // end TPL
 
@@ -8247,106 +8303,75 @@ function initPhaseDrag(){
 function initBuildDrag(){
   var rows=document.querySelectorAll('.build-drag-row');
   if(!rows.length)return;
-  var _drag={active:false,clone:null,srcRow:null,srcDi:-1,srcGei:-1,srcPhase:'',startY:0,lastY:0};
-
   rows.forEach(function(row){
     var handle=row.querySelector('.build-drag-handle');
     if(!handle)return;
-
-    function onStart(y,x,rowEl){
-      _drag.active=true;
-      _drag.srcRow=row;
-      _drag.srcDi=parseInt(row.dataset.di);
-      _drag.srcGei=parseInt(row.dataset.gei);
-      _drag.srcPhase=row.dataset.phase;
-      _drag.startY=y;_drag.lastY=y;
-
-      // Create floating clone
+    var _drag={active:false,clone:null,srcRow:row,startY:0,cloneTop:0};
+    function onStart(clientY){
+      _drag.active=true;_drag.startY=clientY;
       var rect=row.getBoundingClientRect();
       var clone=row.cloneNode(true);
-      clone.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;'+
-        'width:'+rect.width+'px;z-index:9999;opacity:0.92;box-shadow:0 8px 24px rgba(0,0,0,0.4);'+
-        'border-radius:10px;pointer-events:none;background:var(--bg2);border:2px solid var(--acc);'+
-        'display:flex;align-items:center;padding:10px 12px;transition:none;color:var(--tx);';
-      // Force clone bg and strip child backgrounds/borders to match phase drag appearance
+      clone.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;z-index:9999;opacity:0.92;box-shadow:0 8px 24px rgba(0,0,0,0.4);border-radius:10px;pointer-events:none;background:var(--bg2);border:2px solid var(--acc);display:flex;align-items:center;padding:10px 12px;';
       clone.style.background='var(--bg2)';
       Array.from(clone.querySelectorAll('*')).forEach(function(el){el.style.background='transparent';el.style.border='none';el.style.boxShadow='none';});
       document.body.appendChild(clone);
-      _drag.clone=clone;
-      _drag.cloneTop=rect.top;
-
-      // Hide source row (matches phase drag behaviour)
-      row.style.opacity='0';
-      handle.style.cursor='grabbing';
+      _drag.clone=clone;_drag.cloneTop=rect.top;
+      row.style.opacity='0.3';handle.style.cursor='grabbing';
     }
-
-    function onMove(y){
+    function onMove(clientY){
       if(!_drag.active||!_drag.clone)return;
-      var dy=y-_drag.startY;
+      var dy=clientY-_drag.startY;
       _drag.clone.style.top=(_drag.cloneTop+dy)+'px';
-      _drag.lastY=y;
-
-      // Find which row the clone centre overlaps (same logic as phase drag)
       var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2;
-      var target=null;
+      var phase=row.dataset.phase;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
-        if(r===_drag.srcRow)return;
-        if(r.dataset.phase!==_drag.srcPhase)return;
+        if(r===row)return;
+        if(r.dataset.phase!==phase)return;
         var rr=r.getBoundingClientRect();
-        if(midY>=rr.top&&midY<=rr.bottom){target=r;}
-      });
-      // Highlight target row — matching phase drag behaviour exactly
-      document.querySelectorAll('.build-drag-row').forEach(function(r){
-        if(r===_drag.srcRow)return;
-        if(r.dataset.phase!==_drag.srcPhase)return;
-        var hit=r===target;
+        var hit=midY>=rr.top&&midY<=rr.bottom;
         r.style.background=hit?'var(--bg2)':'var(--bg3)';
         r.style.border=hit?'0.5px solid var(--acc)':'0.5px solid var(--brd)';
       });
     }
-
-    function onEnd(){
+    function onEnd(clientY){
       if(!_drag.active)return;
       _drag.active=false;
       if(_drag.clone){_drag.clone.remove();_drag.clone=null;}
-      _drag.srcRow.style.opacity='';
-      handle.style.cursor='grab';
-      document.querySelectorAll('.build-drag-row').forEach(function(r){r.style.background='var(--bg3)';r.style.border='0.5px solid var(--brd)';});
-
-      // Find drop target — same as onMove
-      var dy=_drag.lastY-_drag.startY;
-      var rowH=_drag.srcRow.offsetHeight;
-      var midY=_drag.cloneTop+dy+rowH/2+(dy<0?rowH/2:rowH);
+      row.style.opacity='';handle.style.cursor='grab';
+      var dy=clientY-_drag.startY;
+      var midY=_drag.cloneTop+dy+row.offsetHeight/2;
+      var phase=row.dataset.phase;
       var tgtRow=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
-        if(r===_drag.srcRow)return;
-        if(r.dataset.phase!==_drag.srcPhase)return;
+        if(r===row)return;
+        if(r.dataset.phase!==phase)return;
         var rr=r.getBoundingClientRect();
-        if(midY>=rr.top&&midY<=rr.bottom){tgtRow=r;}
+        if(midY>=rr.top&&midY<=rr.bottom)tgtRow=r;
+        r.style.background='var(--bg3)';r.style.border='0.5px solid var(--brd)';
       });
       if(tgtRow){
+        var srcGei=parseInt(row.dataset.gei);
         var tgtGei=parseInt(tgtRow.dataset.gei);
-        var di=_drag.srcDi;
+        var di=parseInt(row.dataset.di);
         var exs=S.customEdit.days[di].exercises;
-        var srcEx=exs.splice(_drag.srcGei,1)[0];
-        // Recalculate target index after splice
-        var newTgt=tgtGei>_drag.srcGei?tgtGei-1:tgtGei;
+        var srcEx=exs.splice(srcGei,1)[0];
+        var newTgt=tgtGei>srcGei?tgtGei-1:tgtGei;
         exs.splice(newTgt,0,srcEx);
         sv();buildOpenExSheet(di);
       }
     }
-
+    handle.addEventListener('mousedown',function(e){
+      e.preventDefault();onStart(e.clientY);
+      function mm(e){onMove(e.clientY);}
+      function mu(e){onEnd(e.clientY);document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);}
+      document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu);
+    });
     handle.addEventListener('touchstart',function(e){
-      e.preventDefault();onStart(e.touches[0].clientY,e.touches[0].clientX,row);
+      e.preventDefault();onStart(e.touches[0].clientY);
+      function tm(e){onMove(e.touches[0].clientY);}
+      function tu(e){onEnd(e.changedTouches[0].clientY);document.removeEventListener('touchmove',tm);document.removeEventListener('touchend',tu);}
+      document.addEventListener('touchmove',tm,{passive:false});document.addEventListener('touchend',tu);
     },{passive:false});
-    document.addEventListener('touchmove',function(e){
-      if(_drag.active){e.preventDefault();onMove(e.touches[0].clientY);}
-    },{passive:false,capture:true});
-    document.addEventListener('touchend',function(){onEnd();},{capture:true});
-    // Mouse support for desktop testing
-    handle.addEventListener('mousedown',function(e){e.preventDefault();onStart(e.clientY,e.clientX,row);});
-    document.addEventListener('mousemove',function(e){if(_drag.active)onMove(e.clientY);});
-    document.addEventListener('mouseup',function(){if(_drag.active)onEnd();});
   });
 }
 
