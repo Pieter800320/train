@@ -2161,13 +2161,139 @@ var TPL = [
   ]}
 ]},
 
+// ─── FULL CIRCLE ─────────────────────────────────────────────────────────────
+{key:'full_circle',name:'Full Circle',cat:'kettlebell',
+  desc:'A complete 7-day KB programme: Flow & Grind, Strength & Hypertrophy, Rotation, and Agility — built around the park bell.',
+  duration:45,defaultPlan:'maintenance',compatiblePlans:['maintenance'],
+  days:[
+
+  // MON — Flow & Grind + Cossack Squat
+  {label:'Mon — Flow & Grind',focus:'Flow & Grind',
+   phaseConfig:{countdown:{duration:15,name:'KB Flow'},tabata:{rounds:5,work:0,rest:60,mode:'reps'}},
+   phaseOrder:['mobility','countdown','tabata','cooldown'],
+   exercises:[
+    ex('Cossack Squat',2,8,30,'mobility','Move slowly through the full range. Use the KB as a counterbalance if needed.'),
+    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
+    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
+    exT('T-Spine Rotation',1,'45s',10,'mobility'),
+    exT('Hamstring Sweep',1,'45s',10,'mobility'),
+    exT('Ankle Circles',1,'30s',0,'mobility'),
+    // KB Flow — 15-minute continuous bell work (steps list shown as reference)
+    {name:'KB Flow',sets:1,reps:0,vol:'15min',rest:0,ph:'countdown',cue:'Never put the bell down. Move at your own pace.',
+     steps:['Clean L/R × 3','Press L/R × 3','Swing × 10','Goblet Squat × 5','Snatch L/R × 3','Halo × 5 each direction','Figure-8 × 10','Clean & Press L/R × 3','Swing × 10'],
+     track:['time']},
+    // KB Grind — 5-round reps-based circuit
+    {name:'KB Snatch',sets:3,reps:5,rest:0,ph:'tabata',cue:'Hike, hip snap, punch through. L/R each round.',track:['reps','weight'],weight:0},
+    {name:'Goblet Squat (Kettlebell)',sets:3,reps:6,rest:0,ph:'tabata',cue:'Elbows inside knees at the bottom.',track:['reps','weight'],weight:0},
+    {name:'KB Renegade Row',sets:3,reps:5,rest:0,ph:'tabata',cue:'Brace hard. No hip rotation.',track:['reps','weight'],weight:0},
+    {name:'Kickstand KB Swing',sets:3,reps:8,rest:0,ph:'tabata',cue:'Drive through the heel. Hinge, not squat.',track:['reps','weight'],weight:0},
+    {name:'Kettlebell Clean',sets:3,reps:5,rest:60,ph:'tabata',cue:'Zip the bell up the body. Soft catch.',track:['reps','weight'],weight:0},
+  ]},
+
+  // TUE — KB Strength & Hypertrophy
+  {label:'Tue — KB Strength',focus:'Strength & Hypertrophy',
+   phaseOrder:['warmup','activation','strength','accessory','cooldown'],
+   exercises:[
+    exT('Kettlebell Halo',2,'45s',15,'warmup','Slow and controlled. Feel the shoulder open.'),
+    ex('Band Pull-Apart',2,15,15,'warmup'),
+    ex('Prying Goblet Squat',2,8,30,'activation','Take your time at the bottom. Breathe into the hips.'),
+    exT("World's Greatest Stretch",1,'45s',10,'activation'),
+    // Strength
+    ex('Double KB Front Squat',4,5,120,'strength','Rack position tight. Elbows up. Full depth.'),
+    ex('Kickstand KB Swing',4,10,90,'strength','Hip hinge — not a squat. Drive through the standing leg.'),
+    ex('KB Offset Push Up',3,8,75,'strength','Place one hand on the bell. Tight plank throughout.'),
+    ex('Pull-Up',3,5,90,'strength','Dead hang start. Chin over bar.'),
+    // Accessory
+    ex('Rear Delt Fly (Dumbbell)',3,12,60,'accessory'),
+    ex('KB Crush Grip Chest Press',3,10,60,'accessory','Squeeze the bell hard between your palms throughout.'),
+    ex('Towel Bicep Curls',3,10,60,'accessory','Loop towel through KB handle. Slow eccentric.'),
+    ex('Dumbbell Lateral Raise',3,12,60,'accessory'),
+    ex('KB Renegade Row',3,6,75,'accessory'),
+    ex('Calf Raises',3,15,45,'accessory'),
+    ex('Skull Crusher (Dumbbell)',3,10,60,'accessory'),
+    ex('KB Offset Carry',2,0,60,'accessory','Walk 30m each side. Keep hips level.','30s'),
+    // Cooldown
+    exT('Kneeling Lat Stretch',1,'45s',10,'cooldown'),
+    exT('Doorway Pec Stretch',1,'45s',10,'cooldown'),
+    exT('Triceps Overhead Stretch',1,'30s',10,'cooldown'),
+  ]},
+
+  // WED — Rest
+  {label:'Wed — Rest',focus:'Rest',
+   exercises:[
+    exT('Walking',1,'20min',0,'cardio','Easy pace. No pace targets. Just move.'),
+  ]},
+
+  // THU — Agility & Quickness + Cossack Squat
+  {label:'Thu — Agility & Quickness',focus:'Agility & Quickness',
+   phaseConfig:{tabata:{rounds:8,work:20,rest:10,mode:'time'}},
+   phaseOrder:['mobility','tabata','cooldown'],
+   exercises:[
+    ex('Cossack Squat',2,8,30,'mobility','Move slowly through the full range.'),
+    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
+    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
+    exT('Ankle Circles',1,'30s',0,'mobility'),
+    // Agility Tabata — 8 rounds 20s/10s
+    {name:'Jump Rope',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
+    {name:'Pogo Jump',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
+    {name:'Lateral Bound',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
+    {name:'180° Rotational Jump Turn',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
+    {name:'Lateral Quick-Step Shuffle',sets:1,reps:0,vol:'20s',rest:0,ph:'tabata',track:['time']},
+    // Cooldown
+    exT('Standing Calf Stretch',1,'45s',10,'cooldown'),
+    exT('Standing Hamstring Stretch',1,'45s',10,'cooldown'),
+    exT('Hip 90/90 Stretch',1,'60s',10,'cooldown'),
+  ]},
+
+  // FRI — KB Rotation & Anti-Rotation
+  {label:'Fri — Rotation & Anti-Rotation',focus:'KB Rotation & Anti-Rotation',
+   phaseOrder:['warmup','activation','strength','accessory','cooldown'],
+   exercises:[
+    exT('Arm Circles',1,'30s',10,'warmup'),
+    ex('Band Pull-Apart',2,15,15,'warmup'),
+    exT('Thoracic Rotation (Quadruped)',1,'45s',10,'warmup'),
+    ex('Band External Rotation',2,12,15,'activation'),
+    ex('Half-Kneeling KB Chop',2,8,45,'activation','Front knee stacked over ankle. Brace the core like a Pallof press.'),
+    ex('Around-the-World-and-Reverse',2,5,30,'activation','Control the arc. Shoulder packed.'),
+    // Strength — rotation work
+    ex('Landmine Twist',3,10,75,'strength','Hinge at the hips slightly. Let the obliques drive the arc.'),
+    ex('Chucky Twist',3,8,90,'strength','Hike between legs. Explosive hip snap into rotation.'),
+    ex('KB Shotput',3,5,90,'strength','L/R each set. Full hip extension before the throw.'),
+    // Accessory — anti-rotation
+    ex('Half-Kneeling KB Chop',3,8,60,'accessory'),
+    ex('Pallof Press (Standing)',3,10,60,'accessory','Exhale on press. Hold 2 seconds at full extension.'),
+    ex('Powerbag Overboard Throw',3,6,90,'accessory','From hinge — explosive extension and throw.'),
+    // Cooldown
+    exT('Lying Spinal Twist',1,'45s',10,'cooldown'),
+    exT('Thread the Needle',1,'45s',10,'cooldown'),
+  ]},
+
+  // SAT — Rest + Cossack Squat
+  {label:'Sat — Rest',focus:'Rest + Mobility',
+   exercises:[
+    ex('Cossack Squat',3,10,30,'mobility','Slow and controlled. Use KB as counterbalance.'),
+    exT('Hip Flexor Stretch',1,'60s',15,'mobility'),
+    exT("World's Greatest Stretch",1,'45s',10,'mobility'),
+    exT('T-Spine Rotation',1,'45s',10,'mobility'),
+    exT('Hamstring Sweep',1,'45s',10,'mobility'),
+    exT('Ankle Circles',1,'30s',0,'mobility'),
+  ]},
+
+  // SUN — Rest
+  {label:'Sun — Rest',focus:'Rest',
+   exercises:[
+    exT('Foam Rolling',1,'10min',0,'cooldown','Full body. Spend extra time on anything that worked hard this week.'),
+  ]},
+
+]},
+
 ]; // end TPL // end TPL
 
 // TPL lookup map
 var TPL_MAP = {};
 TPL.forEach(function(t){TPL_MAP[t.key]=t;});
 // Programme difficulty levels: 0=Rehab, 1=Foundations, 2=Beginner, 3=Intermediate, 4=Advanced
-var PROG_LEVEL={'end_2day':2,'end_b3':2,'end_b4':3,'end_b5':3,'fat_bw_2day':1,'fat_gym':3,'fat_gym2':2,'fat_gym3':2,'fat_home_bw':1,'fat_home_db':2,'fnd_2day':2,'fnd_2day_mob':1,'fnd_30min':3,'fnd_beg':2,'fnd_cool':1,'fnd_home_db':2,'fnd_mob':1,'fnd_return':2,'fnd_senior':2,'hyp_2day':3,'hyp_b3':3,'hyp_b4':4,'hyp_b5':4,'mob_flow':1,'rhb_back':0,'rhb_knee':0,'rhb_sho':0,'spt_climb':3,'spt_jump':4,'spt_pullup':3,'spt_pullup_plateau':3,'spt_run':3,'str_b3':3,'str_b4':3,'str_b5':4,'str_db3':3,'str_pb4':4,'str_ul4':4};
+var PROG_LEVEL={'end_2day':2,'end_b3':2,'end_b4':3,'end_b5':3,'fat_bw_2day':1,'fat_gym':3,'fat_gym2':2,'fat_gym3':2,'fat_home_bw':1,'fat_home_db':2,'fnd_2day':2,'fnd_2day_mob':1,'fnd_30min':3,'fnd_beg':2,'fnd_cool':1,'fnd_home_db':2,'fnd_mob':1,'fnd_return':2,'fnd_senior':2,'full_circle':3,'hyp_2day':3,'hyp_b3':3,'hyp_b4':4,'hyp_b5':4,'mob_flow':1,'rhb_back':0,'rhb_knee':0,'rhb_sho':0,'spt_climb':3,'spt_jump':4,'spt_pullup':3,'spt_pullup_plateau':3,'spt_run':3,'str_b3':3,'str_b4':3,'str_b5':4,'str_db3':3,'str_pb4':4,'str_ul4':4};
 var PROG_LEVEL_LABEL=['','Foundations','Beginner','Intermediate','Advanced'];
 function progLevelDots(key){
   var lvl=PROG_LEVEL[key];
@@ -7995,7 +8121,7 @@ function initPhaseDrag(){
       _pd.active=true;_pd.srcRow=row;_pd.startY=clientY;
       var rect=row.getBoundingClientRect();
       var clone=row.cloneNode(true);
-      clone.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;z-index:9999;opacity:0.92;box-shadow:0 8px 24px rgba(0,0,0,0.4);border-radius:10px;pointer-events:none;background:var(--bg2);border:1px solid var(--acc-brd);display:flex;align-items:center;padding:10px 12px;';
+      clone.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;z-index:9999;opacity:0.92;box-shadow:0 8px 24px rgba(0,0,0,0.4);border-radius:10px;pointer-events:none;background:var(--bg2);border:2px solid var(--acc);display:flex;align-items:center;padding:10px 12px;';
       document.body.appendChild(clone);
       _pd.clone=clone;_pd.cloneTop=rect.top;
       row.style.opacity='0.3';handle.style.cursor='grabbing';
@@ -8074,14 +8200,16 @@ function initBuildDrag(){
       var clone=row.cloneNode(true);
       clone.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;'+
         'width:'+rect.width+'px;z-index:9999;opacity:0.92;box-shadow:0 8px 24px rgba(0,0,0,0.4);'+
-        'border-radius:10px;pointer-events:none;background:var(--acc-bg);border:1.5px solid var(--acc-brd);'+
-        'display:flex;align-items:center;padding:10px 12px;transition:none';
+        'border-radius:10px;pointer-events:none;background:var(--bg2);border:1px solid var(--acc);'+
+        'display:flex;align-items:center;padding:10px 12px;transition:none;color:var(--tx);';
+      // Strip child backgrounds so the clone bg shows through cleanly
+      Array.from(clone.querySelectorAll('*')).forEach(function(el){el.style.background='transparent';el.style.border='none';});
       document.body.appendChild(clone);
       _drag.clone=clone;
       _drag.cloneTop=rect.top;
 
-      // Dim source
-      row.style.opacity='0.3';
+      // Hide source row (matches phase drag behaviour)
+      row.style.opacity='0';
       handle.style.cursor='grabbing';
     }
 
@@ -8091,20 +8219,21 @@ function initBuildDrag(){
       _drag.clone.style.top=(_drag.cloneTop+dy)+'px';
       _drag.lastY=y;
 
-      // Find which row the clone centre overlaps.
-      // Up direction feels correct as-is (triggers ~1 row of travel).
-      // Down direction previously needed ~2 rows of travel — add rowH to
-      // bring the trigger point back to ~1 row, matching up.
-      var rowH=_drag.srcRow.offsetHeight;
-      var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2+(dy<0?rowH/2:rowH);
+      // Find which row the clone centre overlaps (same logic as phase drag)
+      var midY=_drag.cloneTop+dy+_drag.clone.offsetHeight/2;
       var target=null;
       document.querySelectorAll('.build-drag-row').forEach(function(r){
         if(r===_drag.srcRow)return;
-        if(r.dataset.phase!==_drag.srcPhase)return; // same phase only
+        if(r.dataset.phase!==_drag.srcPhase)return;
         var rr=r.getBoundingClientRect();
         if(midY>=rr.top&&midY<=rr.bottom){target=r;}
       });
-      // No target-row highlighting — the floating clone border is the visual indicator
+      // Highlight target row border — matching phase drag behaviour
+      document.querySelectorAll('.build-drag-row').forEach(function(r){
+        if(r===_drag.srcRow)return;
+        if(r.dataset.phase!==_drag.srcPhase)return;
+        r.style.border=r===target?'0.5px solid var(--acc)':'0.5px solid var(--brd)';
+      });
     }
 
     function onEnd(){
@@ -8114,6 +8243,7 @@ function initBuildDrag(){
       _drag.srcRow.style.opacity='';
       handle.style.cursor='grab';
       // (rows were never highlighted during drag, nothing to restore)
+      document.querySelectorAll('.build-drag-row').forEach(function(r){r.style.border='0.5px solid var(--brd)';});
 
       // Find drop target — same as onMove
       var dy=_drag.lastY-_drag.startY;
