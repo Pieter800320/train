@@ -28,7 +28,7 @@
 <title>Falkenburg</title>
 <style>
 :root{
-  --acc:#E07B2A;--acc-bg:#1A0C00;--acc-brd:#2C1600;
+  --acc:#E07B2A;--acc-glow:#F09540;--acc-rgb:224,123,42;--acc-bg:#1A0C00;--acc-brd:#2C1600;
   --teal:#1D9E75;--teal-bg:#001A12;--teal-brd:#003020;
   --coral:#C85030;--coral-bg:#1C0800;--coral-brd:#2E1200;
   --bg:#0e0e10;--bg2:#16161a;--bg3:#1c1c20;
@@ -57,6 +57,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 .tap:active{opacity:.7;transform:scale(0.98);transition:transform .1s,opacity .1s}
 .btn-acc{background:var(--acc-bg);border-color:var(--acc-brd);color:var(--acc)}
 .btn-ghost{background:var(--bg3);border:1px solid var(--brd);color:var(--tx2)}
+.btn-cta{display:block;width:100%;padding:15px 20px;border:none;border-radius:14px;font-size:15px;font-weight:700;letter-spacing:.3px;cursor:pointer;color:#fff;background:linear-gradient(180deg,var(--acc-glow) 0%,var(--acc) 100%);box-shadow:0 4px 14px rgba(var(--acc-rgb),0.35),0 1px 3px rgba(0,0,0,0.2);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .15s ease,background .1s ease;-webkit-tap-highlight-color:transparent;user-select:none;text-align:center}
+.btn-cta:active{transform:scale(0.96);box-shadow:0 2px 6px rgba(var(--acc-rgb),0.2),0 1px 2px rgba(0,0,0,0.15);background:var(--acc)}
 .btn-teal{background:var(--teal-bg);border:1px solid var(--teal-brd);color:var(--teal)}
 .btn-coral{background:var(--coral-bg);border:1px solid var(--coral-brd);color:var(--coral)}
 .btn-sm{padding:7px 14px;font-size:12px;border-radius:9px;width:auto;display:inline-block}
@@ -133,22 +135,22 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .prog-item.active-prog{background:var(--acc-bg)}
 
 /* ─── 7 colour themes ─── */
-.t-amber{--acc:#E07B2A;--acc-bg:#1A0C00;--acc-brd:#2C1600}
-.t-amber.light{--acc:#B85510;--acc-bg:#fdf0e6;--acc-brd:#f0d4b0}
-.t-teal{--acc:#1D9E75;--acc-bg:#001A12;--acc-brd:#003020}
-.t-teal.light{--acc:#0F6E56;--acc-bg:#e8f7f2;--acc-brd:#a8dece}
-.t-blue{--acc:#3B82F6;--acc-bg:#001228;--acc-brd:#0a2248}
-.t-blue.light{--acc:#1D4ED8;--acc-bg:#eff6ff;--acc-brd:#bfdbfe}
-.t-coral{--acc:#E05A3A;--acc-bg:#1C0800;--acc-brd:#2E1000}
-.t-coral.light{--acc:#B83E20;--acc-bg:#fff1ee;--acc-brd:#fdd0c4}
-.t-violet{--acc:#7C6FD4;--acc-bg:#100e28;--acc-brd:#201c44}
-.t-violet.light{--acc:#5548B0;--acc-bg:#f5f3ff;--acc-brd:#ddd6fe}
-.t-forest{--acc:#4A8C5C;--acc-bg:#061408;--acc-brd:#0e2812}
-.t-forest.light{--acc:#2D6B42;--acc-bg:#f0fdf4;--acc-brd:#bbf7d0}
-.t-slate{--acc:#64748B;--acc-bg:#0e1018;--acc-brd:#1a1e2c}
-.t-slate.light{--acc:#475569;--acc-bg:#f8fafc;--acc-brd:#cbd5e1}
-.t-mono{--acc:#D4D4D4;--acc-bg:#141414;--acc-brd:#2a2a2a}
-.t-mono.light{--acc:#1a1a1a;--acc-bg:#f4f4f4;--acc-brd:#d0d0d0}
+.t-amber{--acc:#E07B2A;--acc-glow:#F09540;--acc-rgb:224,123,42;--acc-bg:#1A0C00;--acc-brd:#2C1600}
+.t-amber.light{--acc:#B85510;--acc-glow:#D46A20;--acc-rgb:184,85,16;--acc-bg:#fdf0e6;--acc-brd:#f0d4b0}
+.t-teal{--acc:#1D9E75;--acc-glow:#28C090;--acc-rgb:29,158,117;--acc-bg:#001A12;--acc-brd:#003020}
+.t-teal.light{--acc:#0F6E56;--acc-glow:#1A8C6C;--acc-rgb:15,110,86;--acc-bg:#e8f7f2;--acc-brd:#a8dece}
+.t-blue{--acc:#3B82F6;--acc-glow:#60A5FA;--acc-rgb:59,130,246;--acc-bg:#001228;--acc-brd:#0a2248}
+.t-blue.light{--acc:#1D4ED8;--acc-glow:#3B72F0;--acc-rgb:29,78,216;--acc-bg:#eff6ff;--acc-brd:#bfdbfe}
+.t-coral{--acc:#E05A3A;--acc-glow:#F07858;--acc-rgb:224,90,58;--acc-bg:#1C0800;--acc-brd:#2E1000}
+.t-coral.light{--acc:#B83E20;--acc-glow:#D45838;--acc-rgb:184,62,32;--acc-bg:#fff1ee;--acc-brd:#fdd0c4}
+.t-violet{--acc:#7C6FD4;--acc-glow:#9890E4;--acc-rgb:124,111,212;--acc-bg:#100e28;--acc-brd:#201c44}
+.t-violet.light{--acc:#5548B0;--acc-glow:#7068CC;--acc-rgb:85,72,176;--acc-bg:#f5f3ff;--acc-brd:#ddd6fe}
+.t-forest{--acc:#4A8C5C;--acc-glow:#5CAE70;--acc-rgb:74,140,92;--acc-bg:#061408;--acc-brd:#0e2812}
+.t-forest.light{--acc:#2D6B42;--acc-glow:#3E8856;--acc-rgb:45,107,66;--acc-bg:#f0fdf4;--acc-brd:#bbf7d0}
+.t-slate{--acc:#64748B;--acc-glow:#8494A8;--acc-rgb:100,116,139;--acc-bg:#0e1018;--acc-brd:#1a1e2c}
+.t-slate.light{--acc:#475569;--acc-glow:#5E6E84;--acc-rgb:71,85,105;--acc-bg:#f8fafc;--acc-brd:#cbd5e1}
+.t-mono{--acc:#D4D4D4;--acc-glow:#EEEEEE;--acc-rgb:212,212,212;--acc-bg:#141414;--acc-brd:#2a2a2a}
+.t-mono.light{--acc:#1a1a1a;--acc-glow:#383838;--acc-rgb:26,26,26;--acc-bg:#f4f4f4;--acc-brd:#d0d0d0}
 /* light mode base tokens */
 .light{
   --teal:#0F6E56;--teal-bg:#e8f7f2;--teal-brd:#a8dece;
@@ -3250,9 +3252,9 @@ function homeV(){
   h+='<div style="font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.1;color:var(--tx);margin-bottom:8px">'+day.focus+'</div>';
   h+='<div style="font-size:16px;font-weight:600;color:var(--tx2);margin-bottom:14px">'+day.label+' · ~'+tpl.duration+' min</div>';
   if(inProgress){
-    h+='<button style="font-size:14px;font-weight:700;background:var(--acc);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:13px 20px;cursor:pointer;width:100%;letter-spacing:.2px" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Continue Session →</button>';
+    h+='<button class="btn-cta" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Continue Session →</button>';
   } else {
-    h+='<button style="font-size:14px;font-weight:700;background:var(--acc);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:13px 20px;cursor:pointer;width:100%;letter-spacing:.2px" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Start Training →</button>';
+    h+='<button class="btn-cta" onclick="event.stopPropagation();S.tab=\'today\';sv();draw()">Start Training →</button>';
   }
   h+='</div></div>';
 
@@ -3362,8 +3364,8 @@ function homeV(){
         var _isToday=_cd.getTime()===_today.getTime();
         var _bg,_bdr='';
         if(_isFut){_bg='transparent';}
-        else if(_cnt>=2){_bg='var(--acc)';}
-        else if(_cnt===1){_bg='rgba(224,123,42,0.55)';}
+        else if(_cnt>=2){_bg='var(--acc-glow)';}
+        else if(_cnt===1){_bg='rgba(var(--acc-rgb),0.45)';}
         else{_bg='rgba(255,255,255,0.04)';}
         if(_isToday)_bdr='box-shadow:inset 0 0 0 1.5px var(--acc);';
         h+='<div style="aspect-ratio:1;border-radius:3px;background:'+_bg+';'+_bdr+'"></div>';
