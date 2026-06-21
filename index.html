@@ -4626,7 +4626,7 @@ function openExWindow(exIdx){
   var ph=exEntry.ph||'strength';
   var phLabel={strength:'Strength',warmup:'Warm-Up',activation:'Activation',accessory:'Accessory',core:'Core',cardio:'Cardio',mobility:'Mobility',cooldown:'Cool Down'};
 
-  var h='<div style="padding:0 20px 30px">';
+  var h='<div style="padding:6px 24px 30px">';
 
   // Quick EX lookup for swap availability
   var _swapObj=EX_MAP&&EX_MAP[exEntry.key];
@@ -4646,13 +4646,12 @@ function openExWindow(exIdx){
   // Last exercise = no undone sets belonging to a different exercise after this one
   var _isLast=_playing&&!wx.sets.some(function(s){return!s.done&&s.exIdx!==exIdx;});
   if(_playing&&!allDone&&_hasSwap){
-    h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;color:var(--mu);border-color:var(--brd);padding:4px 10px" onclick="swapExercise('+exIdx+')">Swap ⇄</button>';
+    h+='<button class="btn btn-ghost btn-sm" style="font-size:10px;color:var(--mu);border-color:var(--brd);padding:3px 8px" onclick="swapExercise('+exIdx+')">⇄ Swap</button>';
   }
   if(_playing&&!allDone&&!_alreadySkipped&&!_setsStarted&&!_anySkipped&&!_isLast){
-    h+='<button class="btn btn-ghost btn-sm" style="font-size:11px;color:var(--mu);border-color:var(--brd);padding:4px 10px" onclick="skipExercise('+exIdx+')">Skip ↷</button>';
+    h+='<button class="btn btn-ghost btn-sm" style="font-size:10px;color:var(--mu);border-color:var(--brd);padding:3px 8px" onclick="skipExercise('+exIdx+')">↷ Skip</button>';
   }
   h+='</div></div>';
-  h+='</div>';
 
   // Exercise name — append side label for unilateral exercises
   var _curSide=nextSet?nextSet.side:null;
@@ -5144,8 +5143,11 @@ function swapExercise(exIdx){
   var progs=(exObj.progression||[]).map(function(k){return EX_MAP[k];}).filter(Boolean);
   if(!regs.length&&!progs.length)return;
 
-  var h='<div style="padding:0 20px 20px">';
-  h+='<div style="font-size:18px;font-weight:800;color:var(--tx);margin-bottom:4px">Swap Exercise</div>';
+  var h='<div style="padding:16px 20px 20px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+  h+='<div style="font-size:18px;font-weight:800;color:var(--tx)">Swap Exercise</div>';
+  h+='<button onclick="closeModal()" style="background:none;border:none;font-size:20px;color:var(--mu);cursor:pointer;padding:4px 8px">&times;</button>';
+  h+='</div>';
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:16px">Replace <strong style="color:var(--tx)">'+exEntry.name+'</strong> for this session only.</div>';
   if(regs.length){
     h+='<div class="lbl" style="margin-bottom:8px">EASIER</div>';
@@ -5165,7 +5167,7 @@ function swapExercise(exIdx){
     });
   }
   h+='</div>';
-  openSheet(h,'Swap Exercise');
+  openModal(h);
 }
 
 function doSwapExercise(exIdx,newKey){
@@ -5182,7 +5184,7 @@ function doSwapExercise(exIdx,newKey){
   wx._pendingReps=undefined;
   wx._pendingKg=undefined;
   sv();
-  closeSheet();
+  closeModal();
   openExWindow(exIdx);
 }
 
