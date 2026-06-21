@@ -7320,7 +7320,6 @@ function buildOpenPicker(di,phKey){
   h+='<div style="height:300px"></div>'; // keyboard spacer
   h+='</div>';
   openSheet(h,'Add Exercise',function(){draw();});
-  setTimeout(function(){var el=document.getElementById('bpicker-search');if(el)el.focus();},200);
 }
 
 function buildPickerResults(suggested,other,phKey,di){
