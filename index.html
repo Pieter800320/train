@@ -3953,11 +3953,15 @@ function todayV(){
   var _isCustomTpl=!!(cl.customPrograms&&cl.customPrograms.some(function(cp){return cp.key===cl.tplKey;}));
 
   if(_isCustomTpl){
-    // Custom programme: render sorted by canonical phase order (non-destructive copy)
+    // Custom programme: render in the day's built phase order (drag-to-reorder
+    // in BUILD), falling back to canonical order. Mirrors the session queue
+    // sort in startSession so the list and the workout always agree.
     var _phOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
+    var _dayPhOrder=day.phaseOrder&&day.phaseOrder.length?day.phaseOrder:_phOrder;
     var sortedExercises=day.exercises.slice().sort(function(a,b){
-      var ai=_phOrder.indexOf(a.ph||'strength'); var bi=_phOrder.indexOf(b.ph||'strength');
-      if(ai<0)ai=_phOrder.length; if(bi<0)bi=_phOrder.length;
+      var ai=_dayPhOrder.indexOf(a.ph||'strength'); var bi=_dayPhOrder.indexOf(b.ph||'strength');
+      if(ai<0)ai=_phOrder.indexOf(a.ph||'strength'); if(bi<0)bi=_phOrder.indexOf(b.ph||'strength');
+      if(ai<0)ai=_dayPhOrder.length; if(bi<0)bi=_dayPhOrder.length;
       return ai-bi;
     });
     var _lastPh=null;
@@ -4074,13 +4078,18 @@ function todayV(){
       h+='</div></div>';
     });
   } else {
-    // Pre-built programme: group by phase in fixed order.
-    // Track a running index across all phases — this matches the position
-    // each exercise occupies in S.wx.exercises (sorted by the same phase
-    // order), correctly distinguishing duplicate-named exercises.
+    // Pre-built programme: group by phase. Use the day's built phase order
+    // (drag-to-reorder / custom phaseOrder) when present, else canonical.
+    // This MUST match the sort used for S.wx.exercises in startSession so the
+    // running index lines up with the player queue (active-row highlighting,
+    // duplicate-named exercises).
     var _runningIdx=0;
     var _tabataRenderedPB={};
-    phases.forEach(function(ph){
+    var _pbPhaseOrder=day.phaseOrder&&day.phaseOrder.length?day.phaseOrder.slice():phases.slice();
+    // Append any phases present in the day but missing from phaseOrder, in
+    // canonical order, so nothing is ever dropped from the list.
+    phases.forEach(function(p){if(_pbPhaseOrder.indexOf(p)<0)_pbPhaseOrder.push(p);});
+    _pbPhaseOrder.forEach(function(ph){
       var exsInPhase=day.exercises.filter(function(e){return(e.ph||'strength')===ph;});
       if(exsInPhase.length===0)return;
       // Countdown phase block
