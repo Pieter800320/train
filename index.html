@@ -3272,38 +3272,135 @@ function homeV(){
   }
   h+='</div></div>';
 
-  // Weekly Sessions + Recent (combined card)
-  h+='<div style="padding:0 16px 14px"><div class="card">';
-  h+='<div class="lbl" style="margin-bottom:10px">THIS WEEK</div>';
-  var todayDow=now.getDay();
-  var mondayOffset=todayDow===0?-6:1-todayDow;
-  var weekStart=new Date(now);weekStart.setHours(0,0,0,0);weekStart.setDate(now.getDate()+mondayOffset);
-  var weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+7);
-  var sessionDays={};
-  (cl.hist||[]).forEach(function(s){
-    var d=new Date(s.date);
-    if(d>=weekStart&&d<weekEnd){var dow=d.getDay()===0?6:d.getDay()-1;sessionDays[dow]=true;}
-  });
-  var dayLabels=['M','T','W','T','F','S','S'];
-  var todayDowMon=todayDow===0?6:todayDow-1;
-  h+='<div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:6px">';
-  for(var di=0;di<7;di++){
-    var dotCls='wdot ';
-    if(sessionDays[di])dotCls+='wdot-done';
-    else if(di===todayDowMon)dotCls+='wdot-today';
-    else if(di<todayDowMon)dotCls+='wdot-past';
-    else dotCls+='wdot-future';
-    h+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px">';
-    h+='<span class="'+dotCls+'"></span>';
-    h+='<span style="font-size:8px;font-weight:600;color:var(--mu)">'+dayLabels[di]+'</span>';
-    h+='</div>';
-  }
-  h+='</div>';
-  var wkCount=Object.keys(sessionDays).length;
-  h+='<div style="font-size:11px;color:var(--mu)">'+wkCount+' session'+(wkCount!==1?'s':'')+' this week</div>';
-  h+='<div style="border-top:0.5px solid var(--brd);margin:12px 0"></div>';
-  h+='<div class="lbl" style="margin-bottom:8px">RECENT</div>';
+  // ── PROGRESS + RECENT ─────────────────────────────────────────
   var hist=cl.hist||[];
+  h+='<div style="padding:0 16px 14px"><div class="card">';
+
+  if(!hist.length){
+    // Empty state
+    h+='<div class="lbl" style="margin-bottom:10px">PROGRESS</div>';
+    h+='<div style="font-size:12px;color:var(--mu);font-style:italic">Complete your first session to start tracking progress.</div>';
+  } else {
+    // ── Layer 1: Headline stats ───────────────────────────────
+    var totalSessions=hist.length;
+    var prKeys=Object.keys(cl.pr||{});
+    var totalPRs=prKeys.length;
+
+    // Streak: consecutive weeks with ≥1 session, backward from
+    // current week. Forgive current week if empty (Monday morning).
+    var _swks={};
+    hist.forEach(function(s){
+      var d=new Date(s.date);
+      var dw=d.getDay();var wo=dw===0?-6:1-dw;
+      var ws=new Date(d);ws.setDate(ws.getDate()+wo);ws.setHours(0,0,0,0);
+      _swks[ws.getTime()]=true;
+    });
+    var _streak=0;
+    var _sw=new Date(now);
+    var _swd=_sw.getDay();var _swo=_swd===0?-6:1-_swd;
+    _sw.setDate(_sw.getDate()+_swo);_sw.setHours(0,0,0,0);
+    if(!_swks[_sw.getTime()])_sw.setDate(_sw.getDate()-7);
+    while(_swks[_sw.getTime()]){_streak++;_sw.setDate(_sw.getDate()-7);}
+
+    h+='<div class="lbl" style="margin-bottom:14px">PROGRESS</div>';
+    h+='<div style="display:flex;justify-content:space-around;text-align:center;margin-bottom:16px">';
+    function _statBlk(val,label){
+      return '<div style="flex:1"><div style="font-size:24px;font-weight:800;color:var(--tx);line-height:1.1">'+val+'</div>'
+        +'<div style="font-size:10px;font-weight:600;color:var(--mu);margin-top:3px;letter-spacing:.3px">'+label+'</div></div>';
+    }
+    h+=_statBlk(totalSessions,'session'+(totalSessions!==1?'s':''));
+    h+=_statBlk(_streak?_streak+'w':'\u2014','streak');
+    h+=_statBlk(totalPRs||'\u2014','PR'+(totalPRs!==1?'s':''));
+    h+='</div>';
+
+    // ── Layer 2: 12-week activity heatmap ─────────────────────
+    var _hm={};
+    hist.forEach(function(s){
+      var d=new Date(s.date);
+      var k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+      _hm[k]=(_hm[k]||0)+1;
+    });
+    // 12 weeks total: start 11 weeks before current Monday
+    var _hs=new Date(now);
+    var _hsd=_hs.getDay();var _hso=_hsd===0?-6:1-_hsd;
+    _hs.setDate(_hs.getDate()+_hso-77);_hs.setHours(0,0,0,0);
+
+    // Month labels
+    var _mLabels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    h+='<div style="display:flex;margin-bottom:2px;padding-left:18px">';
+    var _lastMo=-1;
+    for(var _wc=0;_wc<12;_wc++){
+      var _md=new Date(_hs);_md.setDate(_md.getDate()+_wc*7);
+      var _mo=_md.getMonth();
+      if(_mo!==_lastMo){
+        h+='<div style="flex:1;font-size:8px;font-weight:600;color:var(--mu);letter-spacing:.3px">'+_mLabels[_mo]+'</div>';
+        _lastMo=_mo;
+      } else {
+        h+='<div style="flex:1"></div>';
+      }
+    }
+    h+='</div>';
+
+    // Grid: 7 rows (Mon-Sun) x 12 cols (weeks)
+    var _dayL=['M','','W','','F','',''];
+    var _today=new Date(now);_today.setHours(0,0,0,0);
+    h+='<div style="display:flex;gap:0">';
+    // Day labels column
+    h+='<div style="display:flex;flex-direction:column;gap:3px;margin-right:4px;justify-content:center">';
+    for(var _r=0;_r<7;_r++){
+      h+='<div style="height:1px;flex:1;display:flex;align-items:center"><span style="font-size:8px;font-weight:600;color:var(--mu);width:14px;text-align:right">'+_dayL[_r]+'</span></div>';
+    }
+    h+='</div>';
+    // Heatmap cells
+    h+='<div style="flex:1;display:grid;grid-template-columns:repeat(12,1fr);gap:3px">';
+    for(var _r=0;_r<7;_r++){
+      for(var _c=0;_c<12;_c++){
+        var _cd=new Date(_hs);_cd.setDate(_cd.getDate()+_c*7+_r);
+        var _ck=_cd.getFullYear()+'-'+(_cd.getMonth()+1)+'-'+_cd.getDate();
+        var _cnt=_hm[_ck]||0;
+        var _isFut=_cd>_today;
+        var _isToday=_cd.getTime()===_today.getTime();
+        var _bg,_bdr='';
+        if(_isFut){_bg='transparent';}
+        else if(_cnt>=2){_bg='var(--acc)';}
+        else if(_cnt===1){_bg='rgba(224,123,42,0.55)';}
+        else{_bg='rgba(255,255,255,0.04)';}
+        if(_isToday)_bdr='box-shadow:inset 0 0 0 1.5px var(--acc);';
+        h+='<div style="aspect-ratio:1;border-radius:3px;background:'+_bg+';'+_bdr+'"></div>';
+      }
+    }
+    h+='</div></div>';
+    h+='<div style="font-size:10px;color:var(--mu);margin-top:6px;text-align:right">12 weeks</div>';
+
+    // ── Layer 3: Recent PRs ───────────────────────────────────
+    if(totalPRs>0){
+      var _prList=prKeys.map(function(k){return{name:k,kg:(cl.pr[k].kg||0),reps:(cl.pr[k].reps||0),date:cl.pr[k].date||0};})
+        .sort(function(a,b){return b.date-a.date;}).slice(0,3);
+      h+='<div style="border-top:0.5px solid var(--brd);margin:14px 0 10px"></div>';
+      h+='<div class="lbl" style="margin-bottom:8px">RECENT PERSONAL BESTS</div>';
+      _prList.forEach(function(p,i){
+        var _ago='';
+        if(p.date){
+          var _dd=Math.floor((Date.now()-p.date)/86400000);
+          if(_dd===0)_ago='Today';
+          else if(_dd===1)_ago='Yesterday';
+          else if(_dd<7)_ago=_dd+'d ago';
+          else if(_dd<28){var _ww=Math.floor(_dd/7);_ago=_ww+'w ago';}
+          else{var _mm=Math.floor(_dd/30);_ago=_mm+'mo ago';}
+        }
+        var _val=p.kg>0?(p.kg+'kg \u00d7 '+p.reps):(p.reps>0?('BW \u00d7 '+p.reps):'\u2713');
+        h+='<div style="display:flex;align-items:center;justify-content:space-between'+(i>0?';margin-top:6px':'')+'">';
+        h+='<div style="font-size:13px;font-weight:600;color:var(--tx);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name+'</div>';
+        h+='<div style="text-align:right;flex-shrink:0;margin-left:12px"><span style="font-size:12px;font-weight:700;color:var(--acc)">'+_val+'</span>';
+        if(_ago)h+='<span style="font-size:10px;color:var(--mu);margin-left:6px">'+_ago+'</span>';
+        h+='</div></div>';
+      });
+    }
+  }
+
+  // ── Recent sessions ─────────────────────────────────────────
+  h+='<div style="border-top:0.5px solid var(--brd);margin:14px 0 10px"></div>';
+  h+='<div class="lbl" style="margin-bottom:8px">RECENT</div>';
   if(!hist.length){
     h+='<div style="font-size:12px;color:var(--mu);font-style:italic">No sessions logged yet.</div>';
   } else {
@@ -3313,12 +3410,13 @@ function homeV(){
       h+='<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+s.focus+'</div>';
       h+='<div class="lbl" style="margin-top:1px">'+d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+'</div></div>';
       h+='<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:var(--acc)">'+s.duration+' min</div>';
-      h+='<div class="lbl">'+(s.timerSession?'⏱ timer':s.sets+' sets')+'</div></div>';
+      h+='<div class="lbl">'+(s.timerSession?'\u23f1 timer':s.sets+' sets')+'</div></div>';
       h+='</div>';
     });
   }
   h+='</div></div>';
   h+='<div style="height:20px"></div>';
+
   return h;
 }
 
