@@ -3159,7 +3159,7 @@ function obShowRecommendation(recKey,ans){
   h+='<button class="btn btn-ghost" onclick="closeSheet();retakeOB()">Retake questionnaire</button>';
   h+='</div>';
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
-  h+='<button class="btn btn-acc" onclick="closeSheet();S.tab=\'today\';sv();draw()">Start training ›</button>';
+  h+='<button class="btn btn-acc" onclick="closeSheet();S.tab=\'today\';sv();draw()">Start training</button>';
   h+='</div>';
   h+='</div>';
   openSheet(h,'Welcome, '+(cl.name||'Athlete')+'!');
@@ -3894,7 +3894,9 @@ function exportProgramme(tplKey){
   // Store which programme to export
   S._exportKey=tplKey||null;
   // Export button
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
   h+='<button class="btn btn-acc" onclick="_doExportProgramme()">Export</button>';
+  h+='</div>';
   h+='</div>';
   openSheet(h,'Export Programme');
 }
@@ -5878,7 +5880,7 @@ function buildCountdownConfigSheet(di,fromConfig){
   h+='</div>';
   h+=stepperRow('Duration (min)','duration',cfg.duration||15,1,1,120);
   h+='<div style="padding:16px 0 8px">';
-  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 0 20px">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
   h+='<button class="btn btn-acc" onclick="'+( fromConfig?'closeSheet();setTimeout(function(){buildOpenConfigSheet('+di+')},200)':'closeSheet();setTimeout(function(){buildOpenExSheet('+di+')},200)')+'">Done</button>';
   h+='</div>';
   h+='</div>';
@@ -6291,7 +6293,7 @@ function openPlanPreview(key){
   });
 
   // Action
-  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 8px 0">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
   if(isActive){
     h+='<div style="text-align:center;font-size:13px;font-weight:700;color:var(--acc);padding:8px 0 4px">✓ Currently active</div>';
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="buildLoadPlan(this.dataset.key)">Edit in Build</button>';
@@ -6371,7 +6373,7 @@ function openProgPreview(key){
   });
 
   // Action buttons
-  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 8px 0">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
   if(isDraft){
     h+='<button class="btn btn-acc" data-key="'+key+'" onclick="buildResumeDraft(this.dataset.key)">Resume Draft</button>';
     h+='<button class="btn btn-ghost" style="margin-top:8px" data-key="'+key+'" onclick="deleteCustomProg(this.dataset.key)">Delete</button>';
@@ -7037,7 +7039,7 @@ function buildDrillToPatterns(di){
     h+='</div>';
   });
   h+='</div>';
-  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 0 20px">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
   h+='<button class="btn btn-acc" onclick="closeSheet();buildOpenSplitSheet('+di+')">Done</button>';
   h+='</div>';
   h+='</div>';
@@ -7149,7 +7151,9 @@ function buildOpenPhasePicker(di){
     });
     h+='</div>';
   }
-  h+='<button class="btn btn-acc" style="margin-top:20px" onclick="closeSheet();draw()">Done</button>';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
+  h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
+  h+='</div>';
   h+='</div>';
   openSheet(h,'Phases',function(){draw();});
   setTimeout(initPhaseDrag,60);
@@ -7648,7 +7652,9 @@ function buildConfigEx(di,ei){
        (exEntry.steps||[]).join('\n')+'</textarea>';
   }
 
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
   h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">← Back to session</button>';
+  h+='</div>';
   h+='</div>';
   openSheet(h, exEntry.name, function(){buildOpenConfigSheet(di);});
 }
@@ -7986,7 +7992,7 @@ function buildOpenExSheet(di){
       +'onclick="buildDrillToLibrary('+di+',\''+phKey+'\');">+ Add to '+phConf.label+'</button>';
     h+='</div>';
   });
-  h+='<div style="padding:0 0 8px">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
   h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
   h+='</div>';
   h+='</div>';
@@ -8099,7 +8105,7 @@ function buildOpenConfigSheet(di){
   if(!hasAny){
     h+='<div style="font-size:12px;color:var(--mu);text-align:center;padding:20px 0">No exercises yet — add some in Step 3.</div>';
   }
-  h+='<div style="padding:8px 0">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
   h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
   h+='</div>';
   h+='</div>';
