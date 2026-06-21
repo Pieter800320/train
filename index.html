@@ -6985,7 +6985,11 @@ function buildOpenSplitSheet(di){
     : 'None selected';
   var hasPatterns=!!(day.split&&day.split.length);
 
-  var h='<div style="padding:0 20px 30px">';
+  var h='<div style="padding:16px 20px 20px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">';
+  h+='<div style="font-size:18px;font-weight:800;color:var(--tx)">Session '+(di+1)+'</div>';
+  h+='<button onclick="closeModal();draw()" style="background:none;border:none;font-size:20px;color:var(--mu);cursor:pointer;padding:4px 8px">&times;</button>';
+  h+='</div>';
   // Session name
   h+='<div class="lbl" style="margin-bottom:6px">SESSION NAME</div>';
   h+='<input type="text" value="'+day.label+'" placeholder="e.g. Session A" '
@@ -7002,20 +7006,25 @@ function buildOpenSplitSheet(di){
   h+='<span style="color:var(--acc);font-size:13px">›</span>';
   h+='</div>';
 
-  h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
+  h+='<button class="btn btn-acc" onclick="closeModal();draw()">Done</button>';
   h+='</div>';
-  openSheet(h,'Session '+(di+1),function(){draw();});
+  openModal(h);
+  var _ov=document.getElementById('modal-overlay');
+  if(_ov)_ov.onclick=function(){closeModal();draw();};
 }
 
 // Drill-down: swap sheet body to pattern picker, back arrow returns to session sheet
 function buildDrillToPatterns(di){
   S.customEdit.activeDay=di;sv();
   var day=S.customEdit.days[di];
-  var backTitle='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer;padding:0" onclick="buildOpenSplitSheet('+di+')">'
-    +'<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>'
-    +'<span style="font-size:15px;font-weight:800;color:var(--tx)">Movement Patterns</span>'
-    +'</div>';
-  var h='<div style="padding:0 20px 30px">';
+  var h='<div style="padding:16px 20px 20px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+  h+='<div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="buildOpenSplitSheet('+di+')">';
+  h+='<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>';
+  h+='<span style="font-size:18px;font-weight:800;color:var(--tx)">Movement Patterns</span>';
+  h+='</div>';
+  h+='<button onclick="closeModal();draw()" style="background:none;border:none;font-size:20px;color:var(--mu);cursor:pointer;padding:4px 8px">&times;</button>';
+  h+='</div>';
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:16px">Select all movement patterns for this session.</div>';
   h+='<div style="display:flex;flex-direction:column;gap:8px">';
   Object.keys(BUILD_PATTERNS).forEach(function(pat){
@@ -7026,14 +7035,15 @@ function buildDrillToPatterns(di){
       +'border:1.5px solid '+(sel?'var(--acc-brd)':'var(--brd)')+';'
       +'background:'+(sel?'var(--acc-bg)':'var(--bg3)')+'">';
     h+='<span style="font-size:13px;font-weight:600;color:'+(sel?'var(--acc)':'var(--tx)')+'">'+BUILD_PATTERNS[pat]+'</span>';
-    h+='<span style="font-size:13px;color:var(--acc)">'+(sel?'✓':'')+'</span>';
+    h+='<span style="font-size:13px;color:var(--acc)">'+(sel?'\u2713':'')+'</span>';
     h+='</div>';
   });
   h+='</div>';
-  h+='<button class="btn btn-acc" style="margin-top:20px" onclick="buildOpenSplitSheet('+di+')">← Back to session</button>';
+  h+='<button class="btn btn-acc" style="margin-top:20px" onclick="buildOpenSplitSheet('+di+')">Done</button>';
   h+='</div>';
-  var sb=document.getElementById('sheet-body');
-  if(sb) sb.innerHTML=backTitle+h;
+  var mb=document.getElementById('modal-body');
+  if(mb) mb.innerHTML=h;
+
 }
 function buildOpenSplitPicker(di){
   S.customEdit.activeDay=di;sv();
