@@ -3154,10 +3154,12 @@ function obShowRecommendation(recKey,ans){
     h+='<div style="height:8px"></div>';
   }
   h+='<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">';
-  h+='<button class="btn btn-acc" onclick="closeSheet();S.tab=\'today\';sv();draw()">Start training ›</button>';
   h+='<button class="btn btn-ghost" onclick="closeSheet();S.tab=\'programs\';sv();draw()">Browse all programmes</button>';
   h+='<button class="btn btn-ghost" onclick="closeSheet();S.tab=\'build\';sv();draw()">Build my own programme</button>';
   h+='<button class="btn btn-ghost" onclick="closeSheet();retakeOB()">Retake questionnaire</button>';
+  h+='</div>';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
+  h+='<button class="btn btn-acc" onclick="closeSheet();S.tab=\'today\';sv();draw()">Start training ›</button>';
   h+='</div>';
   h+='</div>';
   openSheet(h,'Welcome, '+(cl.name||'Athlete')+'!');
@@ -4374,7 +4376,7 @@ function openPlanSheet(){
   // In that case the plan is fixed by design, not a client choice.
   var _tplLocked=isSinglePlanProgramme(ACTIVE_TPL());
   if(!_tplLocked){
-    h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:12px 28px 0">';
+    h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
     h+='<div style="display:flex;gap:8px">';
     h+='<button class="btn btn-ghost" style="flex:1" onclick="openAttachPlanSheet()">Change Plan</button>';
     h+='<button class="btn btn-ghost" style="flex:1" onclick="confirmDetachPlan()">Remove Plan</button>';
@@ -5876,7 +5878,9 @@ function buildCountdownConfigSheet(di,fromConfig){
   h+='</div>';
   h+=stepperRow('Duration (min)','duration',cfg.duration||15,1,1,120);
   h+='<div style="padding:16px 0 8px">';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 0 20px">';
   h+='<button class="btn btn-acc" onclick="'+( fromConfig?'closeSheet();setTimeout(function(){buildOpenConfigSheet('+di+')},200)':'closeSheet();setTimeout(function(){buildOpenExSheet('+di+')},200)')+'">Done</button>';
+  h+='</div>';
   h+='</div>';
   h+='</div>';
   openSheet(h,'Countdown Config');
@@ -6997,7 +7001,7 @@ function buildOpenSplitSheet(di){
     +'style="margin-bottom:16px;font-size:14px;font-weight:700">';
   // Movement pattern focus — drill-down row
   h+='<div class="lbl" style="margin-bottom:8px">MOVEMENT PATTERN FOCUS</div>';
-  h+='<div onclick="buildDrillToPatterns('+di+')" style="'
+  h+='<div onclick="closeModal();buildDrillToPatterns('+di+')" style="'
     +'display:flex;align-items:center;justify-content:space-between;'
     +'padding:12px 14px;border-radius:10px;'
     +'border:1px solid '+(hasPatterns?'var(--acc-brd)':'var(--brd)')+';'
@@ -7017,19 +7021,13 @@ function buildOpenSplitSheet(di){
 function buildDrillToPatterns(di){
   S.customEdit.activeDay=di;sv();
   var day=S.customEdit.days[di];
-  var h='<div style="padding:16px 20px 20px">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
-  h+='<div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="buildOpenSplitSheet('+di+')">';
-  h+='<span style="font-size:22px;line-height:1;color:var(--acc)">&#8249;</span>';
-  h+='<span style="font-size:18px;font-weight:800;color:var(--tx)">Movement Patterns</span>';
-  h+='</div>';
-  h+='<button onclick="closeModal();draw()" style="background:none;border:none;font-size:20px;color:var(--mu);cursor:pointer;padding:4px 8px">&times;</button>';
-  h+='</div>';
+
+  var h='<div style="padding:6px 20px 0">';
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:16px">Select all movement patterns for this session.</div>';
   h+='<div style="display:flex;flex-direction:column;gap:8px">';
   Object.keys(BUILD_PATTERNS).forEach(function(pat){
     var sel=(day.split||[]).indexOf(pat)>=0;
-    h+='<div onclick="buildToggleSplitPicker('+di+',\''+pat+'\');buildDrillToPatterns('+di+')" style="'
+    h+='<div onclick="buildToggleSplitPicker('+di+',\''+pat+'\');buildDrillToPatternsRefresh('+di+')" style="'
       +'display:flex;align-items:center;justify-content:space-between;'
       +'padding:11px 14px;border-radius:10px;cursor:pointer;'
       +'border:1.5px solid '+(sel?'var(--acc-brd)':'var(--brd)')+';'
@@ -7039,11 +7037,16 @@ function buildDrillToPatterns(di){
     h+='</div>';
   });
   h+='</div>';
-  h+='<button class="btn btn-acc" style="margin-top:20px" onclick="buildOpenSplitSheet('+di+')">Done</button>';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 0 20px">';
+  h+='<button class="btn btn-acc" onclick="closeSheet();buildOpenSplitSheet('+di+')">Done</button>';
   h+='</div>';
-  var mb=document.getElementById('modal-body');
-  if(mb) mb.innerHTML=h;
-
+  h+='</div>';
+  openSheet(h,'Movement Patterns',function(){buildOpenSplitSheet(di);});
+}
+function buildDrillToPatternsRefresh(di){
+  // Re-render the pattern picker in-place after toggling a pattern
+  closeSheet();
+  buildDrillToPatterns(di);
 }
 function buildOpenSplitPicker(di){
   S.customEdit.activeDay=di;sv();
@@ -7851,7 +7854,6 @@ function buildDrillToLibrary(di,phKey){
         (function(capturedQ){customDiv.onclick=function(){buildAddCustomExDrill(di,phKey,capturedQ);};})(q.trim());
         res.appendChild(customDiv);
       });
-      inp.focus();
     }
   }
 }
