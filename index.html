@@ -295,7 +295,7 @@ function ld(){
   // Also fixes reps:0 on non-timed exercises (BUILD's mobility/cardio/cooldown
   // phase defaults previously set reps:0 even for rep-tracked exercises,
   // making them display as empty until manually edited)
-  var _phMigOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','cooldown','tabata','emom','tabata','emom'];
+  var _phMigOrder=['warmup','activation','mobility','primer','strength','accessory','core','cardio','countdown','cooldown','tabata','emom'];
   function _fixZeroReps(d){
     (d.exercises||[]).forEach(function(ex){
       var track=ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol);
@@ -337,6 +337,10 @@ function ld(){
       }
       if(cp.tpl&&cp.tpl.days){
         cp.tpl.days.forEach(function(d){
+          // Respect an explicit phaseOrder (set via drag-to-reorder in BUILD).
+          // Only auto-sort legacy days that never had a custom order, so this
+          // migration never overrides the user's chosen phase sequence.
+          if(d.phaseOrder&&d.phaseOrder.length)return;
           if(d.exercises&&d.exercises.length>1){
             d.exercises.sort(function(a,b){
               var ai=_phMigOrder.indexOf(a.ph||'strength');
@@ -2700,6 +2704,7 @@ function finishSession(){
     sv();
   }
   window._cancelWx=S.wx; // store globally for cancel restore
+  window._cancelSaved=hasAnyWork; // did we push history + advance the counter?
   S.wx=null;sv();
   // Show celebration sheet
   var msg=CONGRATS[Math.floor(Math.random()*CONGRATS.length)];
@@ -2727,12 +2732,20 @@ function cancelFinishSession(){
   var ov=document.getElementById('sheet-overlay');
   if(sheet){sheet._noSwipe=false;sheet.classList.remove('show');}
   if(ov)ov.classList.remove('show');
-  // Undo the history save
+  // Undo the history save — but only if finishSession actually saved one.
   var cl=C();
-  if(cl.hist&&cl.hist.length>0){
-    cl.hist.pop();
-    cl.day=Math.max(0,(cl.day||1)-1);
+  if(window._cancelSaved){
+    if(cl.hist&&cl.hist.length>0)cl.hist.pop();
+    // Roll back the per-programme day counter (the real source of truth for
+    // currentDayIdx), and keep the legacy cl.day field in sync.
+    if(cl.dayCounters&&cl.dayCounters[cl.tplKey]!==undefined){
+      cl.dayCounters[cl.tplKey]=Math.max(0,cl.dayCounters[cl.tplKey]-1);
+      cl.day=cl.dayCounters[cl.tplKey];
+    } else {
+      cl.day=Math.max(0,(cl.day||1)-1);
+    }
   }
+  window._cancelSaved=false;
   // Restore the session exactly as it was
   if(window._cancelWx){
     S.wx=window._cancelWx;
@@ -8577,8 +8590,12 @@ function importAllData(input){
       input.value='';return;
     }
     appConfirm('Restore this backup? This replaces ALL current data — programmes, history and settings — and cannot be undone.',function(){
-      S=parsed;
-      try{localStorage.setItem('falken_v1',JSON.stringify(S));}catch(err){}
+      try{localStorage.setItem('falken_v1',JSON.stringify(parsed));}catch(err){}
+      // Re-run the loader so the imported data passes through all the same
+      // migration / default-fill guards as a normal startup. Importing an
+      // older or partial backup would otherwise skip these and risk
+      // undefined-access crashes.
+      ld();
       input.value='';
       closeTopSheet();
       draw();
