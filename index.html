@@ -465,12 +465,21 @@ function resolveTrack(name,ph,reps,vol){
   return['reps'];
 }
 function ex(name,sets,reps,rest,ph,cue,vol){
-  return {name:name,sets:sets,reps:reps||0,vol:vol||'',rest:rest||60,
+  // The 7th arg historically carried a volume string, but Full Circle passes
+  // the sentinel 'unilateral' there to flag a one-side-per-set movement.
+  // Detect it so it sets the flag instead of corrupting vol/track.
+  var _uni=false;
+  if(vol==='unilateral'){_uni=true;vol='';}
+  var _e={name:name,sets:sets,reps:reps||0,vol:vol||'',rest:rest||60,
           ph:ph||'strength',cue:cue||'',track:resolveTrack(name,ph||'strength',reps,vol)};
+  if(_uni)_e.unilateral=true;
+  return _e;
 }
-function exT(name,sets,vol,rest,ph,cue){
-  return {name:name,sets:sets,reps:0,vol:vol||'45s',rest:rest||30,
+function exT(name,sets,vol,rest,ph,cue,uni){
+  var _e={name:name,sets:sets,reps:0,vol:vol||'45s',rest:(rest===0?0:(rest||30)),
           ph:ph||'strength',cue:cue||'',track:resolveTrack(name,ph||'strength',0,vol||'45s')};
+  if(uni==='unilateral'||uni===true)_e.unilateral=true;
+  return _e;
 }
 // exTabata — a single round-synced Tabata circuit exercise. `steps` is an
 // ordered list of movement names; the live session cycles through
