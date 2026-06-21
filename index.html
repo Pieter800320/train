@@ -7324,6 +7324,9 @@ function buildOpenPicker(di,phKey){
   h+='Exercise Library ›</button>';
   h+='</div>';
   h+='</div>';
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
+  h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
+  h+='</div>';
   h+='<div style="height:300px"></div>'; // keyboard spacer
   h+='</div>';
   openSheet(h,'Add Exercise',function(){draw();});
@@ -7543,7 +7546,9 @@ function buildConfigEx(di,ei){
     h+='<div class="lbl" style="margin-bottom:6px">COACHING CUE (optional)</div>';
     h+='<input type="text" value="'+(exEntry.cue||'')+'" placeholder="e.g. Never put the bell down" '+
        'oninput="S.customEdit.days['+di+'].exercises['+ei+'].cue=this.value;sv()" style="margin-bottom:20px">';
-    h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">← Back to session</button>';
+    h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
+    h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">Done</button>';
+    h+='</div>';
     h+='</div>';
     openSheet(h, exEntry.name, function(){buildOpenConfigSheet(di);});
     return;
@@ -7653,7 +7658,7 @@ function buildConfigEx(di,ei){
   }
 
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
-  h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">← Back to session</button>';
+  h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">Done</button>';
   h+='</div>';
   h+='</div>';
   openSheet(h, exEntry.name, function(){buildOpenConfigSheet(di);});
@@ -7815,8 +7820,9 @@ function buildDrillToLibrary(di,phKey){
     +'style="margin-bottom:12px;font-size:14px" autocomplete="off">'
     +'<div id="bpicker-results" style="display:none"></div>'
     +'<div id="bpicker-library">'+libraryHTML+'</div>'
-    +'<button class="btn btn-acc" style="margin-top:16px" onclick="buildOpenExSheet('+di+')">← Back to session</button>'
-    +'</div>';
+    +'<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">'
+    +'<button class="btn btn-acc" onclick="buildOpenExSheet('+di+')">Done</button>'
+    +'</div></div>';
 
   var sb=document.getElementById('sheet-body');
   if(sb){
