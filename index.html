@@ -3874,7 +3874,7 @@ function openJournalView(){
   // Action buttons — top
   h+='<div style="display:flex;gap:8px;margin-bottom:16px">';
   h+='<button class="btn btn-acc" style="flex:1;font-size:12px" onclick="exportJournal()">Download</button>';
-  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--coral)" onclick="clearAllHistory()">Clear All</button>';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--acc)" onclick="clearAllHistory()">Clear All</button>';
   h+='</div>';
   // Stats
   var total=cl.hist?cl.hist.length:0;
@@ -3897,7 +3897,7 @@ function openJournalView(){
       h+='<div style="font-size:13px;font-weight:600">'+name+'</div>';
       h+='<div style="font-size:11px;color:var(--mu);margin-top:1px">'+val+'</div>';
       h+='</div>';
-      h+='<button data-pbidx="'+i+'" onclick="deletePBByIndex(parseInt(this.dataset.pbidx))" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:8px 10px;line-height:1;flex-shrink:0">✕</button>';
+      h+='<button data-pbidx="'+i+'" onclick="deletePBByIndex(parseInt(this.dataset.pbidx))" style="background:none;border:none;color:var(--acc);font-size:18px;cursor:pointer;padding:8px 10px;line-height:1;flex-shrink:0">✕</button>';
       h+='</div>';
     });
     h+='</div>';
@@ -3922,7 +3922,7 @@ function openJournalView(){
       h+='</div>';
       h+='<div style="text-align:right;margin-right:8px"><div style="font-size:14px;font-weight:700;color:var(--acc)">'+s.duration+'min</div>';
       h+='<div class="lbl">'+(s.timerSession?'⏱ timer':s.sets+' sets')+'</div></div>';
-      h+='<button onclick="clearHistoryItem('+actualIdx+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:4px;flex-shrink:0">✕</button>';
+      h+='<button onclick="clearHistoryItem('+actualIdx+')" style="background:none;border:none;color:var(--acc);cursor:pointer;font-size:16px;padding:4px;flex-shrink:0">✕</button>';
       h+='</div>';
     });
   }
@@ -8935,14 +8935,17 @@ function buildPlanV(){
       // Week header
       h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
       h+='<div style="font-size:13px;font-weight:700;color:'+(deload?'var(--acc)':'var(--tx)')+'">Week '+(wi+1)+'</div>';
-      h+='<button class="toggle '+(deload?'toggle-on':'toggle-off')+'" onclick="S.planEdit.weeks['+wi+'].theme=S.planEdit.weeks['+wi+'].theme===\'deload\'?\'build\':\'deload\';sv();draw()" title="Deload"><div class="toggle-knob"></div></button>';
+      h+='<div style="display:flex;align-items:center;gap:8px">';
+h+='<span style="font-size:11px;font-weight:700;color:'+(deload?'var(--acc)':'var(--mu)')+';letter-spacing:.04em">DELOAD</span>';
+h+='<button class="toggle '+(deload?'toggle-on':'toggle-off')+'" onclick="S.planEdit.weeks['+wi+'].theme=S.planEdit.weeks['+wi+'].theme===\'deload\'?\'build\':\'deload\';sv();draw()"><div class="toggle-knob"></div></button>';
+h+='</div>';
       h+='</div>';
       // Label
       h+='<input type="text" value="'+wk.label+'" placeholder="Week label e.g. Build" oninput="S.planEdit.weeks['+wi+'].label=this.value;sv()" style="margin-bottom:10px;font-size:12px">';
       // RPE / RIR / VOL / REST row
       h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
       [
-        {label:'RPE',key:'rpe',min:1,max:10,step:1},
+        {label:'RPE',key:'rpe',min:6,max:10,step:1},
         {label:'RIR',key:'rir',min:0,max:5,step:1},
         {label:'WEIGHT %',key:'weightPct',min:40,max:120,step:5},
         {label:'VOL%',key:'volMod',min:50,max:130,step:5,scale:100},
@@ -9357,6 +9360,7 @@ function timerDrawFrame(){
     }
   }
 
+  if(t.prep&&t.prep>0){ timerDrawPrep(ctx,W,H,acc,bg,t); return; }
   if(t.setup){ timerDrawSetup(ctx,W,H,acc,bg,t); return; }
 
   // ── Running / paused ──
@@ -9370,10 +9374,28 @@ function timerDrawFrame(){
   timerDrawRunning(ctx,W,H,cx,cy,ringR,acc,bg,t);
 }
 
-function timerDrawSetup(ctx,W,H,acc,bg,t){
-  // Setup is rendered as HTML — canvas just shows a minimal background
-  // Actually we let HTML handle setup and only use canvas for running
-  // So this is a no-op — draw() handles setup via HTML
+function timerDrawSetup(ctx,W,H,acc,bg,t){}
+function timerDrawPrep(ctx,W,H,acc,bg,t){
+  // Full-screen prep countdown overlay on the canvas
+  ctx.clearRect(0,0,W,H);
+  // Background
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  var cx=W/2, cy=H/2;
+  // Large countdown number
+  var n=t.prep||0;
+  ctx.font='800 '+Math.round(H*0.38)+'px system-ui,sans-serif';
+  ctx.fillStyle=acc;
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.globalAlpha=0.95;
+  ctx.fillText(String(n),cx,cy);
+  ctx.globalAlpha=1;
+  // "GET READY" label
+  ctx.font='700 '+Math.round(H*0.055)+'px system-ui,sans-serif';
+  ctx.fillStyle=acc;
+  ctx.globalAlpha=0.6;
+  ctx.fillText('GET READY',cx,cy-Math.round(H*0.28));
+  ctx.globalAlpha=1;
 }
 
 function timerDrawRunning(ctx,W,H,cx,cy,R,acc,bg,t){
@@ -9704,15 +9726,15 @@ function timerOpenConfig(mode){
     var mins=Math.floor(t.totalSecs/60);var secs=t.totalSecs%60;
     h+=timerSetupStepper('MINUTES','cdMins',mins,'m',1);
     h+=timerSetupStepper('SECONDS','cdSecs',secs,'s',5);
-    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();startCountdown()">Start</button>';
+    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();timerStartPrep(startCountdown)">Start</button>';
   } else if(mode==='tabata'){
     h+=timerSetupStepper('WORK (seconds)','tabWork',t.tabWork,'s',5);
     h+=timerSetupStepper('REST (seconds)','tabRest',t.tabRest,'s',5);
     h+=timerSetupStepper('ROUNDS','tabRounds',t.tabRounds,'',1);
-    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();startTabata()">Start</button>';
+    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();timerStartPrep(startTabata)">Start</button>';
   } else if(mode==='emom'){
     h+=timerSetupStepper('TOTAL MINUTES','emomMins',t.emomMins,' min',1);
-    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();startEMOM()">Start</button>';
+    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();timerStartPrep(startEMOM)">Start</button>';
   }
   h+='</div>';
   openSheet(h,mode.charAt(0).toUpperCase()+mode.slice(1)+' Setup');
@@ -9877,6 +9899,26 @@ function setTimerMode(m){
     btn.style.borderRadius='12px';btn.style.width='auto';
   });
 }
+var _timerPrepInterval=null;
+function timerStartPrep(startFn){
+  // 5-second countdown before timer starts. Soft tick each second, decisive beep on GO.
+  var ctx=_getAudioCtx();if(ctx&&ctx.state==='suspended')ctx.resume();
+  S.timer.prep=5;S.timer.setup=false;
+  sv();draw(); // show prep display
+  if(_timerPrepInterval)clearInterval(_timerPrepInterval);
+  _timerPrepInterval=setInterval(function(){
+    S.timer.prep--;
+    if(S.timer.prep<=0){
+      clearInterval(_timerPrepInterval);_timerPrepInterval=null;
+      S.timer.prep=null;
+      timerBeep(1100,0.18,0.45,0); // decisive GO beep — higher, louder, longer
+      startFn();
+    } else {
+      timerBeep(660,0.08,0.2,0); // soft tick
+      sv();draw();
+    }
+  },1000);
+}
 function startCountdown(){
   var t=S.timer;if(t.totalSecs<=0)return;
   t.remaining=t.totalSecs;t.setup=false;t.running=true;t.startedAt=Date.now();
@@ -9941,7 +9983,8 @@ function timerDoLog(label,detail,duration){
   sv();
 }
 function timerReset(){
-  var t=S.timer;
+  if(_timerPrepInterval){clearInterval(_timerPrepInterval);_timerPrepInterval=null;}
+  var t=S.timer; t.prep=null;
   // Offer log on early reset: countdown ran ≥5 min
   if(t.mode==='countdown'&&!t._logOffered&&t.startedAt){
     var elapsed=Math.round((Date.now()-t.startedAt)/1000);
