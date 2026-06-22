@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img">
+  <title>Falkenburg App Icon</title>
+  <desc>Deep slate background with geometric F letterform in warm off-white, right portions of horizontal bars in amber gradient, amber baseline accent and soft glow dot.</desc>
+
+  <defs>
+    <!-- Background: deep slate, warm-dark gradient -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c2133"/>
+      <stop offset="100%" stop-color="#0e1118"/>
+    </linearGradient>
+
+    <!-- Off-white: slightly warm, not stark -->
+    <linearGradient id="ow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F2EDE4"/>
+      <stop offset="100%" stop-color="#D8D2CE"/>
+    </linearGradient>
+
+    <!-- Amber: rich gold to deep amber -->
+    <linearGradient id="amb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#C97C0A"/>
+    </linearGradient>
+
+    <!-- Amber baseline: deeper, grounding -->
+    <linearGradient id="ambBase" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#92400E"/>
+    </linearGradient>
+
+    <!-- Top highlight: very subtle inner glow at top -->
+    <linearGradient id="topShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Rounded corner clip for icon shape -->
+    <clipPath id="iconClip">
+      <rect width="1024" height="1024" rx="220" ry="220"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Background ── -->
+  <g clip-path="url(#iconClip)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <!-- Subtle inner top highlight -->
+    <rect width="1024" height="340" fill="url(#topShine)"/>
+
+    <!-- ── F LETTERFORM ──────────────────────────────────────
+         Canvas: 1024×1024
+         F block: left=192, right=736 (width=544)
+         Vertical stroke: x=192, width=108
+         Top bar: y=180, height=108
+         Mid bar: y=458, height=96
+         Bottom of vertical stroke: y=180+568=748
+         
+         Amber split point (top bar): x=470
+         Amber split point (mid bar): x=440
+    ──────────────────────────────────────────────────────── -->
+
+    <!-- VERTICAL STROKE — full height, off-white -->
+    <rect x="192" y="180" width="108" height="568" rx="20" fill="url(#ow)"/>
+
+    <!-- TOP BAR — full width, off-white -->
+    <rect x="192" y="180" width="544" height="108" rx="20" fill="url(#ow)"/>
+
+    <!-- MID BAR — 3/4 width, off-white -->
+    <rect x="192" y="458" width="424" height="96" rx="20" fill="url(#ow)"/>
+
+    <!-- ── AMBER SPLIT — top bar ── -->
+    <!-- Left square join (no radius on left edge of amber) -->
+    <rect x="470" y="180" width="246" height="108" rx="0" fill="url(#amb)"/>
+    <!-- Right rounded cap — overlaps to restore right radius -->
+    <rect x="616" y="180" width="120" height="108" rx="20" fill="url(#amb)"/>
+
+    <!-- ── AMBER SPLIT — mid bar ── -->
+    <rect x="440" y="458" width="136" height="96" rx="0" fill="url(#amb)"/>
+    <!-- Right rounded cap -->
+    <rect x="536" y="458" width="80" height="96" rx="20" fill="url(#amb)"/>
+
+    <!-- ── AMBER BASELINE — thin amber line under vertical stroke ── -->
+    <rect x="192" y="732" width="108" height="16" rx="8" fill="url(#ambBase)"/>
+
+    <!-- ── AMBIENT GLOW DOT — lower right interior ── -->
+    <!-- Outer soft ring -->
+    <circle cx="680" cy="720" r="72" fill="#FBBF24" opacity="0.07"/>
+    <!-- Inner glow -->
+    <circle cx="680" cy="720" r="36" fill="#FBBF24" opacity="0.12"/>
+    <!-- Core dot -->
+    <circle cx="680" cy="720" r="14" fill="#FBBF24" opacity="0.22"/>
+  </g>
+
+</svg>
