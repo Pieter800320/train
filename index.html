@@ -388,6 +388,8 @@ function dayToStorage(d){
               track:ex.track||resolveTrack(ex.name,ex.ph||'strength',ex.reps,ex.vol)};
       if(ex.unilateral!==undefined)_exOut.unilateral=ex.unilateral;
       if(ex.steps&&ex.steps.length)_exOut.steps=ex.steps.slice();
+      if(ex.key)_exOut.key=ex.key;
+      if(ex.group)_exOut.group=ex.group;
       return _exOut;
     })
   };
@@ -2587,29 +2589,63 @@ function startSession(){
     return ai-bi;
   });
   var setsData=[];
+  // Build per-exercise flat set arrays first, then interleave superset groups
+  var _perExSets=[]; // _perExSets[ei] = array of set objects
   orderedExercises.forEach(function(exEntry,ei){
-    // Tabata-phase exercises are tracked at phase level — skip individual sets
-    if(exEntry.ph==='tabata'||exEntry.ph==='emom'||exEntry.ph==='countdown')return;
+    if(exEntry.ph==='tabata'||exEntry.ph==='emom'||exEntry.ph==='countdown'){_perExSets.push([]);return;}
     var volMod=banner?banner.volMod:1;
     var sets=Math.max(1,Math.round((exEntry.sets||1)*volMod));
-    // Detect unilateral: exercise entry flag takes priority, then EX_MAP lookup
     var exDbEntry=EX_MAP[exEntry.key]||null;
     if(!exDbEntry&&exEntry.name&&EX_MAP){
       var _ks=Object.keys(EX_MAP);
       for(var _ki=0;_ki<_ks.length;_ki++){if(EX_MAP[_ks[_ki]].name===exEntry.name){exDbEntry=EX_MAP[_ks[_ki]];break;}}
     }
-    var isUnilateral = exEntry.unilateral!==undefined ? exEntry.unilateral : (exDbEntry?exDbEntry.unilateral:false);
+    var isUnilateral=exEntry.unilateral!==undefined?exEntry.unilateral:(exDbEntry?exDbEntry.unilateral:false);
+    var arr=[];
     if(isUnilateral){
-      // L-R-L-R: each set becomes two entries (left then right)
       var sides=['Left','Right'];
       for(var s=0;s<sets;s++){
         for(var si=0;si<2;si++){
-          setsData.push({exIdx:ei,setNum:s+1,totalSets:sets,side:sides[si],done:false,kg:0,reps:exEntry.reps||0,vol:exEntry.vol||''});
+          arr.push({exIdx:ei,setNum:s+1,totalSets:sets,side:sides[si],done:false,kg:0,reps:exEntry.reps||0,vol:exEntry.vol||'',roundIdx:s});
         }
       }
     } else {
       for(var s=0;s<sets;s++){
-        setsData.push({exIdx:ei,setNum:s+1,totalSets:sets,side:null,done:false,kg:0,reps:exEntry.reps||0,vol:exEntry.vol||''});
+        arr.push({exIdx:ei,setNum:s+1,totalSets:sets,side:null,done:false,kg:0,reps:exEntry.reps||0,vol:exEntry.vol||'',roundIdx:s});
+      }
+    }
+    _perExSets.push(arr);
+  });
+  // Interleave superset groups: for each round, emit all group members before next round
+  var _visited={}; // track which exIdx already placed
+  orderedExercises.forEach(function(exEntry,ei){
+    if(_visited[ei])return;
+    if(!exEntry.group){
+      // Solo exercise — emit all its sets in order
+      (_perExSets[ei]||[]).forEach(function(s){setsData.push(s);});
+      _visited[ei]=true;
+    } else {
+      // Collect all members of this group in their programme order
+      var grp=exEntry.group;
+      var members=[];
+      orderedExercises.forEach(function(e2,ei2){
+        if(e2.group===grp)members.push(ei2);
+      });
+      members.forEach(function(m){_visited[m]=true;});
+      // Find max rounds across group members
+      var maxRounds=0;
+      members.forEach(function(m){
+        var arr=_perExSets[m]||[];
+        // For unilateral, roundIdx repeats (L+R share same roundIdx)
+        var rounds=arr.length>0?arr[arr.length-1].roundIdx+1:0;
+        if(rounds>maxRounds)maxRounds=rounds;
+      });
+      // Emit round by round: for each round, emit all members' sets for that round
+      for(var r=0;r<maxRounds;r++){
+        members.forEach(function(m){
+          var arr=_perExSets[m]||[];
+          arr.filter(function(s){return s.roundIdx===r;}).forEach(function(s){setsData.push(s);});
+        });
       }
     }
   });
@@ -3836,8 +3872,8 @@ function openJournalView(){
 
   // Action buttons — top
   h+='<div style="display:flex;gap:8px;margin-bottom:16px">';
-  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="exportJournal()">⤓ Download</button>';
-  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--coral)" onclick="clearAllHistory()">✕ Clear All</button>';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--acc)" onclick="exportJournal()">Download</button>';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--coral)" onclick="clearAllHistory()">Clear All</button>';
   h+='</div>';
   // Stats
   var total=cl.hist?cl.hist.length:0;
@@ -4079,9 +4115,12 @@ function _doExportProgramme(){
           +'width:20px;height:20px;border-radius:50%;background:#d0d0d0;'
           +'color:#888;text-decoration:none;font-size:9px;flex-shrink:0;margin-right:8px'
           +'" title="Watch: '+ex.name+'">&#9654;</a>'):'';
+        var _expGrpBadge=ex.group?('<span style="display:inline-flex;align-items:center;justify-content:center;'
+          +'width:16px;height:16px;border-radius:50%;background:#e8e8e8;'
+          +'color:#555;font-size:9px;font-weight:800;margin-right:5px;flex-shrink:0">'+ex.group+'</span>'):'';
         h+='<div class="row">';
         h+='<span style="font-size:13px;display:flex;align-items:center">'
-          +playBtn+ex.name+'</span>';
+          +playBtn+_expGrpBadge+ex.name+'</span>';
         h+='<span style="font-size:12px;color:#555">'+vol+(ex.rest?' · '+ex.rest+'s':'')+'</span>';
         h+='</div>';
         if(ex.cue)h+='<div style="font-size:11px;color:#aaa;padding:0 0 4px 0;font-style:italic">'+ex.cue+'</div>';
@@ -4773,6 +4812,20 @@ function openExWindow(exIdx){
   }
   h+='</div></div>';
 
+  // Superset banner — shown when exercise belongs to a group
+  if(exEntry.group&&_playing){
+    var _grpExs=wx.exercises.map(function(e,i){return{e:e,i:i};}).filter(function(o){return o.e.group===exEntry.group;});
+    var _grpPos=_grpExs.findIndex(function(o){return o.i===exIdx;})+1;
+    var _grpTotal=_grpExs.length;
+    var _grpColor='rgba(var(--acc-rgb),0.15)';
+    h+='<div style="display:flex;align-items:center;gap:6px;background:'+_grpColor+';'
+      +'border:1px solid rgba(var(--acc-rgb),0.35);border-radius:8px;'
+      +'padding:5px 10px;margin-bottom:8px">'
+      +'<span style="font-size:16px;font-weight:900;color:var(--acc)">'+exEntry.group+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:var(--acc);letter-spacing:.05em">SUPERSET</span>'
+      +'<span style="font-size:11px;color:var(--mu);margin-left:auto">'+_grpPos+' of '+_grpTotal+'</span>'
+      +'</div>';
+  }
   // Exercise name — append side label for unilateral exercises
   var _curSide=nextSet?nextSet.side:null;
   var _dispName=exEntry.name+(_curSide?' <span style="font-size:16px;font-weight:700;color:var(--acc)">— '+_curSide+'</span>':'');
@@ -5188,11 +5241,18 @@ function doLogSet(globalIdx){
   var allDoneNow=wx.sets.filter(function(s){return s.exIdx===exIdx;}).every(function(s){return s.done;});
   if(allDoneNow){wx.exDone[exIdx]=true;if(wx.skipped)wx.skipped[exIdx]=false;}
 
+  // Superset check: if next set in queue is same group+round → open immediately, no rest
+  var _exGroup=wx.exercises[exIdx]?wx.exercises[exIdx].group:null;
+  var _nextSet=null;
+  for(var _ni=globalIdx+1;_ni<wx.sets.length;_ni++){if(!wx.sets[_ni].done){_nextSet=wx.sets[_ni];break;}}
+  var _nextGroup=_nextSet&&wx.exercises[_nextSet.exIdx]?wx.exercises[_nextSet.exIdx].group:null;
+  var _sameGroupRound=_exGroup&&_nextGroup&&_exGroup===_nextGroup&&_nextSet&&set&&_nextSet.roundIdx===set.roundIdx;
   // Set rest timer — skipped if this was the last undone set in the whole
   // session, since there's nothing left to rest before (avoids the rest
   // circle popping up over the Finish Session flow).
+  // Also skipped if next set is superset partner (no rest between group members).
   var sessionComplete=isSessionComplete(wx);
-  var restSecs=sessionComplete?0:((wx.exercises[exIdx].rest)||60);
+  var restSecs=sessionComplete?0:(_sameGroupRound?0:((wx.exercises[exIdx].rest)||60));
   if(restSecs>0){
     wx.restActive=true;
     wx.restEnd=Date.now()+restSecs*1000;
@@ -5203,11 +5263,8 @@ function doLogSet(globalIdx){
   // Start floating rest circle
   if(restSecs>0)startRestCircle(restSecs);
   // Redraw list, then auto-open next exercise
-  // (rest circle also calls autoOpenNextEx when it expires, but this handles rest=0 cases
-  // and ensures skipped exercises are surfaced immediately when their turn comes)
   setTimeout(function(){
     draw();
-    // Only auto-open if no rest timer running (rest circle handles the rest>0 case)
     if(!S.wx||!S.wx.restActive){
       setTimeout(function(){autoOpenNextEx();},150);
     }
@@ -5295,11 +5352,13 @@ function doSwapExercise(exIdx,newKey){
   var exEntry=wx.exercises[exIdx];
   var newEx=EX_MAP[newKey];if(!newEx)return;
   // Preserve sets/reps/rest/phase from original, update name/key/cue/track
+  var _swapGroup=exEntry.group; // preserve superset group across swap
   exEntry.name=newEx.name;
   exEntry.key=newKey;
   exEntry.cue='';
   exEntry.track=resolveTrack(newEx.name,exEntry.ph||'strength',exEntry.reps,exEntry.vol);
   exEntry._swapped=true;
+  if(_swapGroup)exEntry.group=_swapGroup; // restore group after overwrite
   // Reset pending values so the new exercise picks up fresh defaults
   wx._pendingReps=undefined;
   wx._pendingKg=undefined;
@@ -5325,13 +5384,21 @@ function logTimedSet(exIdx){
     // Reset timedEx so the next tap starts fresh
     wx.timedEx=null;
     wx._pendingTime=undefined;
+    // Superset check for timed exercises
+    var _tExGroup=wx.exercises[exIdx]?wx.exercises[exIdx].group:null;
+    var _tNextSet=null;
+    var _tDoneSet=exSets.filter(function(s){return s.done;}).pop();
+    var _tGlobalIdx=_tDoneSet?wx.sets.indexOf(_tDoneSet):-1;
+    for(var _tni=_tGlobalIdx+1;_tni<wx.sets.length;_tni++){if(!wx.sets[_tni].done){_tNextSet=wx.sets[_tni];break;}}
+    var _tNextGroup=_tNextSet&&wx.exercises[_tNextSet.exIdx]?wx.exercises[_tNextSet.exIdx].group:null;
+    var _tSameGroupRound=_tExGroup&&_tNextGroup&&_tExGroup===_tNextGroup&&_tNextSet&&_tDoneSet&&_tNextSet.roundIdx===_tDoneSet.roundIdx;
     var sessionComplete=isSessionComplete(wx);
-    var restSecs=sessionComplete?0:((wx.exercises[exIdx].rest)||30);
+    var restSecs=sessionComplete?0:(_tSameGroupRound?0:((wx.exercises[exIdx].rest)||30));
     if(restSecs>0){wx.restActive=true;wx.restEnd=Date.now()+restSecs*1000;wx.waitingFor=exIdx;}
     sv();
     closeSheet();
     if(restSecs>0)startRestCircle(restSecs);
-    setTimeout(function(){draw();},300);
+    setTimeout(function(){draw();if(!S.wx||!S.wx.restActive){setTimeout(function(){autoOpenNextEx();},150);}},300);
   }
 }
 
@@ -7166,8 +7233,10 @@ function buildDrillToPatterns(di){
   openSheet(h,'Movement Patterns',function(){buildOpenSplitSheet(di);});
 }
 function buildDrillToPatternsRefresh(di){
-  // Re-render the pattern picker in-place after toggling a pattern
-  closeSheet();
+  // Re-render pattern picker in-place: null the onClose first so closeSheet()
+  // does NOT fire buildOpenSplitSheet (which would show the modal mid-flow)
+  var _sheet=document.getElementById('bottom-sheet');
+  if(_sheet)_sheet._onClose=null;
   buildDrillToPatterns(di);
 }
 function buildOpenSplitPicker(di){
@@ -8072,6 +8141,78 @@ function buildAddCustomExDrill(di,phKey,q){
 }
 
 
+// ── Superset link mode helpers ──────────────────────────────────────────────
+function assignNextGroup(di){
+  var exs=S.customEdit.days[di].exercises||[];
+  var used={};
+  exs.forEach(function(e){if(e.group)used[e.group]=true;});
+  var letters='ABCDEFGHIJ';
+  for(var i=0;i<letters.length;i++){if(!used[letters[i]])return letters[i];}
+  return 'A';
+}
+function buildLinkTap(di,gei){
+  var day=S.customEdit.days[di];
+  var ex=day.exercises[gei];
+  if(!ex)return;
+  var lm=S._build||(S._build={});
+  if(!lm.linkMode){return;} // link mode not active — ignore
+  if(lm.linkPending===null||lm.linkPending===undefined){
+    // First tap — select this exercise as pending
+    lm.linkPending={di:di,gei:gei};
+    sv();buildOpenExSheet(di);
+  } else {
+    // Second tap — form the pair/group
+    var p=lm.linkPending;
+    if(p.di===di&&p.gei===gei){
+      // Tapped same exercise — deselect
+      lm.linkPending=null;sv();buildOpenExSheet(di);return;
+    }
+    var ex1=day.exercises[p.gei];
+    var ex2=day.exercises[gei];
+    if(!ex1||!ex2){lm.linkPending=null;sv();buildOpenExSheet(di);return;}
+    // Determine group letter: if one already has a group, use that; else assign next
+    var grp=ex1.group||ex2.group||assignNextGroup(di);
+    ex1.group=grp;ex2.group=grp;
+    lm.linkPending=null;
+    // Keep linkMode on so user can pair more groups
+    sv();buildOpenExSheet(di);
+  }
+}
+function buildUnpairEx(di,gei){
+  var day=S.customEdit.days[di];
+  var ex=day.exercises[gei];
+  if(!ex||!ex.group)return;
+  var grp=ex.group;
+  // Remove group from this exercise only — keep others in the group
+  delete ex.group;
+  // If only one exercise left with this group, remove from it too (no lone pairs)
+  var remaining=day.exercises.filter(function(e){return e.group===grp;});
+  if(remaining.length<2)remaining.forEach(function(e){delete e.group;});
+  sv();buildOpenExSheet(di);
+}
+function buildToggleLinkMode(di){
+  var lm=S._build||(S._build={});
+  lm.linkMode=!lm.linkMode;
+  lm.linkPending=null;
+  sv();buildOpenExSheet(di);
+}
+function buildGroupColor(grp){
+  return 'var(--acc)';
+}
+function buildGroupBorderColor(grp){
+  return 'var(--acc)';
+}
+function buildSupersetBadgeHtml(grp,di,gei){
+  return '<span onclick="event.stopPropagation();buildUnpairEx('+di+','+gei+')" '
+    +'title="Tap to remove from superset" '
+    +'style="display:inline-flex;align-items:center;justify-content:center;'
+    +'width:20px;height:20px;border-radius:50%;'
+    +'background:rgba(var(--acc-rgb),0.18);'
+    +'border:1.5px solid '+buildGroupBorderColor(grp)+';'
+    +'color:var(--acc);font-size:10px;font-weight:800;'
+    +'cursor:pointer;flex-shrink:0;margin-right:6px">'+grp+'</span>';
+}
+
 function buildOpenExSheet(di){
   S.customEdit.activeDay=di;sv();
   var e=S.customEdit;
@@ -8105,21 +8246,50 @@ function buildOpenExSheet(di){
     h+='</div>';
     phExs.forEach(function(ex){
       var globalEi=day.exercises.indexOf(ex);
+      var _lm=S._build&&S._build.linkMode;
+      var _pending=S._build&&S._build.linkPending;
+      var _isPending=_pending&&_pending.di===di&&_pending.gei===globalEi;
+      var _hasPending=!!_pending;
+      var _rowBorder=ex.group?('1.5px solid '+buildGroupBorderColor(ex.group)):'0.5px solid var(--brd)';
+      var _rowBg=_isPending?'rgba(var(--acc-rgb),0.12)':'var(--bg3)';
       h+='<div class="build-drag-row" data-di="'+di+'" data-gei="'+globalEi+'" data-phase="'+phKey+'" '
-        +'style="display:flex;align-items:center;padding:10px 12px;background:var(--bg3);'
-        +'border:0.5px solid var(--brd);border-radius:10px;margin-bottom:5px">';
-      h+='<div class="build-drag-handle" style="cursor:grab;margin:-10px 14px -10px -12px;padding:10px 14px 10px 12px;color:var(--mu);font-size:18px;user-select:none;line-height:1;touch-action:none">⠿</div>';
+        +'style="display:flex;align-items:center;padding:10px 12px;background:'+_rowBg+';'
+        +'border:'+_rowBorder+';border-radius:10px;margin-bottom:5px;'
+        +(_lm?'cursor:pointer;':'')+'" '
+        +(_lm?'onclick="buildLinkTap('+di+','+globalEi+')"':'')+'>'; 
+      // Left side: group badge OR link icon
+      if(ex.group){
+        h+=buildSupersetBadgeHtml(ex.group,di,globalEi);
+      } else if(_lm){
+        var _linkCol=_isPending?'var(--acc)':(_hasPending?'rgba(var(--acc-rgb),0.5)':'var(--mu)');
+        h+='<span style="font-size:14px;color:'+_linkCol+';margin-right:8px;flex-shrink:0">⛓</span>';
+      }
+      h+='<div class="build-drag-handle" style="cursor:grab;margin:-10px 8px -10px 0;padding:10px 8px;color:var(--mu);font-size:18px;user-select:none;line-height:1;touch-action:none">⠿</div>';
       h+='<div style="flex:1;font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div>';
-      h+='<button onclick="event.stopPropagation();buildRemoveEx('+di+','+globalEi+');buildOpenExSheet('+di+')" '
-        +'style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:15px;padding:4px 8px">✕</button>';
+      if(!_lm){
+        h+='<button onclick="event.stopPropagation();buildRemoveEx('+di+','+globalEi+');buildOpenExSheet('+di+')" '
+          +'style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:15px;padding:4px 8px">✕</button>';
+      }
       h+='</div>';
     });
     h+='<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" '
       +'onclick="buildDrillToLibrary('+di+',\''+phKey+'\');">+ Add to '+phConf.label+'</button>';
     h+='</div>';
   });
+  // Sticky footer: link mode hint bar + Pair Supersets toggle + Done
+  var _lmActive=S._build&&S._build.linkMode;
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
-  h+='<button class="btn btn-acc" onclick="closeSheet();draw()">Done</button>';
+  if(_lmActive){
+    var _pendingNow=S._build&&S._build.linkPending;
+    var _hintTxt=_pendingNow?'Tap another exercise to pair — or tap it again to cancel':'Tap two exercises to pair them as a superset';
+    h+='<div style="font-size:11px;color:var(--acc);text-align:center;margin-bottom:8px;font-weight:600">'+_hintTxt+'</div>';
+  }
+  h+='<div style="display:flex;gap:8px">';
+  h+='<button class="btn btn-ghost" style="flex:1;font-size:13px;'
+    +(_lmActive?'border-color:var(--acc);color:var(--acc)':'')
+    +'" onclick="buildToggleLinkMode('+di+')">'+(_lmActive?'Done Pairing':'Pair Supersets')+'</button>';
+  h+='<button class="btn btn-acc" style="flex:1" onclick="closeSheet();draw()">Done</button>';
+  h+='</div>';
   h+='</div>';
   h+='</div>';
   openSheet(h,day.label||'Session '+(di+1),function(){draw();});
@@ -8668,9 +8838,44 @@ function initBuildDrag(){
         var tgtGei=parseInt(tgtRow.dataset.gei);
         var di=parseInt(row.dataset.di);
         var exs=S.customEdit.days[di].exercises;
-        var srcEx=exs.splice(srcGei,1)[0];
-        var newTgt=tgtGei>srcGei?tgtGei-1:tgtGei;
-        exs.splice(newTgt,0,srcEx);
+        var srcGrp=exs[srcGei]&&exs[srcGei].group;
+        if(srcGrp){
+          // Move the whole group together
+          var grpIndices=[];
+          exs.forEach(function(e,i){if(e.group===srcGrp)grpIndices.push(i);});
+          var grpExs=grpIndices.map(function(i){return exs[i];});
+          for(var gi=grpIndices.length-1;gi>=0;gi--)exs.splice(grpIndices[gi],1);
+          var removed=grpIndices.filter(function(i){return i<tgtGei;}).length;
+          var insertAt=Math.min(tgtGei-removed,exs.length);
+          for(var gj=grpExs.length-1;gj>=0;gj--)exs.splice(insertAt,0,grpExs[gj]);
+        } else {
+          var srcEx=exs.splice(srcGei,1)[0];
+          var newTgt=tgtGei>srcGei?tgtGei-1:tgtGei;
+          exs.splice(newTgt,0,srcEx);
+        }
+        // Re-cluster: ensure all members of every group are contiguous.
+        // Walk the array; when we encounter a group member, pull all other
+        // members of that group immediately after it (preserving relative order).
+        var phase=row.dataset.phase;
+        var phExs=S.customEdit.days[di].exercises.filter(function(e){return(e.ph||'strength')===phase;});
+        var nonPhExs=S.customEdit.days[di].exercises.filter(function(e){return(e.ph||'strength')!==phase;});
+        var seen={};
+        var clustered=[];
+        phExs.forEach(function(e){
+          if(!e.group){clustered.push(e);return;}
+          if(seen[e.group])return; // already placed with its group
+          seen[e.group]=true;
+          phExs.forEach(function(e2){if(e2.group===e.group)clustered.push(e2);});
+        });
+        // Rebuild full exercises array preserving non-phase exercises in original positions
+        var result=[];
+        var phasePos=S.customEdit.days[di].exercises.map(function(e,i){return(e.ph||'strength')===phase?i:-1;}).filter(function(i){return i>=0;});
+        var ci=0;
+        S.customEdit.days[di].exercises.forEach(function(e,i){
+          if((e.ph||'strength')===phase){result.push(clustered[ci++]);}
+          else{result.push(e);}
+        });
+        S.customEdit.days[di].exercises=result;
         sv();buildOpenExSheet(di);
       }
     }
@@ -9712,7 +9917,8 @@ function timerOfferLog(label,detail,completed){
   h+='<div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:6px">'+(completed?'Timer Complete!':'Good work!')+'</div>';
   h+='<div style="font-size:14px;font-weight:600;color:var(--acc);margin-bottom:4px">'+label+'</div>';
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:20px">'+detail+' · '+duration+' min</div>';
-  h+='<div style="font-size:13px;color:var(--tx2);margin-bottom:20px">Log this to your journal?</div>';
+  h+='<div style="font-size:13px;color:var(--tx2);margin-bottom:12px">Log this to your journal?</div>';
+  h+='<input id="timer-log-name" type="text" placeholder="Session name (optional)" style="width:100%;box-sizing:border-box;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;color:var(--tx);font-size:14px;padding:10px 12px;outline:none;text-align:left;margin-bottom:16px">';
   h+='<button class="btn btn-acc" onclick="timerDoLog(\''+label+'\',\''+detail+'\','+duration+');closeSheet()" style="margin-bottom:8px">Log Session</button>';
   h+='<button class="btn btn-ghost" onclick="closeSheet()">Skip</button>';
   h+='</div>';
@@ -9721,8 +9927,10 @@ function timerOfferLog(label,detail,completed){
 function timerDoLog(label,detail,duration){
   var cl=C();
   if(!cl.hist)cl.hist=[];
+  var _nameEl=document.getElementById('timer-log-name');
+  var _customName=_nameEl&&_nameEl.value&&_nameEl.value.trim();
   cl.hist.push({date:Date.now(),tplKey:'timer',dayIdx:0,label:label,
-    focus:detail,sets:0,duration:duration,plan:null,timerSession:true});
+    focus:_customName||detail,sets:0,duration:duration,plan:null,timerSession:true});
   sv();
 }
 function timerReset(){
