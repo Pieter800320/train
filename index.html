@@ -16,7 +16,7 @@
       blue:{dark:'#3B82F6',light:'#1D4ED8'},coral:{dark:'#E05A3A',light:'#B83E20'},
       violet:{dark:'#7C6FD4',light:'#5548B0'},forest:{dark:'#4A8C5C',light:'#2D6B42'},
       slate:{dark:'#64748B',light:'#475569'},mono:{dark:'#D4D4D4',light:'#1a1a1a'}};
-    var key=s.colourTheme||'amber';var isDark=s.theme!=='light';
+    var key=s.colourTheme||'carbon';var isDark=s.theme!=='light';
     var colour=(themes[key]||themes.amber)[isDark?'dark':'light'];
     document.getElementById('theme-meta').setAttribute('content',colour);
   }catch(e){}
@@ -28,11 +28,11 @@
 <title>Falkenburg</title>
 <style>
 :root{
-  --acc:#E07B2A;--acc-glow:#F09540;--acc-rgb:224,123,42;--acc-bg:#1A0C00;--acc-brd:#2C1600;
+  --acc:#F05A28;--acc-glow:#FF7A45;--acc-rgb:240,90,40;--acc-bg:#1f0d06;--acc-brd:#321408;
   --teal:#1D9E75;--teal-bg:#001A12;--teal-brd:#003020;
   --coral:#C85030;--coral-bg:#1C0800;--coral-brd:#2E1200;
-  --bg:#0e0e10;--bg2:#16161a;--bg3:#1c1c20;
-  --brd:#242428;--tx:#f0f0f2;--tx2:#a0a0a8;--mu:#72727c;
+  --bg:#1A1A1A;--bg2:#242424;--bg3:#2C2C2C;
+  --brd:#363636;--tx:#FFFFFF;--tx2:#A0A0A0;--mu:#666666;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,'SF Pro Text',sans-serif;overflow:hidden}
@@ -150,8 +150,11 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .t-violet.light{--acc:#5548B0;--acc-glow:#7068CC;--acc-rgb:85,72,176;--acc-bg:#f5f3ff;--acc-brd:#ddd6fe}
 .t-forest{--acc:#4A8C5C;--acc-glow:#5CAE70;--acc-rgb:74,140,92;--acc-bg:#061408;--acc-brd:#0e2812}
 .t-forest.light{--acc:#2D6B42;--acc-glow:#3E8856;--acc-rgb:45,107,66;--acc-bg:#f0fdf4;--acc-brd:#bbf7d0}
-.t-slate{--acc:#64748B;--acc-glow:#8494A8;--acc-rgb:100,116,139;--acc-bg:#0e1018;--acc-brd:#1a1e2c}
-.t-slate.light{--acc:#475569;--acc-glow:#5E6E84;--acc-rgb:71,85,105;--acc-bg:#f8fafc;--acc-brd:#cbd5e1}
+.t-steel{--acc:#64748B;--acc-glow:#8494A8;--acc-rgb:100,116,139;--acc-bg:#0e1018;--acc-brd:#1a1e2c}
+.t-steel.light{--acc:#475569;--acc-glow:#5E6E84;--acc-rgb:71,85,105;--acc-bg:#f8fafc;--acc-brd:#cbd5e1}
+.t-carbon{--acc:#F05A28;--acc-glow:#FF7A45;--acc-rgb:240,90,40;--acc-bg:#1f0d06;--acc-brd:#321408}
+.t-carbon{--bg:#1A1A1A;--bg2:#242424;--bg3:#2C2C2C;--brd:#363636;--tx:#FFFFFF;--tx2:#A0A0A0;--mu:#666666}
+.t-carbon.light{--acc:#C8401A;--acc-glow:#E05530;--acc-rgb:200,64,26;--acc-bg:#fff3ee;--acc-brd:#fcc9b8}
 .t-mono{--acc:#D4D4D4;--acc-glow:#EEEEEE;--acc-rgb:212,212,212;--acc-bg:#141414;--acc-brd:#2a2a2a}
 .t-mono.light{--acc:#1a1a1a;--acc-glow:#383838;--acc-rgb:26,26,26;--acc-bg:#f4f4f4;--acc-brd:#d0d0d0}
 /* light mode base tokens */
@@ -262,7 +265,7 @@ function getEx(n){return EX_MAP[exKey(n)]||null;}
 // DEFAULT STATE
 // ═══════════════════════════════════════════════════════════════
 var DEFAULT_CLIENT={name:'',initials:'',colour:'#D4691E',ob:{done:false,step:0,ans:{}},tplKey:'str_b4',day:0,plan:null,dayCounters:{},plans:{},hist:[],pr:{},lastWeights:{},customPrograms:[],customPlans:[],_pgOpen:{}};
-var DEFAULT_S={activeClient:'default',clients:{default:JSON.parse(JSON.stringify(DEFAULT_CLIENT))},buildMode:'program',customEdit:{step:0,name:'',days:[],activeDay:0,activePhase:null},planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},wx:null,timer:{mode:'tabata',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:40,tabRest:20,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true},tab:'today',colourTheme:'amber',_browserOpen:{},theme:'dark',admin:{active:false,pin:'',set:false},notice:{title:'Welcome to Falkenburg',body:'Your training starts here. Go to Programmes to pick your first programme.',active:true}};
+var DEFAULT_S={activeClient:'default',clients:{default:JSON.parse(JSON.stringify(DEFAULT_CLIENT))},buildMode:'program',customEdit:{step:0,name:'',days:[],activeDay:0,activePhase:null},planEdit:{name:'My Plan',targetWeeks:4,cyclic:true,weeks:[],editWeek:null},wx:null,timer:{mode:'tabata',running:false,elapsed:0,remaining:600,totalSecs:600,emomMins:10,emomRound:0,tabWork:40,tabRest:20,tabRounds:8,tabCurrent:0,tabPhase:'work',setup:true},tab:'today',colourTheme:'carbon',_browserOpen:{},theme:'dark',admin:{active:false,pin:'',set:false},notice:{title:'Welcome to Falkenburg',body:'Your training starts here. Go to Programmes to pick your first programme.',active:true}};
 var S;
 function sv(){try{localStorage.setItem('falken_v1',JSON.stringify(S));}catch(e){}}
 function ld(){
@@ -278,7 +281,7 @@ function ld(){
   if(!S.admin)S.admin={active:false,pin:'',set:false};
   if(!S.notice)S.notice={title:'',body:'',active:false};
   if(!S.notes)S.notes=[];
-  if(!S.tab)S.tab='home';if(!S.colourTheme)S.colourTheme='amber';
+  if(!S.tab)S.tab='home';if(!S.colourTheme)S.colourTheme='carbon';
   var cl=S.clients[S.activeClient];
   if(!cl.customPrograms)cl.customPrograms=[];
   if(!cl.customPlans)cl.customPlans=[];
@@ -3225,17 +3228,18 @@ function linkify(text){
 // THEME APPLICATION
 // ═══════════════════════════════════════════════════════════════
 var THEMES={
+  carbon:{name:'Carbon',dark:'#F05A28',light:'#C8401A'},
+  steel:{name:'Slate',dark:'#64748B',light:'#475569'},
   amber:{name:'Amber',dark:'#E07B2A',light:'#B85510'},
   teal: {name:'Teal', dark:'#1D9E75',light:'#0F6E56'},
   blue: {name:'Blue', dark:'#3B82F6',light:'#1D4ED8'},
   coral:{name:'Coral',dark:'#E05A3A',light:'#B83E20'},
   violet:{name:'Violet',dark:'#7C6FD4',light:'#5548B0'},
   forest:{name:'Forest',dark:'#4A8C5C',light:'#2D6B42'},
-  slate:{name:'Slate',dark:'#64748B',light:'#475569'},
   mono:{name:'Mono',dark:'#D4D4D4',light:'#1a1a1a'}
 };
 function applyTheme(){
-  var key=S.colourTheme||'amber';
+  var key=S.colourTheme||'carbon';
   var isDark=S.theme!=='light';
   var html=document.documentElement;
   Object.keys(THEMES).forEach(function(k){html.classList.remove('t-'+k);});
