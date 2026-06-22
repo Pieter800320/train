@@ -5274,27 +5274,33 @@ function doLogSet(globalIdx){
 function skipExercise(exIdx){
   var wx=S.wx;if(!wx||!wx.playing)return;
   if(!wx.skipped)wx.skipped={};
-  // Collect all undone sets for this exercise
-  var skipSets=wx.sets.filter(function(s){return s.exIdx===exIdx&&!s.done;});
+  // If this exercise belongs to a superset group, skip all group members together
+  var _grp=wx.exercises[exIdx]?wx.exercises[exIdx].group:null;
+  var _skipExIdxs=_grp
+    ? wx.exercises.map(function(e,i){return e.group===_grp?i:-1;}).filter(function(i){return i>=0;})
+    : [exIdx];
+  // Collect all undone sets for the target exercise(es), preserving queue order
+  var skipSets=wx.sets.filter(function(s){return _skipExIdxs.indexOf(s.exIdx)>=0&&!s.done;});
   if(!skipSets.length)return;
-  // Register as skipped
-  wx.skipped[exIdx]=true;
-  // Remove from current queue position
-  wx.sets=wx.sets.filter(function(s){return!(s.exIdx===exIdx&&!s.done);});
+  // Mark all as skipped
+  _skipExIdxs.forEach(function(i){wx.skipped[i]=true;});
+  // Remove their undone sets from current queue positions
+  wx.sets=wx.sets.filter(function(s){return!(_skipExIdxs.indexOf(s.exIdx)>=0&&!s.done);});
   // Find first undone set in remaining queue
   var firstUndoneSet=null;
   for(var k=0;k<wx.sets.length;k++){if(!wx.sets[k].done){firstUndoneSet=wx.sets[k];break;}}
-  if(!firstUndoneSet){
-    // Nothing else pending — just append
+  if(!firstUndoneSet||_grp){
+    // Nothing else pending, OR group skip: always send to end of queue
+    // (group skips must not insert-after-next or a partner resurfaces immediately)
     wx.sets=wx.sets.concat(skipSets);
   } else if(!wx.skipped[firstUndoneSet.exIdx]){
-    // Next exercise is NOT skipped — insert immediately after all its sets
+    // Solo skip, next exercise is NOT skipped — insert immediately after all its sets
     var nextEx=firstUndoneSet.exIdx;
     var lastPos=-1;
     for(var j=wx.sets.length-1;j>=0;j--){if(wx.sets[j].exIdx===nextEx){lastPos=j;break;}}
     wx.sets=wx.sets.slice(0,lastPos+1).concat(skipSets).concat(wx.sets.slice(lastPos+1));
   } else {
-    // Next exercise is also skipped — append to end (skipped exercises resolved in order)
+    // Solo skip, next exercise is also skipped — append to end
     wx.sets=wx.sets.concat(skipSets);
   }
   // Advance currentSet to first undone
