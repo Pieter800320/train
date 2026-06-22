@@ -58,6 +58,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:-apple-sy
 .btn-acc{background:var(--acc-bg);border-color:var(--acc-brd);color:var(--acc)}
 .btn-ghost{background:var(--bg3);border:1px solid var(--brd);color:var(--tx2)}
 .btn-cta{display:block;width:100%;padding:15px 20px;border:none;border-radius:14px;font-size:15px;font-weight:700;letter-spacing:.3px;cursor:pointer;color:#fff;background:linear-gradient(180deg,var(--acc-glow) 0%,var(--acc) 100%);box-shadow:0 4px 14px rgba(var(--acc-rgb),0.35),0 1px 3px rgba(0,0,0,0.2);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .15s ease,background .1s ease;-webkit-tap-highlight-color:transparent;user-select:none;text-align:center}
+.btn-cta[style*="flex:1"]{display:inline-flex;align-items:center;justify-content:center;width:auto}
 .btn-cta:active{transform:scale(0.96);box-shadow:0 2px 6px rgba(var(--acc-rgb),0.2),0 1px 2px rgba(0,0,0,0.15);background:var(--acc)}
 .t-mono .btn-cta{color:#111}
 .t-mono.light .btn-cta{color:#fff}
@@ -3872,7 +3873,7 @@ function openJournalView(){
 
   // Action buttons — top
   h+='<div style="display:flex;gap:8px;margin-bottom:16px">';
-  h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--acc)" onclick="exportJournal()">Download</button>';
+  h+='<button class="btn btn-acc" style="flex:1;font-size:12px" onclick="exportJournal()">Download</button>';
   h+='<button class="btn btn-ghost" style="flex:1;font-size:12px;color:var(--coral)" onclick="clearAllHistory()">Clear All</button>';
   h+='</div>';
   // Stats
@@ -4462,7 +4463,7 @@ function todayV(){
   // Bottom actions — only Finish Session in PLAY mode
   if(isPlaying){
     h+='<div style="padding:14px">';
-    h+='<button class="btn btn-acc" onclick="finishSession()">Finish Session</button>';
+    h+='<button class="btn-cta" onclick="finishSession()">Finish Session</button>';
     h+='</div>';
   }
   h+='<div style="height:20px"></div>';
@@ -6070,7 +6071,7 @@ function buildCountdownConfigSheet(di,fromConfig){
   h+=stepperRow('Duration (min)','duration',cfg.duration||15,1,1,120);
   h+='<div style="padding:16px 0 8px">';
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
-  h+='<button class="btn btn-acc" onclick="'+( fromConfig?'closeSheet();setTimeout(function(){buildOpenConfigSheet('+di+')},200)':'closeSheet();setTimeout(function(){buildOpenExSheet('+di+')},200)')+'">Done</button>';
+  h+='<button class="btn btn-ghost" onclick="'+( fromConfig?'closeSheet();setTimeout(function(){buildOpenConfigSheet('+di+')},200)':'closeSheet();setTimeout(function(){buildOpenExSheet('+di+')},200)')+'">Done</button>';
   h+='</div>';
   h+='</div>';
   h+='</div>';
@@ -7742,7 +7743,7 @@ function buildConfigEx(di,ei){
     h+='<input type="text" value="'+(exEntry.cue||'')+'" placeholder="e.g. Never put the bell down" '+
        'oninput="S.customEdit.days['+di+'].exercises['+ei+'].cue=this.value;sv()" style="margin-bottom:20px">';
     h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
-    h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">Done</button>';
+    h+='<button class="btn btn-ghost" onclick="buildOpenConfigSheet('+di+')">Done</button>';
     h+='</div>';
     h+='</div>';
     openSheet(h, exEntry.name, function(){buildOpenConfigSheet(di);});
@@ -7853,7 +7854,7 @@ function buildConfigEx(di,ei){
   }
 
   h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
-  h+='<button class="btn btn-acc" onclick="buildOpenConfigSheet('+di+')">Done</button>';
+  h+='<button class="btn btn-ghost" onclick="buildOpenConfigSheet('+di+')">Done</button>';
   h+='</div>';
   h+='</div>';
   openSheet(h, exEntry.name, function(){buildOpenConfigSheet(di);});
@@ -8016,7 +8017,7 @@ function buildDrillToLibrary(di,phKey){
     +'<div id="bpicker-results" style="display:none"></div>'
     +'<div id="bpicker-library">'+libraryHTML+'</div>'
     +'<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">'
-    +'<button class="btn btn-acc" onclick="buildOpenExSheet('+di+')">Done</button>'
+    +'<button class="btn btn-ghost" onclick="buildOpenExSheet('+di+')">Done</button>'
     +'</div></div>';
 
   var sb=document.getElementById('sheet-body');
@@ -8458,7 +8459,7 @@ function buildTabataConfigSheet(di,phKey,fromConfig){
     h+=stepperRow('Interval (s)',  'interval',ec.interval,5,5,300);
     h+=stepperRow('Duration (min)','duration',ec.duration,1,1,60);
   }
-  h+='<button class="btn btn-acc" style="margin-top:20px" onclick="closeSheet();'+(fromConfig?'buildOpenConfigSheet('+di+')':'buildOpenExSheet('+di+')')+'">Done</button>';
+  h+='<button class="btn btn-ghost" style="margin-top:20px" onclick="closeSheet();'+(fromConfig?'buildOpenConfigSheet('+di+')':'buildOpenExSheet('+di+')')+'">Done</button>';
   h+='</div>';
   openSheet(h, (phKey==='tabata'?'Tabata Config':'EMOM Config'));
 }
@@ -8595,7 +8596,7 @@ function buildWizardNav(backStep,nextStep,canNext,hint){
   h+='<div id="build-wizard-nav" style="display:flex;gap:8px;padding-top:16px;border-top:0.5px solid var(--brd);margin-top:4px">';
   // Back — hidden at Step 1 (start)
   if(!backDisabled){
-    h+='<button class="btn btn-acc" style="flex:1" onclick="buildGoto('+backStep+')">← Back</button>';
+    h+='<button class="btn btn-ghost" style="flex:1" onclick="buildGoto('+backStep+')">← Back</button>';
   }
   // Save Draft (middle, always if a draft name exists)
   if(hasDraft&&!isFinalStep){
@@ -8604,7 +8605,7 @@ function buildWizardNav(backStep,nextStep,canNext,hint){
   // Next / Save Programme
   if(isFinalStep){
     // Step 5 — Save Programme replaces Next
-    h+='<button class="btn btn-acc" style="flex:1" onclick="buildSave()">Save Programme ✓</button>';
+    h+='<button class="btn-cta" style="flex:1" onclick="buildSave()">Save Programme ✓</button>';
   } else if(nextStep==='step0'){
     if(nextDisabled){
       h+='<button class="btn btn-ghost" style="flex:1;opacity:0.35" disabled title="'+hint+'">Next →</button>';
@@ -9703,15 +9704,15 @@ function timerOpenConfig(mode){
     var mins=Math.floor(t.totalSecs/60);var secs=t.totalSecs%60;
     h+=timerSetupStepper('MINUTES','cdMins',mins,'m',1);
     h+=timerSetupStepper('SECONDS','cdSecs',secs,'s',5);
-    h+='<button class="btn btn-acc" style="height:56px;font-size:17px;font-weight:800;margin-top:8px" onclick="closeSheet();startCountdown()">Start</button>';
+    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();startCountdown()">Start</button>';
   } else if(mode==='tabata'){
     h+=timerSetupStepper('WORK (seconds)','tabWork',t.tabWork,'s',5);
     h+=timerSetupStepper('REST (seconds)','tabRest',t.tabRest,'s',5);
     h+=timerSetupStepper('ROUNDS','tabRounds',t.tabRounds,'',1);
-    h+='<button class="btn btn-acc" style="height:56px;font-size:17px;font-weight:800;margin-top:8px" onclick="closeSheet();startTabata()">Start</button>';
+    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();startTabata()">Start</button>';
   } else if(mode==='emom'){
     h+=timerSetupStepper('TOTAL MINUTES','emomMins',t.emomMins,' min',1);
-    h+='<button class="btn btn-acc" style="height:56px;font-size:17px;font-weight:800;margin-top:8px" onclick="closeSheet();startEMOM()">Start</button>';
+    h+='<button class="btn-cta" style="margin-top:8px" onclick="closeSheet();startEMOM()">Start</button>';
   }
   h+='</div>';
   openSheet(h,mode.charAt(0).toUpperCase()+mode.slice(1)+' Setup');
@@ -9925,7 +9926,7 @@ function timerOfferLog(label,detail,completed){
   h+='<div style="font-size:12px;color:var(--mu);margin-bottom:20px">'+detail+' · '+duration+' min</div>';
   h+='<div style="font-size:13px;color:var(--tx2);margin-bottom:12px">Log this to your journal?</div>';
   h+='<input id="timer-log-name" type="text" placeholder="Session name (optional)" style="width:100%;box-sizing:border-box;background:var(--bg3);border:0.5px solid var(--brd);border-radius:10px;color:var(--tx);font-size:14px;padding:10px 12px;outline:none;text-align:left;margin-bottom:16px">';
-  h+='<button class="btn btn-acc" onclick="timerDoLog(\''+label+'\',\''+detail+'\','+duration+');closeSheet()" style="margin-bottom:8px">Log Session</button>';
+  h+='<button class="btn-cta" style="margin-bottom:8px" onclick="timerDoLog(\''+label+'\',\''+detail+'\','+duration+');closeSheet()">Log Session</button>';
   h+='<button class="btn btn-ghost" onclick="closeSheet()">Skip</button>';
   h+='</div>';
   openSheet(h, null);
