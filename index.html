@@ -284,6 +284,7 @@ function ld(){
   if(!cl._pgOpen)cl._pgOpen={};
   if(!cl.hist)cl.hist=[];
   if(!cl.pr)cl.pr={};
+  if(!cl.body)cl.body=[];
   if(cl.plan===undefined)cl.plan=null;
   if(!cl.dayCounters)cl.dayCounters={};
   if(!cl.plans)cl.plans={};
@@ -3404,6 +3405,35 @@ function homeV(){
     }
   }
 
+  // ── Body stats (if logged) ────────────────────────────────
+  var _bodyEntries=cl.body||[];
+  if(_bodyEntries.length){
+    var _bLatest=_bodyEntries[_bodyEntries.length-1];
+    h+='<div style="border-top:0.5px solid var(--brd);margin:14px 0 10px"></div>';
+    h+='<div class="lbl" style="margin-bottom:6px">BODY</div>';
+    h+='<div style="display:flex;align-items:baseline;gap:6px">';
+    h+='<span style="font-size:20px;font-weight:800;color:var(--tx)">'+_bLatest.kg+'</span>';
+    h+='<span style="font-size:12px;font-weight:600;color:var(--mu)">kg</span>';
+    // Trend
+    var _b4w=Date.now()-28*86400000;
+    var _bOlder=null;
+    for(var _bi=_bodyEntries.length-1;_bi>=0;_bi--){if(_bodyEntries[_bi].date<=_b4w){_bOlder=_bodyEntries[_bi];break;}}
+    if(_bOlder){
+      var _bDelta=Math.round((_bLatest.kg-_bOlder.kg)*10)/10;
+      var _bArrow=_bDelta>0?'\u2191':_bDelta<0?'\u2193':'\u2192';
+      h+='<span style="font-size:12px;color:'+(_bDelta<=0?'var(--acc)':'var(--mu)')+'">'+_bArrow+' '+(_bDelta>0?'+':'')+_bDelta+'</span>';
+    }
+    var _bEx=[];
+    if(_bLatest.waist)_bEx.push(_bLatest.waist+'cm');
+    if(_bLatest.bf)_bEx.push(_bLatest.bf+'%');
+    if(_bEx.length)h+='<span style="font-size:12px;color:var(--mu);margin-left:4px">\u00b7 '+_bEx.join(' \u00b7 ')+'</span>';
+    h+='</div>';
+    // Time since last log
+    var _bDays=Math.floor((Date.now()-_bLatest.date)/86400000);
+    var _bAgo=_bDays===0?'Today':_bDays===1?'Yesterday':_bDays+'d ago';
+    h+='<div style="font-size:10px;color:var(--mu);margin-top:2px">Last logged: '+_bAgo+'</div>';
+  }
+
   // ── Recent sessions ─────────────────────────────────────────
   h+='<div style="border-top:0.5px solid var(--brd);margin:14px 0 10px"></div>';
   h+='<div class="lbl" style="margin-bottom:8px">RECENT</div>';
@@ -3483,6 +3513,7 @@ function openGearDrawer(){
   // ── TOOLS ────────────────────────────────────────────────────
   h+=sectionHead('Tools');
   h+=row('ti-notes','Notes','closeDrawer();setTimeout(function(){openNotesModal();},300)','Client profiles & coaching notes');
+  h+=row('ti-activity','Body','closeDrawer();setTimeout(function(){openBodySheet();},300)','Log weight, waist & body fat');
   h+=row('ti-archive','Archived Programmes','closeDrawer();setTimeout(function(){openArchivedProgrammes();},300)','Past client programmes');
 
   // ── APP ──────────────────────────────────────────────────────
@@ -3581,6 +3612,91 @@ function openAboutSheet(){
   h+='<div style="text-align:center;font-size:11px;color:var(--mu)">Falkenburg © '+new Date().getFullYear()+'</div>';
   h+='</div>';
   openSheet(h,'About Falkenburg');
+}
+
+
+// ── Body Tracking ─────────────────────────────────────────────
+function openBodySheet(){
+  var cl=C();
+  var entries=cl.body||[];
+  var h='<div style="padding:6px 20px 0">';
+
+  // Latest stats
+  if(entries.length){
+    var latest=entries[entries.length-1];
+    var latestDate=new Date(latest.date);
+    h+='<div style="margin-bottom:16px">';
+    h+='<div style="font-size:36px;font-weight:800;color:var(--tx);line-height:1.1">'+latest.kg+'<span style="font-size:16px;font-weight:600;color:var(--mu)"> kg</span></div>';
+    // Trend vs 4 weeks ago
+    var fourWeeksAgo=Date.now()-28*86400000;
+    var older=null;
+    for(var i=entries.length-1;i>=0;i--){if(entries[i].date<=fourWeeksAgo){older=entries[i];break;}}
+    if(older){
+      var delta=Math.round((latest.kg-older.kg)*10)/10;
+      var arrow=delta>0?'\u2191':delta<0?'\u2193':'\u2192';
+      var col=delta>0?'var(--mu)':delta<0?'var(--acc)':'var(--mu)';
+      h+='<div style="font-size:13px;color:'+col+';margin-top:2px">'+arrow+' '+(delta>0?'+':'')+delta+' kg over 4 weeks</div>';
+    }
+    var extras=[];
+    if(latest.waist)extras.push(latest.waist+' cm waist');
+    if(latest.bf)extras.push(latest.bf+'% bf');
+    if(extras.length)h+='<div style="font-size:12px;color:var(--mu);margin-top:2px">'+extras.join(' \u00b7 ')+'</div>';
+    h+='</div>';
+  }
+
+  // New entry inputs
+  h+='<div style="border-top:0.5px solid var(--brd);padding-top:14px;margin-bottom:14px">';
+  h+='<div class="lbl" style="margin-bottom:10px">NEW ENTRY</div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:10px">';
+  h+='<div style="flex:1"><label style="font-size:10px;font-weight:600;color:var(--mu);letter-spacing:.3px">WEIGHT (kg)</label>';
+  h+='<input type="number" id="body-kg" step="0.1" placeholder="0.0" style="font-size:14px;font-weight:700;margin-top:4px"></div>';
+  h+='<div style="flex:1"><label style="font-size:10px;font-weight:600;color:var(--mu);letter-spacing:.3px">WAIST (cm)</label>';
+  h+='<input type="number" id="body-waist" step="0.5" placeholder="\u2014" style="font-size:14px;margin-top:4px"></div>';
+  h+='<div style="flex:1"><label style="font-size:10px;font-weight:600;color:var(--mu);letter-spacing:.3px">BODY FAT %</label>';
+  h+='<input type="number" id="body-bf" step="0.1" placeholder="\u2014" style="font-size:14px;margin-top:4px"></div>';
+  h+='</div>';
+  h+='<button class="btn btn-acc" onclick="logBody()">Log Entry</button>';
+  h+='</div>';
+
+  // History
+  if(entries.length){
+    h+='<div style="border-top:0.5px solid var(--brd);padding-top:14px">';
+    h+='<div class="lbl" style="margin-bottom:8px">HISTORY</div>';
+    entries.slice().reverse().slice(0,12).forEach(function(e,i){
+      var d=new Date(e.date);
+      var ds=d.toLocaleDateString(undefined,{day:'numeric',month:'short'});
+      var parts=[e.kg+'kg'];
+      if(e.waist)parts.push(e.waist+'cm');
+      if(e.bf)parts.push(e.bf+'%');
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0'+(i>0?';border-top:0.5px solid var(--brd)':'')+'">';
+      h+='<span style="font-size:12px;color:var(--mu)">'+ds+'</span>';
+      h+='<span style="font-size:13px;font-weight:600;color:var(--tx)">'+parts.join(' \u00b7 ')+'</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  h+='<div style="position:sticky;bottom:0;background:var(--bg2);padding:14px 20px 20px">';
+  h+='<button class="btn btn-ghost" onclick="closeSheet();draw()">Done</button>';
+  h+='</div>';
+  h+='</div>';
+  openSheet(h,'Body');
+}
+
+function logBody(){
+  var kgEl=document.getElementById('body-kg');
+  var waistEl=document.getElementById('body-waist');
+  var bfEl=document.getElementById('body-bf');
+  var kg=parseFloat((kgEl||{}).value);
+  if(!kg||kg<=0){if(kgEl)kgEl.style.borderColor='var(--acc)';return;}
+  var entry={date:Date.now(),kg:Math.round(kg*10)/10};
+  var waist=parseFloat((waistEl||{}).value);
+  if(waist>0)entry.waist=Math.round(waist*10)/10;
+  var bf=parseFloat((bfEl||{}).value);
+  if(bf>0)entry.bf=Math.round(bf*10)/10;
+  C().body.push(entry);
+  sv();
+  openBodySheet(); // refresh to show new entry
 }
 
 // ── Notes (modal) ─────────────────────────────────────────────
