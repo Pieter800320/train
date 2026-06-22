@@ -281,7 +281,7 @@ function ld(){
   if(!S.admin)S.admin={active:false,pin:'',set:false};
   if(!S.notice)S.notice={title:'',body:'',active:false};
   if(!S.notes)S.notes=[];
-  if(!S.tab)S.tab='home';if(!S.colourTheme)S.colourTheme='carbon';
+  if(!S.tab)S.tab='home';if(!S.colourTheme||!THEMES[S.colourTheme])S.colourTheme='carbon';
   var cl=S.clients[S.activeClient];
   if(!cl.customPrograms)cl.customPrograms=[];
   if(!cl.customPlans)cl.customPlans=[];
@@ -3240,6 +3240,8 @@ var THEMES={
 };
 function applyTheme(){
   var key=S.colourTheme||'carbon';
+  // Guard: fall back to carbon if stored theme no longer exists
+  if(!THEMES[key])key='carbon';
   var isDark=S.theme!=='light';
   var html=document.documentElement;
   Object.keys(THEMES).forEach(function(k){html.classList.remove('t-'+k);});
@@ -3602,7 +3604,7 @@ function openThemeSheet(){
   h+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px">';
   Object.keys(THEMES).forEach(function(key){
     var t=THEMES[key];
-    var isActive=(S.colourTheme||'amber')===key;
+    var isActive=(S.colourTheme||'carbon')===key;
     var colour=S.theme==='light'?t.light:t.dark;
     h+='<div data-key="'+key+'" onclick="setColourTheme(this.dataset.key)" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px">';
     h+='<div style="width:36px;height:36px;border-radius:18px;background:'+colour+';border:'+(isActive?'3px solid var(--tx)':'2.5px solid var(--brd)')+';box-sizing:border-box"></div>';
